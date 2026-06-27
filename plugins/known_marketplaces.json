@@ -1,0 +1,66 @@
+{
+  "karpathy-skills": {
+    "source": {
+      "source": "github",
+      "repo": "forrestchang/andrej-karpathy-skills"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\karpathy-skills",
+    "lastUpdated": "2026-06-25T15:37:31.939Z"
+  },
+  "caveman": {
+    "source": {
+      "source": "github",
+      "repo": "JuliusBrussee/caveman"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\caveman",
+    "lastUpdated": "2026-06-25T15:37:37.870Z"
+  },
+  "anthropic-agent-skills": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/skills"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\anthropic-agent-skills",
+    "lastUpdated": "2026-06-27T06:37:51.709Z"
+  },
+  "understand-anything": {
+    "source": {
+      "source": "github",
+      "repo": "Egonex-AI/Understand-Anything"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\understand-anything",
+    "lastUpdated": "2026-06-25T15:38:42.280Z"
+  },
+  "ecc": {
+    "source": {
+      "source": "github",
+      "repo": "affaan-m/ECC"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\ecc",
+    "lastUpdated": "2026-06-25T15:39:45.624Z"
+  },
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\claude-plugins-official",
+    "lastUpdated": "2026-06-27T06:37:49.017Z"
+  },
+  "ponytail": {
+    "source": {
+      "source": "github",
+      "repo": "DietrichGebert/ponytail"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\ponytail",
+    "lastUpdated": "2026-06-26T03:58:39.433Z"
+  },
+  "open-code-review": {
+    "source": {
+      "source": "github",
+      "repo": "alibaba/open-code-review"
+    },
+    "installLocation": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\open-code-review",
+    "lastUpdated": "2026-06-26T03:59:25.021Z"
+  }
+}

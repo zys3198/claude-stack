@@ -1,0 +1,4 @@
+interface:
+  display_name: "cc-switch 设置同步"
+  short_description: "把 Claude settings.json 的公共配置同步进 ccswitch 数据库，防止热切换降级"
+  default_prompt: "把当前 claude settings.json 同步到 ccswitch 数据库，防止切换 provider 时降级"

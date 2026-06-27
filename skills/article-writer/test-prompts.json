@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "type": "happy_path_practices",
+    "prompt": "请使用 article-writer skill（JavaGuide 模式）创作一篇 docs/ai-coding/practices 系列文章。主题：如何用 Claude Code 的 Hook 自动拦截危险 git 命令（push -f / reset --hard / rm -rf）。要求体现 practices 系列签名。",
+    "expected": "practices 结构模板（你好我是小 G + 读者反馈 + 误区破题 + 核心理念 + 按风险分层 + 命令/模板/踩坑三件套 + 总结回扣）；自称小 G；按风险分层；命令清单+模板清单+失败模式表三件套齐全"
+  },
+  {
+    "id": 2,
+    "type": "happy_path_cases",
+    "prompt": "请使用 article-writer skill（JavaGuide 模式）创作一篇 docs/ai-coding/cases 系列文章。主题：用 Claude Code + Arthas 诊断线上 JVM 慢请求的实战。要求体现 cases 系列签名。",
+    "expected": "cases 结构模板（大家好我是 Guide + 环境配置截图 + 场景一/二闭环 + 实战总结 + 写在最后 + 参考资料）；自称 Guide/笔者；每个场景有可量化验收结果；AI 输出效果截图位"
+  },
+  {
+    "id": 3,
+    "type": "concept_anchoring",
+    "prompt": "请使用 article-writer skill（JavaGuide 模式）创作一篇 docs/ai/agent 概念系列文章。主题：Agent Memory 机制。要求用锚定比喻、五种开头钩子之一、阅读契约导航列表。",
+    "expected": "概念拆解型（是什么→为什么→边界→原理→落地）；锚定比喻（Agent Memory = 类似人的生活场景）；误区破题开头；导航列表带字数+建议收藏；结尾回扣误区+最小可行路径"
+  }
+]

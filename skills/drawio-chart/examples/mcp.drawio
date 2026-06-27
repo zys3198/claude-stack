@@ -1,0 +1,471 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6" pages="7">
+  <diagram id="fFXkkxOpZAwIeqUW0pkC" name="simple-diagram">
+    <mxGraphModel dx="2706" dy="676" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ai-group" parent="1" style="swimlane;whiteSpace=wrap;fillColor=none;strokeColor=#005D7B;strokeWidth=2;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=15;startSize=30;" value="AI Applications（MCP Host）" vertex="1">
+          <mxGeometry height="300" width="320" x="-10" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-app" parent="ai-group" style="rounded=1;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="Chat 客户端&#xa;Claude Desktop" vertex="1">
+          <mxGeometry height="60" width="240" x="40" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ide-app" parent="ai-group" style="rounded=1;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="IDE / 编辑器&#xa;Cursor / VS Code" vertex="1">
+          <mxGeometry height="60" width="240" x="40" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="other-app" parent="ai-group" style="rounded=1;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="其他 AI 应用" vertex="1">
+          <mxGeometry height="60" width="240" x="40" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-core" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=18;fontStyle=1;" value="MCP&#xa;标准化协议" vertex="1">
+          <mxGeometry height="60" width="190" x="435" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="data-group" parent="1" style="swimlane;whiteSpace=wrap;fillColor=none;strokeColor=#005D7B;strokeWidth=2;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=15;startSize=30;" value="数据源与工具（MCP Server）" vertex="1">
+          <mxGeometry height="300" width="320" x="800" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="file-server" parent="data-group" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=none;fontFamily=JetBrains Mono;fontSize=14;" value="文件系统 / 云盘" vertex="1">
+          <mxGeometry height="60" width="240" x="40" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="db-server" parent="data-group" style="shape=cylinder3;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=JetBrains Mono;fontSize=14;" value="数据库&#xa;Postgres / SQLite" vertex="1">
+          <mxGeometry height="60" width="240" x="40" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-server" parent="data-group" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=none;fontFamily=JetBrains Mono;fontSize=14;" value="开发 / 效率工具&#xa;Git / Slack / API" vertex="1">
+          <mxGeometry height="60" width="240" x="40" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="2" edge="1" parent="1" source="ai-group" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic;dashed=1;fontFamily=JetBrains Mono;fontSize=14;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mcp-core" value="双向数据流">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="420" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3" edge="1" parent="1" source="mcp-core" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic;dashed=1;fontFamily=JetBrains Mono;fontSize=14;" target="data-group" value="双向数据流">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="D9JagU--aH42ktz2odUS-3" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;labelBackgroundColor=none;fontSize=13;fontColor=#999999;rotation=-15;sketch=0;shadow=0;fontFamily=JetBrains Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DJetBrains%2BMono;fontStyle=1;textShadow=0;" value="公众号：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;JavaGuide&lt;/font&gt;&lt;br&gt;网站：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;javaguide.cn&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="180" x="439.9997052680666" y="172.6122305850082" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="l3MLzHknLOYhz2NGsTdY" name="four-layer-architecture">
+    <mxGraphModel dx="1845" dy="599" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="host-group" parent="1" style="swimlane;whiteSpace=wrap;fillColor=none;strokeColor=#005D7B;dashed=1;strokeWidth=2;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;fontStyle=1;startSize=30;" value="MCP Host（AI 应用）" vertex="1">
+          <mxGeometry height="120" width="700" x="60" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="app" parent="host-group" style="rounded=1;whiteSpace=wrap;fillColor=#0891B2;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;shadow=1;" value="Claude Desktop / Cursor / VS Code / Codex" vertex="1">
+          <mxGeometry height="60" width="400" x="150" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-group" parent="1" style="swimlane;whiteSpace=wrap;fillColor=none;strokeColor=#005D7B;dashed=1;strokeWidth=2;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;fontStyle=1;startSize=30;" value="MCP 协议层" vertex="1">
+          <mxGeometry height="140" width="700" x="60" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-client" parent="mcp-group" style="rounded=1;whiteSpace=wrap;fillColor=#7C3AED;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;shadow=1;" value="MCP Client" vertex="1">
+          <mxGeometry height="60" width="220" x="60" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-server" parent="mcp-group" style="rounded=1;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;shadow=1;" value="MCP Server" vertex="1">
+          <mxGeometry height="60" width="220" x="420" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-client-server" edge="1" parent="mcp-group" source="mcp-client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=12;fontColor=#64748B;" target="mcp-server" value="JSON-RPC 2.0">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="data-group" parent="1" style="swimlane;whiteSpace=wrap;fillColor=none;strokeColor=#005D7B;dashed=1;strokeWidth=2;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;fontStyle=1;startSize=30;" value="外部系统 / 数据源" vertex="1">
+          <mxGeometry height="140" width="700" x="60" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="local-files" parent="data-group" style="rounded=1;whiteSpace=wrap;fillColor=#E4C189;strokeColor=none;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;shadow=1;" value="本地文件 / Git 仓库" vertex="1">
+          <mxGeometry height="60" width="220" x="60" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="external-api" parent="data-group" style="rounded=1;whiteSpace=wrap;fillColor=#E4C189;strokeColor=none;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=13;shadow=1;" value="数据库 / GitHub / 业务 API" vertex="1">
+          <mxGeometry height="60" width="220" x="420" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-app-client" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#94A3B8;" target="mcp-client" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="260" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-server-local" edge="1" parent="1" source="mcp-server" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#94A3B8;" target="local-files" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="590" y="410" />
+              <mxPoint x="230" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-server-api" edge="1" parent="1" source="mcp-server" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#94A3B8;" target="external-api" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n4oUtUGOSmVUTzYSb1vA-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontColor=#0F172A;fontFamily=Microsoft YaHei, PingFang SC, system-ui, sans-serif;fontSize=25;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" value="MCP 四层架构" vertex="1">
+          <mxGeometry height="46" width="860" x="-20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="n4oUtUGOSmVUTzYSb1vA-2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;labelBackgroundColor=none;fontSize=14;fontColor=#999999;rotation=0;sketch=0;shadow=0;fontFamily=JetBrains Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DJetBrains%2BMono;fontStyle=1;textShadow=0;" value="公众号：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;JavaGuide&lt;/font&gt;&lt;br&gt;后端+AI 面试网站：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;javaguide.cn&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="260" x="310" y="440" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="wPTbwmj82RkGQiNRZrUd" name="mcp-vs-skills">
+    <mxGraphModel dx="1106" dy="676" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontFamily=JetBrains Mono;fontColor=#333333;fontStyle=1" value="Skill vs MCP" vertex="1">
+          <mxGeometry height="40" width="400" x="500" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="prompt" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#00838F;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=15;fontStyle=1" value="Prompt Layer&#xa;用户意图表达" vertex="1">
+          <mxGeometry height="70" width="240" x="580" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fc" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#7B68EE;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=15;fontStyle=1" value="Function Calling&#xa;底层机制（地基）" vertex="1">
+          <mxGeometry height="70" width="240" x="580" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-layer" parent="1" style="swimlane;whiteSpace=wrap;fillColor=none;strokeColor=#005D7B;strokeWidth=2;dashed=1;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;startSize=40;" value="工具集成层（二选一）" vertex="1">
+          <mxGeometry height="320" width="1160" x="120" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-group" parent="tool-layer" style="swimlane;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#607D8B;strokeWidth=2;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;startSize=40;" value="MCP 路径（协议标准化）" vertex="1">
+          <mxGeometry height="220" width="480" x="60" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-protocol" parent="mcp-group" style="rounded=1;whiteSpace=wrap;fillColor=#607D8B;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="MCP Protocol&#xa;JSON-RPC 标准化" vertex="1">
+          <mxGeometry height="60" width="200" x="140" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp-server" parent="mcp-group" style="rounded=1;whiteSpace=wrap;fillColor=#9B59B6;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="MCP Server&#xa;协议转换" vertex="1">
+          <mxGeometry height="50" width="200" x="140" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="skills-group" parent="tool-layer" style="swimlane;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#005D7B;strokeWidth=2;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;startSize=40;" value="Skills 路径（自然语言编排）" vertex="1">
+          <mxGeometry height="220" width="480" x="620" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="skills-load" parent="skills-group" style="rounded=1;whiteSpace=wrap;fillColor=#7B68EE;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="load_skill()&#xa;延迟加载触发" vertex="1">
+          <mxGeometry height="60" width="200" x="140" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="skill-md" parent="skills-group" style="rounded=1;whiteSpace=wrap;fillColor=#3498DB;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="SKILL.md&#xa;元数据 + 正文(SOP)" vertex="1">
+          <mxGeometry height="50" width="200" x="140" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="vs" parent="tool-layer" style="ellipse;whiteSpace=wrap;fillColor=#C44545;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=16;fontStyle=1" value="VS" vertex="1">
+          <mxGeometry height="60" width="60" x="550" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="2" edge="1" parent="1" source="prompt" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;strokeColor=#333333;fontFamily=JetBrains Mono;fontSize=13;" target="fc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="3" edge="1" parent="1" source="fc" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;strokeColor=#333333;fontFamily=JetBrains Mono;fontSize=13;" target="tool-layer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ezQCYkyiXnlsB8Is4OR4-3" parent="1" style="swimlane;whiteSpace=wrap;fillColor=#F6FFF8;strokeColor=#005D7B;strokeWidth=2;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;startSize=35;" value="Skill 目录结构" vertex="1">
+          <mxGeometry height="180" width="300" x="120" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="ezQCYkyiXnlsB8Is4OR4-4" parent="ezQCYkyiXnlsB8Is4OR4-3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=JetBrains Mono;fontSize=13;fontColor=#333333;fontStyle=1" value="skill-name/" vertex="1">
+          <mxGeometry height="20" width="260" x="20" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="ezQCYkyiXnlsB8Is4OR4-5" parent="ezQCYkyiXnlsB8Is4OR4-3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=JetBrains Mono;fontSize=11;fontColor=#333333;" value="├── SKILL.md (必需) - 元数据+指令" vertex="1">
+          <mxGeometry height="20" width="260" x="20" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ezQCYkyiXnlsB8Is4OR4-6" parent="ezQCYkyiXnlsB8Is4OR4-3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=JetBrains Mono;fontSize=11;fontColor=#333333;" value="├── scripts/ (可选) - 可执行脚本" vertex="1">
+          <mxGeometry height="20" width="260" x="20" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="ezQCYkyiXnlsB8Is4OR4-7" parent="ezQCYkyiXnlsB8Is4OR4-3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=JetBrains Mono;fontSize=11;fontColor=#333333;" value="├── references/ (可选) - 参考文档" vertex="1">
+          <mxGeometry height="20" width="260" x="20" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="ezQCYkyiXnlsB8Is4OR4-8" parent="ezQCYkyiXnlsB8Is4OR4-3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=JetBrains Mono;fontSize=11;fontColor=#333333;" value="└── assets/ (可选) - 模板/资源" vertex="1">
+          <mxGeometry height="20" width="260" x="20" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-3" parent="1" style="swimlane;whiteSpace=wrap;fillColor=#F6FFF8;strokeColor=#005D7B;strokeWidth=2;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;startSize=35;" value="MCP vs Skills 核心对比" vertex="1">
+          <mxGeometry height="180" width="620" x="660" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-4" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#005D7B;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=12;fontStyle=1" value="维度" vertex="1">
+          <mxGeometry height="30" width="80" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-5" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#607D8B;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=12;fontStyle=1" value="MCP (协议标准化)" vertex="1">
+          <mxGeometry height="30" width="230" x="95" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-6" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#3498DB;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=12;fontStyle=1" value="Skills (自然语言编排)" vertex="1">
+          <mxGeometry height="30" width="260" x="330" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-7" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#BDC3C7;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=11;fontStyle=1" value="核心思路" vertex="1">
+          <mxGeometry height="30" width="80" x="10" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-8" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#BDC3C7;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=11;" value="JSON-RPC 标准化连接" vertex="1">
+          <mxGeometry height="30" width="230" x="95" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-9" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#BDC3C7;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=11;" value="SKILL.md 自然语言引导" vertex="1">
+          <mxGeometry height="30" width="260" x="330" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-10" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#BDC3C7;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=11;fontStyle=1" value="定义方式" vertex="1">
+          <mxGeometry height="30" width="80" x="10" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-11" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#BDC3C7;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=11;" value="Server 端代码写死逻辑" vertex="1">
+          <mxGeometry height="30" width="230" x="95" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="1lTXzYl9NjD4BF15x1YB-12" parent="1lTXzYl9NjD4BF15x1YB-3" style="rounded=0;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#BDC3C7;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=11;" value="延迟加载 + 模型决策" vertex="1">
+          <mxGeometry height="30" width="260" x="330" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="AtfJBZXRnrCc--VRSxfD-3" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;labelBackgroundColor=none;fontSize=13;fontColor=#999999;rotation=-15;sketch=0;shadow=0;fontFamily=JetBrains Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DJetBrains%2BMono;fontStyle=1;textShadow=0;" value="公众号：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;JavaGuide&lt;/font&gt;&lt;br&gt;网站：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;javaguide.cn&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="180" x="439.9997052680666" y="760.0022305850082" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="3KDvDl5GKgdpj6Bh4uhL" name="fc-agent-relations">
+    <mxGraphModel dx="1404" dy="676" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-2" parent="1" style="swimlane;whiteSpace=wrap;fillColor=#ECF0F1;strokeColor=#005D7B;strokeWidth=3;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=18;fontStyle=1;startSize=40;" value="Agent (任务执行系统)" vertex="1">
+          <mxGeometry height="580" width="900" x="200" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-3" parent="cIDwWXd3M8MsgbQKV1FN-2" style="rounded=1;whiteSpace=wrap;fillColor=#00838F;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=16;fontStyle=1;" value="MCP Host + LLM&#xa;(决策与控制中心)" vertex="1">
+          <mxGeometry height="90" width="220" x="340" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-4" parent="cIDwWXd3M8MsgbQKV1FN-2" style="rounded=1;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=15;" value="MCP Server&#xa;(标准化工具)" vertex="1">
+          <mxGeometry height="70" width="180" x="120" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-5" parent="cIDwWXd3M8MsgbQKV1FN-2" style="rounded=1;whiteSpace=wrap;fillColor=#607D8B;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="外部资源&#xa;GitHub / DB / API" vertex="1">
+          <mxGeometry height="70" width="180" x="120" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-6" parent="cIDwWXd3M8MsgbQKV1FN-2" style="rounded=1;whiteSpace=wrap;fillColor=#9B59B6;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=15;" value="Function Calling&#xa;(模型原生能力)" vertex="1">
+          <mxGeometry height="70" width="180" x="600" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-7" parent="cIDwWXd3M8MsgbQKV1FN-2" style="rounded=1;whiteSpace=wrap;fillColor=#8E44AD;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="特定模型推理&#xa;(紧耦合适配)" vertex="1">
+          <mxGeometry height="70" width="180" x="600" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-8" parent="cIDwWXd3M8MsgbQKV1FN-2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#005D7B;fontFamily=JetBrains Mono;fontSize=12;fontStyle=1" value="JSON-RPC 2.0&lt;br&gt;(应用层协议)" vertex="1">
+          <mxGeometry height="40" width="120" x="210" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-9" parent="cIDwWXd3M8MsgbQKV1FN-2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#666666;fontFamily=JetBrains Mono;fontSize=12;" value="私有 API 格式&lt;br&gt;(模型依赖)" vertex="1">
+          <mxGeometry height="40" width="120" x="590" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-10" parent="cIDwWXd3M8MsgbQKV1FN-2" style="rounded=1;whiteSpace=wrap;fillColor=#4CA497;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=12;" value="★ 协议化：一次开发，跨平台复用&#xa;解决工具集成碎片化" vertex="1">
+          <mxGeometry height="60" width="240" x="90" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-11" parent="cIDwWXd3M8MsgbQKV1FN-2" style="rounded=1;whiteSpace=wrap;fillColor=#95A5A6;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=12;" value="▲ 机制化：模型各异，重复适配&#xa;维护成本随模型数量倍增" vertex="1">
+          <mxGeometry height="60" width="240" x="570" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-12" edge="1" parent="cIDwWXd3M8MsgbQKV1FN-2" source="cIDwWXd3M8MsgbQKV1FN-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#E99151;" target="cIDwWXd3M8MsgbQKV1FN-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-13" edge="1" parent="cIDwWXd3M8MsgbQKV1FN-2" source="cIDwWXd3M8MsgbQKV1FN-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#9B59B6;" target="cIDwWXd3M8MsgbQKV1FN-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-14" edge="1" parent="cIDwWXd3M8MsgbQKV1FN-2" source="cIDwWXd3M8MsgbQKV1FN-4" style="edgeStyle=straight;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#607D8B;" target="cIDwWXd3M8MsgbQKV1FN-5" value="统一接入">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-15" edge="1" parent="cIDwWXd3M8MsgbQKV1FN-2" source="cIDwWXd3M8MsgbQKV1FN-6" style="edgeStyle=straight;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#8E44AD;" target="cIDwWXd3M8MsgbQKV1FN-7" value="硬编码映射">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cIDwWXd3M8MsgbQKV1FN-16" parent="cIDwWXd3M8MsgbQKV1FN-2" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;labelBackgroundColor=none;fontSize=13;fontColor=#999999;rotation=-15;sketch=0;shadow=0;fontFamily=JetBrains Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DJetBrains%2BMono;fontStyle=1;textShadow=0;" value="公众号：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;JavaGuide&lt;/font&gt;&lt;br&gt;网站：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;javaguide.cn&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="180" x="379.9997052680666" y="290.0022305850082" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="XjjyJxuZlH-VzA_YE2uX" name="transport-decision">
+    <mxGraphModel dx="1091" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#00838F;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=16;fontStyle=1;" value="选择 MCP 传输方式" vertex="1">
+          <mxGeometry height="50" width="220" x="340" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="decision1" parent="1" style="rhombus;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="是否需要&#xa;跨机器访问？" vertex="1">
+          <mxGeometry height="90" width="160" x="370" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="http-sse" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#27AE60;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=13;" value="Streamable HTTP&#xa;• 远程部署、独立服务&#xa;• 标准兼容，无需长连接&#xa;• 逐条请求独立鉴权&#xa;• 负载均衡器/API 网关友好" vertex="1">
+          <mxGeometry height="120" width="200" x="600" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="decision2" parent="1" style="rhombus;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=14;" value="是否需要&#xa;极低延迟？" vertex="1">
+          <mxGeometry height="90" width="160" x="370" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="stdio" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#3498DB;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=13;" value="stdio&#xa;• 本地进程间通信 (IPC)&#xa;• 极度轻量，无网络开销&#xa;• 启动快&#xa;• 同权限，需沙箱隔离" vertex="1">
+          <mxGeometry height="130" width="200" x="120" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="http-sse-2" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#27AE60;strokeColor=none;fontColor=#FFFFFF;fontFamily=JetBrains Mono;fontSize=13;" value="Streamable HTTP&#xa;(本地运行，更易调试)" vertex="1">
+          <mxGeometry height="80" width="200" x="350" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-start" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#333333;" target="decision1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-decision1-yes" edge="1" parent="1" source="decision1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#4CA497;fontColor=#4CA497;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;" target="http-sse" value="是">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="155" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-decision1-no" edge="1" parent="1" source="decision1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#333333;fontColor=#333333;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;" target="decision2" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-decision2-yes" edge="1" parent="1" source="decision2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#4CA497;fontColor=#4CA497;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;" target="stdio" value="是">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="315" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-decision2-no" edge="1" parent="1" source="decision2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#95A5A6;fontColor=#95A5A6;fontFamily=JetBrains Mono;fontSize=14;fontStyle=1;" target="http-sse-2" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="zzwhTSdELTqOZvuz-c9u-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;labelBackgroundColor=none;fontSize=13;fontColor=#999999;rotation=-15;sketch=0;shadow=0;fontFamily=JetBrains Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DJetBrains%2BMono;fontStyle=1;textShadow=0;" value="公众号：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;JavaGuide&lt;/font&gt;&lt;br&gt;网站：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;javaguide.cn&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="180" x="209.99970526806658" y="210.0022305850082" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="y2-sPMUXDOQNFKp7y15V" name="fc-agent-layer">
+    <mxGraphModel dx="1106" dy="599" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-1" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#0891B2;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;shadow=1;fontStyle=1;" value="Agent（任务编排层）" vertex="1">
+          <mxGeometry height="70" width="260" x="210" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-2" parent="1" style="rounded=0;whiteSpace=wrap;fillColor=none;strokeColor=none;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;align=left;verticalAlign=middle;" value="规划步骤、调用工具、维护记忆&#xa;等待人工确认、处理循环" vertex="1">
+          <mxGeometry height="54" width="250" x="500" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-3" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#7C3AED;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;shadow=1;fontStyle=1;" value="MCP（通信协议层）" vertex="1">
+          <mxGeometry height="70" width="260" x="210" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-4" parent="1" style="rounded=0;whiteSpace=wrap;fillColor=none;strokeColor=none;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;align=left;verticalAlign=middle;" value="工具发现、调用路由、连接管理&#xa;JSON-RPC 通信、参数校验" vertex="1">
+          <mxGeometry height="54" width="250" x="500" y="338" as="geometry" />
+        </mxCell>
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-5" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;shadow=1;fontStyle=1;" value="Function Calling（模型能力层）" vertex="1">
+          <mxGeometry height="70" width="260" x="210" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-6" parent="1" style="rounded=0;whiteSpace=wrap;fillColor=none;strokeColor=none;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;align=left;verticalAlign=middle;" value="结构化调用意图、参数映射&#xa;Tool Use / Function Calling" vertex="1">
+          <mxGeometry height="54" width="250" x="500" y="478" as="geometry" />
+        </mxCell>
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-7" edge="1" parent="1" source="0b5Ews1Znf3QUgEachZ7-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=12;fontColor=#64748B;" target="0b5Ews1Znf3QUgEachZ7-3" value="触发工具调用">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0b5Ews1Znf3QUgEachZ7-8" edge="1" parent="1" source="0b5Ews1Znf3QUgEachZ7-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=12;fontColor=#64748B;" target="0b5Ews1Znf3QUgEachZ7-5" value="模型生成 tool call">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="wA1bfOWwyFViUtDMqH88-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontColor=#0F172A;fontFamily=Microsoft YaHei, PingFang SC, system-ui, sans-serif;fontSize=25;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" value="FC/MCP/Agent 三层关系图" vertex="1">
+          <mxGeometry height="50" width="410" x="209" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="7xhAS10xuTQ0fDKiOGL9-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;labelBackgroundColor=none;fontSize=14;fontColor=#999999;rotation=0;sketch=0;shadow=0;fontFamily=JetBrains Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DJetBrains%2BMono;fontStyle=1;textShadow=0;" value="公众号：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;JavaGuide&lt;/font&gt;&lt;br&gt;后端+AI 面试网站：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;javaguide.cn&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="260" x="414" y="550" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="4iP9GvCw6XufvwYvotcB" name="call-seq">
+    <mxGraphModel dx="1018" dy="599" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="user-box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#0891B2;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=16;shadow=1;align=center;" value="User" vertex="1">
+          <mxGeometry height="50" width="120" x="14" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="host-box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#005D7B;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=16;shadow=1;align=center;" value="Host / LLM" vertex="1">
+          <mxGeometry height="50" width="120" x="184" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="client-box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#7C3AED;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=16;shadow=1;align=center;" value="MCP Client" vertex="1">
+          <mxGeometry height="50" width="120" x="354" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="server-box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#E99151;strokeColor=none;fontColor=#FFFFFF;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=16;shadow=1;align=center;" value="MCP Server" vertex="1">
+          <mxGeometry height="50" width="120" x="524" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="data-box" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#E4C189;strokeColor=none;fontColor=#2D3748;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=16;shadow=1;align=center;" value="Data Source" vertex="1">
+          <mxGeometry height="50" width="120" x="694" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="user-line" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#94A3B8;strokeWidth=1;fontSize=14;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="74" y="200" as="sourcePoint" />
+            <mxPoint x="74" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="host-line" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#94A3B8;strokeWidth=1;fontSize=14;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="244" y="200" as="sourcePoint" />
+            <mxPoint x="244" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="client-line" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#94A3B8;strokeWidth=1;fontSize=14;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="414" y="200" as="sourcePoint" />
+            <mxPoint x="414" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="server-line" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#94A3B8;strokeWidth=1;fontSize=14;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="584" y="200" as="sourcePoint" />
+            <mxPoint x="584" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="data-line" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#94A3B8;strokeWidth=1;fontSize=14;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="754" y="200" as="sourcePoint" />
+            <mxPoint x="754" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg1" edge="1" parent="1" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;align=center;" value="1. 提问：分析这个仓库的最新提交">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="74" y="240" as="sourcePoint" />
+            <mxPoint x="244" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg2" edge="1" parent="1" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;curved=1;" value="2. 判断需要读取 Git 提交记录">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="284" y="315" />
+            </Array>
+            <mxPoint x="244" y="300" as="sourcePoint" />
+            <mxPoint x="244" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg3" edge="1" parent="1" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;" value="3. Call Tool: list_commits()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="244" y="380" as="sourcePoint" />
+            <mxPoint x="414" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg4" edge="1" parent="1" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;" value="4. JSON-RPC Request">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="414" y="440" as="sourcePoint" />
+            <mxPoint x="584" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg5" edge="1" parent="1" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;" value="5. Fetch Git Logs">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="584" y="500" as="sourcePoint" />
+            <mxPoint x="754" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg6" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;" value="6. Return Logs">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="754" y="560" as="sourcePoint" />
+            <mxPoint x="584" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg7" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;" value="7. JSON-RPC Response">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="584" y="620" as="sourcePoint" />
+            <mxPoint x="414" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg8" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;" value="8. Tool Output">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="414" y="680" as="sourcePoint" />
+            <mxPoint x="244" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg9" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeWidth=2;strokeColor=#94A3B8;labelBackgroundColor=#F8FAFC;fontFamily=system-ui, -apple-system, PingFang SC, Microsoft YaHei, sans-serif;fontSize=14;fontColor=#64748B;" value="9. 整理分析结果">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="244" y="760" as="sourcePoint" />
+            <mxPoint x="74" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ZnmDH23Xuh0oDELUWTHg-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontColor=#0F172A;fontFamily=Microsoft YaHei, PingFang SC, system-ui, sans-serif;fontSize=25;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" value="MCP 调用时序图" vertex="1">
+          <mxGeometry height="40" width="340" x="244" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="VAL4GFCl66rPiw8Ozr-X-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;labelBackgroundColor=none;fontSize=14;fontColor=#999999;rotation=0;sketch=0;shadow=0;fontFamily=JetBrains Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DJetBrains%2BMono;fontStyle=1;textShadow=0;" value="公众号：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;JavaGuide&lt;/font&gt;&lt;br&gt;后端+AI 面试网站：&lt;font style=&quot;color: rgb(0, 139, 222);&quot;&gt;javaguide.cn&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="260" x="490" y="760" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,81 @@
+# ----- runtime / session state -----
+projects/
+sessions/
+session-data/
+session-env/
+file-history/
+jobs/
+tasks/
+teams/
+paste-cache/
+metrics/
+telemetry/
+cache/
+backups/
+shell-snapshots/
+docs/superpowers/
+plans/
+
+# ----- locks / temp markers -----
+daemon/
+daemon.*
+*.lock
+*.log
+.caveman-active
+.caveman-active.*
+.ponytail-active
+.last-cleanup
+.last-update-result.json
+cost-tracker.log
+bash-commands.log
+mcp-health-cache.json
+*.pid
+
+# ----- local-only secrets / personal config -----
+.local/
+settings.local.json
+settings.json
+settings.json.bak
+settings.json.bak-*
+config.json
+history.jsonl
+.env
+.env.*
+*.token
+*.key
+secrets.*
+
+# ----- plugin runtime -----
+plugins/cache/
+plugins/data/
+plugins/marketplaces/*/node_modules/
+plugins/marketplaces/*/.git/
+plugins/marketplaces/*/dist/
+plugins/marketplaces/*/build/
+
+# ----- skill runtime / backups -----
+skills/.system/
+skills/learned/
+skills/.ppt-master-repo-backup/
+skills/setup-matt-pocock-skills/
+
+# ----- heavy history / git -----
+.history/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ----- build artifacts / deps -----
+**/node_modules/
+**/dist/
+**/build/
+**/.next/
+**/target/
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+**/venv/
+**/.tox/
+**/*.pyc
+**/*.pyo
