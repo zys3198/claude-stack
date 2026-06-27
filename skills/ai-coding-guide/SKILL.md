@@ -74,6 +74,7 @@ description: Use when user asks which skill/tool/ecosystem to use, how Superpowe
 | 开发新功能 | 开发新功能 | "写个登录", "做个新页面", "加个API" |
 | 已有需求/PRD | 有需求文档 | "根据这份PRD实现", "需求文档见文件X" |
 | 审查代码 | 审查代码 | "审查这段代码", "帮我review", "看看有什么问题" |
+| 审查 AI 代码 | 审查 AI 代码 | "AI 写的要不要审", "review 一下 Claude 写的", "学习模式下 AI 生成的代码", "vibe coding 产出" |
 | 调试 bug | 调试 bug | "这个bug怎么回事", "报错了", "运行失败" |
 | 快速原型/小改 | 快速改动 | "改个小功能", "加个按钮", "简单修一下" |
 | 构建错误 | 构建错误 | "编译不过", "build报错", "类型错误" |
@@ -176,6 +177,27 @@ description: Use when user asks which skill/tool/ecosystem to use, how Superpowe
       一线修复：退到 SP requesting-code-review（轻量自检）+ `code-review:code-review`
      仍失败兜底：用户手动提供第三方扫描器或跳过对抗
 
+分类: 审查 AI 代码
+→ 三维审查 + 自检四步 + 数据支撑压测（CLAUDE.md §1.4 完整方法论）
+
+   🔴 强约束：AI 代码默认必审，无「小到不用审」豁免。AI 擅长写「语法漂亮、逻辑自洽、语义错误」的代码——读着顺 ≠ 对。
+
+   **🛑 STOP — 等审查对象确定后：**
+   停问：
+   "审查 AI 代码 = X，按哪条路径走？"
+
+   A: "三维必查（正确性边界 / 数据结构选型 / 代码整洁度）" → 按 CLAUDE.md §1.4 完整方法论执行（审查强度复用 §3 / 三维 / 动作清单 / 沟通技巧 / 反模式），含 §1.3 三查（假绿/幻觉/幽灵代码）
+   B: "高风险对抗双审 `ecc:santa-loop`" → AI 生成的 auth/DB schema/架构/安全敏感代码，两独立 reviewer 都 approve 才放行
+   C: "AI 自检 + 人工确认" → `superpowers:verification-before-completion` 跑证据检查 + 用户手动复核设计意图
+
+   ⚠ 触发条件：AI 代码无可用压测环境（生产数据敏感/无依赖）
+     一线修复：要求 AI 用合成数据或最小可复现 demo 跑 benchmark；不接受「应该/可能/大概」
+     仍失败兜底：保留决策疑问标 TODO，下个迭代补测
+
+   ⚠ 触发条件：AI 自己 review 自己
+     一线修复：拒绝，要求引入独立 reviewer（agent 或人）
+     仍失败兜底：至少换一个 agent 跑同一份代码的 review，对比差异
+
 分类: 调试 bug
 → [SP] systematic-debugging → 可选 `gitnexus:trace` / `:explain`（基于 graph 定位根因）
    **🛑 STOP — 停住，等用户选：**
@@ -210,7 +232,7 @@ description: Use when user asks which skill/tool/ecosystem to use, how Superpowe
    停问（A/B/C）：
    "检测到构建错误，走框架修复流程，是否执行？"
 
-   A: "执行构建修复" → 检测框架 → `ecc:react-build` / `:rust-build` / `:go-build` / `:kotlin-build` / `:flutter-build` / `:cpp-build` / `:gradle-build` / `:fastapi-review` 等（框架专属）/ 后端 tsc --noEmit / go build / mvn 等（按项目 CLAUDE.md §1.4 构建纪律）
+   A: "执行构建修复" → 检测框架 → `ecc:react-build` / `:rust-build` / `:go-build` / `:kotlin-build` / `:flutter-build` / `:cpp-build` / `:gradle-build` / `:fastapi-review` 等（框架专属）/ 后端 tsc --noEmit / go build / mvn 等（按项目 CLAUDE.md §1.3 改后验证纪律）
    B: "展示可用构建修复工具" → 展示"诊断问题"表中构建相关行 + ECC build 命令族
    C: "先看看参考信息" → 展示"决策速查"表
 
@@ -358,6 +380,7 @@ Step 1 分类 → Step 2 推荐路径 → 文字停问确认（A 执行 / B 看�
 |------|------|------|
 | "想写个功能" | SP brainstorming 自动启动 | 设计先行 |
 | "审查这段代码" | SP requesting-code-review（日常自检）→ `code-review:code-review` 或 `open-code-review:review`（本地 diff/PR 多轴）→ `ecc:security-scan`（安全）→ `ecc:santa-loop`（高风险对抗双审） | 四层递进：自检→结构审查→安全→对抗多 pass |
+| "审查 AI 写的代码" | CLAUDE.md §1.4 完整方法论（强度复用 §3 / 三维必查 / 动作清单 + §1.3 三查）→ `ecc:santa-loop`（高风险对抗双审）→ `superpowers:verification-before-completion`（AI 自检 + 人工确认） | AI 特有：(1) 默认必审无豁免；(2) 选型无 benchmark 不下结论；(3) 不接受「应该/可能/大概」；(4) AI 不准自己 review 自己 |
 | "我刚改完，确保没问题" | SP verification-before-completion（日常）→ `ecc:react-test` / `:flutter-test` 等框架 test（合并前）| 先证据检查后系统验证 |
 | "写测试" | SP test-driven-development（流程纪律）→ `ecc:<lang>-test`（框架专属） | 流程纪律 + 框架执行 |
 | "调试这个 bug" | SP systematic-debugging → `gitnexus:trace` / `:explain`（基于 graph 定位）/ `ecc:<lang>-build`（构建错误）| 4 阶段根因 + graph 辅助 |
