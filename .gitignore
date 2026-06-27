@@ -24,6 +24,7 @@ daemon.*
 .caveman-active
 .caveman-active.*
 .ponytail-active
+hooks/*_state.json
 .last-cleanup
 .last-update-result.json
 cost-tracker.log
@@ -48,6 +49,8 @@ secrets.*
 # ----- plugin runtime -----
 plugins/cache/
 plugins/data/
+plugins/installed_plugins.json
+plugins/known_marketplaces.json
 plugins/marketplaces/*/node_modules/
 plugins/marketplaces/*/.git/
 plugins/marketplaces/*/dist/
