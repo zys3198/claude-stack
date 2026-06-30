@@ -26,7 +26,7 @@
 - 强制流程（HARD-GATE）→ 可靠但有时啰嗦
 - 假设执行者是"热情但品味差的初级工程师"→ 极度详细的任务拆分
 - "NO 生产代码 WITHOUT 失败测试"→ 删掉没测试就写的代码
-- 审查反馈不能说"你说得对"→ 这是 CLAUDE.md 显式禁止的
+- 审查反馈不能说"你说得对"→ 这是 AGENTS.md 显式禁止的
 
 ### agent-skills（作者：Addy Osmani）
 
@@ -41,11 +41,11 @@
 | 独有亮点 | interview-me、idea-refine、doubt-driven-development、source-driven-development、context-engineering |
 | 闭环 | spec→plan→build→test→review→ship 一条龙 |
 
-触发机制：调 skill（用 skill 长名）。⚠ Claude Code 侧装为顶层独立 skill（无 namespace，散落在 ~/.claude/skills/），无 slash 命令——用 skill 长名调用，勿用斜杠命令。
+触发机制：调 skill（用 skill 长名）。⚠ Codex 侧经 skill-installer 装为独立 skill（无 namespace，散落在 ~/.codex/skills/），slash 命令（/build /spec 等）未安装——用 skill 长名调用，勿用斜杠命令。
 
 设计取舍：
 - 闭环完整但与 SP 大量功能重叠（TDD/review/plan/spec 各 2-3 套实现）
-- 若串行跑 spec-driven-development → planning-and-task-breakdown 全流程，**违反用户 CLAUDE.md §1.2/§1.3 的 commit-per-change + 人工确认线**——慎用，建议分步调用单 skill
+- 若串行跑 spec-driven-development → planning-and-task-breakdown 全流程，**违反用户 AGENTS.md §1.2/§1.3 的 commit-per-change + 人工确认线**——慎用，建议分步调用单 skill
 - 风格偏叙述流程，与 SP 的指令式风格混用易输出漂移
 
 定位：参考实现 + 独有亮点吸收。同领域执行优先 SP。
@@ -54,7 +54,7 @@
 
 哲学：小而锐的单用途 skill，显式调用为主
 
-28 个 skill 分 5 类（engineering / productivity / misc / in-progress / personal），用户级安装（`~/.claude/skills/`，无 namespace，可原地编辑）。核心设计：
+28 个 skill 分 5 类（engineering / productivity / misc / in-progress / personal），用户级安装（`~/.codex/skills/ 或 ~/.agents/skills/，无 namespace，可原地编辑）。核心设计：
 
 | 类别 | 代表 skill |
 |------|-----------|
@@ -70,7 +70,7 @@
 - `teach` — 结构化教学工作区（MISSION.md + lessons/ + learning-records/ + reference/），zone of proximal development，多 session 状态化
 - `zoom-out` — 上调抽象层给模块地图（vs understand-anything 全量扫，更轻）
 - `writing-beats/fragments/shape` — narrative 文章塑形三件套
-- `grill-me/grill-with-docs` — 对抗式访谈压测计划
+- `grill-me/grill-with-docs` — 轻量需求澄清与对抗式访谈；重点不是产长文档，而是逐问逐答、让用户快速拍板
 - `caveman` — 全文 caveman 模式压缩
 - `design-an-interface` — 并行多 agent 出 N 套接口设计对比
 
@@ -80,7 +80,26 @@
 - 个人/教育风格（Matt Pocock TS 背景）→ writing/teaching 类强，企业工程不如 SP
 - 同领域重叠：tdd≈SP test-driven-development；review≈SP requesting-code-review。重叠时优先 SP（流程纪律）
 
-定位：写作/教学/单用途工具的主力。工程流程当 SP 的补充。
+定位：写作/教学/单用途工具的主力。`grill-me` 负责轻量澄清，工程重流程仍由 SP 兜底。
+
+### Trellis（外部 CLI，Mindfold）
+
+哲学：把执行期约束从聊天上下文里抽出来，放进结构化任务树
+
+它不是 skill 生态，而是外部 CLI。本指南建议主要用于**长会话执行期**：给任务、验收标准、层级关系一个持久真相源，减少模型随着对话变长而跑偏。前期需求澄清走 `grill-me`，不靠 Trellis。
+
+| 特征 | 价值 |
+|------|------|
+| 任务树 | 把大任务拆成可持续引用的节点，而不是散在聊天记录里 |
+| 验收标准 | 每个任务可带明确 done 条件，减少“差不多完成”的漂移 |
+| 长任务治理 | 适合 30-60 分钟以上、跨多阶段执行 |
+
+设计取舍：
+- 比单纯聊天更稳，但前置成本更高
+- 适合“计划已定、进入执行期”的任务，不适合替代轻量需求澄清
+- 本指南不默认假设已安装；只有用户明确提到，或确实遇到长会话跑偏问题时才推荐
+
+定位：执行期结构化治理层。前期澄清优先 `grill-me`，重流程设计优先 SP，长任务执行期再考虑 Trellis。
 
 ### understand-anything（作者：Egonex-AI，原创建者 Lum1104）
 
@@ -112,179 +131,91 @@ MCP 工具：`headroom_compress`（长内容 → 压缩文本 + hash）/ `headro
 
 定位：长会话/大仓库上下文管理。与 lean-ctx（本地代码压缩）分层互补——lean-ctx 压代码/命令输出，headroom 压任意长文本。MCP 服务需运行。
 
-### Claude Code 插件系统（plugin cache + enabledPlugins）
+### Codex marketplace 插件（openai-curated 等三源）
 
-哲学：Claude Code 通过 `~/.claude/plugins/cache/<plugin-name>/<plugin-name>/<version>/` 加载插件，`~/.claude/settings.json` 的 `enabledPlugins` 字段控制启用
+哲学：Codex 官方插件市场托管的 skill 集 + MCP 服务，通过 codex plugin 命令管理
 
-插件类型：
-- **namespace 插件**：`<plugin>:` 前缀调用（superpowers / ecc / ponytail / caveman / understand-anything / karpathy-skills / claude-md-management / commit-commands / code-review / open-code-review / feature-dev / frontend-design / skill-creator / claude-code-setup / example-skills）
-- **MCP 服务插件**：通过 MCP 协议暴露工具（context7 / playwright / chrome-devtools / github / lean-ctx / gitnexus / douyin / headroom）
-- **顶层 skill**：直接装在 `~/.claude/skills/` 无 namespace（agent-skills / mattpocock / 大量用户自装中文 skill）
+三个 marketplace 源：
+- openai-primary-runtime：documents / spreadsheets / presentations（Office 文档处理）
+- openai-bundled：browser / computer-use（浏览器和桌面自动化）
+- openai-curated：最大的源，含 codex-security / build-web-apps / openai-developers / github / figma / notion / playwright / supabase / stripe 等 40+ 插件
 
-管理：编辑 `~/.claude/settings.json` 的 `enabledPlugins` 字段，或用 Claude Code 的 `/plugin` 交互命令。cache 目录即权限源——文件夹在 = 插件可被启用。
+管理命令：codex plugin list（查可用）/ codex plugin add <name>@<marketplace>（装）/ codex plugin marketplace add <owner>/<repo>（加第三方源）
 
-### ECC（最大生态，v2.0.0）
+### codex-security（openai-curated 插件）
 
-哲学：全栈框架 + 工作流编排，覆盖 14+ 语言/框架的 build/review/test + 安全 + 工作流 + agent 编排
+哲学：安全扫描全管线，从发现到验证到修复的闭环
 
-271 skill + 92 command + 67 agent 全载于 `~/.claude/plugins/cache/ecc/ecc/2.0.0/`。核心覆盖：
-
-| 类别 | 代表 skill / command |
-|------|---------------------|
-| 框架 build/review/test（14 语言） | `ecc:cpp-build` / `:cpp-review` / `:cpp-test` / `:rust-*` / `:go-*` / `:kotlin-*` / `:flutter-*` / `:react-build` / `:react-review` / `:react-test` / `:vue-review` / `:fastapi-review` / `:python-review` / `:django-review` 等 |
-| 安全 | `ecc:security-scan` / `ecc:security-review`（skill）+ 框架专属 `django-security` / `springboot-security` / `laravel-security` / `quarkus-security` / `defi-amm-security` / `llm-trading-agent-security` |
-| 前端 | `ecc:multi-frontend` / `frontend-patterns` / `frontend-a11y` / `frontend-design` / `liquid-glass-design` / `react-patterns` / `react-performance` / `vue-patterns` / `angular-developer` / `nextjs-turbopack` / `vite-patterns` / `nuxt4-patterns` |
-| 后端框架 | `django-patterns` / `fastapi-patterns` / `springboot-*` / `quarkus-*` / `nestjs-patterns` / `laravel-*` / `dotnet-patterns` / `golang-patterns` / `python-patterns` / `mysql-patterns` / `postgres-patterns` / `redis-patterns` / `prisma-patterns` / `jpa-patterns` / `kubernetes-patterns` / `docker-patterns` |
-| 移动端 | `swift-*`（swiftui / actor-persistence / concurrency-6-2 / protocol-di-testing）/ `kotlin-coroutines-flows` / `kotlin-exposed-patterns` / `kotlin-ktor-patterns` / `compose-multiplatform-patterns` / `flutter-dart-code-review` / `harmonyos-app-resolver` |
-| 工作流编排 | `ecc:santa-loop`（adversarial 双审，两独立 reviewer 须都 approve）/ `ecc:gan-build` / `:gan-design`（generator-evaluator）/ `ecc:orch-build-mvp` / `:orch-add-feature` / `:orch-change-feature` / `:orch-fix-defect` / `:orch-refine-code` / `ecc:multi-plan` / `:multi-execute` / `:multi-frontend` / `:multi-backend` / `:multi-workflow` / `ecc:loop-start` / `:loop-status` |
-| 代码质量 | `ecc:code-review` / `:refactor-clean` / `:prune` / `:test-coverage` / `:quality-gate` / `:production-audit` / `:safety-guard` |
-| 计划/蓝图 | `ecc:plan` / `:blueprint` / `:plan-prd` / `:plan-orchestrate` / `:checkpoint` / `:aside` |
-| agent 编排 | 67 个 framework 专属 agent（`ecc:python-reviewer` / `:react-reviewer` / `:rust-reviewer` / `:security-reviewer` / `:architect` / `:planner` / `:code-explorer` 等）|
-| 成本/会话 | `ecc:cost-report` / `:sessions` / `:resume-session` / `:save-session` / `:project-init` / `:projects` / `:harness-audit` |
-
-定位：当前环境**最大生态**。安全审查主力是 `ecc:security-scan` + santa-loop（对抗双审）；前端开发主力是 `ecc:react-*` + `multi-frontend`；多语言团队项目几乎全靠 ECC。codex-security（Codex 独有的 10 skill 全管线）和 build-web-apps（6 skill 全链路）在 Claude Code 不存在，功能由 ECC 子集覆盖。
-
-### gitnexus（代码库知识图谱 + 控制流/数据流/taint）
-
-哲学：代码库 → 可查询知识图谱 + 控制流图（CFG）/ 程序依赖图（PDG，含 CDG 控制依赖 + RD 数据依赖边）/ taint source→sink 追踪
-
-`gitnexus` MCP 暴露 17 工具 + 9 顶层 skill（gitnexus-cli / -debugging / -exploring / -guide / -impact-analysis / -pdg-query / -pr-review / -refactoring / -taint-analysis）。
-
-| 工具 | 作用 |
-|------|------|
-| `query` / `cypher` | 图查询（节点/边/路径）|
-| `impact` / `api_impact` | 改动 blast radius（哪些调用方会受影响）|
-| `trace` | 追踪函数调用链 |
-| `route_map` | 端点 → 处理器路由图 |
-| `pdg_query` | 控制依赖 / 数据依赖边查询（CDG / REACHING_DEF）|
-| `explain` / `context` | 自然语言解释代码片段 / 上下文注入 |
-| `check` / `detect_changes` / `shape_check` / `tool_map` | 健康检查 / 变更检测 / 形状校验 / 工具映射 |
-| `rename` / `group_sync` / `group_list` / `list_repos` | 安全重命名 / 仓库组同步 |
-
-> ℹ️ **MCP 工具无 `taint-analysis`**——source→sink 污染传播在 **skill 层**（顶层 `gitnexus-taint-analysis` skill），不在 `gitnexus` MCP。同款 skill 还有 `gitnexus-pr-review` / `gitnexus-refactoring` / `gitnexus-impact-analysis` / `gitnexus-pdg-query` / `gitnexus-debugging` / `gitnexus-exploring` / `gitnexus-cli` / `gitnexus-guide`。
-
-定位：与 understand-anything 同属代码库理解层，但**实时查询**强于 understand-anything 的「先 build 全量 graph」。安全审查（taint skill）、重构（impact/rename）、PR review（gitnexus-pr-review skill）独有价值。Claude Code 当前最完整的代码图谱 + 程序分析能力。
-
-### caveman（压缩模式，hook 驱动）
-
-哲学：drop 冗余（冠词/虚词/客套），保留全部技术实质，省 ~75% token
-
-`caveman:` 插件 7 skill（caveman / cavecrew / caveman-commit / caveman-compress / caveman-help / caveman-review / caveman-stats）+ SessionStart hook 自动激活。`caveman:cavecrew` 派子代理（builder / investigator / reviewer）输出 caveman 压缩格式。
-
-定位：与 ponytail 配套的「沟通压缩」层。教程编写/学习材料默认不用 caveman（用户 memory 已声明——见 `~/.claude/projects/*/memory/tutorial-content-no-caveman.md`）。Level 切换：`/caveman lite|full|ultra|wenyan`。
-
-### commit-commands（git 工作流插件）
-
-哲学：git commit/push/PR 一键化，减少手动错误
-
-3 skill：
-| skill | 作用 |
-|-------|------|
-| `commit-commands:commit` | 智能 commit message（conventional commits）|
-| `commit-commands:commit-push-pr` | 一键 commit + push + 开 PR |
-| `commit-commands:clean_gone` | 清理本地已删远程分支的引用 |
-
-定位：日常 git 工作流最快捷径。高风险操作（force-push / reset --hard）已由 hooks 拦（见 CLAUDE.md §5）。
-
-### claude-md-management（CLAUDE.md 维护插件）
-
-哲学：CLAUDE.md 是项目记忆，需审计 + session 学习回写
-
-2 skill：
-| skill | 作用 |
-|-------|------|
-| `claude-md-management:claude-md-improver` | 审计 CLAUDE.md 质量（冲突/冗余/含糊/不可执行规则），输出报告 + 改进 |
-| `claude-md-management:revise-claude-md` | 把当前 session 的学习回写到 CLAUDE.md |
-
-定位：CLAUDE.md 维护主力。配合顶层 `claude-md-audit` skill（独立审计）形成三件套。
-
-### code-review / open-code-review（代码审查插件）
-
-哲学：本地 diff / PR 多轴结构化审查
+10 个 skill 构成完整安全审查链路：
 
 | skill | 作用 |
 |-------|------|
-| `code-review:code-review` | 本地 diff 多轴审查（effort low/medium/high，可 --fix 自动应用，--comment 发 PR 评论）|
-| `open-code-review:review` / `:open-code-review` | 走阿里巴巴 `ocr` CLI，行级评论 + 可自动 apply fix |
+| security-scan | repository 全量或 scoped-path 扫描 |
+| deep-security-scan | 多 pass 独立发现 + 语义合并 + 验证（最彻底）|
+| security-diff-scan | PR / commit / branch diff 的安全审查 |
+| threat-model | 创建/更新/持久化仓库威胁模型 |
+| finding-discovery | 发现候选安全发现 |
+| validation | 判定候选发现是否有效 |
+| attack-path-analysis | 从 source 到 sink 追踪 + 校准 severity |
+| fix-finding | 修复并验证已确认的安全发现 |
+| track-findings | 把已验证发现登记到 Linear/Jira/GitHub issue/安全公告 |
+| triage-finding | 导入外部扫描器/报告，做仓库影响 triage |
 
-定位：SP requesting-code-review（流程纪律）的补充——结构化深度审查。open-code-review 适合 PR 远程审查；code-review 适合本地 diff。
+定位：当前环境**最完整的安全审查链路**。codex-security 是全管线（发现→验证→修复→追踪）；agent-skills security-and-hardening 补通用加固。日常用 codex-security:security-diff-scan（PR 审查）。
 
-### feature-dev（特性开发插件）
+### build-web-apps（openai-curated 插件）
 
-哲学：架构蓝图 + 执行路径追踪 + reviewer，特性开发三件套
+哲学：前端开发全链路，从设计概念到可运行代码
 
-1 命令（`feature-dev`）+ 3 agent（code-architect / code-explorer / code-reviewer）：
-| entry | 类型 | 作用 |
-|-------|------|------|
-| `feature-dev:code-architect` | agent | 分析现有 codebase 模式，输出实施蓝图（文件/接口/数据流/build order）|
-| `feature-dev:code-explorer` | agent | 追执行路径，映射架构层，文档化依赖 |
-| `feature-dev:code-reviewer` | agent | confidence-based 过滤的高优先 issue 审查 |
-| `feature-dev:feature-dev` | command | 总入口 |
+6 个 skill：
 
-定位：与 SP brainstorming + writing-plans 重叠但角度不同——feature-dev 偏「分析现有 codebase 出蓝图」，SP 偏「设计先行 + 任务拆分」。新功能开发可二选一或互补。
+| skill | 作用 |
+|-------|------|
+| frontend-app-builder | 从 image-generated 概念设计到实现，section-specific references |
+| react-best-practices | React/Next.js 性能优化指南（Vercel Engineering）|
+| shadcn | shadcn/ui 组件管理——加/搜/修/组合 |
+| stripe-best-practices | Stripe 集成——Checkout/PaymentIntents/Connect/billing |
+| supabase-postgres-best-practices | Postgres 查询/schema/配置优化 |
+| frontend-testing-debugging | 前端 dev server / UI 回归 / 交互 bug / 响应式布局 QA |
 
-### frontend-design（反 slop 前端设计）
+定位：前端开发主力。build-web-apps 偏工程实践（best practices + 测试 + 修复），react-best-practices / shadcn / stripe / supabase 全链路。建新应用用 frontend-app-builder，优化现有用 react-best-practices / frontend-testing-debugging。
 
-哲学：反 AI 生成模板味，真实设计系统 + audit-first + 严格 pre-flight check
+### openai-developers（openai-curated 插件）
 
-`frontend-design:frontend-design` + `example-skills:frontend-design`（同源）。涵盖落地页 / 作品集 / 重设计。
+哲学：OpenAI 官方应用开发 skill 集，覆盖 API key 管理到部署
 
-定位：建新前端应用的设计层主力。配合 ECC `react-*` / `multi-frontend` 实施层。build-web-apps:frontend-app-builder（Codex 独有）的 Claude Code 替代。
+5 个 skill：
 
-### skill-creator（skill 生成与优化）
+| skill | 作用 |
+|-------|------|
+| agents-sdk | 构建/运行/部署/评估 Agents SDK 应用 |
+| build-chatgpt-app | 构建/重构 ChatGPT Apps SDK（MCP server + widget UI）|
+| chatgpt-app-submission | 生成 submission.json + 审查清单 |
+| openai-api-troubleshooting | 分类 API 请求失败原因 + 路由修复 |
+| platform-api-key | API key 安全管理（inspect/ask reuse-vs-new/never expose）|
 
-哲学：从 git history 抽模式生成 SKILL.md，或对现有 skill 跑 9 维 rubric 自优化
+定位：OpenAI 应用开发唯一选择，无其他生态重叠。platform-api-key 是所有 OpenAI API 工作的**前置门**（先确认 key 可用再继续）。
 
-| 入口 | 作用 |
-|------|------|
-| `skill-creator:skill-creator` / `example-skills:skill-creator` | 本地 git history 抽模式生成 SKILL.md（GitHub App 的本地版）|
-| 顶层 `darwin-skill` | 9 维 rubric（结构 + 效果 + 元黑名单）+ hill-climbing + 独立 judge agent 盲评 + 测试 prompt 验证 |
-| 顶层 `darwin-weekly-audit` | 周期体检，跑 darwin Phase 0.5（设计测试 prompt）+ Phase 1（基线分），只出报告不自动优化 |
+### github（openai-curated 插件）
 
-定位：skill 元开发。darwin-skill 是 skill 生态的「自我进化」入口。
+哲学：GitHub PR / issue / CI 工作流 skill 集，配 GitHub MCP
 
-### claude-code-setup（hook / automation 推荐）
+4 个 skill：
 
-哲学：扫 transcript 找重复模式，推荐可自动化的 hook
+| skill | 作用 |
+|-------|------|
+| github | 仓库 / PR / issue 总览与 triage 入口 |
+| gh-address-comments | 审查 PR 未解决 review 线程，实现选定的修复 |
+| gh-fix-ci | 调试修复 GitHub Actions 失败的 PR check |
+| yeet | 本地改动 → commit → push → 开 draft PR 的工作流 |
 
-`claude-code-setup:claude-automation-recommender` 单 skill。
-
-定位：hook 配置主力。配合 `update-config` skill（顶层）+ 直接编辑 `~/.claude/settings.json`。
-
-### example-skills（Anthropic 官方 17 示例 skill，umbrella：anthropic-agent-skills/example-skills/）
-
-哲学：官方 skill 写法范例 + 即用工具 + Office 文档处理
-
-17 skill：algorithmic-art / brand-guidelines / canvas-design / claude-api / doc-coauthoring / docx / frontend-design / internal-comms / mcp-builder / pdf / pptx / skill-creator / slack-gif-creator / theme-factory / web-artifacts-builder / webapp-testing / xlsx。
-
-定位：学习 skill 写法的范例 + mcp-builder（构建 MCP server）/ web-artifacts-builder（生成 web artifact）有即用价值。
-
-### last30days（跨平台趋势研究）
-
-哲学：抓最近 30 天真实人声，非训练数据回忆
-
-`last30days` 顶层 skill v3.7.0。覆盖 Reddit / X / YouTube / TikTok / Hacker News / Polymarket / GitHub / web。
-
-定位：用户/市场调研。与 `agent-reach`（17 平台 CLI/MCP/curl 互动）互补——last30days 偏只读研究，agent-reach 偏互动。
-
-### github（GitHub MCP，60+ 工具）
-
-哲学：通过 `plugin:github:github` MCP 暴露完整 GitHub 操作
-
-替代 Codex 时代的 github 插件 skill 集。MCP 工具覆盖：
-- PR：`create_pull_request` / `update_pull_request` / `merge_pull_request` / `get_*` / `list_pull_requests`
-- Issue：`create_issue` / `update_issue` / `list_issues` / `add_issue_comment`
-- Branch / commit / tag / release：`create_branch` / `list_commits` / `get_commit` / `list_tags` / `create_release`
-- Code search：`search_code` / `search_commits` / `search_issues` / `search_pull_requests` / `search_repositories` / `search_users`
-- 协作：`assign_copilot_to_issue` / `request_copilot_review` / `create_pull_request_with_copilot`
-
-定位：GitHub 集成主力。token 通过 Claude Code 的 MCP OAuth 流配置；不可用时降级 `gh` CLI。
+定位：GitHub 集成主力。配 github MCP（token 需配，降级走 `gh` CLI）。CI 修复走 gh-fix-ci，发 PR 走 yeet（轻量）或 SP finishing-a-development-branch（要选合并/PR/保留/丢弃）。
 
 ### ponytail（作者：Dietrich Gebert）
 
 哲学：lazy senior dev mode，强制最简方案
 
-v4.8.3。hooks 驱动（`ponytail/hooks/claude-codex-hooks.json`），在工具执行前拦截，强制 YAGNI / stdlib first / 不加未请求的抽象。
+v4.7.0。hooks 驱动（`ponytail/hooks/claude-codex-hooks.json`），在工具执行前拦截，强制 YAGNI / stdlib first / 不加未请求的抽象。
 
 | 铁律 | 内容 |
 |------|------|
@@ -306,36 +237,37 @@ v4.8.3。hooks 驱动（`ponytail/hooks/claude-codex-hooks.json`），在工具�
 
 ## 多生态流程对比
 
-### 开发一个功能（Superpowers 主力）
+### 开发一个功能（先分清澄清层 / 设计层 / 执行层）
 
-| 阶段 | Superpowers | 补充生态 |
-|------|------------|---------|
-| 设计 | brainstorming（自动触发）。问需求→出设计文档→签审。HARD-GATE：没设计就不能写代码 | agent-skills idea-refine（发散收敛）、mattpocock design-an-interface（多方案对比）、`feature-dev:code-architect`（分析现有 codebase 出蓝图）|
-| 计划 | writing-plans（自动触发）。假设执行者是"没上下文+品味差的新人"，每步 2-5 分钟。每个任务包含完整文件路径和代码 | agent-skills planning-and-task-breakdown（轻量拆任务）、mattpocock to-prd（出 PRD）、`ecc:plan` / `:blueprint`（ECC 工作流版）|
-| 实现 | subagent-driven-development（自动触发）。每个任务：派 agent → spec 审查 → 代码质量审查 → 通过才提交。或 executing-plans（人工场景）| ponytail（最简实现）、agent-skills planning-and-task-breakdown（分步，见 §人工确认线）、`ecc:multi-execute` / `:orch-build-mvp`（并行/编排）|
-| 审查 | requesting-code-review → 派审查 subagent。receiving-code-review → 质疑式消化反馈（禁止说"你说得对"）| `code-review:code-review`（多轴）/ `open-code-review:review`（行级 `ocr` CLI）/ `ecc:security-scan`（安全）/ `ecc:santa-loop`（高风险对抗双审）/ `gitnexus:impact` + `:taint-analysis`（图谱安全审查）|
-| 验证 | verification-before-completion（铁律：证据驱动）。必须有当轮运行的命令输出，不能依赖"应该可以"| `ecc:<lang>-test`（react/vue/flutter/rust/go 等，框架专属）/ `ecc:test-coverage` |
-| 收尾 | finishing-a-development-branch → 显示 4 个选项（合并/PR/保留/丢弃）| `commit-commands:commit-push-pr`（一键三连，最快）|
+| 阶段 | 主力 | 补充生态 |
+|------|------|---------|
+| 轻量澄清 | `grill-me`。逐问逐答，帮用户快速拍板；适合需求模糊、但不想先读长 brainstorm 文档 | agent-skills interview-me / idea-refine |
+| 设计 | brainstorming（自动触发）。问需求→出设计文档→签审。HARD-GATE：没设计就不能写代码 | mattpocock design-an-interface（多方案对比） |
+| 计划 | writing-plans（自动触发）。假设执行者是"没上下文+品味差的新人"，每步 2-5 分钟。每个任务包含完整文件路径和代码 | agent-skills planning-and-task-breakdown（轻量拆任务）、mattpocock to-prd（出 PRD） |
+| 执行治理 | Trellis（若已安装）。长会话/多阶段任务用任务树持续约束；不是默认前置层 | TaskCreate / TaskUpdate（内置轻量替代） |
+| 实现 | subagent-driven-development（自动触发）。每个任务：派 agent → spec 审查 → 代码质量审查 → 通过才提交。或 executing-plans（人工场景） | ponytail（最简实现）、agent-skills planning-and-task-breakdown（分步，见 §人工确认线） |
+| 审查 | requesting-code-review → 派审查 subagent。receiving-code-review → 质疑式消化反馈（禁止说"你说得对"） | codex-security:security-diff-scan（安全）→ deep-security-scan（高风险多 pass） |
+| 验证 | verification-before-completion（铁律：证据驱动）。必须有当轮运行的命令输出，不能依赖"应该可以" | build-web-apps:frontend-testing-debugging（前端合并前） |
+| 收尾 | finishing-a-development-branch → 显示 4 个选项（合并/PR/保留/丢弃） | 无 |
 
 ### 诊断问题
 
 | 场景 | 工具 | 说明 |
 |------|------|------|
-| 系统化找根因 | SP systematic-debugging + `gitnexus:trace` / `:explain`（图谱辅助定位）| 4 阶段：调查→复现→检查变更→多组件边界加诊断 |
-| 构建/类型错误 | 项目构建纪律（CLAUDE.md §1.4）+ `ecc:<lang>-build`（cpp/rust/go/kotlin/flutter/gradle 等框架专属）| tsc --noEmit / go build 等本地编译先行 |
-| 性能分析 | mattpocock zoom-out（模块地图）/ `ecc:react-performance` / `performance-optimization` skill | 无单一专门 skill，组合使用 |
+| 系统化找根因 | SP systematic-debugging | 4 阶段：调查→复现→检查变更→多组件边界加诊断 |
+| 构建/类型错误 | 项目构建纪律（AGENTS.md §1.4）+ build-web-apps:frontend-testing-debugging（前端）| tsc --noEmit / go build 等本地编译先行 |
+| 性能分析 | mattpocock zoom-out（模块地图）/ build-web-apps:react-best-practices | 无单一专门 skill，组合使用 |
 
 ### 自动化/循环
 
 | 场景 | 方式 |
 |------|------|
-| 定时轮询 | `/loop 5m <prompt>` skill（Claude Code 内置）|
-| 自定步持续 | `/loop <prompt>`（omit interval 让模型自配速）|
-| 受管循环 | 无独立生态——`/loop` + 手动 max-runs/max-duration 硬限制 |
+| 定时轮询 | 内置 /loop 5m <prompt> |
+| 条件驱动持续运行 | 内置 /goal <condition>（小模型每轮评估，达标自动停）|
 
 ### 学习积累
 
-Claude Code 侧可手写 memory（CLAUDE.md §7 防错闭环，路径 `~/.claude/projects/*/memory/`）；代码库学习走 understand-anything / gitnexus / mattpocock teach。
+无专门生态。Codex 侧可手写 memory（AGENTS.md §8 防错闭环）；代码库学习走 understand-anything / mattpocock teach。
 
 ---
 
@@ -345,24 +277,25 @@ Claude Code 侧可手写 memory（CLAUDE.md §7 防错闭环，路径 `~/.claude
 
 **已有明确需求/PRD →** 决策流走"有需求文档"分类，引导至 SP writing-plans，不走 brainstorming。HARD-GATE 由"用户已确认"替代设计文档。
 
-**多生态分工原则：** SP（流程纪律）/ ECC（框架 + 安全 + 工作流编排）/ gitnexus + understand-anything（代码库理解）/ context7（文档查询）/ lean-ctx + headroom（上下文压缩）/ caveman + ponytail（沟通/代码风格 hook）。agent-skills 和 mattpocock 的通用流程类与 SP 重复，只留独有亮点。
+**多生态分工原则：** `grill-me`（轻量澄清）/ SP（流程纪律）/ Trellis（长任务执行治理）/ codex-security（安全）/ build-web-apps（前端）/ understand-anything + CodeGraph（代码库理解）。agent-skills 和 mattpocock 的通用流程类与 SP 重复，只留独有亮点。
 
 ### 重叠区处理（多生态共存，每个域 2-4 套实现）
 
 | 重叠区 | 各生态实现 | 推荐主力（冗余策略） |
 |--------|-----------|---------------------|
-| TDD | SP test-driven-development（纪律）／ agent-skills test-driven-development ／ mattpocock tdd ／ `ecc:tdd-workflow` | **SP（纪律）**。agent-skills/mattpocock/ECC 与 SP 重复，按项目偏好二选一 |
-| 审查 | SP requesting/receiving-code-review（自检）／ agent-skills code-review-and-quality ／ mattpocock review ／ `code-review:code-review`（多轴）／ `open-code-review:review`（`ocr` CLI）／ `ecc:code-review` ／ `ecc:santa-loop`（对抗双审）| **SP（日常自检）→ `code-review:code-review`（结构）→ `ecc:security-scan`（安全）→ `ecc:santa-loop`（高风险对抗）** |
-| 调试 | SP systematic-debugging（4 阶段根因）／ agent-skills debugging-and-error-recovery ／ `gitnexus:trace` / `:explain`（图谱辅助）| **SP（最系统化）+ gitnexus（图谱定位）**。debugging-and-error-recovery 为子集 |
-| 计划 | SP brainstorming + writing-plans（设计先行 HARD-GATE）／ agent-skills planning-and-task-breakdown + spec-driven-development ／ mattpocock to-prd + design-an-interface + prototype ／ `feature-dev:code-architect` ／ `ecc:plan` / `:blueprint` | **SP（设计先行）+ mattpocock design-an-interface（多方案对比，独有）+ feature-dev:code-architect（分析现有 codebase）** |
-| 验证 | SP verification-before-completion（证据铁律）／ agent-skills shipping-and-launch ／ `ecc:<lang>-test`（react/vue/flutter/rust/go 等）／ `ecc:test-coverage` | **SP（每步）+ ECC 框架专属 test（合并前）** |
-| 安全 | `ecc:security-scan` + `:security-review`（主力）／ `ecc:santa-loop`（对抗双审）／ `gitnexus-taint-analysis` skill（source→sink 污染流）／ agent-skills security-and-hardening（通用加固）／ 顶层 `security-and-hardening` skill | **ECC security-scan（主力）+ santa-loop（高风险）+ gitnexus-taint-analysis skill（污染流）**。codex-security 10-skill 全管线在 Claude Code 不存在 |
-| 代码库理解 | gitnexus（MCP 实时图查询 + PDG/taint）／ understand-anything（8 skill 知识图谱 + tour）／ mattpocock zoom-out + improve-codebase-architecture | **gitnexus（实时查询/重构/taint）+ understand-anything（新项目深度 onboarding/tour）**。mattpocock 偏轻量摘要 |
-| 前端开发 | ECC `react-*` / `vue-*` / `multi-frontend` / `frontend-design` / `frontend-patterns` / `frontend-a11y` ／ `frontend-design:frontend-design`（反 slop）／ `example-skills:web-artifacts-builder` ／ agent-skills frontend-ui-engineering | **ECC 前端全家桶（建新 + 优化）+ frontend-design:frontend-design（设计层反 slop）**。build-web-apps 6-skill 全链路在 Claude Code 不存在 |
-| 上下文压缩 | lean-ctx + headroom（MCP 三层栈，已配）／ caveman + handoff（沟通压缩层）| **lean-ctx + headroom（MCP 层，自动）+ caveman（沟通压缩，hook）**。层级不同不冲突 |
-| OpenAI 应用开发 | ECC `agent-payment-x402`（仅此一项）／ `claude-api` skill（Anthropic 侧参考）| **Claude Code 侧无 OpenAI 全套**——openai-developers 5-skill 在 Claude Code 不存在。需 OpenAI SDK 工作时手写或参考 claude-api skill 跨生态类比 |
+| TDD | SP test-driven-development（纪律）／ agent-skills test-driven-development ／ mattpocock tdd | **SP（纪律）**。agent-skills/mattpocock 与 SP 重复，按项目偏好二选一 |
+| 审查 | SP requesting/receiving-code-review（自检）／ agent-skills code-review-and-quality ／ mattpocock review ／ codex-security security-diff-scan（安全）| **SP（日常自检）→ codex-security（安全）→ codex-security deep-security-scan（高风险多 pass）** |
+| 调试 | SP systematic-debugging（4 阶段根因）／ agent-skills debugging-and-error-recovery | **SP（最系统化）**。debugging-and-error-recovery 为子集 |
+| 计划 | SP brainstorming + writing-plans（设计先行 HARD-GATE）／ agent-skills planning-and-task-breakdown + spec-driven-development ／ mattpocock to-prd + design-an-interface + prototype | **需求模糊先 `grill-me`；需求清楚走 SP writing-plans；想轻量拆任务用 planning-and-task-breakdown** |
+| 执行治理 | Trellis（执行期任务树治理，外部 CLI，不默认假设已装） ／ TaskCreate + TaskUpdate（内置） | **计划已定 + 长会话/多阶段才上 Trellis；未装回落 TaskCreate** |
+| 验证 | SP verification-before-completion（证据铁律）／ agent-skills shipping-and-launch ／ build-web-apps:frontend-testing-debugging（前端）| **SP（每步）+ build-web-apps（前端合并前）** |
+| 执行放权 | dangerously-skip-permissions（风险开关，不属某一生态） | **默认不用**。仅在需求非常清楚、计划扎实、用户显式接受风险时讨论 |
+| 安全 | codex-security（10 skill 全管线）／ agent-skills security-and-hardening | **codex-security（主力，管线最完整）+ agent-skills security-and-hardening（通用加固）** |
+| 代码库理解 | understand-anything（8 skill 知识图谱）／ CodeGraph MCP ／ mattpocock zoom-out + improve-codebase-architecture | **CodeGraph（日常结构查询）+ understand-anything（新项目深度 onboarding）**。mattpocock 偏轻量摘要 |
+| 前端开发 | build-web-apps（6 skill 工程实践）／ agent-skills frontend-ui-engineering | **build-web-apps（建新应用 + 优化现有）** |
+| 上下文压缩 | lean-ctx + headroom（MCP 三层栈，已配）／ mattpocock caveman + handoff | **lean-ctx + headroom（MCP 层，自动）**。mattpocock 是 skill 指令层建议，层级不同不冲突 |
 
-**冗余处理原则：** 核心开发流程（TDD/审查/调试/计划/验证）每域有 2-4 套实现。不全部触发——按"SP 管流程纪律 + ECC 管框架/安全/工作流 + gitnexus/understand-anything 管代码库理解 + context7 管文档查询 + lean-ctx/headroom 管上下文"分工。agent-skills 和 mattpocock 的通用流程类与 SP 重复，只留独有亮点（agent-skills 留 interview-me / idea-refine / doubt-driven-development / source-driven-development；mattpocock 留 teach / zoom-out / writing-* / grill-* / design-an-interface）。
+**冗余处理原则：** 核心开发流程（TDD/审查/调试/计划/验证）每域有 2-4 套实现。不全部触发——按"`grill-me` 管轻量澄清 + SP 管流程纪律 + Trellis 管长任务执行治理 + codex-security 管安全 + build-web-apps 管前端 + understand-anything/CodeGraph 管代码库理解"分工。agent-skills 和 mattpocock 的通用流程类与 SP 重复，只留独有亮点（agent-skills 留 interview-me / idea-refine / doubt-driven-development；mattpocock 留 teach / zoom-out / writing-* / grill-* / design-an-interface）。
 
 ---
 
@@ -372,20 +305,14 @@ Claude Code 侧可手写 memory（CLAUDE.md §7 防错闭环，路径 `~/.claude
 
 | 生态 | 依赖 | 不可用时降级 |
 |------|------|-------------|
-| headroom | headroom MCP 服务运行 | 退到 lean-ctx 本地压缩（无 hash 取回，纯压）；或 `ctx_compose` |
-| understand-anything | 首次 build graph 需 AST 解析 | 大仓库超时 → 缩范围（子目录）或退到 gitnexus（实时子图查询）/ mattpocock zoom-out 轻量摘要 |
-| gitnexus | gitnexus MCP + 已 build 的代码图谱 | 退到 understand-anything（重新 build）/ mattpocock zoom-out（无图）|
-| context7 | context7 MCP 服务（Claude Code 已配双实例 `a1b2c3d4-context7-mcp-001` + `plugin:context7:context7`，Upstash 跨平台 MCP） | 退到直接查官方文档 / WebSearch |
-| playwright | playwright MCP + 浏览器（双实例 `b2c3d4e5-playwright-mcp-002` + `plugin:playwright:playwright`）| 退到手动测试 / curl 验证 API |
-| chrome-devtools | `plugin:ecc:chrome-devtools` MCP + Chromium | 退到 playwright MCP / 手动测试 |
-| github | `plugin:github:github` MCP + token（MCP OAuth 流配置）| 退到 `gh` CLI |
-| lean-ctx | `lean-ctx` MCP 服务运行 | 退到原生 Read/Grep/Shell/Glob（无压缩，token 消耗增加）|
-| douyin | `douyin` MCP | 无降级（视频提取专用，缺失则跳过该场景）|
-| ECC 框架 build/review/test | 无外部依赖（命令/skill 内部）| 命令本身不可用 → 退到 SP 同名 skill + 项目构建命令 |
-| agent-skills 全流程串行 | 无外部依赖，但语义上绕过人工确认线 | 用户 CLAUDE.md §1.2/§1.3 已声明 commit 前展示 diff —— 分步调单 skill，或走 SP writing-plans → executing-plans |
+| headroom | headroom MCP 服务运行 | 退到 lean-ctx 本地压缩（无 hash 取回，纯压）；或 ctx_compress |
+| understand-anything | 首次 build graph 需 AST 解析 | 大仓库超时 → 缩范围（子目录）或退到 mattpocock zoom-out 轻量摘要 |
+| context7 | context7 MCP 服务（config.toml 已配 `a1b2c3d4-context7-mcp-001`，Upstash 跨平台 MCP） | 退到直接查官方文档 / 搜索引擎 |
+
+| playwright | playwright MCP + 浏览器 | 退到手动测试 / curl 验证 API |
+| github | github MCP + token | 退到 `gh` CLI |
+| agent-skills 全流程串行 | 无外部依赖，但语义上绕过人工确认线 | 用户 AGENTS.md §1.2/§1.3 已声明 commit 前展示 diff —— 分步调单 skill，或走 SP writing-plans → executing-plans |
 
 ## 推荐性质声明
 
-本指南所有生态对比、决策速查、选型速判的推荐均为**基于生态设计哲学的推理**（如"SP 管流程纪律"、"ECC 管框架/安全"），非 benchmark 实测数据。重叠区优先级（如"审查 SP 日常自检 + `code-review:code-review` 结构 + ECC 安全 + santa-loop 对抗"）是经验判断，未做 with-skill vs baseline 对照实验。重要决策建议结合具体项目实测。
-
-平台差异声明：本指南针对 **Claude Code** 环境（`~/.claude/`、CLAUDE.md、settings.json、`/plugin` 系统）。Codex 副本（`~/.codex/`、AGENTS.md、config.toml、`codex plugin` 命令、codex-security/build-web-apps/openai-developers 三个 marketplace 插件）是独立维护的另一份指南，路径与可用生态不同，不混淆。
+本指南所有生态对比、决策速查、选型速判的推荐均为**基于生态设计哲学的推理**（如"SP 管流程纪律"），非 benchmark 实测数据。重叠区优先级（如"审查 SP 日常自检 + codex-security 深度"）是经验判断，未做 with-skill vs baseline 对照实验。重要决策建议结合具体项目实测。

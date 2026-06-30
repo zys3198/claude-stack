@@ -15,18 +15,17 @@
 | 触发信号 | 动作 |
 |---------|------|
 | 用户 `/plugin install` 或 `/plugin marketplace add` 新插件 | 新增"#### 生态名（作者）"小节，填哲学/命令/亮点/取舍四件套 |
-| 用户手动 clone 新 skill 到 `~/.claude/skills/` | 同上，或归入已有生态（若属 SP 子集） |
+| 用户手动 clone 新 skill 到 `~/.codex/skills/ 或 ~/.agents/skills/` | 同上，或归入已有生态（若属 SP 子集） |
 | skill 列表（系统 reminder）出现新前缀（如 `xxx:`） | 识别为新插件命名空间，加生态小节 |
 | 某生态命令/skill 重命名或删除 | 全文 grep 旧名，替换或移除 |
 | 用户反馈"X 和 Y 重复触发" | 在"重叠区处理"表加行，定优先级 |
 | 两次以上同模式困惑 | 升级"反模式与失败处理"表 |
 | 发现引用的命令/skill 名过时或不存在 | grep/查系统 reminder 核实，改并记 CHANGELOG |
 | 用户质疑某推荐准确性 | 不辩解，贴证据或改措辞为"经验判断/推理"，记 CHANGELOG |
-| 跨平台迁移（Codex ↔ Claude Code）| 全文路径/AGENTS↔CLAUDE/config.toml↔settings.json 替换 + 跨平台差异声明 |
 
 ### 怎么更新（5 步）
 
-1. **扫现状**：读系统 reminder 的 skill 列表，或用 `ctx_shell` 跑 `ls ~/.claude/skills/` + `ls ~/.claude/plugins/cache/`，比对本指南已列生态。
+1. **扫现状**：读系统 reminder 的 skill 列表，或 `ls ~/.codex/skills/ 或 ~/.agents/skills/` + `ls ~/.codex/plugins/`，比对本指南已列生态。
 2. **定位差异**：新增 / 删除 / 重命名 / 版本升级。
 3. **改四件套**：新生态 → 加"哲学 + 命令 + 亮点 + 取舍"四段；已有生态 → 增量改对应行。
 4. **更新决策表**：在"决策速查"和"选型速判"表里加该生态的推荐场景行。
@@ -45,6 +44,9 @@
 
 | 日期 | 动作 | 原因 |
 |------|------|------|
+| 2026-06-30 | 吸收 2026 工作流长文，重写默认推荐重心。主文件：新增"分层原则"（grill-me/SP/Trellis 三层）；开发新功能改先判 grill-me/SP/ponytail；有需求文档区分 SP 计划层 vs Trellis 执行治理；反操作清单加"SP 太重先降 grill-me"与 dangerously-skip-permissions 风险边界 | 核心观点：Superpowers 方法论对但默认包装太重；grill-me 更适合前期轻量澄清 |
+| 2026-06-30 | ecosystems.md 同步：grill-me 轻量澄清定位、Trellis 小节、流程对比改"澄清层/设计层/执行层"、重叠区拆"计划"+"执行治理"两行、冗余处理原则纳入 grill-me/Trellis | 让参考文档承接而非另起路由 |
+| 2026-06-30 | 四路并行审校后修复残留：选型速判"日常开发功能=SP"改三层分流（P0）；反模式绝对 HARD-GATE 收窄到"需求未成文"分支；有需求文档 Trellis 加"未装回落"；环境表去"实测"过满口气；Trellis 小节去"核心价值"断言 | 主代理自审不可信，派 4 独立 agent 对抗式核查抓出残留 SP-first 路由 |
 | 2026-06-13 | 主文件新增「定位与质量标准」H2 节（H1 后、决策流程前）：声明本 skill 触发后为整条 AI 编码工作流默认参考；立「准确/AI 可读/可进化」三质量底线 + 证据门槛；何时更新表加 2 行（命令名过时核实、用户质疑推荐改措辞） | 用户要求加一条：触发后整条工作流借鉴本 skill，故质量/准确性/AI 可读性/可进化性必须显式定标准 |
 | 2026-06-13 | 主文件减负：进化机制+变更记录移至本文件（references/MAINTENANCE.md）；删 Step3 Mermaid 流程图改文字；description 收窄删过宽触发词（"不知道怎么做/用什么、没思路、求建议、迷茫"） | 主文件每次触发加载维护内容污染推理上下文（省 ~40 行）；Mermaid 给人看非 LLM，删之省 token；过宽触发词致普通编码问题误触发路由 skill |
 | 2026-06-12 | 决策速查表加 qiaomu-ai-prd（一行想法→AI 可执行 PRD）一行；反模式表加 PRD 三件套（qiaomu-ai-prd / /plan-prd / /prp-prd）重叠优先级行 | 本会话装 qiaomu-ai-prd 第三方 skill（skills.sh 市场），非新生态故不单列小节，仅入决策表 + 重叠处理 |
@@ -62,4 +64,3 @@
 | 2026-06-23 | ECC 机制根本修正（磁盘实测推翻 bug #26037 归因）。发现历史版本把 ECC **commands 误当 skill**：`/plan` `/code-review` `/pr` `/santa-loop` `/loop-start` 等在 `marketplaces/ecc/commands/`（92 个 .md），从未在 skills/ 目录，却被标为"通用流程 skill 不可用"。实测：① plugin.json 的 `"skills":"../../skills/"` 路径断裂（指向 cache 中不存在目录），故 271 skill 无法自动加载，仅 63 个手动拷可用；② plugin.json **无 commands 字段**（全插件仅 ponytail 声明了），故 92 commands 不加载；③ 67 agents 同理；④ `blueprint`/`tdd-workflow`/`verification-loop`/`intent-driven-development` 是真 skill 但未拷贝。归因从"上游 bug #26037"（无法在线核实）改为"plugin.json 结构断裂"（磁盘可证）。三文件修正：新增 `references/ecc-structure.md` 证据文档（含可复现验证命令）；SKILL.md 自检表/生态速查/决策速查表/反操作清单/审查深度原则/Step 2 决策流共 ~25 处；ecosystems.md ECC 小节+重叠区表~10 处；删旧脚注（与新脚注重复）。 | 用户质疑"内容不一定正确，要有铁证"。磁盘扫证后发现 commands/skill 混淆是历代修正的根因——每次"修死路径"都在错误前提下打补丁，ECC 状态才会在一天内摇摆三次（⚠️→🔶→22处修） |
 | 2026-06-23 | **彻底移除 ECC**（用户决定 Codex 侧不用 ECC，仅 Claude Code 副本保留）。四文件清理：SKILL.md 删自检表/生态速查/决策速查/反操作清单/选型速判全部 ECC 行（ECC 残留 0），构建错误分类 A 选项去 ECC 化（改 build-web-apps + 构建纪律）；ecosystems.md 删 ECC 小节、流程对比表从 SP vs ECC 双栏改 SP 单栏、重叠区表删 ECC 列；删 `references/ecc-structure.md` 整文件；audit.ps1 删 ECC 扫描段。附带修复：codex-security 数字 8→10（补 track-findings/triage-finding）；audit.ps1 `Get-PluginMeta` SkillsDir 上溯 version 目录 bug（原全报 0，现正确报 superpowers=14 等）。ECC「63 可用」虚报根因确认：实际 overlap 仅 29，且声称的 Kotlin/Swift/Flutter/.NET/C++ 框架 skill 全未拷。 | 审查发现 ECC 是 P0 问题高发区（29 vs 63 虚报 + 死路径），用户不维护 Codex 侧 ECC → 删除比保留更省维护成本。两副本（.agents 与 .claude）独立非共享，删 Codex 副本零影响 Claude Code 使用 |
 | 2026-06-23 | 子代理独立审查后修复三处自审盲区。① agent-skills 死斜杠命令（P0，与 ECC 死路径同构）：8 个 `/build` `/spec` `/plan` `/review` `/ship` `/test` `/code-simplify` `/webperf` 全是死引用（Codex 侧经 skill-installer 装为独立 skill，commands 从未安装），改为 skill 长名调用（spec-driven-development / planning-and-task-breakdown / code-review-and-quality / test-driven-development / shipping-and-launch / code-simplification / performance-optimization）；删 `agent-skills:` namespace 错误声明。② 命名漂移：SKILL.md 4 处引用"多生态流程对比"与 ecosystems.md 真实标题"多生态核心流程对比"不一致，改标题去"核心"对齐。③ SKILL.md:310 一个 0x08 退格控制字符把 build-web-apps 吃成 uild-web-apps，删除。 | 用户不信主代理自审结论，派两个独立 explorer 子代理并行核查。两个代理各自抓出主代理漏掉的问题，其中 agent-skills 死命令是独立 P0（非 ECC 残留，是任务开始就带的盲区）。教训：主代理自审不可信，需独立代理对抗式核查 |
-| 2026-06-27 | **方案 B 全量对齐 Claude Code 环境**（用户选 B）。磁盘实测（`ls ~/.claude/plugins/cache/` + `ls ~/.claude/skills/`）+ reminder 比对发现三大 P0：① **ECC 错误移除**——2026-06-23 CHANGELOG 写"仅 Claude Code 副本保留"但本文件就是 Claude Code 副本，ECC 却被删干净。实测 ECC v2.0.0 在 Claude Code 全装（271 skill / 92 command / 67 agent）。② **平台路径全错**——全文 `~/.codex/` `~/.agents/` `AGENTS.md` `config.toml` `codex plugin` `Codex marketplace` 是 Codex 味，但本环境是 Claude Code（`~/.claude/`、CLAUDE.md、settings.json、`/plugin` 系统）。③ **gitnexus MCP 完全缺席**——20+ 工具（query/cypher/impact/trace/pdg_query/taint/route_map）+ 9 顶层 skill 全在 reminder，指南零提及。修复：SKILL.md 重写自检表（27 行覆盖全生态）+ 生态速查表（25 行，新增 ECC/gitnexus/caveman/commit-commands/claude-md-management/code-review/open-code-review/feature-dev/frontend-design/skill-creator/claude-code-setup/example-skills/last30days）+ 决策速查表（codex-security:→ecc:security-scan，加 gitnexus 重构行/CLAUDE.md 维护行/hook 配置行）+ 选型速判表（加 ECC 团队项目行/大重构 gitnexus 行）+ Step 2 决策树（审查/构建错误分类去 codex-security:/build-web-apps: 改 ecc:* + 12 处 AskUserQuestion→停问）；ecosystems.md 重写 Codex marketplace/codex-security/build-web-apps/openai-developers/github 五小节为 Claude Code 插件系统/ECC/gitnexus/caveman/commit-commands/claude-md-management/code-review/open-code-review/feature-dev/frontend-design/skill-creator/darwin-skill/claude-code-setup/example-skills/last30days/github MCP，流程对比表 + 重叠区表 + MCP 降级表全更新；MAINTENANCE.md 加跨平台迁移触发信号 + 本 CHANGELOG 行。 | 用户问"全面看看现有的mcp、skill、插件，来优化 /ai-coding-guide"。三天前（2026-06-23）的"彻底移除 ECC"决策基于 Codex 侧判断，被错误应用到 Claude Code 副本——历史 CHANGELOG 是双副本混淆的高发区，迁移时需逐条核对"这决策属于哪个平台"。ECC 在 Claude Code 是最大生态，遗漏 = 路由失效 |

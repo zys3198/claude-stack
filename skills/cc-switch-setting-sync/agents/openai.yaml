@@ -1,4 +1,4 @@
 interface:
-  display_name: "cc-switch è®¾ç½®åŒæ­¥"
-  short_description: "æŠŠ Claude settings.json çš„å…¬å…±é…ç½®åŒæ­¥è¿› ccswitch æ•°æ®åº“ï¼Œé˜²æ­¢çƒ­åˆ‡æ¢é™çº§"
-  default_prompt: "æŠŠå½“å‰ claude settings.json åŒæ­¥åˆ° ccswitch æ•°æ®åº“ï¼Œé˜²æ­¢åˆ‡æ¢ provider æ—¶é™çº§"
+  display_name: "cc-switch ÉèÖÃÍ¬²½"
+  short_description: "°Ñ Codex config.toml µÄ¹«¹²ÅäÖÃÍ¬²½½ø ccswitch Êı¾İ¿â£¬·ÀÖ¹ÈÈÇĞ»»½µ¼¶"
+  default_prompt: "°Ñµ±Ç° codex config.toml Í¬²½µ½ ccswitch Êı¾İ¿â£¬·ÀÖ¹ÇĞ»» provider Ê±½µ¼¶"

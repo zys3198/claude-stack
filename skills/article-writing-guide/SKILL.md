@@ -30,7 +30,7 @@ description: 文章写作总路由器——用户要写/改/审/查重/配图/�
 | ③ 起草-素材成型 | "我有一堆笔记/碎片，帮我拼成文章" | `writing-fragments`🪶(先挖) → `writing-shape`🪨(再塑形) |
 | ③ 起草-叙事节拍 | "按故事线/节拍一步步写" | `writing-beats`🪨 |
 | ④ 结构改写 | "重新组织这篇""调整章节结构""逻辑不顺" | `edit-article`🪨 |
-| ⑤ 去 AI 味/润色 | "AI 味太重""改得像人写的""优化文风" | `de-ai-orchestrator`🪨 |
+| ⑤ 去 AI 味/润色 | "AI 味太重""改得像人写的""优化文风" | `ai-text-polisher`🪨 |
 | ⑥ 排版规范化 | "统一 Markdown 格式""修中英文空格/标点""批量规范" | `chinese-markdown-normalizer`🪶 |
 | ⑦ 配图 | "要不要加图""画个流程图/架构图""配图" | `drawio-article-illustration`🪶(决策+校验) → `drawio-chart`🪨(画图) |
 | ⑧ 审校-逐段 | "逐段 review""标 VERSION 增量评审""快速过一遍" | `tech-article-review`🪨 |
@@ -43,7 +43,7 @@ description: 文章写作总路由器——用户要写/改/审/查重/配图/�
 ## 2. 易混 skill 区分
 
 - **起草三选**：从零创作 → `article-writer`；已有碎片要拼 → `writing-shape`；要边写边选支线 → `writing-beats`。
-- **改写四选**：调结构/逻辑 → `edit-article`；去 AI 味/文风 → `de-ai-orchestrator`（内部判档 → 串联 humanizer-zh / shuorenhua / ai-text-polisher）；纯排版/标点/空格 → `chinese-markdown-normalizer`；**深度改写整篇**（骨架+措辞都要动）→ `article-writer`（深度改写模式）。前三者可串行：先 edit-article → 再 polisher → 最后 normalizer。
+- **改写四选**：调结构/逻辑 → `edit-article`；去 AI 味/文风 → `ai-text-polisher`；纯排版/标点/空格 → `chinese-markdown-normalizer`；**深度改写整篇**（骨架+措辞都要动）→ `article-writer`（深度改写模式）。前三者可串行：先 edit-article → 再 polisher → 最后 normalizer。
 - **审校三选 + 发布闸**：逐段增量、单次快评 → `tech-article-review`；多维度并行 + **直接批量改** → `multi-review-pipeline`；多维度并行只要**报告**（事实核查/一致性/风格/结构）→ `review-doc`；**发布前强制关卡**（只放行不改）→ `publish-final-check`。**裁决：要改选 multi-review-pipeline，要报告选 review-doc，二选一不叠加；发布闸是 pipeline 末环，三者之后才跑。**
 - **调研七选**（按信息源，决策树见 REFERENCE §1）：
   - 本地仓库 .md → `doc-finder`🪶
@@ -62,7 +62,7 @@ description: 文章写作总路由器——用户要写/改/审/查重/配图/�
 > 🔴 **CHECKPOINT**：跨多阶段 pipeline 前，先与用户确认范围（跑全链路 / 只跑某几步 / 单点）。
 
 ### 通用技术写作
-`doc-finder/deep-research`(选型) → `article-writer`(起草) → `edit-article`(结构) → `de-ai-orchestrator`(去AI味) → `drawio-article-illustration`+`drawio-chart`(配图) → `multi-review-pipeline`(审校改) → `plagiarism-audit`(查重，**需外部来源，否则跳过**) → `chinese-markdown-normalizer`(排版) → **`publish-final-check`(发布闸)**
+`doc-finder/deep-research`(选型) → `article-writer`(起草) → `edit-article`(结构) → `ai-text-polisher`(去AI味) → `drawio-article-illustration`+`drawio-chart`(配图) → `multi-review-pipeline`(审校改) → `plagiarism-audit`(查重，**需外部来源，否则跳过**) → `chinese-markdown-normalizer`(排版) → **`publish-final-check`(发布闸)**
 
 ### JavaGuide 模式
 同上，但第②步 `article-writer` **强制 JavaGuide 模式**（执行规范见其 §6）；查重对齐"只可参考不可抄袭"铁律；末环 `publish-final-check` 的风格子项对照 `javaguide-style-guide` §1 M1-M9。
@@ -82,7 +82,6 @@ description: 文章写作总路由器——用户要写/改/审/查重/配图/�
 
 用户提以下任一关键词 → 全 pipeline 切 JavaGuide 模式：JavaGuide、docs/ai、Snailclimb、Java 面试系列、`my-submission/`。
 切模式后：起草用 `article-writer` JavaGuide 模式（遵循其 §6）；查重对齐"只可参考不可抄袭"铁律（见 [REFERENCE.md](REFERENCE.md) §5）；终检 `publish-final-check` ③ 风格子项对照 `javaguide-style-guide` §1 M1-M9。
-去 AI 味阶段：由 `de-ai-orchestrator` 自动接管，强制重度档；`humanizer-zh` / `shuorenhua` 切**连接词限制模式**（仅清连接词，不动风格层），保护强观点、钩子、生活化比喻不被规则链抹掉。详见 `de-ai-orchestrator` §JavaGuide 模式。
 
 ## 6. 演进
 

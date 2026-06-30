@@ -3,21 +3,6 @@
 本文件记录 article-writing-guide 路由 skill 及下游 skill（`publish-final-check`、`javaguide-style-guide`）的演进。
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
-
-## 2026-06-27 — 路由收口到 de-ai-orchestrator
-
-- 新增 `de-ai-orchestrator` skill：判档 + 串联 humanizer-zh / shuorenhua / ai-text-polisher，按档位自动跑；保留事实与术语；不接女娲（手动）。
-- `article-writing-guide` §1 第 ⑤ 阶段从 `ai-text-polisher` 改为 `de-ai-orchestrator`。
-- 默认 pipeline（通用 + JavaGuide 模式）第 ⑤ 步同步改为 `de-ai-orchestrator`。
-- 现有 `ai-text-polisher` / `humanizer-zh` / `shuorenhua` 内部未改；保留直达入口。
-
-## 2026-06-27 — JavaGuide 模式去 AI 味接管
-
-- `de-ai-orchestrator` 新增 §JavaGuide 模式：外部传 `javaguide-mode: true` 时强制重度档，`humanizer-zh` / `shuorenhua` 切**连接词限制模式**（仅清连接词，不动风格层），保护 JavaGuide 强观点、钩子、生活化比喻。
-- 用户显式“JavaGuide 深改 / 保风格” → 内部硬切 `ai-text-polisher` 单链路，跳过规则链；回执标 `style-mode: polisher-only`。
-- 回执模板新增字段 `javaguide-mode` + `style-mode`（`full` / `connectives-only` / `polisher-only`）。
-- `article-writing-guide` §5 JavaGuide 模式开关加一段接管说明，指 `de-ai-orchestrator` 自动接管 + 连接词限制模式。
-
 ## [0.6.0] - 2026-06-24
 
 ### javaguide-style-guide 补源码/表格呈现判定（article-writer §6.4 终检覆盖）
