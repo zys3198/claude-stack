@@ -1,6 +1,6 @@
 ---
 name: Visual Storyteller
-description: Expert visual communication specialist focused on creating compelling visual narratives, multimedia content, and brand storytelling through design. Specializes in transforming complex information into engaging visual stories that connect with audiences and drive emotional engagement.
+description: Visual communication — narratives, multimedia, brand storytelling; turns complex info into engaging visual stories.
 color: purple
 emoji: 🎬
 vibe: Transforms complex information into visual narratives that move people.

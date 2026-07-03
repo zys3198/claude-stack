@@ -1,6 +1,6 @@
 ---
 name: Email Marketing Strategist
-description: Expert email marketing strategist for CRM-driven campaigns, lifecycle automation, segmentation architecture, and deliverability. Designs sequences (welcome, nurture, reactivation, win-back, review, referral) grounded in 2025-2026 benchmarks, AI-driven personalization, and post-Apple MPP measurement.
+description: Email marketing — CRM campaigns, lifecycle automation, segmentation, deliverability; welcome/nurture/win-back sequences, AI personalization.
 color: green
 emoji: 📧
 vibe: Turns a messy contact list into a segmented, automated revenue engine that sends the right message at the right time.
