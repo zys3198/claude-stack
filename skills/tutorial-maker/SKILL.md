@@ -1,6 +1,6 @@
 ---
 name: tutorial-maker
-description: 从零开始系统学习的 Markdown 系列教程生成器。面向开发者与零基础学习者，把主题/笔记变成可发布的循序渐进 markdown 系列（每课：目标→前置→讲解→你来试练习+折叠答案→小结），内置 from-zero 读者模拟自审门（独立 sub-agent 做 teach-back 验每课真教会，MUST/SHOULD 分级）。触发：教程制作、从零开始系统学习、生成系列教程、把笔记变成教程、系统性入门某主题、tutorial maker、make a tutorial series、从0学XX。
+description: Use when 用户要制作 Markdown 系列教程、课程计划、从零系统学习路径，或把主题/笔记变成循序渐进教程；触发词包括 教程制作、从零开始系统学习、生成系列教程、把笔记变成教程、系统性入门某主题、tutorial maker、make a tutorial series、从0学XX。
 ---
 
 # Tutorial Maker
@@ -18,12 +18,14 @@ description: 从零开始系统学习的 Markdown 系列教程生成器。面向
 │   ├── sources.md            # 本地材料 + 溯源 + gaps（§13 防臆造）
 │   └── reviews/              # 每课自审报告
 └── <topic>-tutorial/         # 可发布产物（默认名，可覆盖）
-    ├── README.md             # 课程索引
+    ├── README.md             # 课程索引 + 怎么用这套课 + 课索引含 time_estimate
     ├── lessons/01-<slug>..md # 每课一文件，编号 = 线性路径
+    ├── cheatsheet-<stage>.md # 阶段速查表（每阶段一页，从该阶段课压缩）
+    ├── recommended-resources.md # 推荐资源 ≤5（从 sources.md 筛，4 元数据）
     └── glossary.md           # 全局术语表
 ```
 
-产物纯 Markdown 无 JS。反馈靠 `<details>` 折叠答案 + 「你来试」练习。
+产物纯 Markdown 无 JS。反馈靠 `<details>` 折叠答案 + 「你来试」练习。**一题一个 `<details>`**，不合并——合并就等于"一次扔答案"，读者一展开全暴露，自欺。
 
 ## 命令
 
@@ -79,6 +81,8 @@ start
 - 🚫 **自评自卷**——自审门必须派独立 sub-agent，主 agent 不准自己判 `done`。
 - 🚫 **臆造 gaps 外的事实**——本地材料和命名权威源都没有的细节，标 gaps，不编。
 - 🚫 **objective 写"理解/掌握"**——必须可观测（能说出/能做到 X）。
+- 🚫 **答案合并到一个 `<details>`**——必须一题一个折叠，规约读者一次一题。
+- 🚫 **跳过 `common_mistakes` / `exit_criteria`**——curriculum.yaml 声明的常见错误必须在课内「常见错误」节真覆盖；阶段 `exit_criteria` 必须在 README 学习路径里明示。
 - 🚫 **regen 死磕**——同一课 regen 2 次仍不过即标顽固点，不硬刷。
 - 🚫 **联网补查（v1）**——v1 只命名权威源不抓取内容；缺口标 gaps 留 v2。
 - 🚫 **运行时调其他 skill**——与 teach/cram-engine/ruthless-review/grill 是思想借鉴，零依赖。

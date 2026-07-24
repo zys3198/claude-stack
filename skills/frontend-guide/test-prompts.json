@@ -1,0 +1,68 @@
+[
+    {
+        "id": 1,
+        "prompt": "帮我做个登录页，极简风",
+        "expected": "命中本域。阶段裁决：新做页面无定稿方向 → 定方向，主路径 design-taste-frontend；用户点名「极简风」→ 叠加 minimalist-ui 风格预设，不再走 design-taste-frontend 推断。不进入编码域分类流程。",
+        "scenario": "正向-新页面定方向+点名风格"
+    },
+    {
+        "id": 2,
+        "prompt": "先出几张效果图我看看再写码",
+        "expected": "命中本域。阶段裁决：要先看效果图 → 出参考图，主路径 imagegen-frontend-web（网页）或 imagegen-frontend-mobile（App），网页默认 web。图确认后才进入实现阶段 frontend-ui-engineering，串行不并联。",
+        "scenario": "正向-出参考图优先"
+    },
+    {
+        "id": 3,
+        "prompt": "这个页面太丑了，帮我升级一下质感",
+        "expected": "命中本域。阶段裁决：已有产物要提质 → 升级现有，主路径 redesign-existing-projects（先审现有 AI 味再改）；不当新做重定方向（反模式表第 3 行）。",
+        "scenario": "正向-升级现有"
+    },
+    {
+        "id": 4,
+        "prompt": "落地页设计我想要几个不同方向的方案对比",
+        "expected": "命中本域。阶段裁决：想看几个差异方案 → 多方案探索，主路径 design-an-interface（并行子代理出多方案）。含「落地页」视觉信号，不被编码域抢走。",
+        "scenario": "正向-多方案探索+落地页信号"
+    },
+    {
+        "id": 5,
+        "prompt": "帮我写个用户管理的后端 API",
+        "expected": "不命中本域。纯后端逻辑无界面 → 转介 ai-coding-guide。本 guide description「不用于」清单第 1 条：纯写代码逻辑无界面走 ai-coding-guide。",
+        "scenario": "跨界转介-纯后端"
+    },
+    {
+        "id": 6,
+        "prompt": "帮我润色这篇公众号文章",
+        "expected": "不命中本域。写作任务 → 转介 article-writing-guide。本 guide「与兄弟路由器」段：写作交 article-writing-guide。",
+        "scenario": "跨界转介-写作"
+    },
+    {
+        "id": 7,
+        "prompt": "帮我做个落地页，现代一点好看一点，做完顺便把代码写了",
+        "expected": "命中本域且优先于编码域。含「落地页」且要视觉产出 → 设计方向先行（description 视觉优先条款：即使同时提到写代码）。先定方向（design-taste-frontend）→ 实现阶段（frontend-ui-engineering）本路由已覆盖，不转介 ai-coding-guide。对应 ai-coding-guide test #27 的镜像用例。",
+        "scenario": "域边界-落地页+写码优先本域"
+    },
+    {
+        "id": 8,
+        "prompt": "帮我改善这个页面的动画，感觉不够丝滑",
+        "expected": "命中本域。阶段裁决：动画动效 → 改动画手感，主路径 emil-design-eng（综合判断 easing/手感）；若涉及全库多处动画可分流 improve-animations。动画专项不被「升级现有」泛化吞掉。",
+        "scenario": "正向-动画动效-改善丝滑"
+    },
+    {
+        "id": 9,
+        "prompt": "这个动画的回弹感觉不对，帮我 review 一下",
+        "expected": "命中本域。阶段裁决：动画动效 → 审已有动画，主路径 review-animations（严审动画规则）；review 歧义按重叠裁决「审已有动画」走 review-animations，非整体 redesign。",
+        "scenario": "正向-动画动效-审动画"
+    },
+    {
+        "id": 10,
+        "prompt": "那个弹窗打开时弹一下的效果叫什么来着",
+        "expected": "命中本域。阶段裁决：动画动效 → 命名/术语反查，主路径 animation-vocabulary（反查术语词表，不设计不实现）。",
+        "scenario": "正向-动画动效-命名术语"
+    },
+    {
+        "id": 11,
+        "prompt": "这个界面感觉死气沉沉的，加点动效让它活一点",
+        "expected": "命中本域。阶段裁决：动画动效 → 找该动哪/该不该动，主路径 find-animation-opportunities（只读提案，找点非审现有）；定完点后实现走 emil-design-eng 或对应动画执行。",
+        "scenario": "正向-动画动效-找动效机会"
+    }
+]

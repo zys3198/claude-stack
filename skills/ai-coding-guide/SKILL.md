@@ -1,397 +1,418 @@
 ---
 name: ai-coding-guide
-description: Use when user asks which skill/tool/ecosystem to use, how Superpowers/agent-skills (or any installed plugin) differ or compare, which fits a task, how to combine them, or when a new plugin/skill is installed and this guide needs updating. 中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/agent-skills 怎么选、哪个更好、该用什么、怎么配合。Living doc — evolves as ecosystems are added.
+description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南。不用于：含"页面/界面/UI/落地页/登录页"的视觉任务（走 frontend-guide，即使同时提到写代码）、中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.3.2 -->
 ---
 
-# AI 编码多生态使用指南
+# AI 编码路由指南（Claude Code）
 
 ## 定位与质量标准
 
-**定位：** 本 skill 是选型路由器，负责推荐用哪个 skill / 生态。路由结论、决策表、反模式表用于**选型参考**，不认领整条工作流权威——下游 skill / agent 的执行纪律由各自 skill 和项目 AGENTS.md 决定。用户没显式否定时，按本指南推荐走。
+**定位：** 本 skill 是 Claude Code 当前环境下的**开工路由器**。它先回答「这类任务先走哪条流程、该用哪个 skill、哪些能力要组合、哪些质量闸门必须保留」。生态地图、质量闸门、学习陪跑都服务这个开工路由：
 
-**质量底线（因被全局借鉴，故必须高）：**
-- **准确**：命令/skill 名引用前 grep 或查当前会话系统 reminder 确认仍存在；规模数字加"≈"；作者/归属核实来源（marketplace.json / plugin 元数据），不凭记忆断言。
-- **AI 可读**：决策走表格不走散文；每路径保持「触发条件 → 一线修复 → 兜底」三段式；无歧义标记（🔴 必做 / 🛑 停 / ⚠️ 异常 / ℹ️ 备注）。
-- **可进化**：living doc，触发即改。发现过时/错误/新生态，当场更新并记 CHANGELOG（流程见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)），不拖到下次。
+1. **开工路由（主目标）**：把用户意图分到正确流程，少选错工具。
+2. **生态地图**：解释 Superpowers / ECC / ponytail / Matt Pocock / lean-ctx 等边界和组合方式。
+3. **质量闸门**：让 review / verify / TDD / 提交前检查各归其位，防假完成、误提交、错用危险 fallback。
+4. **学习陪跑**：用户想练 AI coding 判断力时，路由到 `ai-coding-coach`，让用户先想方案，助手纠偏和复盘。
 
-**环境自检（触发即执行）：** 本指南推荐跨越多套生态，但各生态是否实际安装因环境而异。触发本 skill 后，**先扫当前会话的 skill 列表（系统 reminder）**，对缺失生态做如下处理：
+它不认领下游 skill 的完整执行权威；执行纪律以下游 skill 与项目级 `CLAUDE.md` 为准。
 
-> ⚠️ **reminder 是磁盘的不完整投影**：系统 reminder 列出的 skill 可能少于磁盘实际安装（实测：SP 磁盘 14 个但 reminder 只暴露 13 个，using-git-worktrees 缺席）。因此：reminder 里有的 = 一定可用；reminder 里没有的 ≠ 一定不存在，关键推荐前用 Get-ChildItem ~/.codex/skills / ~/.agents/skills 实测复核。
-- 生态整体缺失（skill 列表无该命名空间）→ 推荐路径里跳过该生态，用 ✅标记的替代生态（见下表）
-- 生态部分缺失（个别 skill 不在）→ 正常推荐，fallback 走"仍失败兜底"
-- **不自检就推荐不存在的工具** = 最严重的路由失败
+**域边界（显式枚举，防范围词放大）：** 以下三类任务不在本路由范围，命中即转介，不展开分类流程——
+- 含「页面/界面/UI/落地页/登录页」且要视觉产出 → `frontend-guide`（用户同时提到"写代码"也算视觉任务，设计方向先行）。
+- 中文技术文章的写/改/审/润色/发布 → `article-writing-guide`。
+- 学习/调研/吃透/做教程 → `learning-guide`。
+反例（留在本路由）：纯后端 API、CLI 工具、构建/调试/审查/提交、工具选型问答。
 
-**生态可用性参考（需触发时实测复核，勿当静态事实）：**
+**质量底线：**
+- **准确**：skill 名、命令名、目录路径、插件归属先查当前会话或本地文件，再写结论。
+- **AI 可读**：主文件只放路由和最小速查；长解释外置到 [`references/ecosystems.md`](references/ecosystems.md)。
+- **可进化**：发现死引用、错归属、错默认路径时当场修，并同步 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
+- **默认值先于菜单**：各分类 AskUserQuestion 是例外而非默认；默认路径明确、用户点名、或说「直接做」时直接执行不问。每分类至多一次提问（v1.3.0 起收敛：Step 2 的 A/B/C 仅路径选择会改变成本/风险/产物且无法判断时使用）。
 
-| 生态 | 状态 | 缺失时替代 |
-|------|------|-----------|
-| ✅ Superpowers | 14 skill 全在 | 无需替代 |
-| ✅ agent-skills | 24 skill 全在 | — |
-| ✅ mattpocock | 多 skill 已装（含 `grill-me` / `teach` / `zoom-out`） | SP / ponytail / 直接回答 |
-| ✅ codex-security | 10 skill 全在 | — |
-| ✅ build-web-apps | 6 skill 全在 | — |
-| ✅ openai-developers | 5 skill 全在 | — |
-| ✅ understand-anything | 8 skill 已装（junction） | 大仓库降级 CodeGraph |
-| ✅ headroom | v0.23.0（pip + MCP 已配） | 降级 lean-ctx |
-| ✅ github | 4 skill 全在 | — |
-| ✅ karpathy-skills | 1 skill 已装（karpathy-guidelines） | — |
-| ✅ ponytail | v4.7.0，lazy senior dev mode（YAGNI / stdlib first / 不加未请求抽象） | SP 设计先行（需完整流程时）|
-| ✅ claude-api | anthropic-agent-skills，Claude API/SDK 文档 skill | — |
-| ✅ last30days-skill | v3.7.0，跨平台趋势研究（Reddit/X/YouTube 等） | agent-reach（社交/资讯）|
-| ⚪ Trellis（外部 CLI） | 默认未装，需实测 | SP writing-plans / TaskCreate |
-| ❌ harness 配置（update-config 等） | Codex 无此机制 | 手动改 config.toml |
+## 触发门禁（分类前先跑，防误路由）
 
-**证据门槛：** 本指南所有推荐均为基于生态设计哲学的**推理**（如"SP 管纪律"），非 benchmark 实测；重叠区优先级是经验判断。依赖 MCP 的生态（headroom/context7/playwright/understand-anything）不可用时需降级。用户质疑推荐时不辩解，贴更硬证据或承认不确定。
+Step 1 分类前先输出 3 行门禁：
 
-**分层原则：** 默认先分清三层再推荐——`grill-me` 管轻量澄清，Superpowers 管重流程硬门禁，Trellis 管长任务执行期的任务树治理（外部 CLI，不默认假设已安装）。不要把三层混成一个“大而全默认答案”。
+```
+域归属： 编码 / 前端视觉 / 写作 / 学习 —— <一句理由>
+ai-coding-guide 在当前会话？ YES/NO
+若域归属非编码 → 转介对应 router，不进 Step 1
+```
+
+## 环境自检
+
+触发本 skill 后，先按 Claude Code 当前环境复核可用性：
+
+1. **先看当前会话可用清单**：只把当前 `Available skills` / `Available tools` / `Available agent types` 视为已证实；历史摘要、memory、prior-session 内容不算可用性证据。
+2. **再看顶层独立 skill**：`~/.claude/skills/`（本机常由 cc-switch 同步，源目录通常是 `~/.cc-switch/skills/`）。
+3. **再看插件附带 skill**：`~/.claude/plugins/cache/*/skills/`。
+4. **关键提醒**：reminder 没列出 ≠ 一定不存在；关键推荐前要按磁盘再复核一次。
+
+- 生态整体缺失 → 推荐路径里跳过该生态，改给当前已装替代。
+- 生态部分缺失 → 正常推荐主路径，但写清 fallback。
+- 不自检就推荐不存在的工具 = 最严重的路由失败。
+
+## 证据门槛
+
+- **本地已证实**：当前会话可见、本机目录可见、当前仓库文件可见。
+- **官方可证实**：官方 README、官方 marketplace 元数据、官方插件说明。
+- **经验判断**：默认建议、经验排序、惯用主路径；要写成推荐，不写成定律。
+- **证据不足**：影响主推荐结论时停下来问用户；不影响则标「不确定」或删除。
+
+## 轻量迁移闸门 & 重机制黑名单
+
+外部 AI 编码实践要吸收进本指南时，先过迁移闸门（只吸收路由规则，不承接项目流水线）；重机制（8 阶段流水线、wiki 三级库、TECH_SPEC 模板等）不内置。详见 [`references/cheatsheet.md`](references/cheatsheet.md) §轻量迁移闸门 / §重机制黑名单。
 
 ---
 
 ## 交互决策流程
 
-**重要：** 触发本 skill 后，先执行以下决策流程，再展示参考内容。
+🔴 **CHECKPOINT · 🛑 STOP**：先分类 → 再推荐。只有路径选择会改变成本/风险/产物且请求无法判断时，才用 AskUserQuestion A/B/C 收口并停；目标明确、用户点名 skill/slash command、或用户说「直接做 / 别问」时，直接走默认路径。AskUserQuestion 不可用时，用一句自然语言问同一个关键问题。
+
+### Step 0：组合顺序
+
+1. **点名优先**：用户点名某个已装 skill/slash command → 先用它；若与安全、不可逆操作或当前环境冲突，先说明冲突再停。
+2. **Superpowers 前置**：若要进入任一 `superpowers:*` 流程且本会话尚未加载 `superpowers:using-superpowers`，先调用 `superpowers:using-superpowers`。
+3. **流程优先**：同一任务命中多个 skill 时，先流程型（`superpowers:brainstorming` / `superpowers:writing-plans` / `superpowers:systematic-debugging` / `superpowers:test-driven-development` / `superpowers:writing-skills`），再专项型（`frontend-design` / `security-and-hardening` / `ecc:*` / 文档 skill）。
+4. **少叠加**：默认 1 个主路径 + 必要 1 个专项 + 收尾验证；不要把所有相关 skill 一次性全调用。高风险审查、构建失败、外部发布例外。
+5. **能组合就组合**：用户同时问结构和调用链、实现和验证、提交前确认时，按顺序串联能力，不让用户在互补能力之间二选一。
+6. **收尾固定**：产生产品代码改动后才进横切收尾；纯理解、纯审查、纯文档不强行 verify。
+
+### Step 0.5：路由输出契约
+
+默认输出 5 行，除非用户要求展开：
+
+```markdown
+分类：<Step 1 分类>
+主路径：<第一个要调用的 skill / slash command / agent>
+组合：<必要附加能力；没有写“无”>
+闸门：<TDD / review / verify / 提交确认 / 无>
+下一步：<直接执行 / 问 1 个关键问题 / 等用户确认>
+```
+
+- 解释只补“为什么不是另一路径”的关键一句。
+- 用户问生态对比时，再展开 `references/ecosystems.md`。
+- 用户进入学习陪跑时，输出先改为 `模式 / 你先做什么 / 我怎么纠偏 / 收尾复盘什么`。
+
+### Step 0.6：风险 → 闸门矩阵
+
+| 风险 | 触发 | 必要闸门 |
+|---|---|---|
+| 低 | 文案、样式微调、单文件机械改 | 最小检查；不强制 review / verify |
+| 中 | 功能逻辑、bug 修复、重构 | 失败测试或最小复现 → 实现 → 相关 test/lint/build → 必要 review |
+| 高 | auth、权限、DB schema、迁移、支付、外部 IO、安全边界、架构 | 计划/设计确认 → TDD/复现 → 专项 reviewer + security-review → verify/证据 |
+| 不可逆/外发 | commit、push、PR、删除文件、清理未跟踪文件、密钥、数据库写操作 | 先展示范围/状态/diff 或删除清单，得到用户确认后才执行 |
+
+### Step 0.7：最小信息清单
+
+| 任务 | 只问这些缺口 |
+|---|---|
+| 构建错误 | 语言/框架、执行命令、完整错误、最近改动 |
+| 调试 bug | 复现步骤、期望/实际、错误原文、最近改动 |
+| 审查代码 | 对象：当前 diff / PR / 分支 / 文件 / 代码块；风险域 |
+| 验证生效 | 要证明的行为、入口/命令、验收信号 |
+| 提交/PR | 提交范围、是否 push/开 PR、目标分支 |
+| 学习陪跑 | 想练：方案设计 / debug / review / 工具选择；希望我教练还是直接做 |
+
+### Step 0.8：学习陪跑模式
+
+| 模式 | 触发 | 路由动作 |
+|---|---|---|
+| coach | “我先想”“你别直接给答案”“训练判断力” | 先让用户给方案/假设；助手纠偏、问反例、最后复盘 why |
+| pair | “一起想”“帮我权衡” | 助手给 2-3 个可选路径和取舍，用户定方向后执行 |
+| driver | “直接做，但讲为什么” | 助手按工程师模式执行，收尾用 3 行复盘关键判断 |
 
 ### Step 1：提取用户意图
 
-从用户消息中提取关键信息：
-
 | 信号 | 分类 | 示例 |
-|------|------|------|
-| 开发新功能 | 开发新功能 | "写个登录", "做个新页面", "加个API" |
-| 已有需求/PRD | 有需求文档 | "根据这份PRD实现", "需求文档见文件X" |
-| 审查代码 | 审查代码 | "审查这段代码", "帮我review", "看看有什么问题" |
-| 调试 bug | 调试 bug | "这个bug怎么回事", "报错了", "运行失败" |
-| 快速原型/小改 | 快速改动 | "改个小功能", "加个按钮", "简单修一下" |
-| 构建错误 | 构建错误 | "编译不过", "build报错", "类型错误" |
-| 文档写作 | 文档写作 | "写篇文章", "写文档", "润色" |
-| 持续/循环任务 | 循环任务 | "每5分钟检查", "持续跑到XX条件" |
-| 单纯问指南 | 了解指南 | "SP和agent-skills有什么区别", "用什么工具" |
+|---|---|---|
+| 开发新功能 | 开发新功能 | “写个登录”“做个新页面”“加个 API” |
+| 学习型 AI 编码 | 学习型开发 | “我想自己能力提高”“别让我依赖 AI”“和我一起想方案”“我先想你纠偏” |
+| 判级/暴露未知 | 判级/暴露未知 | “暴露未知”“判级”“这个需求我没思路”“让 AI 采访我”“反考我”“出题验收”“开工前先把盲点摊出来” |
+| 已有需求/PRD | 有需求文档 | “根据这份 PRD 实现”“需求文档见文件 X” |
+| 想读懂代码 | 理解代码 | “这库怎么结构”“X 怎么工作”“谁调用了 Y” |
+| 审查代码 | 审查代码 | “帮我 review”“审查这段代码” |
+| 改完要验证 | →横切收尾（Step2 顶部） | “改完了验证下”“确认真生效”“别假完成” |
+| 调试 bug | 调试 bug | “报错了”“这个 bug 怎么回事” |
+| 要重构/简化 | 重构/简化 | “帮我重构”“简化这段”“代码太乱” |
+| 快速小改 | 快速改动 | “改个按钮文案”“小修一下” |
+| 构建错误 | 构建错误 | “build 报错”“类型错误” |
+| 文档写作 | 文档写作 | “写文章”“润色”“审文档” |
+| 外部 AI 编码实践 | 路由指南维护 | “这篇文章能不能优化进指南”“把某个 AI 编码流程吸收到 ai-coding-guide”“某做法要不要加进路由” |
+| 审查/优化 guide skill | 路由指南维护 | “审查这个 guide”“优化路由 skill”“guide 体检”“误路由排查”“新建一个路由器 skill” |
+| 要提交/收尾 | 提交/收尾 | “帮我提交”“发个 PR”“这分支收尾” |
+| 知识收尾/同步 | 知识收尾 | “同步一下”“整理文档”“更新记忆”“这个阶段做完了”“新人能直接上手”“阶段完成后同步 docs / README / AGENTS/CLAUDE / memory” |
+| 循环任务 | 循环任务 | “每 5 分钟检查”“持续跑到满足条件” |
+| 纯对比/选型问题 | 了解指南 | “SP 和 agent-skills 区别”“该用哪个工具” |
+| 编码域查最近动态/社区 | 编码域调研 | "最近 React 有什么更新""K8s 社区最近在讨论什么""Next.js changelog 看一眼" |
 
-**分类优先规则：** 消息含"哪个好""怎么选""该用什么""推荐哪个"等比较/选择疑问 → **先做对比型二次分流**：
-
-| 子类 | 判定 | 路由 |
-|------|------|------|
-| 带任务信号 | 选择疑问 + 明确开工信号（写功能/写博客/学代码库/审查/调试等 Step 1 分类信号） | **不走了解指南**。按任务信号归入对应分类，在该分类推荐路径里直接给 A vs B 对比结论 + AskUserQuestion 确认，**不泛泛展示速查表** |
-| 纯抽象对比 | 只问生态/工具本身，无具体任务（如"SP 和 agent-skills 有什么区别"） | 优先 **了解指南**，展示速查表 + Read references 详情，再问是否执行 |
-
-典型用例："想写个登录功能，用 SP 还是 ponytail"→ 带任务，走开发新功能分类给对比；"SP 和 agent-skills 区别"→ 纯抽象，走了解指南。
-
-**多生态同时触发检测：** 分类后若消息同时提到 ≥2 个生态的同类能力（如 SP brainstorming + agent-skills review、SP verification + agent-skills shipping、多套 TDD/plan/spec）→ **必查下方「反模式与失败处理」表**定优先级，按"SP 管流程纪律先行 / 技术生态随后"决定先后，**不并发触发**。
-
-**明确优先级：** "了解指南" 以外的分类，先走决策路径，再解释概念。用户语调像咨询而非开工时，优先了解指南。
+**优先规则：**
+- 带明确开工信号的“怎么选”问题，不走泛泛介绍；按任务分类直接给 A/B/C。
+- 只有纯抽象对比、没有开工信号时，才走「了解指南」。
+- **信号重叠裁决**：带 PRD/需求文档字样 →「有需求文档」优先于「开发新功能」；build/compile/类型错误 →「构建错误」优先于「调试 bug」（调试=运行时/逻辑错）；「想改代码」优先于「想读代码」（重构优先于理解，除非用户明说“先看懂”）。
+- **混合意图裁决（tie-breaker）**：单一请求跨多域时按「最终交付物/目标」定归属，不猜——「代码+写作」看交付物（交付文章→`article-writing-guide`，交付代码→留本路由）；「修 bug+求理解」看目标（要修好→留本路由「调试 bug」，要学会了→`learning-guide`）；「做页面+写代码」按域边界条款（有视觉产出→`frontend-guide`）。判不出 → 按 Step 4 问，不擅自二选一。
+- **决策点先问（默认问、可直接做）**：涉及方向/方案/栈选型等有多个合理走向的决策点时，先给 2-3 个选项问用户，不让下游 skill 自行推断；用户说「直接做/你定/别问」则跳过，走默认路径。
 
 ### Step 2：匹配推荐路径
 
-> 🔴 **CHECKPOINT 规则**：每条推荐路径执行前**必须**用 AskUserQuestion 确认（A 执行 / B 看详情 / C 看其他）。**🛑 STOP**：用户说"直接做/别问"才跳过确认；收敛流程见 Step 3（排除已拒 → 缩小范围 → 3 轮不成退 Step 4）。
->
-> **🛑 STOP 执行规程**：(1) 每轮 A/B/C 问完即停，用户选前不动；(2) 用户明确表态才继续；(3) 同分类重复触发先 Re-read 收敛状态再问。
+> 🔴 **横切收尾（所有产生产品代码改动的分类通用）**：开发新功能 / 调试 bug / 重构简化 / 快速改动 / 构建错误 完工前，先按运行时表面验证：有可驱动流程 → 用 `run` 驱动真实流程验证；无运行时表面 → 跑相关 build / lint / test / check。随后用 `superpowers:verification-before-completion` 组织证据，再宣布完成。审查代码 ≠ 完工验证：review 是人读挑错，验证是跑起来证行为对，互补。**用户直接说「帮我验证/确认生效」→先确认最近改动属哪类改动，再走本检查点；若还要求提交，验证通过后继续进入「提交/收尾」。**
 
-根据分类 + 用户明确表达，选推荐路径。每分类提供 **3 选项**：A 执行推荐 / B 展示详情 / C 看其他选项。
-
-每分类含三段式 fallback：触发条件 → 一线修复 → 仍失败兜底。
-
-> ℹ️ 下方各分类 B/C 选项提到的对比表（「多生态流程对比」「诊断问题」「配合模式」「重叠区处理」）均已迁至 **`references/ecosystems.md`**，需 Read 展开后再展示给用户。主文件只保留「生态速查」「决策速查」「选型速判」三张速查表。
-
-```
 分类: 开发新功能
-→ 默认先判定是"需求还模糊"还是"需求已够清楚"
-   - 需求模糊 / 用户自己也在犹豫方案 → 优先 `grill-me`（轻量澄清，逐问逐答）
-   - 需求清楚但任务大 / 涉及架构或多模块 → 走 [SP] brainstorming（重流程设计先行）
-   - 只是小功能 / 范围很小 → 重分类"快速改动"，走 ponytail
+- 默认先走 `superpowers:brainstorming`；若需求很模糊，可先用 `grill-me` 压清问题再 brainstorming
+- 需求清楚且跨模块/要设计 → `superpowers:brainstorming` 后进入 `superpowers:writing-plans`
+- 范围很小 → 轻量确认目标后走 `ponytail:ponytail`
+- 实际写代码时再接 `superpowers:test-driven-development`，完工走横切收尾
 
-   **🛑 STOP — 停住，等用户选：**
-   AskUserQuestion:
-   "检测到你要开发新功能，先走哪层？"
+AskUserQuestion:
+- A: 先 `superpowers:brainstorming`（默认）
+- B: 先 `grill-me` 澄清
+- C: 当成小改动走 `ponytail:ponytail`
 
-   A: "先 grill-me 澄清需求" → 触发 grill-me；澄清完回到本 skill 或转有需求文档
-   B: "直接 SP brainstorming" → 跳过本 skill，触发 brainstorming skill
-   C: "只是小改，走最简方案" → 重分类"快速改动"
+Fallback:
+- `grill-me` 不在 → 直接 `superpowers:brainstorming`
+- 用户明确讨厌重流程 → 降到 `ponytail:ponytail` 或手动澄清
+- 仍失败 → AskUserQuestion「你的真实目标是什么？」重分类
 
-  ⚠ 触发条件：`grill-me` 不存在或用户明确讨厌被连续追问
-     一线修复：改走 SP brainstorming（要完整设计）或有需求文档（需求已定）
-     仍失败兜底：用户描述需求，直接回答（不走流程）
+分类: 学习型开发
+- 默认主路径 → `ai-coding-coach`
+- 先按 Step 0.8 选 `coach` / `pair` / `driver`
+- 与代码改动叠加时：先用 `ai-coding-coach` 定协作模式，再按实际任务进入开发新功能 / 调试 bug / 重构简化 / 快速改动
+- 高风险或用户明确要练判断 → coach；赶交付 → driver 但保留 why-review
 
-   ⚠ 触发条件：同一 session 已触发审查类生态
-    一线修复：先做澄清/设计，审查后置。查「反模式与失败处理」首行确认顺序
-    仍失败兜底：用户坚持串行 → 按用户指定顺序执行，不加干扰
+AskUserQuestion:
+- A: `ai-coding-coach`（搭档偏教练，推荐）
+- B: 先看这套协作方式怎么工作
+- C: 直接切工程师模式，但收尾必须复盘
 
-   ⚠ 触发条件：用户嫌 SP 太重，但又不是小改
-     一线修复：先 grill-me，把需求压实后重分类"有需求文档"
-     仍失败兜底：展示 plan 类 skill（writing-plans、planning-and-task-breakdown）
+Fallback:
+- `ai-coding-coach` 不在 → 手动执行：用户先给第一版方案，助手纠偏，对照项目标杆/官方做法，最后让用户讲 why
+
+分类: 判级/暴露未知
+- 默认主路径 → `expose-unknowns`（判四象限 → 按级选技巧 → 任务后反考）
+- 判「未知的已知/未知的未知」需采访澄清 → `expose-unknowns` 内嵌路由到 `grill-me` / `superpowers:brainstorming`，不重复展开
+- 只问四象限概念、不开工 → 直接解释，不强拉进流程
+
+AskUserQuestion:
+- A: `expose-unknowns`（默认）
+- B: 只看判级方法说明
+- C: 跳过判级直接开工
+
+Fallback:
+- `expose-unknowns` 不在 → 手动执行 CLAUDE.md §1.1「动手前先判级」一行规则
+- 需求模糊但用户未提判级/暴露词 → 仍走「开发新功能」的 brainstorming，不抢路由
 
 分类: 有需求文档
-→ 默认先判定是"只缺执行计划"还是"要长任务治理"
-   - 只缺落地计划 → [SP] writing-plans
-   - 计划已定且预计长会话/多阶段执行 → `Trellis`（外部 CLI，需用户环境已装；未装则回落 TaskCreate + SP writing-plans）
-   - 想轻量拆任务，不想进 SP 重流程 → agent-skills planning-and-task-breakdown
+- 默认主路径 → `superpowers:writing-plans`
+- 只想轻量拆任务 → `planning-and-task-breakdown`
+- 用户只想先整理需求项 → `to-prd` / `to-issues`
+- 计划批准后实际写代码 → `superpowers:test-driven-development` + 横切收尾
 
-   **🛑 STOP — 停住，等用户选：**
-   AskUserQuestion:
-   "有明确需求，下一步走哪种执行层？"
+AskUserQuestion:
+- A: `superpowers:writing-plans`
+- B: `planning-and-task-breakdown`
+- C: 先整理需求项
 
-   A: "SP writing-plans" → 执行 writing-plans（拆任务+文件路径）
-   B: "Trellis 任务树执行" → 说明这是外部 CLI；用于长任务保持上下文不跑偏
-   C: "轻量拆任务" → 执行 planning-and-task-breakdown
+Fallback:
+- `superpowers:writing-plans` 不可用 → `planning-and-task-breakdown`
+- 用户只要结论不要计划 → 直接回答，不强拉进计划流程
 
-   ⚠ 触发条件：SP writing-plans 执行出错
-     一线修复：退到 planning-and-task-breakdown（轻量拆任务）
-     仍失败兜底：手动写出需求清单，不做 plan 直接实现
+分类: 理解代码
+- 日常查结构/看某处实现 → `lean-ctx`（成本最低，先走）
+- 大范围建模/架构全貌 → `understand`
+- 调用链/影响范围/谁调用谁 → `gitnexus-exploring`
+- 同时问结构 + 调用链 → `lean-ctx` 后接 `gitnexus-exploring`，不让用户二选一
 
-   ⚠ 触发条件：用户提 Trellis，但当前环境未确认已安装
-     一线修复：先把 Trellis 定位成"执行期外部治理层"，不直接假设可运行；回落到 SP writing-plans
-     仍失败兜底：用户自己在项目根运行 `trellis init` 后再继续，或完全不走 Trellis
+AskUserQuestion:
+- A: 先 `lean-ctx`
+- B: `understand` 建模
+- C: `gitnexus-exploring` 查影响
 
-   ⚠ 触发条件：用户对计划不满意
-     一线修复：展示替代 plan skill（writing-plans / agent-skills planning-and-task-breakdown / mattpocock to-prd）
-     仍失败兜底：AskUserQuestion 问"要详细计划(>5 步)还是粗略路线(≤3 步)"
+Fallback:
+- `lean-ctx` 不可用 → 原生搜索 + 精读文件
+- `understand` / `gitnexus-*` 不可用 → 继续用 `lean-ctx` 聚焦读取
 
 分类: 审查代码
-→ [SP] requesting-code-review / codex-security:security-diff-scan
+- 先定对象：代码块 / 当前 diff / 指定文件 / PR / 分支
+- 当前 diff → `code-review`
+- PR / 分支 / 指定基线对比 → `review`
+- 指定文件 / 代码块 → 对应语言 reviewer（如 `ecc:python-review` / `ecc:react-review`）或通用 Code Reviewer agent
+- 高风险（auth / DB / 架构 / 安全） → 实际 reviewer + `security-review`；需要加固建议再叠 `security-and-hardening`
+- “实现完成后找人复核” → 再加 `superpowers:requesting-code-review`
 
-   🔴 前置门（先定审查对象，再选深度）：
-   1. 有未提交改动（`git diff` 非空）→ 审本地改动
-   2. 用户提供 PR 链接/编号 → 审远程 PR（`gh pr view`）
-   3. 都没有 → AskUserQuestion 二选一："贴代码块" / "给 PR 链接"
-   对象未定前，**不**急着选轻量/深度。
+AskUserQuestion:
+- A: 审当前 diff / 分支 / PR
+- B: 审指定文件 / 代码块
+- C: 安全/高风险审查
 
-   **🛑 STOP — 等审查对象确定后：**
-   AskUserQuestion（对象已定后）:
-   "审查对象 = X，推荐哪个深度？"
-
-   快路径（避冗余）：贴代码块 / 改动 < 3 文件 / 非高风险（auth/DB/架构/安全）→ 默认 A 轻量，不再问；高风险或用户主动要"深度" → 直走 B。
-
-   A: "轻量审查 SP requesting-code-review" → 执行 requesting-code-review（低/中风险够用）
-   B: "安全审查 codex-security:security-diff-scan" → 执行 security-diff-scan（高风险：auth/DB/架构/安全）
-   C: "展示全部审查选项" → 展示"多生态流程对比"节（审查行）+ "重叠区处理"表 + "决策速查"表
-
-   ⚠ 触发条件：用户项目无 git diff 且无 PR 链接
-     一线修复：AskUserQuestion "贴代码块 or 远程 PR 链接？"
-     仍失败兜底：用户贴代码块，逐行审查
-
-   ⚠ 触发条件：security-diff-scan 需 MCP 但未配置
-      一线修复：退到 SP requesting-code-review（轻量自检）
-     仍失败兜底：用户手动提供第三方 API key 或跳过对抗
+Fallback:
+- 对象不明确 → 先问「贴代码块、给文件路径，还是审当前 diff？」
+- 专项 reviewer 不在 → 用通用 Code Reviewer agent 或 `code-review`
+- 仍失败 → 停止审查，先问意图（审查/调试/当参考）再走对应分类
 
 分类: 调试 bug
-→ [SP] systematic-debugging
-   **🛑 STOP — 停住，等用户选：**
-   AskUserQuestion:
-   "检测到调试需求，走 SP systematic-debugging（4阶段根因分析），是否执行？"
+- 默认主路径 → `superpowers:systematic-debugging`
+- 定位后需要修代码 → 先补失败测试复现，再走 `superpowers:test-driven-development` + 横切收尾
 
-   A: "执行 SP systematic-debugging" → 触发 systematic-debugging skill
-   B: "展示调试工具详情" → 展示"诊断问题"表中 SP 调试能力
-   C: "我自己来，看看参考信息" → 展示"自动化/循环"表 + "决策速查"表
+AskUserQuestion:
+- A: 进入系统化调试
+- B: 先看调试路径区别
+- C: 我只要你直接判断
 
-   ⚠ 触发条件：systematic-debugging skill 不存在
-     一线修复：手动执行 4 阶段（调查→复现→检查变更→加诊断）
-     仍失败兜底：AskUserQuestion 问错误信息/复现步骤，人工诊断
+Fallback:
+- 用户不给复现信息 → 先收错误信息、触发条件、最近改动
+
+分类: 重构/简化
+- **前置**：行为未理解先走「理解代码」；已理解再选 A/B/C（`simplify` 要求 after behavior understood）
+- 行为不变提清晰度 → `simplify`
+- 大重构先出计划 → `request-refactor-plan`
+- 架构级提升 → `improve-codebase-architecture`
+- 会话/阶段收尾、文档/记忆/README/AGENTS 同步清理 → `neat-freak`（知识库洁癖，不替代代码重构）
+
+AskUserQuestion:
+- A: `simplify`（小步，行为不变）
+- B: `request-refactor-plan`（大重构先出计划）
+- C: `improve-codebase-architecture`（架构级）
+
+Fallback:
+- 都不在 → 手动列坏味道 + 逐步改，每步跑测试
 
 分类: 快速改动
-→ [ponytail] 最简方案（YAGNI / stdlib first）
-   **🛑 STOP — 停住，等用户选：**
-   AskUserQuestion:
-   "快速改动，走 ponytail 最简方案，是否执行？"
+- 默认主路径 → `ponytail:ponytail`
+- 改动超出 3 文件或开始跨模块 → 重新分类为「开发新功能」
 
-   A: "好，开始" → ponytail 强制最简实现，改完可选 SP verification-before-completion
-   B: "展示步骤详情" → 展示"多生态流程对比"节（开发功能阶段行）+ "决策速查"表
-   C: "我自己决定步骤" → 展示"选型速判"表
+AskUserQuestion:
+- A: 走最简改动
+- B: 看为什么不建议上重流程
+- C: 改成完整功能流程
 
-   ⚠ 触发条件：改动范围比预期大（>3 文件）
-     一线修复：重新分类"开发新功能"，走 SP brainstorming
-     仍失败兜底：直接手动改，不做 plan/review
+Fallback:
+- 用户说「别省，按完整流程来」 → 升到「开发新功能」
 
 分类: 构建错误
-→ 手动框架检测 + build-web-apps / 语言无关排查
-   **🛑 STOP — 停住，等用户选：**
-   AskUserQuestion:
-   "检测到构建错误，走框架修复流程，是否执行？"
+- 已知语言/框架 → 先调用对应专项 slash command（如 `ecc:react-build` / `ecc:rust-build`）
+- slash command 不可用但有 resolver agent → 用 Agent 派对应 build resolver（如 `ecc:react-build-resolver`）
+- 两者都没有 → 跑项目已有构建命令，按错误原文排查
 
-   A: "执行构建修复" → 检测框架 → build-web-apps:frontend-testing-debugging（前端）/ 语言无关的编译错误排查（后端：tsc --noEmit / go build 等，按项目 AGENTS.md §1.4 构建纪律）
-   B: "展示可用构建修复工具" → 展示"诊断问题"表中构建相关行 + build-web-apps:frontend-testing-debugging
-   C: "先看看参考信息" → 展示"决策速查"表
+AskUserQuestion:
+- A: 直接排构建错误
+- B: 看有哪些专项构建入口
+- C: 我先贴错误原文
 
-   ⚠ 触发条件：无法自动检测框架
-     一线修复：AskUserQuestion 问"什么语言/框架？"
-     仍失败兜底：按项目构建命令直接排查（tsc --noEmit / go build / mvn 等），贴编译错误原文人工分析
-
-   ⚠ 触发条件：构建命令本身报错无法定位
-     一线修复：展示编译错误原文，结合 import 链推断受影响模块
-     仍失败兜底：回退到干净状态，用户手动排查
+Fallback:
+- 框架未知 → 先问语言/框架
+- 没有专项入口 → 回到构建命令原文 + 手动分析
+- 仍失败 → 停止自动清理，展示工作区状态和完整错误；如需删除未跟踪文件，单独确认删除范围
 
 分类: 文档写作
-→ 第三方 skill
-   **🛑 STOP — 停住，等用户选：**
-   AskUserQuestion:
-   "文档类任务，走哪个方向？"
+- 默认先走 `article-writing-guide`（写作总路由）
+- 从零写且分类已明确 → `article-writer`
+- 规范格式/统一 Markdown → `chinese-markdown-normalizer`
+- 审校已有文章 → `review-doc`
 
-   A: "从零写文章" → 调用 article-writer skill
-   B: "润色/规范格式" → 调用 chinese-markdown-normalizer skill
-   C: "审校已有文章" → 调用 review-doc skill
+AskUserQuestion:
+- A: 从零写
+- B: 规范/润色
+- C: 审校
 
-   ⚠ 触发条件：article-writer skill 不在已安装列表
-     一线修复：退到基础写作流程（问主题→出大纲→逐段写）
-     仍失败兜底：用户直接说内容，手动组织
+Fallback:
+- skill 不在 → 回到基础人工流程
 
-   ⚠ 触发条件：review-doc 需要原文路径但用户只贴了片段
-     一线修复：用贴的片段做分段评审
-     仍失败兜底：用户提供完整文件路径
+分类: 路由指南维护
+- 先判断是否值得迁移；只评估外部做法 → 只给结论，不改文件
+- 审查/优化/新建任一 router 型 guide skill（含本指南自身）→ `guide-skill-auditor`（十查 + 基线测试 + 分级修复）
+- 小型路由/测试修正 → 补 RED 场景或最小检查，最小改 `SKILL.md` / `test-prompts.json` / 必要参考文件，并跑审计
+- 行为变化或要量化优化 → `superpowers:writing-skills` + `darwin-skill`
+- 迁移内容只吸收路由规则：触发词、分类、证据门槛、fallback、反模式
+
+AskUserQuestion:
+- A: 只做最小迁移（推荐）
+- B: 先完整评估再改
+- C: 只给方案不改文件
+
+Fallback:
+- 外部做法太项目化 → 不迁移，建议做项目专属 skill
+- 缺少可验证测试场景 → 先补 test prompt，不直接改正文
+- 用户要求“直接做” → 仍保留 RED 检查和审计，跳过 A/B/C 选择
+
+分类: 提交/收尾
+- 单次提交（auto 生成 message + stage） → `commit-commands:commit`
+- 提交 + push + 开 PR（**一条命令自动 push 远端 + gh 开 PR，不可逆**；需 gh CLI + origin） → `commit-commands:commit-push-pr`
+- 长分支收尾（review + 合并准备） → `superpowers:finishing-a-development-branch`
+
+AskUserQuestion:
+- A: `commit-commands:commit`
+- B: `commit-commands:commit-push-pr`（自动 push + 开 PR）
+- C: `superpowers:finishing-a-development-branch`
+
+Fallback:
+- 都不在 → 手动 git add/commit；commit/push 前展示 `git diff --cached --stat` 待确认（§1.3 人工确认线）；`commit-push-pr` 一条命令推远端，跑前务必确认
+
+分类: 知识收尾
+- 默认主路径 → `neat-freak`
+- 用于会话/阶段完成后同步 docs、README、AGENTS/CLAUDE、memory，清理过期/重复/冲突知识
+- 不用于代码重构；代码重构仍走「重构/简化」
+
+AskUserQuestion:
+- A: `neat-freak`（知识库收尾，推荐）
+- B: 只同步 memory
+- C: 只更新项目 docs
+
+Fallback:
+- `neat-freak` 不在 → 手动枚举 docs / README / AGENTS / memory，按受众同步，删过期重复
 
 分类: 循环任务
-→ 内置 /loop / /goal
-   **🛑 STOP — 停住，等用户选：**
-   AskUserQuestion:
-   "循环任务，走哪个方案？"
+- 循环/轮询/条件驱动 → `/loop`（固定间隔走定时；省略间隔让模型自定步调，覆盖条件驱动）
 
-   A: "简单定时轮询 /loop" → 用户补充间隔后执行
-   B: "条件驱动 /goal" → 用户补充条件后执行
-   C: "受管循环" → 走 /loop 或 /goal（Codex 无受管循环生态）
+AskUserQuestion:
+- A: 直接 `/loop`
+- B: 先确认终止条件再 `/loop`
+- C: 展示循环任务路径
 
-   ⚠ 触发条件：/loop 或 /goal 命令不可用
-      一线修复：手动模拟循环（用 /loop）
-     仍失败兜底：描述想要的效果，手动模拟第一次执行
-
-   ⚠ 触发条件：loop 跑飞（无限循环）
-     一线修复：提醒用户用 Ctrl+C 或 TaskStop 终止
-     仍失败兜底：设置 max-runs=10 / max-duration=30m 硬限制
+Fallback:
+- `/loop` 不可用 → 说明不可用并回到手动执行
 
 分类: 了解指南
-→ 展示参考内容 + 决策速查表
-   展示完后 AskUserQuestion："看完了，需要执行什么？" → 回到 Step 1 重新分类
+- 展示最小速查 + `references/ecosystems.md`
+- 展示完后再问「现在要执行什么」
 
-   ⚠ 触发条件：用户看完仍不确定做什么
-     一线修复：走 Step 4（无匹配），让用户从 6 类中选
-     仍失败兜底：直接问"你当前项目是什么场景？"手动匹配
-```
+分类: 编码域调研（社区/舆情/最近动态）
+- 编码场景下查「最近 X 有什么更新/讨论」 → `last30days`（近 30 天社区真实用户声音，跨 Reddit/X/HN/YouTube/TikTok）
+- 不替代 `lean-ctx`（读代码）/ `understand`（建模）/ `research`（存证调研）：这些是结构性查询，本分类是时间敏感的舆情/动态
+- Fallback：`last30days` 不在 → WebSearch 限时 + 用户口径限定
 
-### Step 3：流程仲裁【收敛追踪】
+AskUserQuestion:
+- A: 走 `last30days` 查近 30 天（推荐）
+- B: 用 WebSearch 限时查
+- C: 我只要一手官方 changelog
 
-Step 1 分类 → Step 2 推荐路径 → AskUserQuestion 确认（A 执行 / B 看详情 / C 看其他）→ 执行或展示参考表。"了解指南"分类展示完参考内容后，AskUserQuestion 问"要执行什么"→ 有目标回 Step 1 重分类，没有则结束。
+### Step 3：收敛规则（🛑 同分类重复触发时执行）
 
-**🛑 收敛规则（同 session 同分类重复触发）：**
-- 首次拒绝推荐 A → 排除 A，从剩余选项缩小范围再问
-- 第二次拒绝 → 排除已拒选项，展示剩余全部选项让用户自选
-- 第 3 轮无共识 → 退 Step 4
-- 同一 session 同一分类第二次触发 → 加载上次收敛状态（已拒选项），不重置
+- 第一次拒绝 A → 排除 A，只问剩余选项
+- 第二次仍拒绝 → 展示剩余全部选项让用户自选
+- 第三轮仍无共识 → 停止路由，直接问用户当前真实目标
+- 同一分类在同一 session 重复触发时，沿用上次被拒选项，不重置
 
 ### Step 4：无匹配
 
-无法分类或用户意图模糊 → 用 AskUserQuestion 问：
+分类不清时，AskUserQuestion 单题上限 4 选项，分两步收口：
 
-**示例：**
-```
-不太确定你想做什么，以下哪个最接近？
-- A: 想写个新功能，但在犹豫用什么工具
-- B: 有明确需求/文档，想落地实现
-- C: 审查代码质量
-- D: 调试一个 bug
-- E: 文档写作/润色
-- F: 单纯了解 SP 和其他生态的区别
-```
+**第一问（4 大方向）：**
+- A: 写代码（新功能 / 有需求文档 / 重构 / 快速改动）
+- B: 看代码（理解 / 审查）
+- C: 修问题（调试 bug / 构建错误）
+- D: 其他（文档 / 提交收尾 / 知识收尾 / 循环 / 验证 / 了解指南）
 
-选定分类后走 Step 2，按该分类默认选项 A 执行推荐路径。
+**第二问：** 按第一问选定方向，列出该方向下的具体分类让用户选。
 
 ---
 
 ## 参考内容（新手 & 深度了解用）
 
-以下内容在用户选择"展示选项"或分类为"了解指南"时展示。描述生态特点和常见场景的推荐方案。
-
-### 反操作清单（执行时停走信号）
-
-以下场景按频率排序，标注在 skill 执行时看到信号就停。**出现任一条 → 停走决策流。**
-
-| 场景 | 错误信号 | 正确动作 |
-|------|---------|---------|
-| 用户只是问了一个名词解释（"什么是SP"） | 走决策流程问"是否执行" | 直接回答，不走决策流 |
-| 用户明确说"别问我，直接做" | 还问"是否执行" | 跳过 AskUserQuestion，自动选 A |
-| 用户只是聊天/吐槽（"今天代码又炸了"） | 分类为"调试 bug" | 确认是否真的需要帮助，还是纯吐槽 |
-| 项目没有 git 仓库 | 走审查/PR 路径 | 展示文件级替代方案 |
-| 用户连续 2 次拒绝推荐路径 | 继续推销 | 先排除已拒选项缩小范围再问；第 3 轮达不成 → 停，明说"当前推荐都不适合"让用户自述 |
-| 用户明确嫌 Superpowers 太重/太啰嗦 | 仍默认推 SP | 先降一层：`grill-me` 做轻量澄清；再看是否真需要 SP / Trellis |
-| 用户提 dangerously-skip-permissions / 自动放权 | 把它当推荐默认项 | 只当执行期风险开关处理：需求很清楚 + 计划很硬 + 用户明确接受风险时才提；新项目/陌生仓库默认不推荐 |
-| 两个分类都匹配（如"写个新功能但不知道怎么选"） | 只匹配一个 | 按分类优先规则二次分流：带任务信号→走任务分类给对比结论；纯抽象→了解指南 |
-| 参考内容太长（>200 行） | 全部展示 | 按三层折叠规则执行：用户选 A"直接执行"→ 仅路由，0 参考表；走任务分类 → 折叠，仅决策速查 + 反操作清单 + 相关生态行；选"看详情"或分类=了解指南 → 完整展示 |
-| 用户贴了代码段但没说意图 | 直接分类"审查代码" | 先问"这段代码做什么？你想审查/调试/还是当参考？"再走对应分类 |
-| 用户说"查资料"但实际是调试场景 | 走"了解指南"展示速查表 | 确认意图：真查资料还是排查问题？后者走调试分类 |
-
-### 生态速查（详情 Read [`references/ecosystems.md`](references/ecosystems.md)）
-
-| 生态 | 一句话定位 | 独有亮点 | 代表命令（slash 直调） |
-|------|-----------|---------|----------------------|
-| Superpowers | 流程纪律 pipeline（设计先行 / TDD / 证据驱动，自动触发） | brainstorming HARD-GATE、subagent-driven-development | `superpowers:brainstorming` / `:writing-plans` / `:test-driven-development` / `:systematic-debugging` / `:verification-before-completion` |
-| agent-skills | SDLC 闭环 spec→ship | interview-me / idea-refine / doubt-driven-development | skill 长名调用（spec-driven-development / planning-and-task-breakdown / code-review-and-quality / test-driven-development / shipping-and-launch / code-simplification）。⚠ Codex 侧无 namespace，slash 命令未装 |
-| mattpocock | 28 个单用途小 skill，显式调用为主 | teach / zoom-out / writing-* / grill-* / caveman | 多为 Skill 工具调用，少数有 slash（`caveman:caveman`）；需求澄清优先看 `grill-me` |
-| understand-anything | 代码库 → 知识图谱（8 skill，已装于 ~/.agents/skills/） | graph.json / tour-builder / blast radius | `understand` / `understand-chat` / `understand-onboard`（MCP 服务需先 build graph）|
-| headroom | 上下文压缩 MCP（v0.23.0，pip 装于系统 Python） | headroom_compress/retrieve/stats（配合 lean-ctx 三层栈） | MCP 工具 `headroom mcp serve`，无 slash |
-| Trellis | 长任务执行期任务树治理（外部 CLI，不是当前 skill 生态） | 任务树做持久真相源，减少长会话跑偏 | `trellis init --claude --codex`（仅在用户环境已装时提） |
-| karpathy-skills | 编码行为规范准则（减少 LLM 常见编码错误，1 skill 已装） | karpathy-guidelines（外科手术式改动、显式假设、可验证验收标准） | Skill 调用 `karpathy-guidelines` |
-| codex-security | 安全扫描全套（10 skill，openai-curated 插件） | deep-security-scan（多 pass）/ security-diff-scan（PR/commit）/ threat-model / attack-path-analysis / fix-finding / track-findings / triage-finding | codex-security:security-scan / :deep-security-scan / :security-diff-scan / :threat-model |
-| build-web-apps | 前端开发全链路（6 skill，openai-curated 插件） | frontend-app-builder（从设计到代码）/ react-best-practices / shadcn / stripe / supabase / frontend-testing-debugging | uild-web-apps:frontend-app-builder / :react-best-practices / :shadcn / :frontend-testing-debugging |
-| openai-developers | OpenAI 应用开发（5 skill，openai-curated 插件） | agents-sdk / build-chatgpt-app / chatgpt-app-submission / openai-api-troubleshooting / platform-api-key | openai-developers:agents-sdk / :build-chatgpt-app / :openai-api-troubleshooting |
-| Codex marketplace 插件 | Codex 官方插件市场（openai-primary-runtime / openai-bundled / openai-curated 三源） | documents / spreadsheets / presentations（Office）；browser / computer-use（自动化）；github / figma / notion / playwright（集成） | `codex plugin add <name>@<marketplace>` / `codex plugin list` / `codex plugin marketplace add <owner>/<repo>` |
-| 全量查询类 | 想看全部可用命令/skill 时的入口 | 实时反射当前安装内容 | `/help` 或交互终端（内置命令全量） |
-| ponytail | lazy senior dev mode：强制最简方案（YAGNI / stdlib first / 不加未请求抽象） | 与 SP 设计先行冲突时的裁决 | skill 自动触发（v4.7.0）|
-| claude-api | Claude API/SDK 文档（构建 LLM 应用时参考） | 与 openai-developers 互补 | skill 调用 |
-
-> 各生态哲学 / 命令 / 取舍 / 流程对比 / 重叠区处理：用户选 B「看详情」或分类「了解指南」时，Read `references/ecosystems.md` 展开。
->
-> ⚠️ **推荐性质**：本表推荐均为推理非实测（重叠优先级=经验判断），详见上方「定位与质量标准 → 证据门槛」。MCP 依赖生态（headroom/context7/playwright/understand-anything）降级见 references「MCP 依赖与降级」节。
-
-### 决策速查
-
-| 你说 | 工具 | 理由 |
-|------|------|------|
-| "想写个功能" | `grill-me`（需求模糊时）→ SP brainstorming（需求大且要重流程）→ ponytail（范围很小时） | 先澄清，再决定是否值得上重流程 |
-| "审查这段代码" | SP requesting-code-review（日常自检）→ codex-security:security-diff-scan（安全审查）→ codex-security:deep-security-scan（高风险） | 三层递进：自检→安全→深度扫描 |
-| "我刚改完，确保没问题" | SP verification-before-completion（日常）→ build-web-apps:frontend-testing-debugging（前端合并前） | 先证据检查后系统验证 |
-| "写测试" | SP test-driven-development | 流程纪律驱动 |
-| "调试这个 bug" | SP systematic-debugging | 4 阶段根因分析 |
-| "安全扫描/安全审查" | codex-security:security-scan（repo 全量）/ security-diff-scan（PR/diff） | 当前最完整安全管线；高风险用 deep-security-scan（多 pass）|
-| "写前端应用" | build-web-apps:frontend-app-builder（设计→代码）/ react-best-practices / shadcn | 前端全链路 |
-| "用 OpenAI API 开发" | openai-developers:agents-sdk / build-chatgpt-app / openai-api-troubleshooting | OpenAI 官方 skill；配 platform-api-key 管 key |
-| "构建错误" | build-web-apps:frontend-testing-debugging（前端）；后端按项目构建纪律排查（tsc --noEmit / go build 等，见 AGENTS.md §1.4） | 框架自动检测 |
-| "每 5 分钟检查" | 内置 /loop 5m ... | 最轻量的定时方案 |
-| "持续跑到目标达成" | 内置 /goal <condition>（环境依赖，不可用时降级 /loop）| 条件驱动 |
-| "我刚做完，要发 PR" | SP finishing-a-development-branch（选操作） | SP finishing-a-development-branch 内含 PR 选项 |
-| "一行产品想法写 PRD" | qiaomu-ai-prd skill（速读卡+约束层+验收脚本，AI 可执行） | 重产出可执行 PRD 文档；若要落地实施计划 → SP writing-plans |
-| "系统学/上手新代码库" | understand-anything（深度结构化 graph + blast radius）vs mattpocock zoom-out（轻量摘要） | 深度学习/大重构影响分析选 understand-anything，快速浏览选 zoom-out；前者依赖 MCP 不可用需降级 |
-| "长会话执行老跑偏" | Trellis（若已安装）→ 回落 TaskCreate / SP writing-plans | Trellis 价值在执行期任务树，不在前期头脑风暴 |
-| "想开 dangerously-skip-permissions" | 默认不用 | 风险开关非生产力项；完整边界见下方「反操作清单」 |
-| "想看全部可用命令/skill" | `/help` 或交互终端（内置命令全量） | 实时反射当前安装内容，本指南只点代表不穷尽 |
-
-> **审查深度原则**：高风险/重要模块用**循环返工审查**（reject-until-criteria，门下省式）而非单次 review。
->
-> 单次轻量 review 跑一遍就过 = 无门下省；高风险（auth/DB schema/架构/安全敏感）需循环兜底。实际执行走 codex-security 多 pass（deep-security-scan）或 SP requesting-code-review。`plagiarism-audit` 是查重领域同款循环架构（计划生成者→多审查员→反馈者，多轮直到独立终判 PASS）的参考。
-
----
-
-### 反模式与失败处理
-
-| 场景 | 一线处理 | 仍失败兜底 | 不要做的事 |
-|------|---------|-----------|-----------|
-| 同时触发 SP brainstorming 和代码审查 | 优先走 SP 流程（设计先行），审查留在后面 | 用户明确说"审查代码"时 SP 的 HARD-GATE 不适用 | 不要两个同时跑——SP 的 HARD-GATE 会阻止写代码，审查需要代码存在 |
-| SP 流程太啰嗦，想跳过设计直接写 | 仅当"需求未成文的新功能"才坚持 HARD-GATE：没设计就不能写代码。已有明确需求/PRD → 走"有需求文档"分类，不强制 brainstorming | 用户说"我很确定不需要设计"→ 清理工作树后交给用户决定 | 不要在需求已成型时仍强制 SP brainstorming |
-| 找不到合适 skill | 用 find-skills 按关键词搜，或 `/help` 看全部 | 直接问"你想要什么能力" | 不要花时间背 skill 列表 |
-| SP 的 TDD 强制在不适合的项目触发 | 用户说"这个项目不适用 TDD"→ 不要自动触发 test-driven-development | 在项目 AGENTS.md 声明 "skip TDD" | 不要手动删掉 test-driven-development skill |
-| 两个生态同时建议同一件事（审查/验证） | 先用 SP 的轻量版本（requesting-code-review / verification-before-completion） | 仍有问题再上 codex-security 深度版（deep-security-scan） | 不要两个都跑——浪费 token |
-| /loop 循环跑飞 | 确认有终止条件（max-runs / max-cost / max-duration） | 关 terminal 强制停 | 不要把 /loop 当背景噪音跑 |
-| 同时触发 qiaomu-ai-prd / SP writing-plans（PRD 流程） | qiaomu-ai-prd（生成 AI 可执行 PRD）→ SP writing-plans（基于 PRD 出计划） | 用户只要 PRD 文档不落地则单跑 qiaomu-ai-prd | 不要两个都跑——产出重叠浪费 token |
-
-### 选型速判
-
-| 你的情况 | 推荐主力 | 原因 |
-|---------|---------|------|
-| 新功能需求还模糊 | `grill-me` | 逐问逐答快速拍板，比先读长 brainstorm 文档轻 |
-| 新功能需求已清楚 + 要重流程 | SP brainstorming → writing-plans | 自动流程兜底，不担心漏步骤 |
-| 长会话执行老跑偏 | Trellis（若已安装）→ 回落 TaskCreate / SP writing-plans | Trellis 管执行期任务树，非默认前置 |
-| 快速原型/改 bug | ponytail（最简方案）/ SP systematic-debugging（bug） | ponytail 管最简改动；bug 走 SP |
-| 团队项目 | SP + codex-security | SP 管流程纪律，安全走 codex-security；前端 patterns 用 build-web-apps，通用工具按需用 mattpocock |
-| 个人文档项目（如 JavaGuide） | ponytail + 第三方 skill | SP 的 TDD 强制在此场景不适用；ponytail 管最简实现 |
-| 代码质量要求高 | SP requesting-code-review + codex-security | 通用审查流程走 SP + codex-security（深度安全用 deep-security-scan）|
-| 持续集成/自动化 | 内置 /loop + /goal | Codex loop 能力走内置命令 |
+速查与反模式见 [`references/cheatsheet.md`](references/cheatsheet.md)（决策速查 / 生态速查 / 反模式 / 迁移闸门 / 重机制黑名单）；生态详情见 [`references/ecosystems.md`](references/ecosystems.md)。用户选「展示选项」或分类为「了解指南」时展开。
 
 ---
 
 ## 进化机制
 
-维护说明（何时更新 / 怎么更新 5 步 / 维护纪律 / 变更记录）见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。本指南是 living doc，随插件/skill 增删持续更新，触发即改。
+维护规则、证据源、同步清单、变更记录见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
+
+<!-- 路由表门禁：Step 1 信号表、Step 2 分类路径由人工维护；删除任何分类/条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.3.0 -->

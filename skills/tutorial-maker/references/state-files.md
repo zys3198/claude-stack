@@ -43,6 +43,9 @@ audience:
 stages:
   - id: s1
     title: <阶段名>
+    exit_criteria:          # 阶段过关标准（可观测，达成才进下一阶段）
+      - <能独立写出 X>
+      - <能解释 Y 为什么不 Z>
     lessons:
       - id: "01"
         slug: <dash-case>
@@ -50,12 +53,24 @@ stages:
         must_know: true
         prereq: []          # v1 线性，多为前一课；字段留 v2 DAG
         objective: <可观测，禁"理解">
+        time_estimate: <如 "45 分钟">   # 读者完成本课的预估时间
+        common_mistakes:    # 本课概念的典型错误 2-4 条
+          - 错误: <误解/误用>
+            为什么错: <根因>
+            正解: <正确做法>
+        review_questions:    # 课末复盘 2-3（非动手，逼回看）
+          - <这一课最关键的一句话是什么？>
+          - <X 和 Y 什么时候选 X？>
         source_refs: [sources.md#<anchor>]
         status: pending      # pending | generating | done | blocked
         review: null         # 自审结果对象或 null
 ```
 
 - `objective` 强制可观测。
+- `exit_criteria`（阶段级）：阶段末读者必须达成的可观测能力清单，**全部达成才进下一阶段**——回答"这层算不算过了"。
+- `common_mistakes`（课级）：本课概念的典型错误，每条三段（错误/为什么错/正解）。课内「常见错误」节必须覆盖这些。
+- `time_estimate`（课级）：读者完成本课预估时间。写进 README 课索引，让读者知道"今天能做完几课"——降低心理门槛（"我要学一个大东西" → "我今天只做这 45 分钟"）。
+- `review_questions`（课级）：2-3 个**回看型**问，不给答案。区别于「你来试」（动手产出）——复盘是逼读者自己提炼"这课最关键是什么 / 边界在哪"。写进课末「复盘」节。
 - `source_refs` 是 §13 溯源锚点，指 sources.md 条目。
 - 大纲审批门通过后才进生成；改大纲直接改此文件。
 

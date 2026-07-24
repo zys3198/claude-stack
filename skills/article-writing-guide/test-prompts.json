@@ -22,7 +22,7 @@
   {
     "id": 5,
     "prompt": "帮我改改这篇",
-    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §2 反问改哪层（骨架/肉/皮），或建议 edit-article→ai-text-polisher→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
+    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→ai-text-polisher→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
   },
   {
     "id": 6,
@@ -32,6 +32,21 @@
   {
     "id": 7,
     "prompt": "用 javaguide-writer 写，再用 obsidian-vault 查资料",
-    "expected": "javaguide-writer 已删 → §4 规则6 存在性校验命中：改用 article-writer JavaGuide 模式；obsidian-vault 在 available skills → 正常委派。两步前都过存在性校验。验证 §4 规则6。"
+    "expected": "javaguide-writer 已删 → §4 规则7 存在性校验命中：改用 article-writer JavaGuide 模式；obsidian-vault 在 available skills → 正常委派。两步前都过存在性校验。验证 §4 规则7。"
+  },
+  {
+    "id": 8,
+    "prompt": "我想边学习边写 alibaba/open-code-review 这个开源项目，最后把学习记录自然沉淀进文章",
+    "expected": "命中边学边写路径：先用 agent-reach/doc-finder 拉官方/权威资料，生成学习路径和心智模型；若已有现稿则用 edit-article 按结构增量写入，若无现稿再用 article-writer 起草。验证 SKILL §1 边学边写路由和 REFERENCE §2。"
+  },
+  {
+    "id": 9,
+    "prompt": "我想先和你讨论文章结构，你给我几个选项，我想到啥再补充。讨论完再逐步设计每个小节，设计完你生成，生成后我审查提建议。",
+    "expected": "命中默认协作写作流：先给 2-4 个结构方案并允许用户混搭增删；结构冻结后逐节设计，每节确认后再生成正文；用户审查后按结构→论点/例子→文风/排版顺序处理反馈。执行端用 article-writer 协作模式，不一次性全文起草。验证 SKILL §3 和 REFERENCE §2。"
+  },
+  {
+    "id": 10,
+    "prompt": "给我做一套从零学 Redis 的系列教程，每课要有练习和折叠答案",
+    "expected": "系统教程/系列课/从零学习 → 路由到 tutorial-maker；不应误走 article-writer 单篇起草。验证 tutorial-maker 新路由。"
   }
 ]

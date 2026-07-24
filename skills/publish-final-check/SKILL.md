@@ -1,11 +1,6 @@
 ---
 name: publish-final-check
-description: >
-  文章发布前强制关卡。4 子项并行终检：①查重（委派 plagiarism-audit 只比贴源）②事实/链接校验 ③风格/AI味（对照 javaguide-style-guide M1-M9 MUST + 自检 AI 味词）④发布面（标题/封面/摘要/SEO/公众号）。
-  MUST/SHOULD 两级拦截——任一 MUST FAIL 不放行，SHOULD FAIL 仅警告。
-  触发：用户说"发布前过一遍""能不能发了""终检""最后检查""publish check""发之前看下""文章写完了"，
-  或 article-writing-guide pipeline 末环强制调用，或用户贴出成稿要最终把关。
-  强制关卡：MUST 全 PASS 才出 PASS；否则 STOP + 必改清单。不自动改文章，只出报告（改归 multi-review-pipeline/各 skill）。
+description: Use when 用户要在中文技术文章发布前做最终把关，问“发布前过一遍”“能不能发了”“终检”“最后检查”“publish check”“发之前看下”“文章写完了”，或 article-writing-guide pipeline 进入末环；只出 PASS/FAIL 报告，不改文章。
 ---
 
 # Publish Final Check（发布前强制关卡）
@@ -78,7 +73,7 @@ JavaGuide 模式：是
 
 | 级别 | 检查内容 | 执行 | FAIL 动作 |
 |------|---------|------|----------|
-| MUST | JavaGuide 模式：对照 `javaguide-style-guide` §1 M1-M9 MUST + §2 量化阈值逐条验 | 读 javaguide-style-guide，按 M1-M9 + 阈值表判定 | 列未达标项 + 阈值 |
+| MUST | JavaGuide 模式：对照 `javaguide-style-guide` §1 M1-M10 MUST + §2 量化阈值逐条验 | 读 javaguide-style-guide，按 M1-M10 + 阈值表判定 | 列未达标项 + 阈值 |
 | MUST | 无机器味收尾段（"本文介绍了...希望对大家有帮助"） | **自检**（关键词扫描：综上所述/总而言之/值得注意的是/本文介绍/希望对大家） | 列改写建议 |
 | SHOULD | 禁 AI 味过渡词（首先/其次/由此可见/综上所述/总而言之/值得注意的是） | **自检**（grep 黑名单） | 警告 + 列位置 |
 | SHOULD | 段落长短交错，无连续 3 段等长（字符数差 <30%） | 自检（按 javaguide-style-guide §2 阈值） | 警告 |
@@ -137,7 +132,7 @@ JavaGuide 模式：是
 ## 5. 委派规则（不重写）
 
 - 查重 → `plagiarism-audit`（只比贴源，禁主动搜）
-- 风格判定 → 读 `javaguide-style-guide` §1 M1-M9 + §2 阈值
+- 风格判定 → 读 `javaguide-style-guide` §1 M1-M10 + §2 阈值
 - AI 味 → **自检关键词黑名单**（不委派 polisher，polisher 交互式不适用）
 - 链接/编号/标签 → 自检（grep/HEAD，无网标待核）
 - 改文章 → 用户拿报告后另起 `multi-review-pipeline` 或对应 skill

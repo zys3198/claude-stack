@@ -25,17 +25,20 @@
 任务：
 1. 可达性：仅凭给定内容，你能否达到本课 objective？哪一句让你卡住（用了没定义的概念 / 跳了步骤 / 前置没交代）？引用原句。
 2. teach-back：回答 objective 派生的问题。如 objective="能说出所有权解决的3个问题"，你就写出3个。答案必须只来自课内，不能猜。
-3. 练习可解性：做"你来试"的题。答案能否从课内推出？有没有歧义（两种合理解读）？
+3. 练习可解性：做"你来试"的题。每题答案能否从课内推出？有没有歧义（两种合理解读）？答案是否一题一折叠（不是合并到一个 `<details>`）？
 4. concrete-first：课是否先上具体例子再抽象？
 5. jargon 卫生：每个术语要么课内定义、要么链 glossary？
+6. common_mistakes 覆盖：curriculum.yaml 声明的 `common_mistakes` 是否在课内「常见错误」节真覆盖（不是只列错误，而是讲了"为什么错 + 正解"）？
 
 输出 JSON：
 {
   "reachable": true|false,
   "teachback_pass": true|false,
   "exercise_solvable": true|false,
+  "exercise_one_per_fold": true|false,
   "concrete_first": true|false,
   "jargon_clean": true|false,
+  "common_mistakes_addressed": true|false,
   "blockers": [{"check": "<检查名>", "quote": "<课内原句>", "fix": "<具体修复>"}]
 }
 ```
@@ -44,7 +47,7 @@
 
 | 级别 | 检查 |
 |------|------|
-| MUST | reachable / teachback_pass / exercise_solvable |
+| MUST | reachable / teachback_pass / exercise_solvable / exercise_one_per_fold / common_mistakes_addressed |
 | SHOULD | concrete_first / jargon_clean |
 
 - 任一 **MUST = false** → 课 status 留 `blocked`，不标 `done`，进 `progress.md` 自审未过清单 + blockers。

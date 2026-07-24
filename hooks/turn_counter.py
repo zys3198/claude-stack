@@ -4,7 +4,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 
 STATE = "C:/Users/zys31/.claude/hooks/turn_state.json"
-THRESHOLD = 20
+THRESHOLD = 999999
 
 try:
     _raw = sys.stdin.buffer.read().decode("utf-8", "replace")

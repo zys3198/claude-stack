@@ -39,6 +39,53 @@ def deny(msg):
     }, ensure_ascii=False))
     sys.exit(0)
 
+# --- explicit user confirmation gate for `git commit` ---
+# PreToolUse gives transcript_path -> session JSONL. If the latest genuine
+# user prompt carries an affirmative token, treat §1.3's confirm requirement
+# as satisfied and let the assistant's `git commit` through (no `!` needed).
+CONFIRM_RE = re.compile(r'(确认|批准|授权|可以提交|可以commit|confirm|go\s+ahead|proceed)', re.IGNORECASE)
+_NOISE_MARKERS = ("Stop hook feedback", "bash-input", "bash-stdout", "bash-stderr",
+                  "system-reminder", "local-command", "UserPromptSubmit hook",
+                  "PostToolUse", "PreToolUse")
+
+
+def _latest_user_prompt(transcript_path):
+    """Text of the most recent *genuine* user prompt in the session
+    transcript, skipping hook feedback and `!`-command echoes."""
+    if not transcript_path:
+        return ""
+    try:
+        with open(transcript_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()[-40:]
+    except Exception:
+        return ""
+    for line in reversed(lines):
+        try:
+            entry = json.loads(line)
+        except Exception:
+            continue
+        if entry.get("type") != "user":
+            continue
+        msg = entry.get("message", {}) or {}
+        content = msg.get("content")
+        if isinstance(content, str):
+            text = content
+        elif isinstance(content, list):
+            text = "\n".join(b.get("text", "") for b in content
+                            if isinstance(b, dict) and b.get("type") == "text")
+        else:
+            text = ""
+        text = text.strip()
+        if not text or any(m in text for m in _NOISE_MARKERS):
+            continue
+        return text
+    return ""
+
+
+def user_confirmed(data):
+    return bool(CONFIRM_RE.search(_latest_user_prompt(data.get("transcript_path", ""))))
+
+
 BLOCK = [
     (r'git\s+reset\s+--hard', 'git reset --hard'),
     (r'git\s+branch\s+-D\b', 'git branch -D (强制删分支)'),
@@ -61,7 +108,9 @@ for pat, name in BLOCK:
         deny(msg)
 
 if re.search(r'git\s+commit\b', cmd):
-    deny("CLAUDE.md §1.3: commit 前先向用户展示 git diff --cached --stat,等确认。")
+    if user_confirmed(data):
+        sys.exit(0)  # 用户已显式确认 -> 放行 commit
+    deny("CLAUDE.md §1.3: commit 需用户显式确认(回复「确认」/confirm)。建议先展示 git diff --cached --stat。")
 elif re.search(r'git\s+push\b', cmd):
     deny("CLAUDE.md §1.3: push 前确认分支/远端,展示待 push commits 给用户确认。")
 elif re.search(r'git\s+(?:checkout\s+-b|switch\s+-c)\b', cmd):
