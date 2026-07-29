@@ -4,6 +4,53 @@
 
 详细维护规则与变更证据见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md) 的变更记录表（2026-07-22 之前的历史改动以该表为准）。
 
+## [v1.4.3] - 2026-07-29
+
+### Fixed
+
+- 删除 `planning-and-task-breakdown` 的 3 处路由引用（「有需求文档」分类的轻量拆任务路径、AskUserQuestion B 选项、SP:writing-plans fallback）——该 skill 已按 skill-trimmer 精简移入 `_weak-model-backup/`（D 类+C2，与 SP:writing-plans 重复），fallback 改为 CLAUDE.md §3 手动拆切片 + PLAN.md。
+
+### Rationale
+
+- 2026-07-28 skill-trimmer 全库精简判定（Carl 四删五留 + 本机三决议），用户逐项拍板后执行；guide-skill-auditor 验证无死引用。
+
+## [v1.4.2] - 2026-07-25
+
+### Fixed
+
+- 开工问询与 Step 0.7 背景去重：开工问询第 2 条加「Step 0.7 已覆盖的缺口不重复问」；Step 0.7 头部加「开工问询已问过的背景不重复收」。
+- 模式默认从「默认推荐 coach」改「按任务类型推荐」（coach/pair/driver 各有适用场景，见开工问询第 1 条）；Step 0.8 同步删「默认 coach」。
+
+### Rationale
+
+- 2026-07-25 评审中风险：开工问询触发条件是「需求模糊/缺背景」，一刀切默认 coach 在明确交付/机械任务上虚晃；开工问询与 Step 0.7 都问背景存在重复问窗口。
+
+## [v1.4.1] - 2026-07-25
+
+### Fixed
+
+- 开工问询标题摘「grill-me 式」字样（死引用）：grill-me 本体是逐题压问，开工问询是一次性模式问询，引用名不符。改中性名「路由入口」。
+- Step 0.8 收敛：coach/pair/driver 定为**路由词汇**，不再内嵌执行定义；进 `ai-coding-coach` 后协作行为以该 skill 为准（partner-coach/coach/engineer），ai-coding-coach 侧加「Mode vocabulary (router handoff)」映射段。
+- learning-guide 裁决规则 3 第 4 点删除「编码任务开工判级 → ai-coding-guide」半句：判级/暴露未知不分域统一 → `expose-unknowns`，编码判级不再在学习域 guide 里被裁决归属。
+
+### Rationale
+
+- 2026-07-25 评审发现 v1.4.0 落地三处硬伤：(1)「grill-me 式」引用与实际问询强度不符；(2) Step 0.8 与 ai-coding-coach 双重定义模式；(3) 判级归属按域切开属绕路，`expose-unknowns` 本就处理判级方法。三处均为 routing-layer 冲突，非行为变更。
+
+## [v1.4.0] - 2026-07-25
+
+### Added
+
+- 新增「开工问询（grill-me 式，路由入口）」段：触发门禁后、分类前，逐个问模式（coach/pair/driver，默认 coach）+ 背景，把 v2.2 learning-first 从全局软声明变成 guide 硬触发。
+- Step 0.5 路由输出契约 5 行 -> 6 行，加「参与度」行。
+- Step 0.8 学习陪跑模式从「学习型开发分类专属」提升为「所有分类路由出口默认卡」，默认 coach。
+
+### Rationale
+
+- v2.2 原写的 `/output-styles` -> Learning 模式经实测本机不存在（无命令/配置/文件），v2.2 一直零落地机制。改由 4 guide 开工问询承担落地。
+- 用户要求（2026-07-25）：「在 AI 时代通过指挥 AI 执行任务提升自己，增加协作参与感，不是 AI 全做完」。
+- 与决策点先问分工：开工问询管 why（背景）+ how（模式）；决策点先问管 which（方向）。不重叠。
+
 ## [v1.3.2] - 2026-07-23
 
 ### Added

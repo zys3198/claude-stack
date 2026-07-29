@@ -1,6 +1,6 @@
 ---
 name: ai-coding-guide
-description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南。不用于：含"页面/界面/UI/落地页/登录页"的视觉任务（走 frontend-guide，即使同时提到写代码）、中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.3.2 -->
+description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南。不用于：含"页面/界面/UI/落地页/登录页"的视觉任务（走 frontend-guide，即使同时提到写代码）、中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.4.2 -->
 ---
 
 # AI 编码路由指南（Claude Code）
@@ -37,6 +37,25 @@ Step 1 分类前先输出 3 行门禁：
 ai-coding-guide 在当前会话？ YES/NO
 若域归属非编码 → 转介对应 router，不进 Step 1
 ```
+
+## 开工问询（路由入口）
+
+触发门禁后、分类前，先跑开工问询。**逐个问，一次一个，每个给推荐答案**；能从代码库/文档查到的不问用户。
+
+**触发：** 需求模糊/缺背景/没明说模式 -> 走；明确任务/机械任务/用户说"直接做" -> 跳过，走默认。
+
+**问询顺序：**
+1. **模式**：这次 coach（我练）/ pair（一起想）/ driver（直接做讲为什么）？**按任务类型给推荐**——该你长期持有的核心技能/有学习点 → 推荐 coach；不熟的库/偶用模式/要权衡 → 推荐 pair；一次性/胶水/样板/明确交付 → 推荐 driver
+   - coach：该你长期持有的核心技能，你先给判断，AI 纠偏 + 对照标杆 + 复盘 why
+   - pair：不熟的库/偶用模式/要权衡，AI 给 2-3 选项你定
+   - driver：一次性/胶水/样板，AI 直接做，收尾 why-review
+   - 用户卡壳给不出判断 -> AI 递参考判断，不死等
+2. **背景**（模糊时才问）：为什么做/什么场景/谁触发/约束；能查的不问；**Step 0.7 已覆盖的缺口（复现步骤、错误原文、审查对象、提交范围等）此处不重复问，留给 Step 0.7**
+3. -> 进 Step 1 分类
+
+**例外（不问，直接 driver）：** 机械任务（1-2 步单文件/改文案/格式）、明确 bug、已指名标杆；用户说"直接做"。
+
+**与现有机制分工：** 开工问询管 why（背景）+ how（模式）；决策点先问管 which（方向 A/B/C）；Step 0.7 管 what（缺口）。不重叠。
 
 ## 环境自检
 
@@ -79,12 +98,13 @@ ai-coding-guide 在当前会话？ YES/NO
 
 ### Step 0.5：路由输出契约
 
-默认输出 5 行，除非用户要求展开：
+默认输出 6 行，除非用户要求展开：
 
 ```markdown
 分类：<Step 1 分类>
 主路径：<第一个要调用的 skill / slash command / agent>
-组合：<必要附加能力；没有写“无”>
+组合：<必要附加能力；没有写”无”>
+参与度：<coach / pair / driver -- 一句理由>
 闸门：<TDD / review / verify / 提交确认 / 无>
 下一步：<直接执行 / 问 1 个关键问题 / 等用户确认>
 ```
@@ -104,6 +124,8 @@ ai-coding-guide 在当前会话？ YES/NO
 
 ### Step 0.7：最小信息清单
 
+开工问询已问过的背景（为什么做/什么场景/谁触发）此处不重复收；本清单只补任务级技术缺口。
+
 | 任务 | 只问这些缺口 |
 |---|---|
 | 构建错误 | 语言/框架、执行命令、完整错误、最近改动 |
@@ -113,13 +135,15 @@ ai-coding-guide 在当前会话？ YES/NO
 | 提交/PR | 提交范围、是否 push/开 PR、目标分支 |
 | 学习陪跑 | 想练：方案设计 / debug / review / 工具选择；希望我教练还是直接做 |
 
-### Step 0.8：学习陪跑模式
+### Step 0.8：参与度模式（coach/pair/driver）
+
+三模式是**路由词汇**，不是下游 skill 的执行定义。开工问询已在路由入口定好模式（按任务类型推荐，见开工问询第 1 条），此处只做两件事：一、把词汇带上路由输出契约（Step 0.5）和「学习型开发」分类；二、指向真正拥有执行定义的下游 skill——进 `ai-coding-coach` 后，协作行为以该 skill 为准（partner-coach / coach / engineer），本表不再重复定义。
 
 | 模式 | 触发 | 路由动作 |
 |---|---|---|
-| coach | “我先想”“你别直接给答案”“训练判断力” | 先让用户给方案/假设；助手纠偏、问反例、最后复盘 why |
-| pair | “一起想”“帮我权衡” | 助手给 2-3 个可选路径和取舍，用户定方向后执行 |
-| driver | “直接做，但讲为什么” | 助手按工程师模式执行，收尾用 3 行复盘关键判断 |
+| coach | “我先想””你别直接给答案””训练判断力” / 默认（有学习点） | 路由到 `ai-coding-coach`；进 coach 后按该 skill 的 coach mode 执行 |
+| pair | “一起想””帮我权衡” | 助手给 2-3 个可选路径和取舍，用户定方向后按实际分类执行 |
+| driver | “直接做，但讲为什么” / 机械任务 | 助手按工程师模式执行，收尾用 3 行复盘关键判断 |
 
 ### Step 1：提取用户意图
 
@@ -174,14 +198,14 @@ Fallback:
 
 分类: 学习型开发
 - 默认主路径 → `ai-coding-coach`
-- 先按 Step 0.8 选 `coach` / `pair` / `driver`
+- 模式已由「开工问询」定（按任务类型推荐），此处不重复问；按已定模式进 `ai-coding-coach`
 - 与代码改动叠加时：先用 `ai-coding-coach` 定协作模式，再按实际任务进入开发新功能 / 调试 bug / 重构简化 / 快速改动
 - 高风险或用户明确要练判断 → coach；赶交付 → driver 但保留 why-review
 
 AskUserQuestion:
-- A: `ai-coding-coach`（搭档偏教练，推荐）
+- A: 进 `ai-coding-coach`（按开工问询定的模式，推荐）
 - B: 先看这套协作方式怎么工作
-- C: 直接切工程师模式，但收尾必须复盘
+- C: 跳过 coach 直接进开发分类（收尾仍 why-review）
 
 Fallback:
 - `ai-coding-coach` 不在 → 手动执行：用户先给第一版方案，助手纠偏，对照项目标杆/官方做法，最后让用户讲 why
@@ -197,22 +221,20 @@ AskUserQuestion:
 - C: 跳过判级直接开工
 
 Fallback:
-- `expose-unknowns` 不在 → 手动执行 CLAUDE.md §1.1「动手前先判级」一行规则
+- `expose-unknowns` 不在 → 手动执行 `code-change-workflow` skill §1.1「动手前先判级」一行规则
 - 需求模糊但用户未提判级/暴露词 → 仍走「开发新功能」的 brainstorming，不抢路由
 
 分类: 有需求文档
 - 默认主路径 → `superpowers:writing-plans`
-- 只想轻量拆任务 → `planning-and-task-breakdown`
 - 用户只想先整理需求项 → `to-prd` / `to-issues`
 - 计划批准后实际写代码 → `superpowers:test-driven-development` + 横切收尾
 
 AskUserQuestion:
 - A: `superpowers:writing-plans`
-- B: `planning-and-task-breakdown`
-- C: 先整理需求项
+- B: 先整理需求项
 
 Fallback:
-- `superpowers:writing-plans` 不可用 → `planning-and-task-breakdown`
+- `superpowers:writing-plans` 不可用 → 按 `code-change-workflow` skill §3 手动拆 4-6 切片 + PLAN.md
 - 用户只要结论不要计划 → 直接回答，不强拉进计划流程
 
 分类: 理解代码
@@ -232,22 +254,22 @@ Fallback:
 
 分类: 审查代码
 - 先定对象：代码块 / 当前 diff / 指定文件 / PR / 分支
-- 当前 diff → `code-review`
-- PR / 分支 / 指定基线对比 → `review`
+- **轻量审查**（快速、有会话上下文）：当前 diff / PR / 分支 / 指定基线对比 → `code-review`（fixed-point 任意：commit / 分支 / tag / main / HEAD~N）
 - 指定文件 / 代码块 → 对应语言 reviewer（如 `ecc:python-review` / `ecc:react-review`）或通用 Code Reviewer agent
-- 高风险（auth / DB / 架构 / 安全） → 实际 reviewer + `security-review`；需要加固建议再叠 `security-and-hardening`
+- **重量审查**（独立、无会话偏见、工程化约束 precision 高）：commit 前自查 / PR / 想要无偏见二次审 → `ocr review`（CLI）或 `/open-code-review:review`（Claude Code 插件）；走 cc-switch proxy 独立调 LLM，不偷工减料、位置不漂移
+- 高风险（auth / DB / 架构 / 安全） → 轻量 reviewer + `security-review` + 重量 `ocr review`（双管齐下，防“自己审自己”盲区）；需要加固建议再叠 `security-and-hardening`
 - “实现完成后找人复核” → 再加 `superpowers:requesting-code-review`
 
 AskUserQuestion:
-- A: 审当前 diff / 分支 / PR
+- A: 审当前 diff / 分支 / PR（轻量，会话内）
 - B: 审指定文件 / 代码块
 - C: 安全/高风险审查
+- D: OCR 独立重量审查（`/open-code-review:review`，无会话偏见）
 
 Fallback:
 - 对象不明确 → 先问「贴代码块、给文件路径，还是审当前 diff？」
 - 专项 reviewer 不在 → 用通用 Code Reviewer agent 或 `code-review`
 - 仍失败 → 停止审查，先问意图（审查/调试/当参考）再走对应分类
-
 分类: 调试 bug
 - 默认主路径 → `superpowers:systematic-debugging`
 - 定位后需要修代码 → 先补失败测试复现，再走 `superpowers:test-driven-development` + 横切收尾
@@ -337,6 +359,7 @@ Fallback:
 - 单次提交（auto 生成 message + stage） → `commit-commands:commit`
 - 提交 + push + 开 PR（**一条命令自动 push 远端 + gh 开 PR，不可逆**；需 gh CLI + origin） → `commit-commands:commit-push-pr`
 - 长分支收尾（review + 合并准备） → `superpowers:finishing-a-development-branch`
+- **commit 前重量级自查**（可选）→ `ocr review` 审当前 diff，commit 前独立审查防漏
 
 AskUserQuestion:
 - A: `commit-commands:commit`
@@ -345,7 +368,6 @@ AskUserQuestion:
 
 Fallback:
 - 都不在 → 手动 git add/commit；commit/push 前展示 `git diff --cached --stat` 待确认（§1.3 人工确认线）；`commit-push-pr` 一条命令推远端，跑前务必确认
-
 分类: 知识收尾
 - 默认主路径 → `neat-freak`
 - 用于会话/阶段完成后同步 docs、README、AGENTS/CLAUDE、memory，清理过期/重复/冲突知识
