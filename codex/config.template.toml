@@ -1,22 +1,10 @@
-# Codex config.toml 模板 -- 可迁移片段（变量需回填，见 SETUP.md + setup.ps1）
-# 不含：notify、[marketplaces.*]、[projects.*]、runtime hash 路径、[hooks.state]、cloudcli-browser（含真实 token）
-# 这些由 Codex app 自动生成 / 本机特定 / 需公司电脑重新获取
+# Codex config.toml 模板 -- 可迁移的非 provider 片段（公司电脑不用 cc-switch，provider/model/auth 自配）
+# 公司电脑 Codex app 登录或在 config.toml 自配 provider/model/auth；本模板只提供用户偏好 + plugins + MCP 片段
+# 不含：provider/model/auth、notify、[marketplaces.*]、[projects.*]、runtime hash 路径、[hooks.state]、cloudcli-browser（含真实 token）
 
-model_provider = "custom"
-model = "kimi-k3"
-model_reasoning_effort = "high"
-disable_response_storage = true
-model_catalog_json = "cc-switch-model-catalog.json"
 sandbox_mode = "danger-full-access"
 approval_policy = "never"
 personality = "pragmatic"
-
-[model_providers.custom]
-name = "custom"
-wire_api = "responses"
-requires_openai_auth = true
-base_url = "{{PROXY_BASE_URL}}"               # 本机 http://127.0.0.1:15721/v1（cc-switch 代理）
-experimental_bearer_token = "PROXY_MANAGED"   # 模板变量，cc-switch 代理注入真值，别手填
 
 [features]
 hooks = true
@@ -33,13 +21,13 @@ disable_on_external_context = true
 enabled = true
 
 [plugins."documents@openai-primary-runtime"]
-enabled = false  # 你写代码+markdown 不写 Office 文档
+enabled = false
 
 [plugins."spreadsheets@openai-primary-runtime"]
 enabled = false
 
 [plugins."presentations@openai-primary-runtime"]
-enabled = false  # ppt-master skill 覆盖幻灯片
+enabled = false
 
 [plugins."open-code-review@open-code-review"]
 enabled = true
@@ -64,7 +52,7 @@ args = ["/c", "npx", "-y", "@upstash/context7-mcp"]
 [mcp_servers.code-spec-plugin]
 type = "stdio"
 command = "npx"
-args = ["tsx", "{{CODE_SPEC_PLUGIN_PATH}}", "mcp"]   # 本机 C:\ZYS\Code\Code-Spec-Plugin\src\cli.ts；公司电脑没此项目则删此段
+args = ["tsx", "{{CODE_SPEC_PLUGIN_PATH}}", "mcp"]   # 公司电脑没此项目则删此段
 
 [mcp_servers.c3d4e5f6-github-mcp-003]
 url = "https://api.githubcopilot.com/mcp/"
@@ -72,10 +60,10 @@ bearer_token_env_var = "GITHUB_PERSONAL_ACCESS_TOKEN"
 
 [mcp_servers.douyin]
 type = "stdio"
-command = "{{PIPX_VENV_PYTHON}}"              # 本机 C:/Users/zys31/pipx/venvs/douyin-mcp-server/Scripts/python.exe
+command = "{{PIPX_VENV_PYTHON}}"
 args = ["-m", "douyin_mcp_server"]
 
-# cloudcli-browser 含真实 CLOUDCLI_BROWSER_USE_MCP_TOKEN，不进模板；公司电脑需要时重新获取 token 手动加
+# cloudcli-browser 含真实 token，不进模板；公司电脑需要时重新获取手动加
 
 [windows]
 sandbox = "elevated"
@@ -86,8 +74,3 @@ show-context-window-usage = true
 keepRemoteControlAwakeWhilePluggedIn = true
 selected-avatar-id = "custom:miku-kimono"
 followUpQueueMode = "queue"
-
-[env]
-OPENAI_BASE_URL = "{{OPENAI_BASE_URL}}"        # 本机 http://127.0.0.1:4444/v1
-
-# [shell_environment_policy.set] 含 runtime hash 与本机路径，公司电脑由 Codex app 重建；不进模板
