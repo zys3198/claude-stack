@@ -56,7 +56,7 @@ def _latest_user_prompt(transcript_path):
         return ""
     try:
         with open(transcript_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()[-40:]
+            lines = f.readlines()[-400:]
     except Exception:
         return ""
     for line in reversed(lines):
@@ -112,6 +112,8 @@ if re.search(r'git\s+commit\b', cmd):
         sys.exit(0)  # 用户已显式确认 -> 放行 commit
     deny("CLAUDE.md §1.3: commit 需用户显式确认(回复「确认」/confirm)。建议先展示 git diff --cached --stat。")
 elif re.search(r'git\s+push\b', cmd):
+    if user_confirmed(data):
+        sys.exit(0)  # 用户已显式确认 -> 放行 push
     deny("CLAUDE.md §1.3: push 前确认分支/远端,展示待 push commits 给用户确认。")
 elif re.search(r'git\s+(?:checkout\s+-b|switch\s+-c)\b', cmd):
     deny("CLAUDE.md §1.1: 新建分支前确认 git status 干净(无未提交改动)。")

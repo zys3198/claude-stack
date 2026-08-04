@@ -56,11 +56,10 @@ plugins/marketplaces/*/.git/
 plugins/marketplaces/*/dist/
 plugins/marketplaces/*/build/
 
-# ----- skill runtime / backups -----
-skills/.system/
-skills/learned/
-skills/.ppt-master-repo-backup/
-skills/setup-matt-pocock-skills/
+# ----- skills managed by cc-switch (not git) -----
+skills/
+!skills/.gitkeep
+skill-trimmer-workspace/
 
 # ----- heavy history / git -----
 .history/
@@ -82,3 +81,5 @@ Thumbs.db
 **/.tox/
 **/*.pyc
 **/*.pyo
+# ----- better-harness: 第三方 marketplace，公司电脑单独拉 -----
+plugins/marketplaces/better-harness/
