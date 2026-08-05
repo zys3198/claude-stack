@@ -2,7 +2,7 @@
 /**
  * ECC Statusline — statusLine command
  *
- * Displays: model | task | $cost Nt Nf Nm | dir ██░░ N%
+ * Displays: model | task | $cost Nt Nf Nm | dir | branch ██░░ N%
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
@@ -80,6 +80,48 @@ function readCurrentTask(sessionId) {
     const todos = JSON.parse(fs.readFileSync(path.join(todosDir, files[0].name), 'utf8'));
     const inProgress = todos.find(t => t.status === 'in_progress');
     return inProgress?.activeForm || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Detect git branch by walking up from dir looking for .git.
+ * Reads .git/HEAD directly (no git subprocess). Handles worktrees
+ * where .git is a file pointing to the real gitdir.
+ * @param {string} dir
+ * @returns {string} Branch name, short commit hash (detached), or empty
+ */
+function getGitBranch(dir) {
+  try {
+    let current = dir;
+    for (let i = 0; i < 20; i++) {
+      const gitPath = path.join(current, '.git');
+      if (fs.existsSync(gitPath)) {
+        let headPath;
+        if (fs.statSync(gitPath).isDirectory()) {
+          headPath = path.join(gitPath, 'HEAD');
+        } else {
+          // .git is a file -> worktree/submodule: "gitdir: <path>"
+          const content = fs.readFileSync(gitPath, 'utf8').trim();
+          const match = content.match(/^gitdir:\s*(.+)$/);
+          if (!match) return '';
+          let gitdir = match[1];
+          if (!path.isAbsolute(gitdir)) gitdir = path.join(current, gitdir);
+          headPath = path.join(gitdir, 'HEAD');
+        }
+        if (!fs.existsSync(headPath)) return '';
+        const head = fs.readFileSync(headPath, 'utf8').trim();
+        const refMatch = head.match(/^ref:\s*refs\/heads\/(.+)$/);
+        if (refMatch) return refMatch[1];
+        // Detached HEAD: short hash
+        return head.substring(0, 7);
+      }
+      const parent = path.dirname(current);
+      if (parent === current) break;
+      current = parent;
+    }
+    return '';
   } catch {
     return '';
   }
@@ -168,6 +210,11 @@ function runStatusline() {
         segments.push(metricsStr);
       }
       segments.push(`\x1b[2m${dirname}\x1b[0m`);
+
+      const branch = getGitBranch(dir);
+      if (branch) {
+        segments.push(`\x1b[33m${branch}\x1b[0m`);
+      }
 
       process.stdout.write(segments.join(' \x1b[2m\u2502\x1b[0m ') + ctx);
     } catch {
