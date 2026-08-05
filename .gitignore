@@ -18,8 +18,7 @@ plans/
 
 # ----- locks / temp markers -----
 daemon/
-daemon.*
-*.lock
+/daemon.*
 *.log
 .caveman-active
 .caveman-active.*
@@ -43,6 +42,7 @@ config.json
 history.jsonl
 .env
 .env.*
+!.env.example
 *.token
 *.key
 secrets.*
@@ -91,5 +91,6 @@ Thumbs.db
 **/*.pyc
 **/*.pyo
 **/.ruff_cache/
-# ----- better-harness: 第三方 marketplace，公司电脑单独拉 -----
+# ----- better-harness: 顶层运行结果 + 第三方 marketplace（公司电脑单独拉）-----
+better-harness/
 plugins/marketplaces/better-harness/

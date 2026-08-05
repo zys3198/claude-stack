@@ -1,0 +1,48 @@
+{
+  "showInTray": true,
+  "minimizeToTrayOnClose": true,
+  "useAppWindowControls": false,
+  "enableClaudePluginIntegration": true,
+  "skipClaudeOnboarding": true,
+  "launchOnStartup": true,
+  "silentStartup": true,
+  "enableLocalProxy": true,
+  "proxyConfirmed": true,
+  "enableFailoverToggle": false,
+  "showProfileSwitcher": true,
+  "preserveCodexOfficialAuthOnSwitch": true,
+  "unifyCodexSessionHistory": true,
+  "unifyCodexMigrateExisting": false,
+  "failoverConfirmed": true,
+  "firstRunNoticeConfirmed": true,
+  "commonConfigConfirmed": true,
+  "language": "zh",
+  "visibleApps": {
+    "claude": true,
+    "claude-desktop": false,
+    "codex": false,
+    "gemini": false,
+    "grokbuild": false,
+    "opencode": false,
+    "openclaw": false,
+    "hermes": false
+  },
+  "currentProviderClaude": "7f8c8fed-6ceb-4874-b60f-daccd44c9fcd",
+  "currentProviderClaudeDesktop": "52074f7c-f816-4b64-b8af-428eb18e4b78",
+  "currentProviderCodex": "939905fe-e925-4d63-be61-212f31fcf5d5",
+  "skillSyncMethod": "symlink",
+  "skillStorageLocation": "cc_switch",
+  "preferredTerminal": "powershell",
+  "localMigrations": {
+    "codexThirdPartyHistoryProviderBucketV1": {
+      "completedAt": "2026-06-23T12:08:41.755135500+00:00",
+      "targetProviderId": "custom",
+      "migratedJsonlFiles": 0,
+      "migratedStateRows": 0,
+      "scannedHistoryFiles": true
+    },
+    "codexProviderTemplateV1": {
+      "completedAt": "2026-06-23T12:08:41.756395100+00:00"
+    }
+  }
+}
