@@ -63,6 +63,9 @@ plugins/marketplaces/*/build/
 usage-data/facets/
 usage-data/session-meta/
 
+# ----- better-harness: run outputs (transient analysis artifacts) -----
+better-harness/
+
 # ----- skills (cc-switch links resolved to real files, tracked) -----
 skill-trimmer-workspace/
 
@@ -91,6 +94,4 @@ Thumbs.db
 **/*.pyc
 **/*.pyo
 **/.ruff_cache/
-# ----- better-harness: 顶层运行结果 + 第三方 marketplace（公司电脑单独拉）-----
-better-harness/
 plugins/marketplaces/better-harness/
