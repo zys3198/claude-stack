@@ -30,6 +30,7 @@ hooks/*_state.json
 cost-tracker.log
 bash-commands.log
 mcp-health-cache.json
+mcp-needs-auth-cache.json
 *.pid
 
 # ----- local-only secrets / personal config -----
@@ -51,15 +52,23 @@ plugins/cache/
 plugins/data/
 plugins/installed_plugins.json
 plugins/known_marketplaces.json
+plugins/.last_inuse_sweep
+plugins/plugin-catalog-cache.json
 plugins/marketplaces/*/node_modules/
 plugins/marketplaces/*/.git/
 plugins/marketplaces/*/dist/
 plugins/marketplaces/*/build/
 
-# ----- skills managed by cc-switch (not git) -----
-skills/
-!skills/.gitkeep
+# ----- usage data (runtime-generated, keep reports only) -----
+usage-data/facets/
+usage-data/session-meta/
+
+# ----- skills (cc-switch links resolved to real files, tracked) -----
 skill-trimmer-workspace/
+
+# ----- backups (git history is the source of truth) -----
+*.bak
+*.bak-*
 
 # ----- heavy history / git -----
 .history/
@@ -81,5 +90,6 @@ Thumbs.db
 **/.tox/
 **/*.pyc
 **/*.pyo
+**/.ruff_cache/
 # ----- better-harness: 第三方 marketplace，公司电脑单独拉 -----
 plugins/marketplaces/better-harness/
