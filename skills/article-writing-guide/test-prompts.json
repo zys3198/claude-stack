@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "prompt": "审校一篇前端 React 渲染优化的技术文章，只出报告不改",
+    "expected": "非后端文体 + 只要报告 → 路由到 review-doc。不应走 tech-article-review（偏后端）或 multi-review-pipeline（会直接改）。验证 M3。"
+  },
+  {
+    "id": 2,
+    "prompt": "查我这篇是不是抄了网上某篇博客",
+    "expected": "用户未给外部来源 → 不空跑 plagiarism-audit；先反问来源 URL/文件，或用 doc-finder/deep-research 拉候选来源。验证 C2 前置条件。"
+  },
+  {
+    "id": 3,
+    "prompt": "write an English tutorial on Docker networking, then edit it",
+    "expected": "英文文章 → article-writer/edit-article 可用，但跳过 chinese-markdown-normalizer 与 ai-text-polisher（中文专用）。验证 M4 语言边界。"
+  },
+  {
+    "id": 4,
+    "prompt": "用 javaguide-writer 给我写篇 Java 并发面试文章",
+    "expected": "识别 javaguide-writer 为已删除 skill（原功能合并入 article-writer）→ 迁移提示：改用 article-writer 指定 JavaGuide 模式。验证 M1。"
+  },
+  {
+    "id": 5,
+    "prompt": "帮我改改这篇",
+    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→ai-text-polisher→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
+  },
+  {
+    "id": 6,
+    "prompt": "帮我写一篇 RAG 入门博客，写完发布前也帮我过一遍",
+    "expected": "跨阶段（起草 + 发布闸）→ 先 🔴 CHECKPOINT 确认跑全链路还是单点；确认后 article-writer → ... → publish-final-check。验证 §4 规则3。"
+  },
+  {
+    "id": 7,
+    "prompt": "用 javaguide-writer 写，再用 obsidian-vault 查资料",
+    "expected": "javaguide-writer 已删 → §4 规则7 存在性校验命中：改用 article-writer JavaGuide 模式；obsidian-vault 在 available skills → 正常委派。两步前都过存在性校验。验证 §4 规则7。"
+  },
+  {
+    "id": 8,
+    "prompt": "我想边学习边写 alibaba/open-code-review 这个开源项目，最后把学习记录自然沉淀进文章",
+    "expected": "命中边学边写路径：先用 agent-reach/doc-finder 拉官方/权威资料，生成学习路径和心智模型；若已有现稿则用 edit-article 按结构增量写入，若无现稿再用 article-writer 起草。验证 SKILL §1 边学边写路由和 REFERENCE §2。"
+  },
+  {
+    "id": 9,
+    "prompt": "我想先和你讨论文章结构，你给我几个选项，我想到啥再补充。讨论完再逐步设计每个小节，设计完你生成，生成后我审查提建议。",
+    "expected": "命中默认协作写作流：先给 2-4 个结构方案并允许用户混搭增删；结构冻结后逐节设计，每节确认后再生成正文；用户审查后按结构→论点/例子→文风/排版顺序处理反馈。执行端用 article-writer 协作模式，不一次性全文起草。验证 SKILL §3 和 REFERENCE §2。"
+  },
+  {
+    "id": 10,
+    "prompt": "给我做一套从零学 Redis 的系列教程，每课要有练习和折叠答案",
+    "expected": "系统教程/系列课/从零学习 → 路由到 tutorial-maker；不应误走 article-writer 单篇起草。验证 tutorial-maker 新路由。"
+  }
+]

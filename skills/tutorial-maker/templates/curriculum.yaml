@@ -1,0 +1,28 @@
+topic: <主题>
+audience:
+  level: zero
+  assumed: []
+stages:
+  - id: s1
+    title: <阶段名>
+    exit_criteria:            # 阶段过关标准（可观测，达成才进下一阶段）
+      - <能独立写出 X>
+      - <能解释 Y 为什么不 Z>
+    lessons:
+      - id: "01"
+        slug: <dash-case-slug>
+        title: <课标题>
+        must_know: true
+        prereq: []
+        objective: <可观测，禁"理解">
+        time_estimate: <如 "45 分钟">   # 读者完成本课的预估时间
+        common_mistakes:       # 本课概念的典型错误 2-4 条
+          - 错误: <误解/误用>
+            为什么错: <根因>
+            正解: <正确做法>
+        review_questions:      # 课末复盘 2-3（非动手练习，逼回看）
+          - <这一课最关键的一句话是什么？>
+          - <X 和 Y 什么时候选 X？>
+        source_refs: [sources.md#<anchor>]
+        status: pending
+        review: null

@@ -1,0 +1,105 @@
+---
+name: article-writing-guide
+description: 文章写作总路由器——用户要写/改/审/查重/配图/发布前检查文章但**不知道用哪个 skill**，或一句话说不清该走哪条路时，读本 skill 定路由，再调具体 skill。元触发："不知道用哪个 skill""这句话该走什么流程""写文章怎么开始""发布前检查整个流程"。覆盖通用技术写作与 JavaGuide 专属模式。已明确点名某 skill（如"用 ai-text-polisher 润色"）则跳过本 skill 直用那个。
+---
+
+# Article Writing Guide（写作总路由）
+
+## 0. 何时用本 skill
+
+用户提写作需求但**没点名具体 skill**，或点名的不一定是最优解时，先读本 skill 定路由。已明确点名（如"用 ai-text-polisher 润色"）则直接跳过本 skill。
+
+**废弃 skill 重定向**：用户点名 `javaguide-writer`（已删除，原功能合并入 `article-writer`）→ 引导改用 `article-writer` 指定 JavaGuide 模式（通用兜底见 §4 规则6）。
+
+**系统内置 skill 提示**：`deep-research`、`hv-analysis` 是系统/插件内置 skill（非本地 skills 目录），调用方式不同（直接 `Skill` 工具或 `/deep-research`），别在本地目录找 SKILL.md。
+
+**语言边界**：本路由默认**中文**写作。英文文章可走 `article-writer` / `edit-article`，但跳过中文专用 skill（`chinese-markdown-normalizer`、`ai-text-polisher`）。
+
+**规范源**：JavaGuide 风格基线见独立 skill `javaguide-style-guide`（终检判定用）；写作执行见 `article-writer` §6。
+
+## 1. 一句话路由表
+
+按 **写作生命周期阶段** 分发。成本标注：🪶轻 / 🪨重 / 🔥烧 token（新手别滥用）。
+
+| 阶段 | 用户在说什么 | 调用 skill |
+|------|-------------|-----------|
+| ① 选型/调研 | "这个主题怎么写""有没有相关资料""帮我研究下 X" | `doc-finder`🪶(仓库内) / `obsidian-vault`🪶(Obsidian 本地库) / `deep-research`🔥(全网带引用，系统内置) / `hv-analysis`🔥(深度研究 PDF，插件内置) |
+| ② 找证据（问答场景，非写作链路） | "从这几篇文章里提取回答 X 的依据" | `answer-evidence-finder`🪶 |
+| ③ 起草-从零 | "写一篇关于 X 的文章""帮我写篇博客/教程/方案" | `article-writer`🪨（默认通用模式） |
+| ③ 起草-JavaGuide | "写 JavaGuide 文章""按 docs/ai 规范写" | `article-writer`🪨 指定 **JavaGuide 模式**（执行规范见其 §6，终检判定见 `javaguide-style-guide`） |
+| ③ 起草-素材成型 | "我有一堆笔记/碎片，帮我拼成文章" | `writing-fragments`🪶(先挖) → `writing-shape`🪨(再塑形) |
+| ③ 起草-叙事节拍 | "按故事线/节拍一步步写" | `writing-beats`🪨 |
+| ④ 结构改写 | "重新组织这篇""调整章节结构""逻辑不顺" | `edit-article`🪨 |
+| ⑤ 去 AI 味/润色 | "AI 味太重""改得像人写的""优化文风" | `ai-text-polisher`🪨 |
+| ⑥ 排版规范化 | "统一 Markdown 格式""修中英文空格/标点""批量规范" | `chinese-markdown-normalizer`🪶 |
+| ⑦ 配图 | "要不要加图""画个流程图/架构图""配图" | `drawio-article-illustration`🪶(决策+校验) → `drawio-chart`🪨(画图) |
+| ⑧ 审校-逐段 | "逐段 review""标 VERSION 增量评审""快速过一遍" | `tech-article-review`🪨 |
+| ⑧ 审校-多维度并行 | "全面审稿""多角度并行审查+批量改" | `multi-review-pipeline`🔥 |
+| ⑧ 审校-聚合报告 | "4 维度并行审校出报告（事实/一致性/风格/结构）" | `review-doc`🔥 |
+| ⑨ 查重/洗稿 | "这篇是不是抄了来源""查洗稿""只可参考不可抄袭" | `plagiarism-audit`🪨（需外部来源，**只比贴源**） |
+| ⑩ 发布前总检 | "文章写完了，发布前过一遍""能不能发了" | `publish-final-check`🔥（强制关卡，MUST/SHOULD 两级拦截） |
+| ⑪ 参考源管理 | "我参考了这几篇""这些是我的参考来源" | 收集参考源 URL/文件 → 喂给 ⑨ 查重 + ⑩ 终检①子项 |
+
+## 2. 易混 skill 区分
+
+- **起草三选**：从零创作 → `article-writer`；已有碎片要拼 → `writing-shape`；要边写边选支线 → `writing-beats`。
+- **改写四选**：调结构/逻辑 → `edit-article`；去 AI 味/文风 → `ai-text-polisher`；纯排版/标点/空格 → `chinese-markdown-normalizer`；**深度改写整篇**（骨架+措辞都要动）→ `article-writer`（深度改写模式）。前三者可串行：先 edit-article → 再 polisher → 最后 normalizer。
+- **审校三选 + 发布闸**：逐段增量、单次快评 → `tech-article-review`；多维度并行 + **直接批量改** → `multi-review-pipeline`；多维度并行只要**报告**（事实核查/一致性/风格/结构）→ `review-doc`；**发布前强制关卡**（只放行不改）→ `publish-final-check`。**裁决：要改选 multi-review-pipeline，要报告选 review-doc，二选一不叠加；发布闸是 pipeline 末环，三者之后才跑。**
+- **调研四选**：仓库内 .md → `doc-finder`；Obsidian 本地笔记库 → `obsidian-vault`；全网多源带引用 → `deep-research`（🔥系统内置）；产品/公司/技术深度研究 PDF → `hv-analysis`（🔥插件内置）。后两者烧 token，新手先用前两个。
+- **配图两件套**：先 `drawio-article-illustration` 判断"哪里需要图、用什么图"，再 `drawio-chart` 实际画。不要跳过前者直接画。
+- **JavaGuide 风格三件套**：写作执行 → `article-writer` §6（含 §6.7 自检、§6.9 反例 11 条）；终检判定 → `javaguide-style-guide`（M1-M9 + 量化阈值）；发布放行 → `publish-final-check` ③ 引用 style-guide。三者不重叠：§6 教写，style-guide 判定，publish 放行。
+
+## 3. 默认 pipeline（端到端）
+
+> 🔴 **CHECKPOINT**：跨多阶段 pipeline 前，先与用户确认范围（跑全链路 / 只跑某几步 / 单点）。
+
+### 通用技术写作
+`doc-finder/deep-research`(选型) → `article-writer`(起草) → `edit-article`(结构) → `ai-text-polisher`(去AI味) → `drawio-article-illustration`+`drawio-chart`(配图) → `multi-review-pipeline`(审校改) → `plagiarism-audit`(查重，**需外部来源，否则跳过**) → `chinese-markdown-normalizer`(排版) → **`publish-final-check`(发布闸)**
+
+### JavaGuide 模式
+同上，但第②步 `article-writer` **强制 JavaGuide 模式**（执行规范见其 §6）；查重对齐"只可参考不可抄袭"铁律；末环 `publish-final-check` 的风格子项对照 `javaguide-style-guide` §1 M1-M9。
+
+> 详细串联顺序、边界 case、落盘规则见 [REFERENCE.md](REFERENCE.md) §6。
+
+## 4. 路由执行规则
+
+1. 读用户请求 → 匹配 §1 表"用户在说什么"列，或 §7 端到端示例。
+2. 命中单一阶段 → 直接调用对应 skill，**不重复本 skill**。
+3. 跨阶段（如"写并审"）→ 🔴 **CHECKPOINT**：先确认跑全链路还是单点，再按默认 pipeline 顺序调用多个 skill，逐个执行。
+4. 模糊/无法匹配 → 🛑 **STOP**：读 [REFERENCE.md](REFERENCE.md) 取详细决策规则；仍无法定 → 反问用户三要素（文体/阶段/目标仓库），**不擅自猜测路由**。
+5. **不要**自己重写各 skill 已封装的能力（如手工去 AI 味、手工查重）—— 一律委派。
+6. **目标 skill 存在性校验**（先于委派）：命中 §1 表后，先在本会话 available skills 列表里核对目标存在；**不存在（被删 / 改名 / 未装）→ 🛑 STOP**，报告用户缺失项 + 给最接近的替代（如 `javaguide-writer` → `article-writer` JavaGuide 模式），**不路由进虚空**。内置 skill（`deep-research`/`hv-analysis`）按其原生调用方式校验，不查本地目录。
+
+## 5. JavaGuide 模式开关
+
+用户提以下任一关键词 → 全 pipeline 切 JavaGuide 模式：JavaGuide、docs/ai、Snailclimb、Java 面试系列、`my-submission/`。
+切模式后：起草用 `article-writer` JavaGuide 模式（遵循其 §6）；查重对齐"只可参考不可抄袭"铁律（见 [REFERENCE.md](REFERENCE.md) §5）；终检 `publish-final-check` ③ 风格子项对照 `javaguide-style-guide` §1 M1-M9。
+
+## 6. 演进
+
+改动本 skill / REFERENCE.md / 下游 skill（`publish-final-check`、`javaguide-style-guide` 等）→ 记 [CHANGELOG.md](CHANGELOG.md)。checklist 类 skill（`publish-final-check` §2、`javaguide-style-guide` §1）设计成可插拔数组，增删项不动流程。
+
+## 7. 端到端路由示例（query → skill → 理由）
+
+| 用户原话 | 命中 skill | 理由 |
+|---------|-----------|------|
+| "帮我写一篇 RAG 入门博客" | `article-writer`（默认） | 从零创作，非 JavaGuide，单点起草 |
+| "按 JavaGuide 风格写 Agent Memory 文章" | `article-writer`（JavaGuide 模式） | 命中 JavaGuide 关键词，走 §6 |
+| "这篇文章 AI 味太重" | `ai-text-polisher` | 点名去 AI 味，单点改文风 |
+| "把这几篇笔记拼成一篇文章" | `writing-fragments` → `writing-shape` | 素材未结构化，先挖再塑形 |
+| "帮我改改这篇" | 先问改哪层；或按骨架→肉→皮 串行 | 模糊，见 REFERENCE §2 易混裁决，不擅猜 |
+| "全面审下这篇并改好" | `multi-review-pipeline` | 要审 + 批量改 |
+| "先出审校报告我看看，别改" | `review-doc` | 要报告不要改 |
+| "这篇是不是抄了这几个来源" | `plagiarism-audit` | 查重，有贴源 |
+| "文章写完了，发布前过一遍" | `publish-final-check` | 发布闸，强制关卡 |
+| "写完并发布前检查" | `article-writer` → ... → `publish-final-check` | 跨阶段，先 CHECKPOINT 确认全链路 |
+| "这个主题怎么写，有没有相关资料" | `doc-finder` / `deep-research` | 调研选型，仓库内 vs 全网 |
+
+## 8. 路由失败兜底
+
+读 §1 + §7 仍无法定 → 反问三要素：
+1. **文体**：博客/教程/方案/知识库/面试题/面经/叙事？
+2. **阶段**：从零写/改现稿/审校/查重/配图/发布闸？
+3. **目标仓库**：通用 还是 JavaGuide（docs/ai 系列）？
+
+详细决策树、易混裁决、反模式见 [REFERENCE.md](REFERENCE.md)。

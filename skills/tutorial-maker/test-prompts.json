@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "prompt": "用 tutorial-maker 把 Rust 所有权做成 from-zero 教程，主题是 \"rust-ownership\"",
+    "expected": "应触发 intake grill（受众/北极星/范围）→ 生成 curriculum.yaml（stages + lessons + objective + common_mistakes + exit_criteria + time_estimate + review_questions + source_refs）→ 停在审批门等用户确认，不直接生成课。课模板应含「常见错误」节 + 「你来试」一题一 <details> + 「复盘」节。"
+  },
+  {
+    "id": 2,
+    "prompt": "我有一份笔记 ./notes/react-hooks.md，把它变成给零基础前端的系列教程",
+    "expected": "应读 sources.md 模板建立溯源 → intake 问受众已具备（JS 基础？）→ 拆课时每课 ONE THING + must_know 标记 → 提示本地材料路径无效时标红不阻塞 → 进度的 gaps 防止臆造。不应跳过审批门直接生成。"
+  },
+  {
+    "id": 3,
+    "prompt": "继续生成下一个 pending 课",
+    "expected": "读 progress.md 找断点 → 读 curriculum.yaml 第一个 pending → 按 lesson.md 骨架生成（讲解 4 步认知策略 + 常见错误 + 你来试一题一折叠 + 复盘 + 小结）→ 同步 glossary → 跑自审门（独立 sub-agent，5 项 MUST：reachable/teachback/exercise_solvable/one_per_fold/common_mistakes_addressed）→ 过才标 done。每 3 课节奏检查。"
+  },
+  {
+    "id": 4,
+    "prompt": "第 02 课自审报 exercise_one_per_fold=false，怎么处理？",
+    "expected": "status 留 blocked，progress.md 自审未过清单记 02 课 + blocker 引用 + fix 建议；提示 /tutorial regen 2（存 .old）；regen 2 次仍不过标顽固点建议手介入。不死磕。"
+  },
+  {
+    "id": 5,
+    "prompt": "全部课 done 了，收尾",
+    "expected": "生成 README.md（含「怎么用这套课」4 条 + AI 考官 prompt 范式 + 课索引含 time_estimate）+ 每阶段 cheatsheet-<stage>.md + recommended-resources.md（≤5 + 4 元数据：谁看/难度/怎么用/跳过）+ glossary 检查。未过自审的课标 \"待修订\"。"
+  }
+]
