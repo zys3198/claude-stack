@@ -2,7 +2,7 @@
 
 记录自建 skill / hook / statusline / 全局配置的出处与迁移要点。外部装的见 skill-install.md / mcp-install.md / tool-install.md。
 
-自建资产迁移原则：**整个 `~/.claude/skills/`、`~/.claude/hooks/`、`~/.claude/statusline`、memory 目录、`installing/` 本目录直接拷贝即迁**；本文件记的是「为什么有这些 + 哪些有坑」。
+自建资产迁移原则：**git 仓库已追踪全部自建**（24 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` 白名单），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
 
 ---
 
@@ -29,8 +29,18 @@
 ### cc-switch-setting-sync
 - 出处：防 cc-switch 切换 provider 降级 settings.json 的同步流程
 
-### handoff / teach
-- 出处：handoff→teach 解耦学（memory `handoff-teach-decoupled-learning`），user-invoked（disable-model-invocation），归档 `C:\ZYS\Wiki\80-records`
+### 写作 skill（自建 12 个）
+- article-writer / edit-article / ai-text-polisher / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / review-doc / content-to-note
+- 出处：2026-06/07 写作流程沉淀；publish-final-check 演进耦合在 article-writing-guide/CHANGELOG.md；plagiarism-audit 针对实战漏网（Codex-book 整源漏审）设计
+
+### 学习 skill（自建 3 个）
+- deep-learn / cram-engine / tutorial-maker
+
+### ai-coding-coach
+- 学习陪跑模式（partner-coach/coach/engineer），ai-coding-guide 路由出口的协作行为定义
+
+### ~~handoff / teach~~（更正 2026-08-07）
+- **非自建**——磁盘上是 Matt 插件 symlink（指 plugins/cache），归 Matt 插件管，见 skill-install.md Matt Pocock 条目。之前误标自建。
 
 ### learning-guide 配套归档
 - 学习记录归档流程，归档目录 `C:\ZYS\Wiki\80-records`（外部路径，迁移时另拷）

@@ -58,7 +58,7 @@ description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill
 - **skill 权威源 = `~/.claude/skills/`（真目录本体）**（2026-08-07 起，见 memory `skill-mgmt-cc-switch-only`）。`~/.cc-switch/skills/` 仅作备份镜像，复制同步、用户手动。移动/删除候选前，先确认目标是真目录本体——**不许留 symlink/junction 指向 plugins/cache 或 cc-switch**（本体在外、缓存清了即断）。残留 symlink 先去链接化（复制真实内容进来）再判定。
 - **移动 = 复制到备份夹 + 从源删除。** 候选移入 `~/.cc-switch/skills/_weak-model-backup/`（备份侧，夹内 README 记标准）或 lab-area exp 目录。用 **copy（robocopy/cp -r）实体复制**，不用 symlink、不依赖 cc-switch RESTORE_SYMLINKS（那是旧「cc-switch 为源+软链」机制，已随源翻转作废）。copy 失败即报错，不静默跳过（§9）。
 - **插件 skill（`ecc:*` 等整包）不在本 skill 判定范围**——插件是整包开关（`enabledPlugins`），用户已拍板全开，不逐个评。
-- **`~/.claude/skills/learned/` 是 ai-coding-coach 产出区**，属 A 类偏好沉淀，默认保留，不进候选。
+- **git 追踪范围（2026-08-07 收窄）**：仅 24 个自建 skill 进 git（白名单见 `.gitignore`）；第三方/插件/官方 skill 只解追踪、磁盘保留，登记在 `~/.claude/installing/skill-install.md`。本 skill 判定的「移入备份」对象=磁盘目录，与 git 追踪无关。
 
 ## 判定流程
 
