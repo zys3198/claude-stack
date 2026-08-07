@@ -95,3 +95,33 @@ Thumbs.db
 **/*.pyo
 **/.ruff_cache/
 plugins/marketplaces/better-harness/
+
+# ----- skills: 默认忽略全部, 只追踪自建 (2026-08-07 收窄) -----
+# 第三方/插件/官方 skill 随官方源更新、不需进 git, 只在 installing/ 台账登记。
+# 新增自建 skill 时在下方白名单加一行 !skills/<name>/
+skills/*
+!skills/ai-coding-coach/
+!skills/ai-coding-guide/
+!skills/ai-text-polisher/
+!skills/article-writer/
+!skills/article-writing-guide/
+!skills/cc-switch-setting-sync/
+!skills/chinese-markdown-normalizer/
+!skills/code-change-workflow/
+!skills/content-to-note/
+!skills/cram-engine/
+!skills/deep-learn/
+!skills/drawio-article-illustration/
+!skills/drawio-chart/
+!skills/edit-article/
+!skills/expose-unknowns/
+!skills/frontend-guide/
+!skills/guide-skill-auditor/
+!skills/javaguide-style-guide/
+!skills/learning-guide/
+!skills/multi-review-pipeline/
+!skills/plagiarism-audit/
+!skills/publish-final-check/
+!skills/review-doc/
+!skills/skill-trimmer/
+!skills/tutorial-maker/

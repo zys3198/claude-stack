@@ -1,6 +1,6 @@
 ---
 name: learning-guide
-description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / research / last30days / obsidian-vault / expose-unknowns 等。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 frontend-guide）。<!-- v1.4.3 -->
+description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / research / last30days / obsidian-vault / expose-unknowns 等。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 frontend-guide）。<!-- v1.4.7 -->
 ---
 
 # 学习路由指南（Claude Code）
@@ -45,9 +45,9 @@ learning-guide 相关？ YES/NO —— <一句理由>
 触发后按顺序复核可用性，**只在会话 `Available skills` 里出现的才算已证实**：
 
 1. 先看当前会话可用清单（唯一可信源）。
-2. 再看顶层独立 skill：`~/.claude/skills/`（本机常由 cc-switch 同步，源目录 `~/.cc-switch/skills/`）。
+2. 再看顶层独立 skill：`~/.claude/skills/`（权威源；`~/.cc-switch/skills/` 仅备份）。
 3. **关键提醒**：reminder 没列出 ≠ 一定不存在；关键推荐前按磁盘再复核一次。
-4. 生态缺失 → 跳过该路径给已装替代，不硬推不存在的工具。下表是本机 cc-switch 盘点，会话里没列出的当不存在。
+4. 生态缺失 → 跳过该路径给已装替代，不硬推不存在的工具。下表是本机 skill 盘点，会话里没列出的当不存在。
 
 ## 路由表
 
@@ -60,10 +60,14 @@ learning-guide 相关？ YES/NO —— <一句理由>
 | 委派后台查一手资料、存成 md | 查资料 | `research` | 前台 WebSearch + 落盘 |
 | 查近 30 天社区/舆情/真实用户声音 | 舆情调研 | `last30days` | WebSearch 限时 |
 | 笔记/速查表存进 wiki 落库 | 记笔记 | `obsidian-vault` | 手动写 md 到 vault |
+| 公众号/B站/抖音链接 → 提取成结构化笔记落 wiki | 链接做笔记 | `content-to-note`（自动识别来源路由，底层由 `bili-note`/`douyin-video-summary` 提取） | 手动复制正文整理 |
 | 开工前不知道自己不知道什么、要扫盲判级 | 判级扫盲 | `expose-unknowns` | `code-change-workflow` skill §1.1 判级一行 |
 | 工作区内教我一个技能、多会话（**仅用户手动 `/teach` 触发**，`disable-model-invocation`，agent 不可自动调） | 跟学技能 | 用户自行 `/teach` | 手动分次讲解 |
+| **干活卡住、概念当场吃不下、想单独学透**（不当场追问污染主线） | 解耦学（handoff→teach） | 用户手动 `/handoff` 打包 → 到 `C:\ZYS\Wiki\` 下 `/teach <主题>` | 不当场展开，主线继续 |
 | 考前/面试前要被拷打、压力测试理解 | 被考官考 | `deep-learn` 第 8 步 | 手动出 10 题逐题问 |
 | 学习计划拆任务、排期 | 拆学习任务 | 手动列清单 | --（planning-and-task-breakdown 已移入备份） |
+
+> **解耦学（handoff→teach）完整流程**：干活会话卡在某概念、当场学不会 → 不当场追问污染主线。① 用户 `/handoff 学 X` 打包——**handoff 默认写到 OS 临时目录（`%TEMP%`），参数只作「会话描述」不改路径，别试图用参数指定存储位置**；它输出文档后**记下返回的路径**；② 另开会话 `cd C:\ZYS\Wiki` 后 `/teach X`，**紧跟着把那个 `%TEMP%` 路径喂给 teach agent**（「先读 `<路径>` 了解我的卡点」）——teach 默认只看当前目录、不知道 handoff 存在，靠传路径当接力棒打通；③ 学出非平凡「会了」→ 归档 learning-record 到 `80-records/NNNN-slug.md`（模板 `93-templates/learning-record.md`，frontmatter 对齐 wiki-structure §3.4）。归档终点与结构见 `C:\ZYS\Wiki\80-records\README.md`。主线不污染，知识进 Wiki 复利。`/handoff`、`/teach` 均 user-invoked，由用户手动敲，agent 只提示不自动调。
 
 ## 裁决规则
 

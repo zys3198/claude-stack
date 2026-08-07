@@ -2,6 +2,16 @@
 
 本文件记录 frontend-guide 路由 skill 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.5.4] - 2026-08-07
+
+### Added
+
+- 「先定阶段」升级现有行 + 重叠裁决表各加 `hallmark`：反 AI slop/去 AI 大路货设计场景，可独立做设计提取/审计。
+
+### Rationale
+
+- 用户拍板（2026-08-07，skill 路由接线会话）：hallmark 是高价值盲区 skill（未被任何 guide 路由），用户点名「hallmark 是不是可以进 frontend-guide」——确认其「页面/反 AI 味设计」正属本域。两处均为路由表加行（非删改），未动既有条目（防无证据漂移）。
+
 ## [v1.5.3] - 2026-07-31
 
 ### Fixed

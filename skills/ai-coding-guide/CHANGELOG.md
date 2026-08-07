@@ -4,6 +4,69 @@
 
 详细维护规则与变更证据见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md) 的变更记录表（2026-07-22 之前的历史改动以该表为准）。
 
+## [v1.4.9] - 2026-08-07
+
+### Added
+
+- Step 2「调试 bug」加 `diagnosing-bugs`（硬 bug/反复修不好/性能回退先走诊断循环）；「开发新功能」加 `spec-driven-development`（需求不清先立 spec）；「理解代码」加 `zoom-out`（不熟代码先看架构定位）。
+
+### Rationale
+
+- 用户拍板（2026-08-07，skill 路由接线会话）：三者为高价值盲区 skill（119 个人 skill 中 40 个未被任何 guide 路由），按「资深全栈+AI 独立开发」画像判为高频，接进编码域路由。全局 `CLAUDE.md` §0 同步补「域外直调」段当元路由。
+- 本 guide 内 ecc `*-review`/`*-build` 引用核实为 slash command（真实存在于 ecc commands/ 目录），`ecc:xxx` 引用格式合法、非死引用，不改。
+- 验证：三处均为路由表加行（非删改），未动既有分类路径（防无证据漂移）。
+
+## [v1.4.8] - 2026-08-07
+
+### Changed
+
+- 开工问询第 4 出口「handoff→teach（解耦学）」由「自带流程」改为**纯转介 `learning-guide`**：删去本 guide 内的流程展开，只留一句「这是学习流程，转介 learning-guide（其路由表解耦学行 + 完整流程块为唯一执行定义）」。
+
+### Rationale
+
+- 用户拍板（2026-08-07）：「以 learning-guide 为主，ai-coding-guide 命中了可以直接转到它上面」。v1.4.7 把流程同时写进两边 = 双份执行定义，违反单一权威（执行定义归下游路由，本 guide 只路由不展开，对齐 MAINTENANCE 职责分层）。现 learning-guide 为唯一执行定义，本 guide 仅跨域转介。
+- 验证：`scripts/audit.ps1` P0:0 P1:0 P2:4（4 个同 v1.4.7 已知假阳性，未新增）。
+
+## [v1.4.7] - 2026-08-07
+
+### Added
+
+- 开工问询模式加第 4 出口「handoff→teach（解耦学）」：用户信号「这块我是真不懂/想单独学透/别当场展开」时，提示 `/handoff` 打包 → `C:\ZYS\Wiki\` 下 `/teach` 单独学 → 归档 learning-record 到 `80-records/`。跨域指针，执行定义归 `learning-guide` v1.4.4（学习域路由器）。
+
+### Rationale
+
+- 用户拍板（2026-08-07）：解耦学的完整用法说明归 `learning-guide` 所有；本 guide 只留一条开工问询跨域指针（编码任务里卡点的出口），不重复展开流程。衔接全局 memory `ai-assist-learning-first-default` v2.3 分支 d。
+- `/handoff`、`/teach` 均 `disable-model-invocation`（user-invoked），故本出口仅提示、由用户手动敲，agent 不自动调。
+- 验证：`scripts/audit.ps1` P0:0 P1:0 P2:4（4 个为已知假阳性——`/handoff`/`/teach` 是 user-invoked slash 本机无独立文件、`disable-model-invocation`/`run` 为 YAML 字段/关键字非 skill，均未新增真实死引用）。
+- 未动区域：Step 1 信号表、Step 2 各分类路径未暴露缺陷，保持原样（防无证据漂移）。
+
+## [v1.4.6] - 2026-08-06
+
+### Added
+
+- 「开发新功能」+「有需求文档」两分类各加一条 **Matt 流程转介**提示（B 主 A 辅）：命中 Matt 独有信号（多会话拆工单 / 留 CONTEXT.md-ADR 纸迹采访 / 原型代码验证 / wayfinder 雾大绿野 / triage 灵感堆积）时，提示手动 `/mattpocock-skills:ask-matt` 进 Matt 编排；只提示不抢路由，未命中不提。「开发新功能」覆盖全部 5 信号，「有需求文档」聚焦多会话工单流（to-spec→to-tickets→implement）。
+
+### Rationale
+
+- 用户拍板「ask-matt 重点用，B 为主 A 为辅」（2026-08-06）：B=guide 转介接线，A=用户手动主力。ask-matt 是 Matt 内部路由器，对 idea→ship 主流程编排比本 guide 深；但其两形态（cc-switch 裸名 + 插件版）均 `disable-model-invocation: true`（user-invoked，模型调不到，只能用户手动敲），故只能转介提示用户敲，不能模型自动调。
+- 方案 1（最小改）：只两高频分类加转介行，不新增独立分类、不动 Step 1 信号表 —— 防分类膨胀（MAINTENANCE 分类观察期规则），triage/wayfinder 信号折中并入「开发新功能」转介提示。
+- 验证：`scripts/audit.ps1` P0:0 P1:0 P2:2（2 个为已知假阳性 disable-model-invocation/run，未新增）；`mattpocock-skills:ask-matt` 带前缀未被误报。
+- 未动区域：其余 17 个分类、Step 1 信号表、cheatsheet/ecosystems 未暴露缺陷，保持原样（防无证据漂移）。
+
+## [v1.4.5] - 2026-08-06
+
+### Fixed
+
+- 清 `planning-and-task-breakdown` 残留死引用 3 处：`references/ecosystems.md` Matt 段代表项与「什么时候优先用」行、重叠区裁决表行；`test-prompts.json` id:3 expected。该 skill v1.4.3 已从 SKILL.md 删除（移 `_weak-model-backup/`），但这几处漏清；当前会话与 `_weak-model-backup/` 均无此 skill，仅 cc-switch 源残留 → 死引用。ecosystems.md 改引 `to-prd`/`to-issues`（裸名磁盘+会话双在，Matt 系 model-invoked）；test-prompts id:3 B 选项同步改。
+- `references/ecosystems.md` Matt Pocock 段重写：补**双形态并存**（cc-switch 裸名 vs claude-plugins-official 插件版 `mattpocock-skills:` 前缀 24 个）+ 插件版主流程骨架（`to-spec`/`to-tickets`/`implement`/`wayfinder`）+ user/model-invoked 可调性差异（14 个 user-invoked 模型调不到需手动敲）；删过时自述「非运行时实测」「本机无 agent-skills 插件」。
+- 版本戳对齐：文末路由表门禁注释 `v1.3.0` → `v1.4.5`，与 description 一致。
+
+### Rationale
+
+- guide-skill-auditor 审查（2026-08-06）：十查第 6 项幻觉引用详查——经磁盘+当前会话双证，主文件引用零幻觉（`grill-me` 等 cc-switch 裸名均 model-invoked 可调，撤回初判"调不到"疑点）；但 ecosystems.md/test-prompts 残留 v1.4.3 已删 skill 的死引用（P0），Matt 生态地图只画裸名一半漏插件版（P1），版本戳脱节（P2）。
+- 动态基线 5 场景（撞词「登录页面」/写作/插件问答/生态对比/调试）全对，零误路由。
+- 未动区域：SKILL.md 主文件 Step 1 信号表、Step 2 各分类路径未暴露缺陷，保持原样（防无证据漂移）。
+
 ## [v1.4.4] - 2026-07-31
 
 ### Fixed

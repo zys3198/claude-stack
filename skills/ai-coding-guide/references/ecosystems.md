@@ -22,12 +22,17 @@
 
 ### Matt Pocock skills
 
-**定位：** SDLC 补充层。本机独立 skill 集（来源 Matt Pocock skills 仓库，经 cc-switch 同步），补上 spec、breakdown、review、security、debugging 这类可拆分能力。代表项：`grill-me`、`planning-and-task-breakdown`、`to-prd`、`to-issues`、`review-doc`、`security-and-hardening`、`triage`、`tdd`。注意是独立 skill，不是插件 namespace——调用用裸名（`grill-me`），不要写成 `agent-skills:grill-me`。社区泛称 agent skills，但本机无 agent-skills 插件。
+**定位：** SDLC 补充层。本机有**两种形态并存**，调用前先看是哪形态：
 
-**证据锚点：** 来源标记见 `setup-matt-pocock-skills`（独立 skill，其描述列 `to-issues`/`to-prd`/`triage`/`tdd` 为其管辖）；本机 `~/.cc-switch/skills/` 下裸名存在、无 namespace 前缀。属「官方可证实 + 本机目录可见」级别，非运行时实测。
+- **cc-switch 裸名独立 skill**（`~/.claude/skills/`，源 `~/.cc-switch/skills/`）：`grill-me`、`grill-with-docs`、`grilling`、`to-prd`、`to-issues`、`triage`、`ask-matt`、`setup-matt-pocock-skills`。多为 model-invoked，模型可直接调裸名（如 `grill-me`）。
+- **插件版**（claude-plugins-official，`mattpocock-skills:` 前缀）：24 个 promoted skill，含完整 idea→ship 主流程骨架 `to-spec`/`to-tickets`/`implement`/`wayfinder`/`grill-with-docs`。其中 14 个 `disable-model-invocation: true`（user-invoked，**模型调不到，需用户手动敲** `/mattpocock-skills:to-spec` 等）；11 个 model-invoked（`tdd`/`research`/`wizard`/`grilling`/`diagnosing-bugs`/`prototype`/`domain-modeling`/`codebase-design`/`code-review`/`resolving-merge-conflicts`/`writing-for-agents`）。
+
+**调用注意：** 同一名称两形态可调性可能不同（如 `grill-me`：裸名 model-invoked 可调；插件版 user-invoked 调不到）。路由时优先用已证实的形态；指插件版 user-invoked 件时，提示用户手动敲，不要假设模型能调。
+
+**证据锚点：** 本会话实测（2026-08-06）：插件版 24 个经 `plugin.json` 注册、`enabledPlugins` 启用；user/model-invoked 以各 `SKILL.md` 的 `disable-model-invocation` 字段判定；cc-switch 裸名 `grill-me` 无该字段（model-invoked）。属「本地已证实」级别。
 
 **什么时候优先用：**
-- 已经知道要做 review / security / planning-and-task-breakdown
+- 已经知道要做 review / security / 需求整理（`to-prd`/`to-issues`）
 - 想给 Superpowers 主流程补一个专项环节
 
 **不要把它当成：** 替代 Superpowers 的总流程默认层。两套都能做时，先按主文件路由决定谁做主、谁做补充。
@@ -72,7 +77,7 @@
 | 冲突场景 | 默认裁决 | 原因 |
 |---|---|---|
 | `superpowers:brainstorming` vs `ponytail:ponytail` | 新功能走 Superpowers，小改动走 ponytail | 先按任务规模分层 |
-| `superpowers:writing-plans` vs `planning-and-task-breakdown` | 已有 spec 默认 `superpowers:writing-plans` | 计划质量和落地细节更稳 |
+| `superpowers:writing-plans` vs `to-prd` / `to-issues` | 已有 spec 默认 `superpowers:writing-plans`；只想先把对话整理成需求项再走 `to-prd`/`to-issues` | 计划质量和落地细节更稳；整理需求项是前置动作 |
 | `superpowers:requesting-code-review` vs `review` / `code-review` | 当前 diff 走 `code-review`；PR/分支/指定基线走 `review`；实现完成后请求复核再用 `superpowers:requesting-code-review` | 审查入口和流程门禁不是同一层 |
 | `security-review` / `security-and-hardening` vs 通用 review | 高风险任务用实际 reviewer + `security-review`；需要加固方案再叠 `security-and-hardening` | 安全审查和加固建议是额外维度，不是替代关系 |
 | `frontend-design` vs `feature-dev:*` | UI/页面骨架先 `frontend-design`，功能实现再 `feature-dev:*` | 先定界面，再做交互 |

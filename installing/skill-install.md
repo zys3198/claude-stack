@@ -1,6 +1,6 @@
 # Skill 安装台账（外部来源）
 
-记录从外部装入的 skill / skill 套件。统一安装位置 `~/.claude/skills/<name>/`，安装方式走 **cc-switch 单系统**（不用 agent-skills CLI 跨工具同步，见 memory `skill-mgmt-cc-switch-only`）。
+记录从外部装入的 skill / skill 套件。权威源 = `~/.claude/skills/<name>/`（真目录本体，禁 symlink 指向外部），`~/.cc-switch/skills/` 仅作备份镜像、复制同步、用户手动。不用 agent-skills CLI 跨工具同步（见 memory `skill-mgmt-cc-switch-only`）。
 
 套装按**仓库级**记一条，内部保留/裁剪写备注，不逐个开条目。自建 skill 不在这里，见 [custom-setup.md](custom-setup.md)。
 
@@ -14,7 +14,7 @@
 - 来源：https://github.com/mattpocock/skills
 - 安装日期：2026-06/07（精确日待补）
 - 安装方法：cc-switch 同步裸名形态进 `~/.claude/skills/`（model-invoked 可调）；另启用插件版 `mattpocock-skills@mattpocock`（`/plugin install`，见 tool-install.md marketplace 清单）
-- 装到哪：`~/.claude/skills/`（diagnosing-bugs / tdd / request-refactor-plan / grill-me / triage / wayfinder / to-spec / to-tickets / to-prd / to-issues 等 40+ 裸名目录）+ 插件版前缀 `mattpocock-skills:`
+- 装到哪：`~/.claude/skills/` 裸名 + 插件版前缀 `mattpocock-skills:`。**裸名里 11 个是指向插件 cache 的 symlink**（本体在 `~/.claude/plugins/cache/mattpocock/mattpocock-skills/1.2.3/skills/...`，随插件升级路径变，非独立本体）：ask-matt / grill-me / grill-with-docs / grilling / handoff / setup-matt-pocock-skills / teach / to-spec / to-tickets / triage / wayfinder。**装回 = 启用 mattpocock 插件即恢复，不用复制**。其余裸名（diagnosing-bugs / tdd / request-refactor-plan / to-prd / to-issues 等）是真目录本体。
 - 依赖：无
 - 备注：**双形态并存**（memory `matt-skills-dual-form`）：裸名 model-invoked 可调；插件版 14 个 user-invoked 模型调不到需手动敲（含 ask-matt，见 `ask-matt-key-flow-decision`）。选型拍板：Matt 主力 + Superpowers 备用 + ECC 跳过（memory `skill-ecosystem-choice-2026-07`）。
 
@@ -55,8 +55,25 @@
   - 内容提取/平台：agent-reach / content-to-note / bili-note / douyin-video-summary / aihot / nuwa-skill
   - 其他：grilling / grill-with-docs / leader / darwin-skill / lean-ctx（skill 部分）/ gitnexus-exploring / ppt-master / understand-anything（另有插件版）/ full-output-enforcement（待考证来源）
 
+## 单件登记（含地址/装法/位置）
+
+### last30days
+- 来源：https://github.com/mvanhorn/last30days-skill
+- 安装日期：待补（2026-08-07 去链接化时复制进 .claude）
+- 安装方法：clone/copy 进 `~/.claude/skills/last30days`（真目录本体）
+- 装到哪：`~/.claude/skills/last30days`（SKILL.md / agents / references / scripts）
+- 依赖：见 SKILL.md（拉 Reddit/X/YouTube/TikTok/HN/Polymarket/GitHub 数据，部分源需对应可用性；自带 doctor 健康检查）
+- 备注：原是指向 cc-switch 的 symlink，2026-08-07 复制为 .claude 真目录。
+
+### hallmark
+- 来源：待补（SKILL.md frontmatter 无 github/homepage，v1.1.0）
+- 安装日期：待补（2026-08-07 去链接化时复制进 .claude）
+- 安装方法：copy 进 `~/.claude/skills/hallmark`（真目录本体）
+- 装到哪：`~/.claude/skills/hallmark`（SKILL.md / references）
+- 备注：Anti-AI-slop 设计 skill（greenfield/audit/redesign/design 提取）。原是指向 cc-switch 的 symlink，2026-08-07 复制为 .claude 真目录。
+
 ## 待补来源（安装时没记，回溯困难——以后装完当轮登记）
-- 以上散件的逐仓库 GitHub 地址与安装日期均未记录；需要重装时按名字在 cc-switch 源或对应作者仓库检索。
+- 除 last30days/hallmark 外，以上散件的逐仓库 GitHub 地址与安装日期均未记录；需要重装时按名字在 cc-switch 源或对应作者仓库检索。
 
 ## 已卸载/备份
 - `_weak-model-backup/`：2026-07-28 Carl 文章二轮精简移入 16 个（memory `skill-trim-carl-article-2026-07-28`）；判定原则见 skill-trimmer。

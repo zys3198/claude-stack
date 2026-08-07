@@ -33,7 +33,7 @@ description: 把公众号/B站/抖音链接提取整理成结构化 Markdown 笔
 脚本:本 skill 自带 `scripts/wechat/run.js`。它集成了 [wechat-article-extractor](https://github.com/freestylefly/wechat-article-extractor-skill) 的 `extract.js`(完整解析:标题/作者/摘要/正文/封面/版权/类型/迁移检测/标签/内嵌公众号链接/错误码 1000-2016)。
 
 ```powershell
-node C:\Users\zys31\.cc-switch\skills\content-to-note\scripts\wechat\run.js "<mp-url>" "<wiki/71-wechat-articles/YYYY-MM-DD-标题.md>"
+node C:\Users\zys31\.claude\skills\content-to-note\scripts\wechat\run.js "<mp-url>" "<wiki/71-wechat-articles/YYYY-MM-DD-标题.md>"
 ```
 
 原理:**直连抓取**(微信 UA + 跟随 302 + UTF-8 Buffer)→ `extract(html, {url})` 解析。绕过 extractor 自带的 request-promise 抓取路径(微信会挡),复用它的成熟解析。
@@ -49,13 +49,13 @@ node C:\Users\zys31\.cc-switch\skills\content-to-note\scripts\wechat\run.js "<mp
 
 ### B站
 
-调 bili-note skill(`~/.cc-switch/skills/bili-note`)。它有完整流程:元数据 / 字幕 / ASR / 评论 / 归档 / 预算 / 评分。
+调 bili-note skill(`~/.claude/skills/bili-note`)。它有完整流程:元数据 / 字幕 / ASR / 评论 / 归档 / 预算 / 评分。
 
 边界:bili-note 的**原始材料归档**(默认 D:\knowledge\…)保持原处不动,本 skill 只把整理后的**学习型笔记**存进 wiki/70-video-notes/。
 
 ### 抖音
 
-调 douyin-video-summary skill(`~/.cc-switch/skills/douyin-video-summary`)。流程:浏览器取音频 → whisper 转写 → 摘要。
+调 douyin-video-summary skill(`~/.claude/skills/douyin-video-summary`)。流程:浏览器取音频 → whisper 转写 → 摘要。
 
 ## 笔记规范
 

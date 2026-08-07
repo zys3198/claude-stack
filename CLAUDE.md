@@ -12,6 +12,17 @@
 
 **场景路由**：编码 → `ai-coding-guide`；中文技术文章写改审 → `article-writing-guide`；学习调研 → `learning-guide`；UI/视觉 → `frontend-guide`。多域任务逐域调路由；用户点名其他 skill 则尊重。
 
+**域外直调**（不进四域的常见场景，模型按此直接调，无需先走路由器）：
+- 硬 bug / 调试卡住 → `diagnosing-bugs`
+- 新功能/需求不清，先立 spec → `spec-driven-development`
+- 浏览器自动化 / 截图 / 填表 / UI 调试 → `playwright`
+- Claude API/SDK 查询（model id/参数/streaming/tool use）→ `claude-api`
+- 公众号/B站/抖音链接 → 结构化笔记 → `content-to-note`
+- 办公文档 → `docx`/`pptx`/`xlsx`/`pdf`（按文件类型）
+- 思维/决策卡住、质疑共识、挖隐藏前提 → `critical-thinking`/`zoom-out`/`logic-triple-check`/`implicit-assumption`
+- 造/改 skill → `skill-creator`；过度设计审查 → `ponytail-review`
+- 并行分支隔离 → `worktrees`
+
 ---
 
 ## 1. 代码改动全流程 [质量/安全]
@@ -22,6 +33,7 @@
 - **人工确认线**：密钥修改/数据库迁移/文件删除/推送/commit——AI 不可自主执行。commit 前展示 `git diff --cached --stat`。
 - **改动确认线**：动 ≥3 文件 / 跨多目录 / 改全局配置 / 不可逆操作前，先 1-2 行说明「改哪些文件+目标」，确认再动手。
 - **AI 代码默认必审**：读着顺 ≠ 对；不让自己 review 自己。
+- **装后必登记**：安装/卸载任何 skill、MCP、插件、CLI/桌面三方工具，或新建自建 skill/hook 后，当轮在 `~/.claude/installing/` 对应 md（skill-install / mcp-install / tool-install / custom-setup）补一条记录（来源、日期、安装命令原文、装到哪、依赖、备注）。目的：拿 md 即可原样装回。
 
 ---
 
@@ -68,6 +80,9 @@
 - 编码：文件读写强制 `encoding='utf-8'`；subprocess 输出加 `env={'PYTHONIOENCODING':'utf-8'}`（防 GBK 乱码）。
 - Python 解释器用 `python312`。后台 MCP 用 `pythonw.exe` 免弹窗。
 - Rust/编译工具链（MinGW64、MSVC）可能不可用。优先 pre-built 或 pip 安装。
+- **命令执行纪律**：简单系统命令用 PowerShell；批量文件、中文编码、复杂路径、大量文本优先写一次性 Python 脚本。
+- **失败止损**：同一执行方式连续失败两次即停，先说明原因再换方案，不盲目改路径/引号/转义反复试。
+- **文件操作**：动前确认目标路径，完成后检查处理结果。
 - **Edit 预读只认原生 Read**：ctx_read（MCP）已读不算，Edit 前必须原生 `Read`。ctx_edit 未装，别指望。
 
 ---
