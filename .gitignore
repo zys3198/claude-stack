@@ -125,3 +125,5 @@ skills/*
 !skills/review-doc/
 !skills/skill-trimmer/
 !skills/tutorial-maker/
+!skills/tech-article-review/
+!skills/shadcn-vue-guide/
