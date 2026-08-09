@@ -142,17 +142,22 @@
 <!-- CAVEMAN_END -->
 
 <!-- lean-ctx -->
-<!-- lean-ctx-claude-v3 -->
+<!-- lean-ctx-claude-v9 -->
 ## lean-ctx — Context Runtime
 
-Always prefer lean-ctx MCP tools over native equivalents:
-- `ctx_read` instead of `Read` / `cat` (cached, 10 modes, re-reads ~13 tokens)
+When the `ctx_*` MCP tools are listed in this session, prefer them over native equivalents:
+- `ctx_read` instead of `Read` / `cat` for exploration (cached, 10 modes, re-reads ~13 tokens)
 - `ctx_shell` instead of `bash` / `Shell` (95+ compression patterns)
 - `ctx_search` instead of `Grep` / `rg` (compact results)
 - `ctx_tree` instead of `ls` / `find` (compact directory maps)
-- Native Edit/StrReplace stay unchanged. If Edit requires Read and Read is unavailable, use `ctx_edit(path, old_string, new_string)` instead.
-- Write, Delete, Glob — use normally.
+- Edits: `ctx_read(mode="anchored")` → `ctx_patch` (line+hash anchors, never echo old text; `op=create` for new files). `ctx_edit` (str_replace) is the legacy power-profile fallback.
 
-Read modes: full (edit), map (overview), signatures (API), diff (post-edit), lines:N-M (range), auto.
+Native `Read` → `Edit`/`StrReplace` stays fully supported — the edit gate requires a
+prior native Read of the same file path. Auto memory under
+`~/.claude/projects/<slug>/memory/` also uses native Read/Edit (not MCP resources).
+Write, Delete, Glob — use normally.
+If no `ctx_*` tools are listed in this session, use the native tools throughout.
+
+Read modes: anchored (edit), full (verbatim), map (overview), signatures (API), diff (post-edit), lines:N-M (range), auto.
 Details live in the `lean-ctx` skill (loads on demand — keep this file lean).
 <!-- /lean-ctx -->
