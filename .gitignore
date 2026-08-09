@@ -102,7 +102,7 @@ plugins/marketplaces/better-harness/
 skills/*
 !skills/ai-coding-coach/
 !skills/ai-coding-guide/
-!skills/ai-text-polisher/
+# !skills/ai-text-polisher/  (skill deleted 2026-08-08, replaced by human-writing)
 !skills/article-writer/
 !skills/article-writing-guide/
 !skills/cc-switch-setting-sync/

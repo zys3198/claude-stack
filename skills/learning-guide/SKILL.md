@@ -1,6 +1,6 @@
 ---
 name: learning-guide
-description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / research / last30days / obsidian-vault / expose-unknowns 等。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 frontend-guide）。<!-- v1.4.7 -->
+description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / research / last30days / expose-unknowns。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 frontend-guide）。<!-- v1.4.8 -->
 ---
 
 # 学习路由指南（Claude Code）
@@ -59,7 +59,7 @@ learning-guide 相关？ YES/NO —— <一句理由>
 | 学习者本人要一条可执行路线+作业（学习路线/学习计划/roadmap/帮我学/我想学/学习路径/制定学习计划） | 学习路线图 | `tech-learning-roadmap` | 手动分阶段列路线+作业 |
 | 委派后台查一手资料、存成 md | 查资料 | `research` | 前台 WebSearch + 落盘 |
 | 查近 30 天社区/舆情/真实用户声音 | 舆情调研 | `last30days` | WebSearch 限时 |
-| 笔记/速查表存进 wiki 落库 | 记笔记 | `obsidian-vault` | 手动写 md 到 vault |
+| 笔记/速查表存进 wiki 落库 | 记笔记 | 手动写 md 到 vault（`obsidian-vault` 已删） | 手动写 md 到 vault |
 | 公众号/B站/抖音链接 → 提取成结构化笔记落 wiki | 链接做笔记 | `content-to-note`（自动识别来源路由，底层由 `bili-note`/`douyin-video-summary` 提取） | 手动复制正文整理 |
 | 开工前不知道自己不知道什么、要扫盲判级 | 判级扫盲 | `expose-unknowns` | `code-change-workflow` skill §1.1 判级一行 |
 | 工作区内教我一个技能、多会话（**仅用户手动 `/teach` 触发**，`disable-model-invocation`，agent 不可自动调） | 跟学技能 | 用户自行 `/teach` | 手动分次讲解 |

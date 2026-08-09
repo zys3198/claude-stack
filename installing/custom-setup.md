@@ -2,7 +2,7 @@
 
 记录自建 skill / hook / statusline / 全局配置的出处与迁移要点。外部装的见 skill-install.md / mcp-install.md / tool-install.md。
 
-自建资产迁移原则：**git 仓库已追踪全部自建**（24 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` 白名单），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
+自建资产迁移原则：**git 仓库已追踪全部自建**（26 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单 26 行；2026-08-08 实测），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
 
 ---
 
@@ -29,8 +29,8 @@
 ### cc-switch-setting-sync
 - 出处：防 cc-switch 切换 provider 降级 settings.json 的同步流程
 
-### 写作 skill（自建 13 个）
-- article-writer / edit-article / ai-text-polisher / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / review-doc / tech-article-review / content-to-note
+### 写作 skill（自建 12 个）
+- article-writer / edit-article / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / review-doc / tech-article-review / content-to-note
 - 出处：2026-06/07 写作流程沉淀；publish-final-check 演进耦合在 article-writing-guide/CHANGELOG.md；plagiarism-audit 针对实战漏网（Codex-book 整源漏审）设计；tech-article-review 与 review-doc 划边界（单 agent 逐段增量 vs 4 agent 并行）
 
 ### 学习 skill（自建 3 个）
@@ -48,6 +48,9 @@
 ### ~~obsidian-vault~~（2026-08-07 删除）
 - 曾硬编码 wiki 路径（C:\ZYS\Code\wiki），用户拍板删除磁盘目录。若日后需要按 skill-install.md 散件检索重装。
 
+### ~~ai-text-polisher~~（2026-08-08 删除，被 human-writing 替代）
+- `.gitignore` 白名单行已注释（原文：`# !skills/ai-text-polisher/  (skill deleted 2026-08-08, replaced by human-writing)`）。磁盘 `skills/ai-text-polisher/` 真目录已物理删除（2026-08-08 盘查确认不在）。
+
 ### learning-guide 配套归档
 - 学习记录归档流程，归档目录 `C:\ZYS\Wiki\80-records`（外部路径，迁移时另拷）
 
@@ -56,9 +59,11 @@
 ### ~/.claude/hooks/
 - ecc 系 hooks（Fact-Forcing Gate / GateGuard 等）随 ecc 插件来；另有自建/调整个别脚本
 - 备份：`~/.claude/hooks/HOOKS_BACKUP.md`
+- **~~turn_counter.py~~ / ~~learning_nudge.py~~（2026-08-08 已删）**：曾为死代码（settings.json 未引用），2026-08-08 经用户确认物理删除；状态文件 `turn_state.json` / `learning_state.json` 同删。hooks/ 现仅留 settings.json 引用的 7 个 Python hook。
 
 ### statusline（已脱离 ecc）
 - 位置：`~/.claude/statusline`，含 cost + git 分支段（memory `statusline-independent-of-ecc`）
+- 文件清单（2026-08-08 实测）：`statusline.js`（入口，settings.json statusLine 调它）+ `cost-tracker.js` + `context-monitor.js` + `metrics-bridge.js` + `lib/`（agent-data-home.js / session-bridge.js / utils.js）
 - 坑：ecc 升级可能重置 settings.json 里的 statusLine 路径，升级后检查。
 
 ### settings.json 关键本机定制

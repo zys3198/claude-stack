@@ -2,6 +2,12 @@
 
 本文件记录 learning-guide 路由 skill 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.4.8] - 2026-08-07
+
+### Fixed
+
+- description 路由目标列表删范畴词「等」（「路由到 deep-learn / ... / expose-unknowns 等」-> 删「等」，列表已列主要下游不必用范畴词兜底）。证据：guide-skill-auditor v1.4.0 第3项盲区扩展（description 路由目标列表范畴词同查），自审检出 FAIL。
+
 ## [v1.4.7] - 2026-08-07
 
 ### Added

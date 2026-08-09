@@ -4,6 +4,27 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.4.5] - 2026-08-08
+
+### Changed
+
+- 删除 `ai-text-polisher` skill，`human-writing` 完全替代。用户实测 `human-writing` 在从零写和改写两场景效果都更好（从材料/说话位置/散文韵律治本 > 检测器指标驱动治表）。
+- §1 ③ 起草-从零 拆两路：技术博客/方案/教程 -> `article-writer`；知乎/论坛/公众号观点/故事/口播 -> `human-writing`。
+- §1 ⑤ 去 AI 味：`ai-text-polisher` -> `human-writing`🪨（大幅重写，从材料/说话位置治本）；触发词去掉「过不了朱雀」（human-writing 无量化检测验收）。
+- §2 改写四选：去 AI 味档 `ai-text-polisher` -> `human-writing`；串行顺序 edit-article -> human-writing -> chinese-markdown-normalizer；AI 味根因治理段重写（human-writing 本身即源头治理）。
+- §3 通用 pipeline / 协作流 / 边学边写 pipeline：去 AI 味环节 `ai-text-polisher` -> `human-writing`。
+- §4 失败模式表 / §7 示例 / §0 语言边界：`ai-text-polisher` -> `human-writing`。
+- REFERENCE.md §2/§4/§8、test-prompts.json 同步清理死引用。
+
+### Removed
+
+- `ai-text-polisher` skill 目录删除。丢失检测器量化验收闭环（朱雀 AI率<30% / contentany 同质化≤20%），用户已知情接受；要过朱雀需手动测。`publish-final-check` §2③ AI 味关键词黑名单自检保留（不依赖 polisher）。
+
+### Rationale
+
+- 路由表漂移修复：`human-writing` 2026-08-07 已装（台账 `installing/skill-install.md` 写作域清单为证）但 §1 路由表漏收。
+- 连带清理 13 个文件的 `ai-text-polisher` 引用：article-writing-guide（SKILL/REFERENCE/test-prompts）、publish-final-check、skill-trimmer、guide-skill-auditor、installing×2、docs/config-checklist、.gitignore。docs/config-inventory.md 已废弃（2026-07-03 声明不再更新），未改。
+
 ## [v1.4.4] - 2026-07-31
 
 ### Fixed

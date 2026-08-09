@@ -2,6 +2,12 @@
 
 本文件记录 frontend-guide 路由 skill 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.5.5] - 2026-08-07
+
+### Fixed
+
+- description 路由目标列表删范畴词「各风格预设」（「.../ design-an-interface / 各风格预设」-> 删「/ 各风格预设」）。证据：guide-skill-auditor v1.4.0 第3项盲区扩展（description 路由目标列表范畴词同查），自审检出 FAIL。
+
 ## [v1.5.4] - 2026-08-07
 
 ### Added

@@ -1,6 +1,6 @@
 # claude-stack
 
-个人的 Claude Code 配置体系仓库（`~/.claude`）。统一管理 CLAUDE.md 全局指令、hooks、agents、skills、statusline、cc-switch/codex 配置快照，以及第三方 plugin marketplace。
+个人的 Claude Code 配置体系仓库（`~/.claude`）。统一管理 CLAUDE.md 全局指令、hooks、agents、skills、statusline、cc-switch 配置快照，以及第三方 plugin marketplace。
 
 ## 目录结构
 
@@ -11,9 +11,8 @@
 | `hooks/` | 拦截/守卫 hook（verify_gate、git_guard、secret_guard、placeholder_guard 等） |
 | `skills/` | 全部 skill（114 目录）。cc-switch 软链接已解析为实文件，git 直接追踪 |
 | `statusline/` | 状态栏 JS（statusline.js、cost-tracker、context-monitor、metrics-bridge） |
-| `codex/` | codex 配置模板与迁移文档 |
 | `docs/` | 配置清单、盘点、迁移计划 |
-| `external-configs/` | cc-switch/codex 非敏感配置**快照副本**（复制非 symlink，同步见该目录 README） |
+| `external-configs/` | cc-switch 非敏感配置**快照副本**（复制非 symlink，同步见该目录 README） |
 | `plugins/marketplaces/` | 第三方 plugin marketplace（ecc、claude-plugins-official、anthropic-agent-skills 等） |
 | `lib/` | lib 资源 |
 
@@ -22,7 +21,7 @@
 - **运行时会话**：`projects/`、`sessions/`、`session-data/`、`cache/`、`metrics/`、`telemetry/`、`backups/`、`plans/` 等
 - **本地配置/密钥**：`settings.json`、`settings.local.json`、`config.json`、`history.jsonl`、`.env`、`*.token`、`*.key`
 - **usage-data**：`facets/`、`session-meta/`（运行时生成）
-- **external-configs 的敏感源**：`~/.cc-switch/cc-switch.db`、各 `auth.json`、`~/.claude.json`、`~/.codex/config.toml` 等（见 `external-configs/README.md`）
+- **external-configs 的敏感源**：`~/.cc-switch/cc-switch.db`、各 `auth.json`、`~/.claude.json` 等（见 `external-configs/README.md`）
 
 ## 维护
 

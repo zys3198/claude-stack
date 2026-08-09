@@ -54,7 +54,7 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 6. 用户确认初稿后才落盘或调用会改文件的下游 skill；长文按节落盘，不把未确认章节写死。
 7. 用户审查后先处理结构问题，再处理论点/例子，最后处理文风和排版。
 
-与下游 skill 分工：这是 `article-writer` 前置协作层；需要调研先跑 `doc-finder`/`agent-reach`/`deep-research`，需要去 AI 味再跑 `ai-text-polisher`，发布前仍跑 `publish-final-check`。
+与下游 skill 分工：这是 `article-writer` 前置协作层；需要调研先跑 `doc-finder`/`agent-reach`/`deep-research`，需要去 AI 味再跑 `human-writing`，发布前仍跑 `publish-final-check`。
 
 ### 不要做
 
@@ -109,12 +109,12 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 | 用户原话 | 真实意图 | skill |
 |---------|---------|-------|
 | "结构乱""重新组织""逻辑不顺""章节调整" | 改**骨架** | `edit-article` 🪨 |
-| "AI 味重""不像人写的""文风生硬""改自然点" | 改**肉**（措辞/语气） | `ai-text-polisher` 🪨 |
+| "AI 味重""不像人写的""文风生硬""改自然点" | 改**肉**（措辞/语气） | `human-writing` 🪨 |
 | "中英文空格""标点不对""标题层级乱""引号格式""批量规范" | 改**皮**（排版） | `chinese-markdown-normalizer` 🪶 |
 | "深度改写整篇""重写这篇""骨架和措辞都要动" | 改**骨架+肉**（整体重写） | `article-writer` 🪨（深度改写模式） |
 | "帮我改改这篇"（模糊） | 不确定 | 先问改哪层；或按 骨架→肉→皮 顺序串行；若要整体重写走 `article-writer` |
 
-**串行顺序**（三层都要改时）：`edit-article` → `ai-text-polisher` → `chinese-markdown-normalizer`。先动骨架会牵动措辞；最后规范排版避免反复改格式。
+**串行顺序**（三层都要改时）：`edit-article` → `human-writing` → `chinese-markdown-normalizer`。先动骨架会牵动措辞；最后规范排版避免反复改格式。
 
 ## 5. 审校三 skill + 发布闸选择
 
@@ -177,7 +177,7 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 
 1. `article-writer` 🪨 起草（系统教程/系列课用 `tutorial-maker`；素材塑形用 `writing-shape`）
 2. `edit-article` 🪨 调结构
-3. `ai-text-polisher` 🪨 去 AI 味
+3. `human-writing` 🪨 去 AI 味
 4. `drawio-article-illustration` 🪶 + `drawio-chart` 🪨 配图
 5. `multi-review-pipeline` 🔥 多维度审校 + 批量改
 6. `plagiarism-audit` 🪨 查重（只比贴源，**需外部来源，否则跳过**）
@@ -209,7 +209,7 @@ JavaGuide 模式：步骤1 切 JavaGuide 模式（执行规范见 `article-write
 
 - ❌ 用户说"写篇文章"就直接徒手写 → 应委派 `article-writer`。
 - ❌ 涉及起草/改写/边学边写时，未给用户看初稿就直接写文件 → 应先对话预览，确认后落盘。
-- ❌ 用户说"去 AI 味"用 `edit-article` → 应 `ai-text-polisher`（edit-article 改结构不改文风）。
+- ❌ 用户说"去 AI 味"用 `edit-article` → 应 `human-writing`（edit-article 改结构不改文风）。
 - ❌ 跳过 `drawio-article-illustration` 直接画图 → 易产装饰图。
 - ❌ 无外部来源就跑 `plagiarism-audit` → 会空转（用户声明无源才跳过）。
 - ❌ 把本路由器当执行器（自己重写各 skill 能力） → 本 skill 只**定路由**，执行委派给具体 skill。

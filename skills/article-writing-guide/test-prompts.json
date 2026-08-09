@@ -12,7 +12,7 @@
   {
     "id": 3,
     "prompt": "write an English tutorial on Docker networking, then edit it",
-    "expected": "英文文章 → article-writer/edit-article 可用，但跳过 chinese-markdown-normalizer 与 ai-text-polisher（中文专用）。验证 M4 语言边界。"
+    "expected": "英文文章 → article-writer/edit-article 可用，但跳过 chinese-markdown-normalizer 与 human-writing（中文专用）。验证 M4 语言边界。"
   },
   {
     "id": 4,
@@ -22,7 +22,7 @@
   {
     "id": 5,
     "prompt": "帮我改改这篇",
-    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→ai-text-polisher→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
+    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→human-writing→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
   },
   {
     "id": 6,

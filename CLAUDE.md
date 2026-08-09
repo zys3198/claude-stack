@@ -30,6 +30,7 @@
 **执行细则已迁 skill**：改前/改中/改后清单、AI 代码审查、调试、Agent 调度、止血回退 → `code-change-workflow` skill（编码任务按需加载）。路由见 §0。
 
 **常驻硬约束（高代价，不进 skill）：**
+
 - **人工确认线**：密钥修改/数据库迁移/文件删除/推送/commit——AI 不可自主执行。commit 前展示 `git diff --cached --stat`。
 - **改动确认线**：动 ≥3 文件 / 跨多目录 / 改全局配置 / 不可逆操作前，先 1-2 行说明「改哪些文件+目标」，确认再动手。
 - **AI 代码默认必审**：读着顺 ≠ 对；不让自己 review 自己。
@@ -40,6 +41,7 @@
 ## 5. 规则管理 [质量]
 
 **放**：AI 反复犯的错。**不放**：已被 lint 强制的规则。
+
 - hook 备份：`~/.claude/hooks/HOOKS_BACKUP.md`
 - 本机覆盖：个人本机偏好走 `settings.local.json`（官方机制），不建臆造文件名。
 - **GateGuard 拦非代码 Edit**：编辑 CLAUDE.md/.json 等配置被 Fact-Forcing Gate 拦时，声明「无代码 import/无公共函数/无数据文件读写」+ 引用户指令原文，重试即过。无需改 ECC_DISABLED_HOOKS。
@@ -53,8 +55,6 @@
 | 自主 | 代码风格、明显 bug、常规优化、类型定义 |
 | 询问确认 | 技术选型、架构模式、命名 |
 | 必须确认 | 技术栈变更、数据结构调整、关键业务分支 |
-
-**默认技术栈**：前端任务默认 `shadcn/ui` + `npx shadcn@latest init`，不手动搭 UI 库；用户点名别的才换。
 
 ---
 

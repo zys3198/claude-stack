@@ -1,2 +1,0 @@
-#!/bin/sh
-exec /c/Users/zys31/.cargo/bin/lean-ctx.exe hook redirect

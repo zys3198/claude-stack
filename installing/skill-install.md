@@ -47,12 +47,12 @@
 
 ### 思维/写作/学习类散件（cc-switch 同步，来源多为各作者仓库，逐个待补）
 - 安装方法：cc-switch 同步进 `~/.claude/skills/`
-- 清单（2026-08-07 盘点，119 个 skill 详见 memory `skill-routing-overhaul-2026-08-07`）：
-  - 写作域：article-writer / edit-article / ai-text-polisher / human-writing / chinese-markdown-normalizer / javaguide-style-guide / publish-final-check / plagiarism-audit / review-doc / tech-article-review / multi-review-pipeline / drawio-article-illustration / drawio-chart
-  - 学习域：deep-learn / cram-engine / tutorial-maker / research / last30days / tech-learning-roadmap（需 Exa API key，已配）/ obsidian-vault / learned
-  - 前端域：frontend-design / frontend-ui-engineering / design-taste-frontend / emil-design-eng / apple-design / minimalist-ui / industrial-brutalist-ui / high-end-visual-design / impeccable / hallmark / hyperframes / animation-vocabulary / improve-animations / review-animations / find-animation-opportunities / pick-ui-library / redesign-existing-projects / design-an-interface / shadcn-vue-guide / imagegen-frontend-web / imagegen-frontend-mobile / remotion
-  - 编码域散件：code-review / code-review-and-quality / debugging-and-error-recovery / git-workflow-and-versioning / security-and-hardening / spec-driven-development / simplify / neat-freak / improve-codebase-architecture / understand / understand-onboard / github-task / playwright / claude-api / officecli / storage-analyzer
-  - 内容提取/平台：agent-reach / content-to-note / bili-note / douyin-video-summary / aihot / nuwa-skill
+- 清单（2026-08-08 实测 105 个 = 94 真目录 + 11 junction/symlink；前值 2026-08-07 盘点 119，详见 memory `skill-routing-overhaul-2026-08-07`；下表为分类示例，个别项可能属插件/未同步/已删，以磁盘为准）：
+  - 写作域：article-writer / edit-article / human-writing / chinese-markdown-normalizer / javaguide-style-guide / publish-final-check / plagiarism-audit / review-doc / tech-article-review / multi-review-pipeline / drawio-article-illustration / drawio-chart
+  - 学习域：deep-learn / cram-engine / tutorial-maker / research / last30days / tech-learning-roadmap（需 Exa API key，已配）/ learned
+  - 前端域：frontend-ui-engineering / design-taste-frontend / emil-design-eng / apple-design / minimalist-ui / industrial-brutalist-ui / high-end-visual-design / impeccable / hallmark / hyperframes / animation-vocabulary / improve-animations / review-animations / find-animation-opportunities / pick-ui-library / redesign-existing-projects / design-an-interface / shadcn-vue-guide / imagegen-frontend-web / imagegen-frontend-mobile / remotion
+  - 编码域散件：code-review / code-review-and-quality / debugging-and-error-recovery / git-workflow-and-versioning / security-and-hardening / spec-driven-development / simplify / neat-freak / improve-codebase-architecture / understand / understand-onboard / github-task / playwright / officecli / storage-analyzer
+  - 内容提取/平台：agent-reach / content-to-note / bili-note / douyin-video-summary / nuwa-skill
   - 其他：grilling / grill-with-docs / leader / darwin-skill / lean-ctx（skill 部分）/ gitnexus-exploring / ppt-master / understand-anything（另有插件版）/ full-output-enforcement（待考证来源）
 
 ## 单件登记（含地址/装法/位置）

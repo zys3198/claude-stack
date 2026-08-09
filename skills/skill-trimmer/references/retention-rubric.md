@@ -23,7 +23,7 @@
 ### A 类 · 偏好沉淀（模型猜不到的固定产物）
 特征：文章风格、图表规范、公司/项目内部模板、特定代码库发布流程。
 判据：没有它，每次交付风格会漂移；有了它，同一套标准能稳定复现。
-例：draw.io 绘图 skill（固定图表样式+避开反复踩的排版坑）、ai-text-polisher（文风）、javaguide-style-guide。
+例：draw.io 绘图 skill（固定图表样式+避开反复踩的排版坑）、human-writing（文风）、javaguide-style-guide。
 本机对应：`learned/` 目录（ai-coding-coach 沉淀）、各 guide 的风格预设。
 
 ### B 类 · 专业判断 + 脚本/资料

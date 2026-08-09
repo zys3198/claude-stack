@@ -1,6 +1,6 @@
 ---
 name: frontend-guide
-description: Use when 用户要做 UI、前端页面、组件、落地页、视觉设计、改样式、升级界面质感、做/改/审动画动效，且没明确点名具体前端/设计 skill。是前端/视觉域的开工路由器，路由到 design-taste-frontend / frontend-ui-engineering / shadcn-vue-guide / redesign-existing-projects / imagegen-frontend-* / design-an-interface / 各风格预设，动画动效类路由到 emil-design-eng / review-animations / improve-animations / find-animation-opportunities / animation-vocabulary / apple-design / pick-ui-library。触发词：做个页面、登录页、落地页、UI、前端、组件、界面设计、改样式、页面太丑、升级质感、网站设计、写个界面、做个界面、动画、动效、丝滑、回弹、过渡、转场。含"页面/界面/UI/落地页/登录页"或动画动效诉求且要视觉产出时优先于编码路由，即使用户同时提到"写代码/做完顺便写"——设计方向先行，实现阶段本路由已覆盖。不用于：纯写代码逻辑无界面（走 ai-coding-guide）、画图配图（走 drawio-chart）、写文章（走 article-writing-guide）。<!-- v1.5.4 -->
+description: Use when 用户要做 UI、前端页面、组件、落地页、视觉设计、改样式、升级界面质感、做/改/审动画动效，且没明确点名具体前端/设计 skill。是前端/视觉域的开工路由器，路由到 design-taste-frontend / frontend-ui-engineering / shadcn-vue-guide / redesign-existing-projects / imagegen-frontend-* / design-an-interface，动画动效类路由到 emil-design-eng / review-animations / improve-animations / find-animation-opportunities / animation-vocabulary / apple-design / pick-ui-library。触发词：做个页面、登录页、落地页、UI、前端、组件、界面设计、改样式、页面太丑、升级质感、网站设计、写个界面、做个界面、动画、动效、丝滑、回弹、过渡、转场。含"页面/界面/UI/落地页/登录页"或动画动效诉求且要视觉产出时优先于编码路由，即使用户同时提到"写代码/做完顺便写"——设计方向先行，实现阶段本路由已覆盖。不用于：纯写代码逻辑无界面（走 ai-coding-guide）、画图配图（走 drawio-chart）、写文章（走 article-writing-guide）。<!-- v1.5.5 -->
 ---
 
 # 前端路由指南（Claude Code）
