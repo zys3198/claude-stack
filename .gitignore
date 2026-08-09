@@ -95,6 +95,7 @@ Thumbs.db
 **/*.pyo
 **/.ruff_cache/
 plugins/marketplaces/better-harness/
+plugins/marketplaces/mattpocock/
 
 # ----- skills: 默认忽略全部, 只追踪自建 (2026-08-07 收窄) -----
 # 第三方/插件/官方 skill 随官方源更新、不需进 git, 只在 installing/ 台账登记。
