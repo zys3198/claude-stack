@@ -1,0 +1,52 @@
+{
+  "skill": "critical-thinking",
+  "version": "0.1.0",
+  "source_book": "《第一性原理》— 李善友",
+  "darwin_compatible": true,
+  "test_cases": [
+    {
+      "id": "should-trigger-01",
+      "type": "should_trigger",
+      "prompt": "我感觉自己被信息茧房困住了，怎么才能独立思考不被带节奏？",
+      "expected_behavior": "应激活 critical-thinking, 引导用户执行可证伪性检查和普遍怀疑",
+      "notes": "直接匹配信息茧房/独立思考的语言信号"
+    },
+    {
+      "id": "should-trigger-02",
+      "type": "should_trigger",
+      "prompt": "为什么我总是不愿意承认自己错了？怎么才能做到真正的自我反思？",
+      "expected_behavior": "应激活 critical-thinking, 帮助用户将'我'与'我的思想'解绑",
+      "notes": "匹配'不愿意承认错误'的可证伪性触发信号"
+    },
+    {
+      "id": "should-trigger-03",
+      "type": "should_trigger",
+      "prompt": "对某个深信不疑的观点开始产生怀疑，但不确定是自己错了还是大家错了",
+      "expected_behavior": "应激活 critical-thinking, 引导用户先做'我错了'检查，再做'我们错了'检查",
+      "notes": "典型的元认知场景——审视自己的思维过程本身"
+    },
+    {
+      "id": "should-not-trigger-01",
+      "type": "should_not_trigger",
+      "prompt": "紧急！生产服务器宕机了，怎么办？",
+      "expected_behavior": "不应激活本 skill, 因为这是紧急情况，需要快速行动而非批判性反思",
+      "notes": "诱饵: 紧急情况，批判性思维需要时间"
+    },
+    {
+      "id": "should-not-trigger-02",
+      "type": "should_not_trigger",
+      "prompt": "请帮我查一下万有引力常数是多少",
+      "expected_behavior": "不应激活本 skill, 因为这是信息查询，不是认知反思",
+      "notes": "诱饵: 纯信息查询，不需要元认知"
+    },
+    {
+      "id": "edge-01",
+      "type": "edge_case",
+      "prompt": "公司内部所有人都认为应该收购竞争对手，但我觉得有问题",
+      "expected_behavior": "可以激活 critical-thinking，用可证伪性+普遍怀疑+逻辑三洽分析收购共识；但也可能更适合 contrarian-decision（如果用户已决定反对）",
+      "notes": "边界: 批判性思维（审视思维本身）vs 反共识决策（独立行动）的分界线"
+    }
+  ],
+  "minimum_pass_rate": 0.8,
+  "notes": "至少 3 条 should_trigger + 2 条 should_not_trigger + 1 条 edge_case。全部 should_not_trigger 必须通过 (诱饵容错为 0)。"
+}
