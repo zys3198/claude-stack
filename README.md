@@ -9,16 +9,16 @@
 | `CLAUDE.md` | 全局指令（给 AI 的规则） |
 | `agents/` | 自定义 agent 定义（design/engineering/security/testing） |
 | `hooks/` | 拦截/守卫 hook（verify_gate、git_guard、secret_guard、placeholder_guard 等） |
-| `skills/` | 全部 skill（114 目录）。cc-switch 软链接已解析为实文件，git 直接追踪 |
+| `skills/` | 只追踪自建 skill（`.gitignore` 白名单制，31 个，2026-08-11 用户人工复核定稿）；第三方 skill 不进 git，来源登记在 `installing/skill-install.md` |
 | `statusline/` | 状态栏 JS（statusline.js、cost-tracker、context-monitor、metrics-bridge） |
 | `docs/` | 配置清单、盘点、迁移计划 |
 | `external-configs/` | cc-switch 非敏感配置**快照副本**（复制非 symlink，同步见该目录 README） |
-| `plugins/marketplaces/` | 第三方 plugin marketplace（ecc、claude-plugins-official、anthropic-agent-skills 等） |
+| `plugins/marketplaces/` | 第三方 plugin marketplace clone，**不进 git**（2026-08-11 解除追踪，约 97 MiB）；来源与安装方法见 `installing/tool-install.md` |
 | `lib/` | lib 资源 |
 
 ## 不进 git（.gitignore）
 
-- **运行时会话**：`projects/`、`sessions/`、`session-data/`、`cache/`、`metrics/`、`telemetry/`、`backups/`、`plans/` 等
+- **运行时会话**：`projects/`、`sessions/`、`session-data/`、`cache/`、`metrics/`、`telemetry/`、`backups/`、`plans/`、`ide/` 等
 - **本地配置/密钥**：`settings.json`、`settings.local.json`、`config.json`、`history.jsonl`、`.env`、`*.token`、`*.key`
 - **usage-data**：`facets/`、`session-meta/`（运行时生成）
 - **external-configs 的敏感源**：`~/.cc-switch/cc-switch.db`、各 `auth.json`、`~/.claude.json` 等（见 `external-configs/README.md`）
@@ -32,3 +32,4 @@
 ## 历史里程碑
 
 - 2026-08-05：skills 纳入 git（cc-switch 软链接解析为实文件）+ 运行时清理 + external-configs 快照 + 3 个 gitlink 解析为实文件 + .gitignore 修复。
+- 2026-08-11：全面审查整改——skill 按用户人工复核分流（31 自建入 git / 154 非自建入 installing 台账）；marketplace clone 与运行缓存解除追踪（-97 MiB）；忽略 `ide/`（含 authToken lock）。

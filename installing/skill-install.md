@@ -72,6 +72,27 @@
 - 装到哪：`~/.claude/skills/hallmark`（SKILL.md / references）
 - 备注：Anti-AI-slop 设计 skill（greenfield/audit/redesign/design 提取）。原是指向 cc-switch 的 symlink，2026-08-07 复制为 .claude 真目录。
 
+## 散件来源反查登记（2026-08-11 公网反查确认）
+
+重装通用方法：`npx skills add <owner/repo>` 或 clone 后 copy 进 `~/.claude/skills/<name>`。以下均为第三方，不进 git。
+
+| 来源仓库 | 本地 skill |
+|---|---|
+| addyosmani/agent-skills | api-and-interface-design, browser-testing-with-devtools, ci-cd-and-automation, code-review-and-quality, code-simplification, context-engineering, debugging-and-error-recovery, deprecation-and-migration, documentation-and-adrs, doubt-driven-development, frontend-ui-engineering, git-workflow-and-versioning, idea-refine, incremental-implementation, interview-me, observability-and-instrumentation, performance-optimization, planning-and-task-breakdown, security-and-hardening, shipping-and-launch, source-driven-development, spec-driven-development, using-agent-skills |
+| kangarooking/first-principles-skill | axiomatic-thinking, contrarian-decision, implicit-assumption, logic-triple-check, multi-mental-models, organizational-refresh, reductionism-deconstruction（critical-thinking 已被用户认定为自建，入 git） |
+| Yeadon8888（仓颉生态） | cangjie-skill, nuwa-skill, darwin-skill |
+| KKKKhazix/khazix-skills | hv-analysis, leader, neat-freak, storage-analyzer |
+| emilkowalski/skills | emil-design-eng, animation-vocabulary, review-animations, improve-animations, find-animation-opportunities, apple-design, pick-ui-library |
+| alvinunreal/oh-my-opencode-slim | worktrees, codemap, clonedeps, deepwork, simplify, reflect |
+| mattpocock/skills（插件外裸名） | to-prd, to-issues, request-refactor-plan, qa, design-an-interface, zoom-out |
+| abhigyanpatwari/GitNexus（`npx gitnexus analyze` 自动装） | gitnexus-cli, gitnexus-debugging, gitnexus-exploring, gitnexus-guide, gitnexus-impact-analysis, gitnexus-pdg-query, gitnexus-pr-review, gitnexus-refactoring, gitnexus-taint-analysis |
+| leonxlnx/taste-skill（含改名副本，description 逐字相同实锤） | gpt-taste, image-to-code, minimalist-ui, industrial-brutalist-ui, redesign-existing-projects, stitch-design-taste, design-taste-frontend, design-taste-frontend-v1, high-end-visual-design, full-output-enforcement, brandkit, imagegen-frontend-mobile, imagegen-frontend-web |
+| 单件 | agent-reach=Panniantong/Agent-Reach, douyin-video-summary=liu-wei-ai, shuorenhua=MrGeDiao/shuorenhua, find-skills=vercel-labs/skills, lean-ctx=yvgude/lean-ctx, hatch-pet=openai/skills, officecli=officecli/officecli, markdown-viewer=markdown-viewer/skills, bili-note=BiliNote 系（精确上游未锁定） |
+
+插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
+
+仍未锁定来源（公网搜不到且非用户自建）：human-writing、ppt-master、qiaomu-ai-prd、remotion、playwright（本地含 LICENSE/NOTICE）、ruthless-review、tech-learning-roadmap、writing-great-skills、doc-finder 之外的 review/slop-review/design/apikey-image-gen/grok-image-to-video/hyperframes/github-task/loop-engineering 等——以磁盘现状为用，重装时按名再查。
+
 ## 待补来源（安装时没记，回溯困难——以后装完当轮登记）
 - 除 last30days/hallmark 外，以上散件的逐仓库 GitHub 地址与安装日期均未记录；需要重装时按名字在 cc-switch 源或对应作者仓库检索。
 - **cram-engine / edit-article**（2026-08-11 移入本类）：原在 Git 白名单当自建追踪，2026-08-11 用户逐个复核时未认领为自建 → 按「非自定义进 installing」规则移出白名单（磁盘目录保留）。来源待补。
