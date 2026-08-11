@@ -2,7 +2,7 @@
 
 记录自建 skill / hook / statusline / 全局配置的出处与迁移要点。外部装的见 skill-install.md / mcp-install.md / tool-install.md。
 
-自建资产迁移原则：**git 仓库已追踪全部自建**（31 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单；2026-08-11 用户人工复核定稿：勾选确认的进 Git，未认领的移出），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
+自建资产迁移原则：**git 仓库已追踪全部自建**（32 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单；2026-08-11 用户人工复核定稿：勾选确认的进 Git，未认领的移出），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
 
 ---
 
@@ -61,7 +61,7 @@
 - 学习记录归档流程，归档目录 `C:\ZYS\Wiki\80-records`（外部路径，迁移时另拷）
 
 ### wiki-sediment + /wiki-save（2026-08-11，全局）
-- 位置：`~/.claude/skills/wiki-sediment/SKILL.md` + `~/.claude/commands/wiki-save.md`（全局，随 ~/.claude git 迁移——需加 .gitignore skills/ 白名单）
+- 位置：`~/.claude/skills/wiki-sediment/SKILL.md` + `~/.claude/commands/wiki-save.md`（全局，随 ~/.claude git 迁移——已加 .gitignore skills/ 白名单）
 - 出处：spec `C:\ZYS\Wiki\docs\superpowers\specs\2026-08-11-wiki-sediment-design.md`（原 commit 3cdfb7e 为 wiki 项目级，同日用户拍板改全局）
 - 内容：沉淀四路径（书籍→knowledge-note / 对话→learning-record / 错误→memory feedback / 仪表盘刷新），复用 wiki-structure 规约；wiki 目标路径硬编码 `C:\ZYS\Wiki`（迁机需改）
 - 依赖：`C:\ZYS\Wiki` 的 wiki-structure skill、`93-templates/`、`scripts/refresh-due.py`

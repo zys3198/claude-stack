@@ -1,5 +1,7 @@
 # RESTORE_SYMLINKS
 
+> **头注 2026-08-11**：历史流程文档。现行政策 Windows 不手搓 symlink（CLAUDE.md §9），且 `skills/` 已全为真目录（0 软链）、白名单制入 git——本脚本流程已不适用，保留存档。
+
 重建 `C:\Users\zys31\.claude\skills\` 下所有 symlink，指向 `.cc-switch\skills\`。
 
 ## 跑法

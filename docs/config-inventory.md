@@ -2,7 +2,7 @@
 
 > ⚠️ **已废弃（2026-07-03）** — 计数过时（134 skills / 21 plugins vs 实际 144 / 19），
 > 且未覆盖 ccswitch db 全表、根 `~/.claude.json`、漂移项。
-> **改看 [`config-checklist.md`](./config-checklist.md)**（表格式单一真相源）。
+> **改看 [`config-checklist.md`](./config-checklist.md)**（表格式单一真相源；注意其 2026-08-11 头注：多项亦已过时，权威口径以 `README.md` + `installing/` 台账为准）。
 > 本文件保留作历史参考，不再更新。
 
 > 文档生成时间：2026-06-30  

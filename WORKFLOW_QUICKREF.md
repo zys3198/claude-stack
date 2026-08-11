@@ -1,6 +1,7 @@
 # Skill 路由速查
 
 > 日常一眼查。重决策 / 多步流程走 `ai-coding-guide` skill。
+> **头注 2026-08-11**：本文件为历史快照，部分引用已失效（codex-security 随 Codex 卸载、build-web-apps 等）。现行路由以 CLAUDE.md §0 场景路由 + 四域 guide（ai-coding-guide / article-writing-guide / learning-guide / frontend-guide）为准。
 
 ## 任务 → Skill
 

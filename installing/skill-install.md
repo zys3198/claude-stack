@@ -14,7 +14,7 @@
 - 来源：https://github.com/mattpocock/skills
 - 安装日期：2026-06/07（精确日待补）
 - 安装方法：cc-switch 同步裸名形态进 `~/.claude/skills/`（model-invoked 可调）；另启用插件版 `mattpocock-skills@mattpocock`（`/plugin install`，见 tool-install.md marketplace 清单）
-- 装到哪：`~/.claude/skills/` 裸名 + 插件版前缀 `mattpocock-skills:`。**裸名里 11 个是指向插件 cache 的 symlink**（本体在 `~/.claude/plugins/cache/mattpocock/mattpocock-skills/1.2.3/skills/...`，随插件升级路径变，非独立本体）：ask-matt / grill-me / grill-with-docs / grilling / handoff / setup-matt-pocock-skills / teach / to-spec / to-tickets / triage / wayfinder。**装回 = 启用 mattpocock 插件即恢复，不用复制**。其余裸名（diagnosing-bugs / tdd / request-refactor-plan / to-prd / to-issues 等）是真目录本体。
+- 装到哪：`~/.claude/skills/` 裸名 + 插件版前缀 `mattpocock-skills:`。**更正 2026-08-11**：旧称「裸名里 11 个是指向插件 cache 的 symlink」已过期——当日实测 skills/ 下 0 个 junction/symlink，裸名全是真目录本体；装回需复制或重装，不再「启用插件即恢复」。
 - 依赖：无
 - 备注：**双形态并存**（memory `matt-skills-dual-form`）：裸名 model-invoked 可调；插件版 14 个 user-invoked 模型调不到需手动敲（含 ask-matt，见 `ask-matt-key-flow-decision`）。选型拍板：Matt 主力 + Superpowers 备用 + ECC 跳过（memory `skill-ecosystem-choice-2026-07`）。
 
@@ -32,11 +32,11 @@
 - 装到哪：`~/.claude/skills/`（docx / pptx / xlsx / pdf / canvas-design / theme-factory / web-artifacts-builder / skill-creator 等）
 
 ### 仓颉 cangjie-skill + first-principles pack
-- 来源：三方仓颉生态（具体仓库待补）
+- 来源：https://github.com/Yeadon8888/cangjie-skill（仓颉）+ https://github.com/kangarooking/first-principles-skill（第一性原理 pack；2026-08-11 公网反查锁定）
 - 安装日期：2026-07（采用记录见 memory `cangjie-skill-adoption-2026-07`）
 - 安装方法：cc-switch 同步
-- 装到哪：`~/.claude/skills/cangjie-skill` + first-principles pack 10 skill（axiomatic-thinking / critical-thinking / multi-mental-models / reductionism-deconstruction / logic-triple-check / implicit-assumption / contrarian-decision / founder-cognitive-boundary / zoom-out 等）
-- 备注：RIA++ 质量扎实；20+ pack 可用性分级见该 memory。
+- 装到哪：`~/.claude/skills/cangjie-skill` + first-principles pack 7 个在案（axiomatic-thinking / contrarian-decision / implicit-assumption / logic-triple-check / multi-mental-models / organizational-refresh / reductionism-deconstruction）
+- 备注：RIA++ 质量扎实；20+ pack 可用性分级见该 memory。更正 2026-08-11：critical-thinking 经用户人工复核认定为自建，已入 git 白名单；zoom-out 实为 mattpocock/skills 成员，不属此 pack；founder-cognitive-boundary 磁盘已不在。
 
 ### ECC（重型套件）
 - 来源：https://github.com/affaan-m/ECC
@@ -45,15 +45,9 @@
 - 装到哪：插件 `ecc@ecc`；hooks（Fact-Forcing Gate / GateGuard 等）；cc-switch 侧另有裸名 skill
 - 备注：用户拍板插件全开不关（memory `ecc-plugin-evaluation`）。升级会重置 settings 路径需留意。
 
-### 思维/写作/学习类散件（cc-switch 同步，来源多为各作者仓库，逐个待补）
+### 思维/写作/学习类散件（cc-switch 同步）
 - 安装方法：cc-switch 同步进 `~/.claude/skills/`
-- 清单（2026-08-08 实测 105 个 = 94 真目录 + 11 junction/symlink；前值 2026-08-07 盘点 119，详见 memory `skill-routing-overhaul-2026-08-07`；下表为分类示例，个别项可能属插件/未同步/已删，以磁盘为准）：
-  - 写作域：article-writer / edit-article / human-writing / chinese-markdown-normalizer / javaguide-style-guide / publish-final-check / plagiarism-audit / review-doc / tech-article-review / multi-review-pipeline / drawio-article-illustration / drawio-chart
-  - 学习域：deep-learn / cram-engine / tutorial-maker / research / last30days / tech-learning-roadmap（需 Exa API key，已配）/ learned
-  - 前端域：frontend-ui-engineering / design-taste-frontend / emil-design-eng / apple-design / minimalist-ui / industrial-brutalist-ui / high-end-visual-design / impeccable / hallmark / hyperframes / animation-vocabulary / improve-animations / review-animations / find-animation-opportunities / pick-ui-library / redesign-existing-projects / design-an-interface / shadcn-vue-guide / imagegen-frontend-web / imagegen-frontend-mobile / remotion
-  - 编码域散件：code-review / code-review-and-quality / debugging-and-error-recovery / git-workflow-and-versioning / security-and-hardening / spec-driven-development / simplify / neat-freak / improve-codebase-architecture / understand / understand-onboard / github-task / playwright / officecli / storage-analyzer
-  - 内容提取/平台：agent-reach / content-to-note / bili-note / douyin-video-summary / nuwa-skill
-  - 其他：grilling / grill-with-docs / leader / darwin-skill / lean-ctx（skill 部分）/ gitnexus-exploring / ppt-master / understand-anything（另有插件版）/ full-output-enforcement（待考证来源）
+- **口径更正 2026-08-11**：旧「2026-08-08 实测 105 个（94 真目录 + 11 junction/symlink）」作废——当日实测 0 symlink；全量复核后 skills/ 为 184 目录 = 31 自建（入 git，见 custom-setup.md）+ 约 150 非自建（仓库级来源多已锁定，见上方「散件来源反查登记」）。原分类示例段已删（把自建误列第三方，与 custom-setup.md 冲突）。
 
 ## 单件登记（含地址/装法/位置）
 
@@ -95,7 +89,7 @@
 
 ## 待补来源（安装时没记，回溯困难——以后装完当轮登记）
 - 除 last30days/hallmark 外，以上散件的逐仓库 GitHub 地址与安装日期均未记录；需要重装时按名字在 cc-switch 源或对应作者仓库检索。
-- **cram-engine / edit-article**（2026-08-11 移入本类）：原在 Git 白名单当自建追踪，2026-08-11 用户逐个复核时未认领为自建 → 按「非自定义进 installing」规则移出白名单（磁盘目录保留）。来源待补。
+- **cram-engine / edit-article**（2026-08-11 移入本类）：原在 Git 白名单当自建追踪，2026-08-11 用户逐个复核时未认领为自建 → 按「非自定义进 installing」规则移出白名单（磁盘目录保留）。cram-engine 来源已锁定：https://github.com/liuliu667/cram-engine（README 实锤，`npx skills add liuliu667/cram-engine`）；edit-article 来源仍待补。注：二者仍被 tracked 路由器引用（learning-guide / article-writing-guide / deep-learn / tutorial-maker）——本机可用，clean clone 后需按来源重装。
 - 2026-08-11 用户复核全量结论：skills/ 下 187 目录 = 31 自定义（已全入 Git 白名单）+ 154 非自定义（本台账管辖，来源大多待补）+ learned 空目录 + .ruff_cache。用户标记待删：darwin-weekly-audit、learned、obsidian-vault——**均已于 2026-08-11 物理删除并验证**（均未入 Git，无 git 历史残留）。
 
 ## 已卸载/备份

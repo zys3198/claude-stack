@@ -14,16 +14,16 @@ claude-stack 体系中外部的非敏感配置**快照副本**。实际位置在
 |---|---|
 | cc-switch-settings.json | `~/.cc-switch/settings.json` |
 | cc-switch-model-pricing.json | `~/.cc-switch/model-pricing.json` |
-| codex-model-catalog.json | `~/.codex/cc-switch-model-catalog.json` |
 | BACKUP_BEFORE_CHANGE.md | `~/.cc-switch/BACKUP_BEFORE_CHANGE.md` |
-| RESTORE_SYMLINKS.md | `~/.cc-switch/RESTORE_SYMLINKS.md` |
+| RESTORE_SYMLINKS.md | `~/.cc-switch/RESTORE_SYMLINKS.md`（历史流程文档，现行政策 Windows 不手搓 symlink，见 CLAUDE.md §9） |
+
+（2026-08-11：Codex 已卸载，`codex-model-catalog.json` 副本及对应 `~/.codex/` 源均已不存在，条目移除。）
 
 源文件变更后，跑以下命令覆盖副本并 commit：
 
 ```bash
 cp ~/.cc-switch/settings.json            ~/.claude/external-configs/cc-switch-settings.json
 cp ~/.cc-switch/model-pricing.json       ~/.claude/external-configs/cc-switch-model-pricing.json
-cp ~/.codex/cc-switch-model-catalog.json ~/.claude/external-configs/codex-model-catalog.json
 cp ~/.cc-switch/BACKUP_BEFORE_CHANGE.md  ~/.claude/external-configs/
 cp ~/.cc-switch/RESTORE_SYMLINKS.md      ~/.claude/external-configs/
 ```

@@ -27,7 +27,7 @@
 
 - **改配置** → 走 CLAUDE.md §1 流程（确认线 + commit 前展示 stat）。
 - **同步 external-configs** → 源变更后手动 `cp`，见 `external-configs/README.md`。
-- **cc-switch 的 skills 源**在 `~/.cc-switch/skills/`；本仓库 `skills/` 是解析后的实文件副本，两者不再自动同步。
+- **cc-switch 的 skills 源**在 `~/.cc-switch/skills/`；本仓库 `skills/` 只追踪白名单内的自建 skill（第三方随 cc-switch/插件走，不入 git）。
 
 ## 历史里程碑
 

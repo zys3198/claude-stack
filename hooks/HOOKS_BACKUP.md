@@ -3,6 +3,7 @@
 **创建**:2026-06-14（Claude 版）；**迁 Codex**:2026-06-21
 **目的**:`hooks.json` 被 lean-ctx 等工具重写时，从此恢复用户手加的 hook。
 **关联**:AGENTS.md §5 指针指向本文件。
+**头注 2026-08-11**：Codex 已卸载（`~/.codex` 已清），本备份仅作历史存档；Claude 侧 hooks 现状以 `settings.json` 引用为准。
 
 ## 加载机制
 

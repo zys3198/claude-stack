@@ -2,6 +2,7 @@
 
 > 生成：2026-07-03 ｜ 基于：opencode 官方文档 + awesome-opencode 生态 + 用户 4 项决策
 > 配置基线见 [`config-checklist.md`](./config-checklist.md)
+> **头注 2026-08-11**：历史计划文档；Codex 已同日卸载、skills 归属已全量复核（见 installing/ 台账），文中环境描述不再代表现状。
 
 ---
 

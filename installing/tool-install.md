@@ -20,7 +20,7 @@
 | i-have-adhd | https://github.com/ayghri/i-have-adhd | marketplace 在，无启用插件 |
 | better-harness | https://github.com/QoderAI/better-harness | 启用中 |
 | minimalist-entrepreneur | https://github.com/slavingia/skills | 已加 marketplace，无启用插件 |
-| taste-skill | 本地目录 `C:\ZYS\Code\lab-area\taste-skill` | 已加 marketplace，启用状态见 settings.json |
+| taste-skill | 本地目录 `C:\ZYS\Code\lab-area\taste-skill`（上游实为公开项目 https://github.com/leonxlnx/taste-skill，plugin.json 实锤；本地目录只是副本） | 已加 marketplace，启用状态见 settings.json |
 
 安装方法（通用）：
 ```

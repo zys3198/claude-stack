@@ -41,7 +41,7 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 
 **废弃 skill 重定向**：用户点名 `javaguide-writer`（已删除，原功能合并入 `article-writer`）→ 引导改用 `article-writer` 指定 JavaGuide 模式（通用兜底见 §4 规则7）。
 
-**系统内置 skill 提示**：`deep-research` 是系统/插件内置 skill（非本地 skills 目录），**本机未装**；命中调研需求时用 §1 表①已装项替代（`obsidian-vault`/`agent-reach`/`last30days`），或走 `research` / `ecc:deep-research`。调用系统内置 skill 用 `Skill` 工具或 `/deep-research`，别在本地目录找 SKILL.md。
+**系统内置 skill 提示**：`deep-research` 是系统/插件内置 skill（非本地 skills 目录），**本机未装**；命中调研需求时用 §1 表①已装项替代（`agent-reach`/`last30days`），或走 `research` / `ecc:deep-research`。调用系统内置 skill 用 `Skill` 工具或 `/deep-research`，别在本地目录找 SKILL.md。
 
 **语言边界**：本路由默认**中文**写作。英文文章可走 `article-writer` / `edit-article`，但跳过中文专用 skill（`chinese-markdown-normalizer`、`ai-text-polisher`）。
 
@@ -59,7 +59,7 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 
 | 阶段 | 用户在说什么 | 调用 skill |
 |------|-------------|-----------|
-| ① 选型/调研 | "这个主题怎么写""有没有相关资料""帮我研究下 X""AI 圈最近有什么" | 本地：`obsidian-vault`🪶/`lean-ctx`🪶；全网趋势/舆情：`last30days`🪶/`aihot`🪶；多平台定向：`agent-reach`🪶；深度调研：`research`🔥 / `ecc:deep-research`（详见 §2 调研七选；`deep-research` 本机未装，仅作已装时的备选） |
+| ① 选型/调研 | "这个主题怎么写""有没有相关资料""帮我研究下 X""AI 圈最近有什么" | 本地：`lean-ctx`🪶；全网趋势/舆情：`last30days`🪶/`aihot`🪶；多平台定向：`agent-reach`🪶；深度调研：`research`🔥 / `ecc:deep-research`（详见 §2 调研七选；`deep-research` 本机未装，仅作已装时的备选） |
 | ③ 起草-从零 | "写一篇关于 X 的文章""帮我写篇博客/方案/单篇教程" | `article-writer`🪨（默认通用模式） |
 | ③ 起草-系统教程/课程 | "从零学 X""做系列教程""把笔记变成教程" | `tutorial-maker`🪨（系统教程/系列课；单篇教程仍走 `article-writer`） |
 | ③ 起草-边学边写 | "我想边学习边写""从 0 了解 X，边学边沉淀成文章""像刚才那样学习记录写进文章" | `agent-reach` 收集权威材料 → 轻量学习路径 → 对话中给增量初稿 → 用户确认后才 `edit-article` 落盘；无现稿则先给对话初稿，用户确认后再 `article-writer` 起草/落盘 |
@@ -84,7 +84,6 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 - **审校三选 + 发布闸**：逐段增量、单次快评 → `tech-article-review`；多维度并行 + **直接批量改** → `multi-review-pipeline`；多维度并行只要**报告**（事实核查/一致性/风格/结构）→ `review-doc`；**发布前强制关卡**（只放行不改）→ `publish-final-check`。**裁决：要改选 multi-review-pipeline，要报告选 review-doc，二选一不叠加；发布闸是 pipeline 末环，三者之后才跑。**
 - **调研七选**（按信息源，决策树见 REFERENCE §1）：
   - 本地仓库 .md → `lean-ctx`（ctx_search/ctx_glob）🪶
-  - Obsidian 笔记库 → `obsidian-vault`🪶
   - 全网某话题近 30 天热度/讨论 → `last30days`🪶（Reddit/X/HN/YouTube/TikTok 等）
   - AI 行业资讯/日报/热点 → `aihot`🪶（中文）
   - 多平台定向检索（小红书/抖音/微博/B站/公众号…） → `agent-reach`🪶

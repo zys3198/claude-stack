@@ -1,6 +1,7 @@
 # Claude Code 配置清单表（速查 · 全量）
 
 > 生成日期：2026-07-03 ｜ **2026-08-08 盘查刷新** ｜ 扫描方式：实盘 `~/.claude/` + `~/.claude.json` + `~/.cc-switch/cc-switch.db`
+> **口径头注 2026-08-11**：本表多项计数/归属已过时（skills 白名单 32 个、marketplace 已不入 git、obsidian-vault/darwin-weekly-audit/learned 已删、Codex 已卸载、cram-engine/edit-article 移出白名单）。权威口径以 `README.md` + `installing/` 台账为准。
 > 列约定：`路径 / 对象` · `用途` · `状态 / 计数` · `维护要点`
 > **替代** 旧的 `config-inventory.md`（散文版，计数已过时，见文末「废弃说明」）。
 

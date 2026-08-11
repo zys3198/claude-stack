@@ -21,9 +21,9 @@
 
 
 ### gitnexus
-- 来源：https://github.com/abhigyanpatwari/GitNexus （需核实——当前是从 npx 缓存目录直接指 .cmd，原安装命令待补）
+- 来源：https://github.com/abhigyanpatwari/GitNexus （2026-08-11 核实：其 skills 与本机 9 个 gitnexus-* 吻合）
 - 安装日期：待补
-- 安装方法：现为 `~/.claude.json` 里 command 直指 `C:\Users\zys31\AppData\Local\npm-cache\_npx\e46929201c1128dd\node_modules\.bin\gitnexus.cmd mcp`。**注意：指 npx 缓存目录不稳，缓存清了就没**。重装建议改为标准形式：`claude mcp add gitnexus -- cmd /c npx -y gitnexus mcp`（包名以官方 README 为准）
+- 安装方法：现为 `~/.claude.json` 里 command 直指 `C:\Users\zys31\AppData\Local\npm-cache\_npx\e46929201c1128dd\node_modules\.bin\gitnexus.cmd mcp`。**注意：指 npx 缓存目录不稳，缓存清了就没**。重装建议改为标准形式：`claude mcp add gitnexus -- cmd /c npx -y gitnexus mcp`（npm 包名 `gitnexus`；`npx gitnexus analyze` 会自动安装配套 skill）
 - 装到哪：`~/.claude.json` → `mcpServers["gitnexus"]`
 - 依赖：Node/npx
 - 备注：用途=代码库图谱/影响面分析（api_impact/trace/cypher 等）。配套 skill `gitnexus-exploring`。

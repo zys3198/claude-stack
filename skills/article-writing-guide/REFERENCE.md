@@ -28,7 +28,6 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 │   └─ JavaGuide 项目内（docs/ai 系列、my-submission/） → article-writer 🪨（JavaGuide 模式，执行规范见其 §6，终检判定见 javaguide-style-guide）
 └─ 需要先调研？
     ├─ 本仓库 .md → doc-finder 🪶
-    ├─ Obsidian 本地笔记库 → obsidian-vault 🪶
     ├─ 全网某话题近 30 天热度/讨论 → last30days 🪶（Reddit/X/HN/YouTube/TikTok）
     ├─ AI 行业资讯/日报/热点 → aihot 🪶（中文）
     ├─ 多平台定向检索（小红书/抖音/微博/B站/公众号…） → agent-reach 🪶

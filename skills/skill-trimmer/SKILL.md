@@ -39,10 +39,10 @@ description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill
 
 ## 本机环境事实（判定前必读，别再探一遍）
 
-- **skill 两种形态**：`~/.claude/skills/` 下大部分是**软链**（指向 cc-switch 源 `~/.cc-switch/skills-*` 等），少量是**直管目录**（实体文件）。软链删的是链接，**源还在，可恢复**；直管目录删了就是真删。软链里又分两亚型——junction（目录联接，Python 可读目标）和真符号链接（msys `/c/...` 目标，Windows Python 读不出，inventory 里标 `unresolved`）；`scan_skills.py` 已统一处理，判定时把 `unresolved` 当软链看待即可。
+- **skill 两种形态（更正 2026-08-11：已全为真目录，0 软链；下述软链/直管区分作废，删除即真删，恢复走 installing 台账重装）**：`~/.claude/skills/` 下大部分是**软链**（指向 cc-switch 源 `~/.cc-switch/skills-*` 等），少量是**直管目录**（实体文件）。软链删的是链接，**源还在，可恢复**；直管目录删了就是真删。软链里又分两亚型——junction（目录联接，Python 可读目标）和真符号链接（msys `/c/...` 目标，Windows Python 读不出，inventory 里标 `unresolved`）；`scan_skills.py` 已统一处理，判定时把 `unresolved` 当软链看待即可。
 - **移动 = 断链/移目录，不是删除。** 候选移入 `~/.cc-switch/skills/_weak-model-backup/`（已有先例，夹内 README 记标准）或 lab-area exp 目录。恢复走 cc-switch 官方 `RESTORE_SYMLINKS.md` 机制（Python `os.symlink` + msys2 路径），**Windows 下不手搓 symlink、不 copy**——这是 §9 规则的既定例外。
 - **插件 skill（`ecc:*` 等整包）不在本 skill 判定范围**——插件是整包开关（`enabledPlugins`），用户已拍板全开，不逐个评。
-- **`~/.claude/skills/learned/` 是 ai-coding-coach 产出区**，属 A 类偏好沉淀，默认保留，不进候选。
+- **`~/.claude/skills/learned/` 是 ai-coding-coach 产出区**，属 A 类偏好沉淀，默认保留，不进候选。（该目录 2026-08-11 已清空删除；日后再出现仍适用本条。）
 
 ## 判定流程
 
