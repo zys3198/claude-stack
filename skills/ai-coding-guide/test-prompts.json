@@ -14,7 +14,7 @@
     {
         "id":  3,
         "prompt":  "PRD 已经写好了，下一步怎么落地？",
-        "expected":  "走『有需求文档』。默认直接推荐 superpowers:writing-plans；只想先整理需求项才给 to-prd / to-issues 作为 B 选项；计划批准后实际写代码再接 superpowers:test-driven-development 与横切收尾。",
+        "expected":  "走『有需求文档』。默认直接推荐 superpowers:writing-plans；轻量拆任务才给 planning-and-task-breakdown 作为 B 选项；计划批准后实际写代码再接 superpowers:test-driven-development 与横切收尾。",
         "scenario":  "已有需求文档"
     },
     {

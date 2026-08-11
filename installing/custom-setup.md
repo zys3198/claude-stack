@@ -2,7 +2,7 @@
 
 记录自建 skill / hook / statusline / 全局配置的出处与迁移要点。外部装的见 skill-install.md / mcp-install.md / tool-install.md。
 
-自建资产迁移原则：**git 仓库已追踪全部自建**（26 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单 26 行；2026-08-08 实测），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
+自建资产迁移原则：**git 仓库已追踪全部自建**（31 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单；2026-08-11 用户人工复核定稿：勾选确认的进 Git，未认领的移出），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
 
 ---
 
@@ -29,12 +29,18 @@
 ### cc-switch-setting-sync
 - 出处：防 cc-switch 切换 provider 降级 settings.json 的同步流程
 
-### 写作 skill（自建 12 个）
-- article-writer / edit-article / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / review-doc / tech-article-review / content-to-note
+### 写作 skill（自建 11 个）
+- article-writer / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / review-doc / tech-article-review / content-to-note
 - 出处：2026-06/07 写作流程沉淀；publish-final-check 演进耦合在 article-writing-guide/CHANGELOG.md；plagiarism-audit 针对实战漏网（Codex-book 整源漏审）设计；tech-article-review 与 review-doc 划边界（单 agent 逐段增量 vs 4 agent 并行）
+- ~~edit-article~~：2026-08-11 复核用户未认领为自建，移出 Git 白名单（归 skill-install.md 待补来源）
 
-### 学习 skill（自建 3 个）
-- deep-learn / cram-engine / tutorial-maker
+### 学习 skill（自建 2 个）
+- deep-learn / tutorial-maker
+- ~~cram-engine~~：2026-08-11 复核用户未认领为自建，移出 Git 白名单（归 skill-install.md 待补来源）
+
+### 2026-08-11 复核新增自建（7 个，已入 Git 白名单）
+- ai-text-polisher / answer-evidence-finder / critical-thinking / doc-finder / humanizer-zh / interview-ai-agent-dev / interview-java-backend
+- 出处：用户逐个勾选自认定稿（推翻此前「ignored 即第三方」的机器推断）。注：critical-thinking、humanizer-zh 公网存在同名项目，以用户判定为准——若实为改过/重写版本，建议日后在 SKILL.md 注明 fork 来源。
 
 ### 前端 skill（自建 1 个）
 - shadcn-vue-guide（中文手写 + 本机 .bak 编辑痕）
@@ -48,8 +54,8 @@
 ### ~~obsidian-vault~~（2026-08-07 删除）
 - 曾硬编码 wiki 路径（C:\ZYS\Code\wiki），用户拍板删除磁盘目录。若日后需要按 skill-install.md 散件检索重装。
 
-### ~~ai-text-polisher~~（2026-08-08 删除，被 human-writing 替代）
-- `.gitignore` 白名单行已注释（原文：`# !skills/ai-text-polisher/  (skill deleted 2026-08-08, replaced by human-writing)`）。磁盘 `skills/ai-text-polisher/` 真目录已物理删除（2026-08-08 盘查确认不在）。
+### ai-text-polisher（更正 2026-08-11）
+- 此前记录「2026-08-08 删除，被 human-writing 替代」**有误**：磁盘目录完整存在，用户复核确认为自建，已恢复 `.gitignore` 白名单追踪。human-writing 用户未认领，归第三方。
 
 ### learning-guide 配套归档
 - 学习记录归档流程，归档目录 `C:\ZYS\Wiki\80-records`（外部路径，迁移时另拷）

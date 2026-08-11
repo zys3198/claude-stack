@@ -4,26 +4,23 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
-## [v1.4.5] - 2026-08-08
+## [v1.5.0] - 2026-08-11
+
+### Added
+
+- 从零创作和深度改写新增“全篇细骨架冻结门”：选定结构方向后，一次性展示完整 H2/H3；每个子节绑定问题、论点、依据 ID、证据/例子、读者获得感、目标篇幅、表现形式、前后过渡，改写模式再映射现稿位置。
+- 骨架末尾汇总预计总篇幅、证据缺口、待补真实经历/截图和可合并章节。用户明确冻结前不得生成正文；明确要求“直接写/跳过骨架”时才可绕过。
+- `test-prompts.json` 新增默认从零创作场景，验证用户未主动要求讨论结构时也会命中细骨架闸门。
 
 ### Changed
 
-- 删除 `ai-text-polisher` skill，`human-writing` 完全替代。用户实测 `human-writing` 在从零写和改写两场景效果都更好（从材料/说话位置/散文韵律治本 > 检测器指标驱动治表）。
-- §1 ③ 起草-从零 拆两路：技术博客/方案/教程 -> `article-writer`；知乎/论坛/公众号观点/故事/口播 -> `human-writing`。
-- §1 ⑤ 去 AI 味：`ai-text-polisher` -> `human-writing`🪨（大幅重写，从材料/说话位置治本）；触发词去掉「过不了朱雀」（human-writing 无量化检测验收）。
-- §2 改写四选：去 AI 味档 `ai-text-polisher` -> `human-writing`；串行顺序 edit-article -> human-writing -> chinese-markdown-normalizer；AI 味根因治理段重写（human-writing 本身即源头治理）。
-- §3 通用 pipeline / 协作流 / 边学边写 pipeline：去 AI 味环节 `ai-text-polisher` -> `human-writing`。
-- §4 失败模式表 / §7 示例 / §0 语言边界：`ai-text-polisher` -> `human-writing`。
-- REFERENCE.md §2/§4/§8、test-prompts.json 同步清理死引用。
-
-### Removed
-
-- `ai-text-polisher` skill 目录删除。丢失检测器量化验收闭环（朱雀 AI率<30% / contentany 同质化≤20%），用户已知情接受；要过朱雀需手动测。`publish-final-check` §2③ AI 味关键词黑名单自检保留（不依赖 polisher）。
+- 默认协作流改为：结构方案 → 方向确认 → 全篇细骨架 → 讨论修改 → 明确冻结 → 逐节正文预览 → 用户确认 → 落盘 → 审查循环。
+- 删除“每节设计完停一下、不要一口气设计完整篇”的旧节奏；改为先一次性展示全篇细骨架，再逐节写正文。
+- 同步更新 `article-writing-guide/SKILL.md`、`REFERENCE.md`、`test-prompts.json` 与 `article-writer/SKILL.md`；创作和优化模式都改为确认后落盘，优化模式不再默认覆盖现稿。
 
 ### Rationale
 
-- 路由表漂移修复：`human-writing` 2026-08-07 已装（台账 `installing/skill-install.md` 写作域清单为证）但 §1 路由表漏收。
-- 连带清理 13 个文件的 `ai-text-polisher` 引用：article-writing-guide（SKILL/REFERENCE/test-prompts）、publish-final-check、skill-trimmer、guide-skill-auditor、installing×2、docs/config-checklist、.gitignore。docs/config-inventory.md 已废弃（2026-07-03 声明不再更新），未改。
+- 用户反馈：“从0开始写文章应该先列出最细致的骨架，讨论完毕后再动笔”。全篇骨架先行能在正文生成前暴露章节重复、证据缺口、前后依赖和篇幅失衡，减少长文返工。
 
 ## [v1.4.4] - 2026-07-31
 

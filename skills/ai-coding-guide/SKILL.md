@@ -1,6 +1,6 @@
 ---
 name: ai-coding-guide
-description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南。不用于：含"页面/界面/UI/落地页/登录页"的视觉任务（走 frontend-guide，即使同时提到写代码）、中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.4.9 -->
+description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南。不用于：含"页面/界面/UI/落地页/登录页"的视觉任务（走 frontend-guide，即使同时提到写代码）、中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.4.4 -->
 ---
 
 # AI 编码路由指南（Claude Code）
@@ -50,7 +50,6 @@ ai-coding-guide 在当前会话？ YES/NO
    - pair：不熟的库/偶用模式/要权衡，AI 给 2-3 选项你定
    - driver：一次性/胶水/样板，AI 直接做，收尾 why-review
    - 用户卡壳给不出判断 -> AI 递参考判断，不死等
-   - **handoff→teach（解耦学）**：用户信号「这块我是真不懂/想单独学透/别当场展开」——不当场追问污染主线。**这是学习流程，转介 `learning-guide`**（其路由表「解耦学」行 + 完整流程块为唯一执行定义）；本 guide 不展开，只把任务交过去。`/handoff`、`/teach` 均 `disable-model-invocation`，由用户手动敲。
 2. **背景**（模糊时才问）：为什么做/什么场景/谁触发/约束；能查的不问；**Step 0.7 已覆盖的缺口（复现步骤、错误原文、审查对象、提交范围等）此处不重复问，留给 Step 0.7**
 3. -> 进 Step 1 分类
 
@@ -63,7 +62,7 @@ ai-coding-guide 在当前会话？ YES/NO
 触发本 skill 后，先按 Claude Code 当前环境复核可用性：
 
 1. **先看当前会话可用清单**：只把当前 `Available skills` / `Available tools` / `Available agent types` 视为已证实；历史摘要、memory、prior-session 内容不算可用性证据。
-2. **再看顶层独立 skill**：`~/.claude/skills/`（权威源；`~/.cc-switch/skills/` 仅备份镜像）。
+2. **再看顶层独立 skill**：`~/.claude/skills/`（本机常由 cc-switch 同步，源目录通常是 `~/.cc-switch/skills/`）。
 3. **再看插件附带 skill**：`~/.claude/plugins/cache/*/skills/`。
 4. **关键提醒**：reminder 没列出 ≠ 一定不存在；关键推荐前要按磁盘再复核一次。
 
@@ -182,12 +181,10 @@ ai-coding-guide 在当前会话？ YES/NO
 > 🔴 **横切收尾（所有产生产品代码改动的分类通用）**：开发新功能 / 调试 bug / 重构简化 / 快速改动 / 构建错误 完工前，先按运行时表面验证：有可驱动流程 → 用 `run` 驱动真实流程验证；无运行时表面 → 跑相关 build / lint / test / check。随后用 `superpowers:verification-before-completion` 组织证据，再宣布完成。审查代码 ≠ 完工验证：review 是人读挑错，验证是跑起来证行为对，互补。**用户直接说「帮我验证/确认生效」→先确认最近改动属哪类改动，再走本检查点；若还要求提交，验证通过后继续进入「提交/收尾」。**
 
 分类: 开发新功能
-- 需求不清 / 无文档、要先立 spec → 先 `spec-driven-development`（写代码前立规格）
 - 默认先走 `superpowers:brainstorming`；若需求很模糊，可先用 `grill-me` 压清问题再 brainstorming
 - 需求清楚且跨模块/要设计 → `superpowers:brainstorming` 后进入 `superpowers:writing-plans`
 - 范围很小 → 轻量确认目标后走 `ponytail:ponytail`
 - 实际写代码时再接 `superpowers:test-driven-development`，完工走横切收尾
-- **Matt 流程转介（B 主 A 辅）**：命中以下 Matt 独有信号时，提示「这套 Matt 流程比当前分类深，可手动 `/mattpocock-skills:ask-matt` 进 Matt 编排（user-invoked，模型调不到）」——多会话大 build 拆工单、要留 CONTEXT.md/ADR 纸迹的采访、设计问题要跑原型代码验证、雾大绿野/巨型 feature（wayfinder）、灵感/请求堆积分类（triage）。只提示不抢路由；用户没提这些信号则不提。
 
 AskUserQuestion:
 - A: 先 `superpowers:brainstorming`（默认）
@@ -231,7 +228,6 @@ Fallback:
 - 默认主路径 → `superpowers:writing-plans`
 - 用户只想先整理需求项 → `to-prd` / `to-issues`
 - 计划批准后实际写代码 → `superpowers:test-driven-development` + 横切收尾
-- **Matt 流程转介**：需求是**多会话大 build、要拆成可独立领的工单**时，提示「可手动 `/mattpocock-skills:ask-matt` 进 Matt 编排（to-spec→to-tickets→implement 工单流，user-invoked 模型调不到）」。只提示不抢路由；单会话能装下的需求不提。
 
 AskUserQuestion:
 - A: `superpowers:writing-plans`
@@ -242,7 +238,6 @@ Fallback:
 - 用户只要结论不要计划 → 直接回答，不强拉进计划流程
 
 分类: 理解代码
-- 不熟某段代码、要先看它在架构里算哪块（退后一步看大局）→ `zoom-out`
 - 日常查结构/看某处实现 → `lean-ctx`（成本最低，先走）
 - 大范围建模/架构全貌 → `understand`
 - 调用链/影响范围/谁调用谁 → `gitnexus-exploring`
@@ -276,8 +271,7 @@ Fallback:
 - 专项 reviewer 不在 → 用通用 Code Reviewer agent 或 `code-review`
 - 仍失败 → 停止审查，先问意图（审查/调试/当参考）再走对应分类
 分类: 调试 bug
-- 硬 bug / 反复修不好 / 性能回退 → 先 `diagnosing-bugs`（诊断循环，定位优先）
-- 一般报错 / 测试挂 / 行为不符 → `superpowers:systematic-debugging`
+- 默认主路径 → `superpowers:systematic-debugging`
 - 定位后需要修代码 → 先补失败测试复现，再走 `superpowers:test-driven-development` + 横切收尾
 
 AskUserQuestion:
@@ -443,4 +437,4 @@ AskUserQuestion:
 
 维护规则、证据源、同步清单、变更记录见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
 
-<!-- 路由表门禁：Step 1 信号表、Step 2 分类路径由人工维护；删除任何分类/条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.4.8 -->
+<!-- 路由表门禁：Step 1 信号表、Step 2 分类路径由人工维护；删除任何分类/条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.3.0 -->

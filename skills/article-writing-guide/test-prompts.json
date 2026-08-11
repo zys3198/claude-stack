@@ -12,7 +12,7 @@
   {
     "id": 3,
     "prompt": "write an English tutorial on Docker networking, then edit it",
-    "expected": "英文文章 → article-writer/edit-article 可用，但跳过 chinese-markdown-normalizer 与 human-writing（中文专用）。验证 M4 语言边界。"
+    "expected": "英文文章 → article-writer/edit-article 可用，但跳过 chinese-markdown-normalizer 与 ai-text-polisher（中文专用）。验证 M4 语言边界。"
   },
   {
     "id": 4,
@@ -22,7 +22,7 @@
   {
     "id": 5,
     "prompt": "帮我改改这篇",
-    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→human-writing→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
+    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→ai-text-polisher→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
   },
   {
     "id": 6,
@@ -42,11 +42,16 @@
   {
     "id": 9,
     "prompt": "我想先和你讨论文章结构，你给我几个选项，我想到啥再补充。讨论完再逐步设计每个小节，设计完你生成，生成后我审查提建议。",
-    "expected": "命中默认协作写作流：先给 2-4 个结构方案并允许用户混搭增删；结构冻结后逐节设计，每节确认后再生成正文；用户审查后按结构→论点/例子→文风/排版顺序处理反馈。执行端用 article-writer 协作模式，不一次性全文起草。验证 SKILL §3 和 REFERENCE §2。"
+    "expected": "命中默认协作写作流：先给 2-4 个结构方案并允许用户混搭增删；方向确认后一次性展示完整 H2/H3 细骨架，每个子节包含问题、论点、依据/例子、获得感、目标篇幅、表现形式和前后过渡；用户明确冻结后才逐节生成正文预览，确认后落盘。不得恢复成每设计一节就停一下。验证 SKILL §3 和 REFERENCE §2。"
   },
   {
     "id": 10,
     "prompt": "给我做一套从零学 Redis 的系列教程，每课要有练习和折叠答案",
     "expected": "系统教程/系列课/从零学习 → 路由到 tutorial-maker；不应误走 article-writer 单篇起草。验证 tutorial-maker 新路由。"
+  },
+  {
+    "id": 11,
+    "prompt": "从零写一篇介绍 PostgreSQL MVCC 的技术文章。",
+    "expected": "即使用户没有主动要求讨论结构，从零创作也默认经过全篇细骨架闸门：先给结构方向，再一次性展示完整 H2/H3 细骨架，讨论并明确冻结后才写正文。除非用户明确说直接写或跳过骨架，不得立即起草正文。验证 SKILL §3、REFERENCE §1-2 和 article-writer §7.3-7.9。"
   }
 ]

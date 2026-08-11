@@ -1,6 +1,6 @@
 ---
 name: frontend-guide
-description: Use when 用户要做 UI、前端页面、组件、落地页、视觉设计、改样式、升级界面质感、做/改/审动画动效，且没明确点名具体前端/设计 skill。是前端/视觉域的开工路由器，路由到 design-taste-frontend / frontend-ui-engineering / shadcn-vue-guide / redesign-existing-projects / imagegen-frontend-* / design-an-interface，动画动效类路由到 emil-design-eng / review-animations / improve-animations / find-animation-opportunities / animation-vocabulary / apple-design / pick-ui-library。触发词：做个页面、登录页、落地页、UI、前端、组件、界面设计、改样式、页面太丑、升级质感、网站设计、写个界面、做个界面、动画、动效、丝滑、回弹、过渡、转场。含"页面/界面/UI/落地页/登录页"或动画动效诉求且要视觉产出时优先于编码路由，即使用户同时提到"写代码/做完顺便写"——设计方向先行，实现阶段本路由已覆盖。不用于：纯写代码逻辑无界面（走 ai-coding-guide）、画图配图（走 drawio-chart）、写文章（走 article-writing-guide）。<!-- v1.5.5 -->
+description: Use when 用户要做 UI、前端页面、组件、落地页、视觉设计、改样式、升级界面质感、做/改/审动画动效，且没明确点名具体前端/设计 skill。是前端/视觉域的开工路由器，路由到 design-taste-frontend / frontend-ui-engineering / shadcn-vue-guide / redesign-existing-projects / imagegen-frontend-* / design-an-interface / 各风格预设，动画动效类路由到 emil-design-eng / review-animations / improve-animations / find-animation-opportunities / animation-vocabulary / apple-design / pick-ui-library。触发词：做个页面、登录页、落地页、UI、前端、组件、界面设计、改样式、页面太丑、升级质感、网站设计、写个界面、做个界面、动画、动效、丝滑、回弹、过渡、转场。含"页面/界面/UI/落地页/登录页"或动画动效诉求且要视觉产出时优先于编码路由，即使用户同时提到"写代码/做完顺便写"——设计方向先行，实现阶段本路由已覆盖。不用于：纯写代码逻辑无界面（走 ai-coding-guide）、画图配图（走 drawio-chart）、写文章（走 article-writing-guide）。<!-- v1.5.3 -->
 ---
 
 # 前端路由指南（Claude Code）
@@ -45,7 +45,7 @@ frontend-guide 相关？ YES/NO —— <一句理由>
 ## 环境自检
 
 1. 只看当前会话 `Available skills` 为已证实。
-2. 顶层独立 skill：`~/.claude/skills/`（权威源；`~/.cc-switch/skills/` 仅备份）。
+2. 顶层独立 skill：`~/.claude/skills/`（cc-switch 同步，源 `~/.cc-switch/skills/`）。
 3. reminder 没列出 ≠ 不存在；关键推荐前按磁盘复核。
 4. 生态缺失 → 跳过给替代，不硬推。
 
@@ -59,7 +59,7 @@ frontend-guide 相关？ YES/NO —— <一句理由>
 | **出参考图** | 要先看效果图再写码 | `imagegen-frontend-web`（网页）/ `imagegen-frontend-mobile`（App） | 先生成设计参考图 |
 | **多方案探索** | 想看几个差异方案再定 | `design-an-interface` | 并行子代理出多个方案 |
 | **实现** | 方向已定、要写生产级 UI | `frontend-ui-engineering` | 工程实现兜底 |
-| **升级现有** | 页面太丑、要去 AI 味、提质 | `redesign-existing-projects` / `impeccable`；反 AI slop/AI 大路货审美 → `hallmark` | 审现有→改；hallmark 专治 AI 味设计 |
+| **升级现有** | 页面太丑、要去 AI 味、提质 | `redesign-existing-projects` / `impeccable` | 审现有→改 |
 | **动画动效** | 做/改/审动画、加动效、不够丝滑、回弹/过渡手感不对、效果叫什么 | `emil-design-eng`（综合默认）/ `review-animations`（审）/ `improve-animations`（改全库）/ `find-animation-opportunities`（找该动哪）/ `animation-vocabulary`（命名） | 动画专项，按子意图分流（见重叠裁决） |
 | **特殊产物** | claude.ai artifact / 海报图 / 视频 | `web-artifacts-builder` / `canvas-design` / `hyperframes` / `remotion` | 非网页交付物 |
 
@@ -81,7 +81,6 @@ frontend-guide 相关？ YES/NO —— <一句理由>
 | 定视觉方向 | `design-taste-frontend` | `frontend-design` | 现行默认 |
 | 要" agency 级精确规范"（字体/间距/阴影数值） | `high-end-visual-design` | `design-taste-frontend` | 它给确切设计 token 而非方向 |
 | 已有项目提质 | `redesign-existing-projects` | `design-taste-frontend` | 它先审现有 AI 味再改 |
-| 反 AI slop/去 AI 大路货设计 | `hallmark` | `redesign-existing-projects` | 专审 AI 味审美，可独立做设计提取/审计 |
 | 组件库使用 | `shadcn-vue-guide` | 通用设计 skill | §6 默认栈，专用指南 |
 | 动画综合判断/品味 | `emil-design-eng` | 通用设计 skill | 动画该不该动、easing 对错的领域专长 |
 | 审已有动画 | `review-animations` | `redesign-existing-projects` | 严审动画规则，非整体重设计 |

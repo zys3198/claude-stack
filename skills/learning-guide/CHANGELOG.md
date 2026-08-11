@@ -2,56 +2,6 @@
 
 本文件记录 learning-guide 路由 skill 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
-## [v1.4.8] - 2026-08-07
-
-### Fixed
-
-- description 路由目标列表删范畴词「等」（「路由到 deep-learn / ... / expose-unknowns 等」-> 删「等」，列表已列主要下游不必用范畴词兜底）。证据：guide-skill-auditor v1.4.0 第3项盲区扩展（description 路由目标列表范畴词同查），自审检出 FAIL。
-
-## [v1.4.7] - 2026-08-07
-
-### Added
-
-- 路由表加「链接做笔记」行：公众号/B站/抖音链接 → `content-to-note`（自动识别来源路由，底层 `bili-note`/`douyin-video-summary` 提取）。
-
-### Rationale
-
-- 用户拍板（2026-08-07，skill 路由接线会话）：content-to-note 是高价值盲区 skill 且跨域（笔记归本域、写作域也用），在路由表加行认领其「链接→笔记」入口。路由表加行非删改，未动既有条目（防无证据漂移）。
-
-## [v1.4.6] - 2026-08-07
-
-### Fixed
-
-- 解耦学流程块**纠正 v1.4.5 的错误约定**：v1.4.5 写「`/handoff` 存到 `99-inbox/`」建立在对 handoff 参数的误读上——handoff 原文「Save to the temporary directory of the user's OS」「arguments 作 what-next-session 描述」，**参数不改存储路径**，该约定实测会失败。改方案 C（用户拍板）：handoff 落 `%TEMP%` 后记下返回路径，teach 会话开头把路径直接喂给 teach agent（「先读 `<路径>`」），靠传路径当接力棒打通，不搬文件、不硬刚默认路径。
-
-### Rationale
-
-- 试跑验证阶段重读 handoff skill 原文，证 v1.4.5 的「参数覆盖路径」是接线 bug（证据门槛：信源码不信记忆）。方案 C 最省事且不依赖存储位置约定。
-- 教训：给外部 skill 设计接线约定前，先读原文确认参数语义，别凭「参数应该能改路径」的直觉。
-
-## [v1.4.5] - 2026-08-07
-
-### Fixed
-
-- 解耦学流程块补 handoff→teach **互通断点**：handoff 默认写 OS 临时目录、teach 默认只看当前目录，两者不互通、无自动查找。现约定 ①`/handoff` 时指定存 `C:\ZYS\Wiki\99-inbox\`（覆盖默认临时目录），②`/teach` 会话 agent 先扫 `99-inbox/` 最新 handoff 当输入，③归档后可消化该 handoff。
-
-### Rationale
-
-- 用户问「handoff 和 teach 互通吗、自动找文件吗」（2026-08-07）——查两 skill 原文证否：handoff 写 `%TEMP%` 无索引，teach 只认 current directory，桥是人。不落这套约定则断点靠每次手动喂路径，靠不住。
-- 选 `99-inbox/` 因它是 Wiki 法定碎片收件箱（wiki-structure §2：「消化后迁出到对应 type 目录」），handoff 正是待消化碎片，归档 learning-record 即「迁出」。
-
-## [v1.4.4] - 2026-08-07
-
-### Added
-
-- 路由表新增「解耦学（handoff→teach）」行 + 表后完整流程块：干活卡住、概念当场吃不下、想单独学透时，用户 `/handoff` 打包 → 到 `C:\ZYS\Wiki\` 下 `/teach <主题>` 单独学 → 归档 learning-record 到 `80-records/`。衔接全局 memory `ai-assist-learning-first-default` v2.3 新增的分支 d。
-
-### Rationale
-
-- 用户拍板（2026-08-07）：handoff→teach 解耦学的用法说明归 learning-guide（学习域路由器）所有，不挂 ai-coding-guide——它是学习流程，不是编码路由。ai-coding-guide 侧保留一条跨域指针（开工问询第 4 出口），执行定义以本 guide 为准。
-- 归档终点定址 `C:\ZYS\Wiki\80-records/`（v1.4.4 同步建 README）：Wiki 的 MISSION/RESOURCES/GLOSSARY + learning-record 类型（wiki-structure §3.4）与 Matt `teach` workspace 结构天然同构，复用现有 taxonomy，不另起 teach workspace 目录。`/handoff`、`/teach` 均 `disable-model-invocation`（user-invoked），路由只提示、由用户手动敲。
-- 未动区域：其余路由表行、裁决规则、反模式未暴露缺陷，保持原样（防无证据漂移）。
-
 ## [v1.4.3] - 2026-07-31
 
 ### Fixed

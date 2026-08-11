@@ -1,6 +1,6 @@
 ---
 name: guide-skill-auditor
-description: Use when 审查、优化、新建 router 型 guide skill（各域开工路由器，如 ai-coding-guide / article-writing-guide / frontend-guide / learning-guide），或排查 guide 误路由、漏触发、兄弟域抢单问题。本 skill 是 guide skill 质量审查器。触发词：审查 guide、优化 guide、路由 skill 体检、guide 抢单、误路由排查、新建路由器、route skill audit。不用于：非路由型执行 skill 的内容审查（走该 skill 自己的维护流程）。<!-- v1.4.0 -->
+description: Use when 审查、优化、新建 router 型 guide skill（各域开工路由器，如 ai-coding-guide / article-writing-guide / frontend-guide / learning-guide），或排查 guide 误路由、漏触发、兄弟域抢单问题。十项静态检查 + 子代理路由基线测试 + 按证据分级修复。触发词：审查 guide、优化 guide、路由 skill 体检、guide 抢单、误路由排查、新建路由器、route skill audit。不用于：非路由型执行 skill 的内容审查（走该 skill 自己的维护流程）。<!-- v1.3.0 -->
 ---
 
 # Guide Skill 审查器
@@ -21,7 +21,7 @@ description: Use when 审查、优化、新建 router 型 guide skill（各域�
 |---|---|---|---|
 | 1 | **description = 角色定位(what) + 触发条件(when)，无流程摘要** | ①须含 what——一句角色定位（router 型必须声明「X 域开工路由器」这类分发角色，否则 Claude 不理解它的路由职责，会漏触发）。②须含 when——触发条件/触发词。③**无流程摘要**（步骤/阶段枚举/「先…再…最后…」）——写了流程 agent 会照 description 执行而不读正文。三者缺一即 FAIL | Anthropic 官方三处一致要 what+when 双全（best-practices / skill-creator / Claude Code 文档）；Superpowers SDO 实测「写流程摘要→agent 跳过正文」。本项取两派各自成立的半块：what 助触发（官方），无流程摘要防跳正文（SP） |
 | 2 | **版本戳** | description 末尾有 `<!-- vX.Y.Z -->`（正文末门禁注释可同写，两处一致） | 四域 v1.3.0 惯例 |
-| 3 | **「不用于」清单 + description 路由目标列表** | 两处均无范畴词：①「不用于」清单显式枚举兄弟域转介条款，无「其他/等/任何」；②description 路由目标列表（如「路由到 X/Y/Z」「各风格预设」）无「等/各/任何」范畴词--写不全就别用范畴词兜底，列全或删 | Superpowers #1301 范畴词被放大解释；learning-guide「路由到…等」、frontend-guide「各风格预设」实测踩坑（2026-08-07 组合审查） |
+| 3 | **「不用于」清单** | 显式枚举兄弟域转介条款，无「其他/等/任何」范畴词 | Superpowers #1301 范畴词被放大解释 |
 | 4 | **触发门禁** | 正文有显式 3 行输出模板：相关性 YES/NO + 目标存在性 + fallback，位置在分类/委派动作之前（范本：`ai-coding-guide` 触发门禁段） | 社区实测无门禁触发率 0-20%，forced-eval 84% |
 | 5 | **路由表无范畴词兜底行** | 每行都是具体信号→具体路径；「其他」类兜底行必须给出具体反问模板，不是空泛「问用户」 | #1301 |
 | 6 | **幻觉引用** | 路由表每个 skill 名核对证据链（严格降序）：①当前会话 available skills ②磁盘 `~/.claude/skills/`、`~/.claude/plugins/cache/`、`~/.cc-switch/skills/`。三处都查不到 → 记 P0 幻觉。磁盘能查到但当前会话未装 → **不算幻觉**，记「待本机会话验证」。禁止仅因审查会话没装就判 FAIL | §12 证据门槛 + 2026-07-22 reviewer 误报教训 |
@@ -52,7 +52,7 @@ description: Use when 审查、优化、新建 router 型 guide skill（各域�
 | 级别 | 内容 | 动作 |
 |---|---|---|
 | P0 | 幻觉引用、误路由、域边界缺失（含十查中任一项 FAIL 且能直接造成上述后果，如第 3 项缺「不用于」致兄弟域抢单） | 立即修，修完跑 GREEN 子代理验证 |
-| P1 | 第 1/4/5/7/10 项 FAIL 但无实锤误路由——触发门禁缺失、兜底行空泛、强制菜单、模糊信号无意图摸查机制等削弱项；**第 3 项 description 路由目标列表范畴词（与「不用于」范畴词同性质、无实锤误路由事故，2026-08-07 新增盲区）** | 本轮修 |
+| P1 | 第 1/4/5/7/10 项 FAIL 但无实锤误路由——触发门禁缺失、兜底行空泛、强制菜单、模糊信号无意图摸查机制等削弱项 | 本轮修 |
 | P2 | 第 2/8/9 项 FAIL——版本戳、配套文件、门禁注释 | 本轮补齐，机械操作 |
 
 ### 第 4 步：落账
@@ -96,4 +96,4 @@ P1/P2: <清单>
 
 本检查清单从 2026-07-22 四域 v1.3.0 改造实战提炼（handoff：`C:\ZYS\Code\lab-area\exp\2026-07-22-guide-skills-v130\handoff.md`）。RED 基线证明：裸审代理能自发发现幻觉引用/自相矛盾/菜单僵化约 4/9 项，但系统漏掉 description 流程摘要、范畴词兜底行、防漂移门禁三类——本 skill 把这三类变成强制检查项。
 
-<!-- 检查清单门禁：增删检查项前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.4.0 -->
+<!-- 检查清单门禁：增删检查项前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.3.0 -->

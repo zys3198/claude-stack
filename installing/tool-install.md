@@ -51,7 +51,26 @@
 ### GitNexus / cloudcli
 - 见 [mcp-install.md](mcp-install.md)（npm 全局/npx 形态）
 
+### OpenAI Codex CLI（已卸载）
+- 来源：https://github.com/openai/codex（npm 包 `@openai/codex`）
+- 卸载日期：2026-08-11
+- 卸载命令原文：`codex logout`；`npm uninstall -g @openai/codex`
+- 原安装位置：`C:\Users\zys31\AppData\Roaming\npm\node_modules\@openai\codex`、`C:\Users\zys31\.codex`
+- 依赖：Node.js / npm
+- 备注：Windows 核心已清理；同时删除未注册的 VS Code Codex 扩展内容、4 条定向 npm 缓存及 `C:\Users\zys31\AGENTS.md`。按用户选择保留 CC Switch 内 Codex 数据、不扫描 WSL；VS Code 占用的 0 文件扩展空目录保留。
+
 ## 运行环境基线
 - Node.js（`C:\Program Files\nodejs\node.exe`）
 - Python 3.12（解释器名 `python312`；不设 PYTHONPATH）
 - Rust/cargo（`~/.cargo/bin`，lean-ctx 依赖；MinGW64/MSVC 可能不可用，优先 pre-built）
+
+
+## WSL Ubuntu 桌面组件
+
+### Breeze Cursor Theme
+- 来源：Ubuntu 26.04 官方仓库（`resolute-updates/universe`）
+- 安装日期：2026-08-11
+- 安装命令原文：`wsl.exe -d Ubuntu -u root -- apt-get install -y breeze-cursor-theme`
+- 装到哪：WSL Ubuntu 系统包 `breeze-cursor-theme`；主题目录 `/usr/share/icons/breeze_cursors`
+- 依赖：APT；本次仅新增该包
+- 备注：当前用户通过 `gsettings` 设置 `org.gnome.desktop.interface cursor-theme` 为 `breeze_cursors`，大小 24。

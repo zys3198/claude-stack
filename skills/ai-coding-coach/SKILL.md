@@ -69,6 +69,16 @@ High-risk examples: auth, payment, DB schema/migration, security, data deletion,
 
 For high-risk work, require evidence before approval: failing test or reproduction, fix explanation, affected entry points, verification command/output, and review status.
 
+## Mode vocabulary (router handoff)
+
+Router guides (e.g. ai-coding-guide 开工问询) use **coach / pair / driver** as routing vocabulary. This skill owns the execution definition. Map on entry:
+
+| Router word | This skill's mode |
+|---|---|
+| coach | coach mode — ask more, answer less |
+| pair | partner-coach mode — user first, assistant merges and sharpens |
+| driver | engineer mode — delivery, still keep the why-review |
+
 ## Mode switches
 
 - Learning or high-risk work: coach mode. Ask more, answer less.

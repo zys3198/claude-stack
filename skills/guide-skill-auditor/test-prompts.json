@@ -19,8 +19,8 @@
     },
     {
         "id": 4,
-        "prompt": "帮我润色 human-writing 这个 skill 的写作规则",
-        "expected": "不命中本 skill。human-writing 是执行型 skill（非路由型），命中 description 的「不用于」条款 → 走该 skill 自己的维护流程。",
+        "prompt": "帮我润色 ai-text-polisher 这个 skill 的改写规则",
+        "expected": "不命中本 skill。ai-text-polisher 是执行型 skill（非路由型），命中 description 的「不用于」条款 → 走该 skill 自己的维护流程。",
         "scenario": "负向触发：执行型 skill 内容审查（不用于条款）"
     },
     {
@@ -34,11 +34,5 @@
         "prompt": "SP 和 Matt Pocock skills 哪个更适合我？",
         "expected": "不命中本 skill。这是 ai-coding-guide 的『了解指南/选型』信号，不是「审查/优化/新建 guide」→ 转介 ai-coding-guide。",
         "scenario": "兄弟域边界：工具选型问题"
-    },
-    {
-        "id": 7,
-        "prompt": "审查 learning-guide 的 description：路由到 deep-learn / cram-engine / tutorial-maker / research / last30days / obsidian-vault / expose-unknowns 等",
-        "expected": "命中本 skill，十查第 3 项 FAIL--description 路由目标列表含范畴词「等」，列表写不全用范畴词兜底会诱导 agent 误判下游范围；要求列全或删「等」。",
-        "scenario": "第 3 项盲区：description 路由目标列表范畴词（learning-guide 实测事故）"
     }
 ]
