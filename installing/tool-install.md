@@ -59,6 +59,15 @@
 - 依赖：Node.js / npm
 - 备注：Windows 核心已清理；同时删除未注册的 VS Code Codex 扩展内容、4 条定向 npm 缓存及 `C:\Users\zys31\AGENTS.md`。按用户选择保留 CC Switch 内 Codex 数据、不扫描 WSL；VS Code 占用的 0 文件扩展空目录保留。
 
+### Kimi WebBridge（浏览器控制桥）
+- 来源：https://cdn.kimi.com/webbridge（skill 文档指向官方帮助页 kimi.com/zh-cn/features/webbridge）
+- 安装日期：2026-08-11
+- 安装命令原文：`irm https://cdn.kimi.com/webbridge/install.ps1 | iex`
+- 装到哪：守护进程 `C:\Users\zys31\.kimi-webbridge\bin\kimi-webbridge.exe`（日志 `...\.kimi-webbridge\logs\daemon.log`）；skill 注入 `~/.claude/skills/kimi-webbridge` 和 `~/.hermes/skills/kimi-webbridge`（均 v1.11.5）
+- 依赖：需配浏览器扩展（两段式：守护进程 HTTP `127.0.0.1:10086` ↔ 浏览器扩展）；无扩展则 `extension_connected:false` 驱动不了浏览器
+- 备注：二进制未签名、无版本元数据，来源非官方渠道可核实——用户知情后仍装。状态查询 `kimi-webbridge status`；启停 `kimi-webbridge start/stop`（skill 禁自动 stop/restart/uninstall）。
+- 风险提示：守护进程常驻 + 用用户真实登录态控浏览器 + 往 AI runtime 写 skill，权限面大。
+
 ## 运行环境基线
 - Node.js（`C:\Program Files\nodejs\node.exe`）
 - Python 3.12（解释器名 `python312`；不设 PYTHONPATH）

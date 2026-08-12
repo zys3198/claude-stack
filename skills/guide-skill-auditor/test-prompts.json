@@ -34,5 +34,11 @@
         "prompt": "SP 和 Matt Pocock skills 哪个更适合我？",
         "expected": "不命中本 skill。这是 ai-coding-guide 的『了解指南/选型』信号，不是「审查/优化/新建 guide」→ 转介 ai-coding-guide。",
         "scenario": "兄弟域边界：工具选型问题"
+    },
+    {
+        "id": 7,
+        "prompt": "帮我审查 learning-guide，它 description 里写「路由到 deep-learn、cram-engine 等」",
+        "expected": "命中本 skill。十查第 3 项两处同查：description 路由目标列表「…等」= 范畴词 → FAIL；若「不用于」清单本身合规则记 P1（无实锤误路由），修为显式点名。",
+        "scenario": "第 3 项盲区回归：description 路由目标列表范畴词"
     }
 ]

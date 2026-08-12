@@ -2,6 +2,46 @@
 
 本文件记录 guide-skill-auditor 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.5.0] - 2026-08-11
+
+### Changed（借鉴 ask-matt 设计思路，用户拍板全采纳）
+
+- **第 6 项扩为「路由目标合法性（存在性 + 可直达性）」**：原只查幻觉引用（存在性）；新增②可直达性——直达目标的 description 若自声明「不主动响应 / 被 X 引用 / 判定源」类参考层身份 → P0 误路由面。证据：ask-matt「vocabulary underneath」参考层分层（Matt Pocock 生产路由器，社区一手）；javaguide-style-guide 自声明「不主动响应写作请求…终检时被 publish-final-check 引用」（本地一手实例，证明四域生态确有参考层）。
+- **第 7 项扩为「默认值先于菜单 + 分支点问句化」**：菜单合理存在时，每分支须是可立即判定的是非/二选一问句 + 每支给具体路径；开放式空泛菜单 = FAIL。证据：ask-matt 分支点范式（"can you settle every question in conversation?" / "is this a multi-session build?"）。
+- **第 5 项扩为「无范畴词兜底行 + 撞词行内联负向边界」**：高撞词行须行内内联「何时不选它」，只靠 description 全局「不用于」兜底不算。证据：ask-matt 条目级内联负向（"don't triage them"）+ 本地四域 tie-breaker 实践。
+- **组合审查五维 → 六维**：第 3 维扩写组合边声明（产物边：A 产物是 B 输入须指明去向；内部驱动边：B 内部调 C 须让用户知道覆盖关系）；新增第 6 维「下游角色分层」（链上/独立/参考层/维护类区别对待，与第 6 项②呼应）。证据：ask-matt 的组合边声明（implement 内部驱动 tdd、research 喂 grill-with-docs）与 main flow/on-ramps/standalone/vocabulary 分层。
+
+### Added（恢复 2026-08-07 丢失的 v1.4.0 修复，事件经过见下条 v1.4.0 补登）
+
+- description 删方法摘要 + 补 what 角色句；第 3 项扩两处同查 + P1 行补盲区；test-prompts 新增 id7。
+
+### Evidence（满足检查清单门禁）
+
+- ask-matt SKILL.md 全文精读（`~/.claude/skills/ask-matt/`，Matt Pocock skills 的元路由器）——社区一手路由器设计，符合 router-guide-skill-quality-bar 的「官方+社区一手」证据 bar。
+- 本地一手：javaguide-style-guide description 自声明参考层身份。
+- 用户 2026-08-11 提出「借鉴 ask-matt」并逐条拍板采纳范围（P5/P1/P3/P2+P4 全采纳）；丢失修复的恢复亦经用户拍板。
+
+### 动态基线（description 删方法摘要 → 必跑）
+
+- 5 场景子代理裸跑新 description（af28dce / a1ae926 / aa27f7d / ac7fafa / ab3ae8c，全部存活无降级）：正向审查 ai-coding-guide ✅ / 执行型 ai-text-polisher 负向 ✅ / 选型问题转 ai-coding-guide ✅ / 视觉混合不抢主单 ✅ / 新建翻译域路由器 ✅。**5/5 良性，无 P0 误路由。**
+
+### 未动区域（防无证据漂移）
+
+- 十查仍为 10 项（第 3/5/6/7 项均扩写非新增）；description 的 use-when / 触发词 / 不用于语义未动（删的是方法摘要句——本身即自身第 1 项违规项）。
+- 明确不借鉴：ask-matt 的 smart-zone/handoff 会话编排（开工路由器职责外，router 薄/single-step 见 v1.2.0 证据）；ask-matt 的 what-only description 形态（它 user-invoked 不用触发词，四域 model-invoked 必须 what+when，第 1 项不动）。
+
+## [v1.4.0] - 2026-08-07（2026-08-11 补登 + 恢复）
+
+### Fixed
+
+- **① description 违反自身第 1 项**（14 天未发现）：含方法摘要「十项静态检查+子代理基线+分级修复」+ 缺 what 角色句。修：删摘要、补「本 skill 是 router 型 guide 的质量审查器」。证据：自审发现审查工具自己不合规自己标准 = 假绿灯。
+- **② MAINTENANCE.md 九查残留**：L13/14「九查」改「十查」——v1.2.1 changelog 声称已改但磁盘实测未净。教训：CHANGELOG 记「已改」≠ 真改，须 grep 实测。
+- **③ 第 3 项盲区**：扩为「不用于清单 + description 路由目标列表」两处同查；P1 行补盲区；test-prompts 新增 id7。证据：learning-guide「路由到…等」、frontend-guide「各风格预设」实测踩坑（当日已修，learning v1.4.8 / frontend v1.5.5）。
+
+### 丢失与恢复事件
+
+- 本轮修复 2026-08-07 完成并验收，后磁盘被旧备份回退至 v1.3.0 状态（头号嫌疑：cc-switch 回拉旧备份），三修复全部丢失。2026-08-11 对照 memory（guide-skill-auditor-v1-4-0-self-fix）逐条核实发现缺失，当日按 memory + 磁盘实测恢复，与 ask-matt 借鉴合并发布为 v1.5.0。教训：cc-switch 备份回拉可整体回退 skill 文件——恢复后勿再回拉旧备份覆盖。
+
 ## [v1.3.0] - 2026-07-24
 
 ### Added
