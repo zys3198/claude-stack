@@ -57,6 +57,8 @@
 
 | 日期 | 动作 | 原因 |
 |---|---|---|
+| 2026-08-13 | v1.6.0：前端视觉转介改 ai-coding-guide 前端子路径；去 AI 味改 human-writing（08-08 拍板落地，加 ai-text-polisher 点名重定向）；审校三选改两选删 review-doc；教程裁决落地；REFERENCE 漂移修复（writing-* 三件套/doc-finder/hv-analysis）；test-prompts 同步+4 新回归 | guide-router 重建步骤 4：RED-02/RED-06 + 全库审计 §三（ai-text-polisher 复活疑案、审校三选一）+ 用户拍板；详见 CHANGELOG [v1.6.0] |
+| 2026-08-13 | v1.5.2：aihot（已删）与 research（已移备份）→ agent-reach / ecc:deep-research（§1① §2七选 §7示例 §0提示 REFERENCE 决策树） | guide-skill-auditor 组合审查 #6 死引用（aihot 实证 skill-backups/20260807_082542_aihot）；详见 CHANGELOG [v1.5.2] |
 | 2026-07-22 | 新建本文件 | v1.3.0 四域路由统一补维护文档，对齐 ai-coding-guide/references/MAINTENANCE.md 模式 |
 | 2026-07-24 | description 补「不用于」条款（v1.3.3） | guide-skill-auditor 十查 #3：v1.3.1 只补正文 §0 不用于，description 漏补；description 是路由唯一信号 |
 | 2026-07-31 | v1.4.4：description 补 what 句「本 skill 是中文技术写作域开工路由器」 | guide-skill-auditor 组合审查 #1 FAIL（description 缺 what）；详见 CHANGELOG [v1.4.4] |

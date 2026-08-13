@@ -1,6 +1,6 @@
 ---
 name: learning-guide
-description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / research / last30days / expose-unknowns 等。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 frontend-guide）。<!-- v1.4.3 -->
+description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / tech-learning-roadmap / agent-reach / last30days / wiki-sediment / expose-unknowns。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 ai-coding-guide 前端视觉子路径）、提升 AI 辅助编码能力/练 AI coding 判断力（走 ai-coding-guide → ai-coding-coach）。<!-- v1.5.0 -->
 ---
 
 # 学习路由指南（Claude Code）
@@ -55,15 +55,15 @@ learning-guide 相关？ YES/NO —— <一句理由>
 |---|---|---|---|
 | 陌生领域、无教材、要系统吃透/调研到能聊 | 深度调研学习 | `deep-learn` | 手动：五视角→矛盾→考试→速查表 |
 | 有课程重点/考试范围、期末速成 | 速成备考 | `cram-engine` | 手动四阶段：拆→讲→考→补 |
-| 把主题做成系列教程/学习路径（输出物） | 做教程 | `tutorial-maker` | 手动规划路径再逐课 |
+| 把主题做成系列教程/学习路径（输出物） | 做教程 | `tutorial-maker`（**给自己学会/作为学习产物**） | 手动规划路径再逐课；对外发布的教程文章转介 `article-writing-guide` |
 | 学习者本人要一条可执行路线+作业（学习路线/学习计划/roadmap/帮我学/我想学/学习路径/制定学习计划） | 学习路线图 | `tech-learning-roadmap` | 手动分阶段列路线+作业 |
-| 委派后台查一手资料、存成 md | 查资料 | `research` | 前台 WebSearch + 落盘 |
+| 委派后台查一手资料、存成 md | 查资料 | `agent-reach`（多平台检索） | 前台 WebSearch + 落盘 |
 | 查近 30 天社区/舆情/真实用户声音 | 舆情调研 | `last30days` | WebSearch 限时 |
 | 笔记/速查表存进 wiki 落库 | 记笔记 | `wiki-sediment` | 手动写 md 到 `C:\ZYS\Wiki` |
 | 开工前不知道自己不知道什么、要扫盲判级 | 判级扫盲 | `expose-unknowns` | `code-change-workflow` skill §1.1 判级一行 |
-| 工作区内教我一个技能、多会话（**仅用户手动 `/teach` 触发**，`disable-model-invocation`，agent 不可自动调） | 跟学技能 | 用户自行 `/teach` | 手动分次讲解 |
+| 工作区内教我一个技能、多会话（**仅用户手动 `/teach` 触发**，`disable-model-invocation`，agent 不可自动调） | 跟学技能 | 用户自行 `/teach`（本会话未装，待用户本机确认） | 手动分次讲解 |
 | 考前/面试前要被拷打、压力测试理解 | 被考官考 | `deep-learn` 第 8 步 | 手动出 10 题逐题问 |
-| 学习计划拆任务、排期 | 拆学习任务 | 手动列清单 | --（planning-and-task-breakdown 已移入备份） |
+| 学习计划拆任务、排期 | 拆学习任务 | 手动列清单 | -- |
 
 ## 裁决规则
 
@@ -72,7 +72,7 @@ learning-guide 相关？ YES/NO —— <一句理由>
 3. **边界重叠**：
    - 「调研 X 然后做成教程」→ 先 `deep-learn`（输入）后 `tutorial-maker`（输出），串行不并行。
    - 「速成」有范围 → `cram-engine`；无范围纯陌生 → `deep-learn`。
-   - 「查资料」只为存证 → `research`；为学会 → `deep-learn`。
+   - 「查资料」只为存证 → `agent-reach`；为学会 → `deep-learn`。
    - 「开工判级/扫盲」归属：判级/暴露未知不分域，统一 → `expose-unknowns`；本 guide 只负责在学习任务入口路由到它。编码任务同样由 `ai-coding-guide` 路由进 `expose-unknowns`（v1.2.1 组合审查新增；v1.4.1 删除域分半句，判级不切开）。
 4. **决策点先问 + 开工问询（默认问、可直接做）**：开工问询先定模式（coach 深学 / pair 概念解释 / driver 速成备考，按任务类型推荐）+ 背景；分类不清或深浅/产出形态不明时，只问一个关键问题收口——「你是想自己学会，还是要产出教程/文章？深学吃透还是只要概念解释？」，不堆选项，也不让下游学习 skill 自行推断深浅；用户说"直接讲/你定"则跳过走默认。
 
@@ -91,8 +91,8 @@ learning-guide 相关？ YES/NO —— <一句理由>
 - 学习任务 → 本指南
 - 编码任务 → `ai-coding-guide`
 - 写作任务 → `article-writing-guide`
-- 前端/视觉 → `frontend-guide`
+- 前端/视觉 → `ai-coding-guide` 前端视觉子路径
 
-四个路由器各管一域（显式枚举，无第五域），不互相嵌套。跨界时串行交接，不并联。
+三个路由器各管一域（显式枚举，无第四域），不互相嵌套。跨界时串行交接，不并联。
 
-<!-- 路由表门禁：路由表条目由人工维护；删除任何条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.3.0 -->
+<!-- 路由表门禁：路由表条目由人工维护；删除任何条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.5.0 -->

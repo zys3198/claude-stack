@@ -4,6 +4,42 @@
 
 详细维护规则与变更证据见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md) 的变更记录表（2026-07-22 之前的历史改动以该表为准）。
 
+## [v1.5.0] - 2026-08-13
+
+### Changed（guide-router 重建：吸收前端域 + 插件路径降级）
+
+- **前端视觉任务改由本 guide 接管**：域边界删除「前端视觉 → frontend-guide」转介，新增 Step 1「前端视觉」分类 + Step 2 前端视觉子路径（阶段先于风格：方向未定先人工方向选择 → `hallmark` / `impeccable`；动画走 `emil-design-eng` 系；组件库优先项目现有依赖）。依据：交接文档 P0 错配——旧 frontend-guide 把「定方向」默认路由到 `design-an-interface`（实测其 description 为模块 API/interface 设计，非 UI）；`frontend-design:frontend-design` 候选第一跳测试 FAIL（当前会话 `Unknown skill`、settings.json 无 enabledPlugins），按计划回退为人工方向选择 + 已验证 fallback。
+- **插件条目全部降为条件路径**：`superpowers:*` / `ecc:*` / `ponytail:*` / `commit-commands:*` / `understand-anything:*` / `ocr review` 不再作为默认主路径；新增「路径角色标记」定义直达/条件路径，判定依据 = 当前会话可调用清单。依据：RED-03——本会话系统提示无任何插件条目，旧正文把插件写死为默认 = 伪装直达。
+- **按全库审计（2026-08-13）删/改路由引用**：删除 `simplify`、`request-refactor-plan`、`review`、`review-doc`、`security-and-hardening` 的路由引用（审计建议档「移除+改路由」，skill 本体移动待用户逐项拍板后执行）；`security-review` 改内置命令；`planning-and-task-breakdown` 引用已不存在（v1.4.3 删）。
+- **新增 A4 两裁决**：教程裁决（给自己学会 → learning-guide；对外发布 → article-writing-guide）；Step 4 无匹配改按最终交付物四问收口，独立工具请求直接执行不制造第四 router。
+- **新增角色分层（A2 本域项）**：`gitnexus-guide`（参考层）、`animation-vocabulary`（词汇参考层）不作为用户第一跳。
+- **Step 0.7 新增「多会话工作」缺口行**：跨会话任务问交接物/断点续跑方式（ask-matt 可迁移思想之单/多会话区分）。
+
+### Fixed（活跃漂移文件点名修复）
+
+- `references/cheatsheet.md`：`grill-me`（已撤销）默认行改 `expose-unknowns` 判级；`review` / `security-and-hardening` 行删；九查 → 十查；`research`（已撤销）→ `agent-reach`；插件行全部加条件路径标注。
+- `references/ecosystems.md`：Matt Pocock 代表项清理已撤销目标（grill-me/triage/tdd/setup-matt-pocock-skills）；新增 frontend-design 候选测试 FAIL 实测状态；`understand` 裸名改 `understand-anything:understand`（条件路径）；ponytail/caveman 按 A3 分流表述。
+- `test-prompts.json`：id 4/10/11/12/13/14/16/17/20/23/29 同步新路由（内置 security-review、手动默认、十查）；新增 #30（登录页方向未定不得进 design-an-interface）、#31（点名插件不可用走 fallback）、#32（三域外独立工具直接执行）、#33（教程归属裁决）。
+
+### Rationale
+
+- 依据：2026-08-13 交接文档 RED 基线（RED-01 前端 P0 错配 / RED-03 插件伪装直达 / RED-04 三域外无收口 / RED-05 单多会话区分）+ 96 项全库审计报告（skill-trimmer-workspace/audit-report-draft.md）。
+- 未动：触发门禁、开工问询、风险矩阵、收敛规则、学习型开发/判级/知识收尾/循环/调研分类主体——无缺陷暴露。
+
+## [v1.4.5] - 2026-08-13
+
+### Fixed
+
+- Step 1「开发新功能」行示例删「做个新页面」撞词，改内联负向：含『页面/界面/UI/落地页/登录页』且要视觉产出 → frontend-guide（#5 撞词行内联负向）。
+- `grill-me` / `improve-codebase-architecture` 已移 `_weak-model-backup` → 改手动/fallback 注（开发新功能、判级/暴露未知、重构/简化 3 分类）。
+- `understand` 裸名改 `understand-anything:understand`（理解代码 3 处）；编码域调研行 `research`（存证调研）→ `agent-reach`。
+- `test-prompts.json` #26 expected 同步。
+
+### Rationale
+
+- guide-skill-auditor 组合审查（2026-08-13）：#5 撞词行无内联负向 + #6 死引用（grill-me / improve-codebase-architecture 移备份磁盘实证；understand/research 前缀或备份）。
+- 未动：Step 2 各分类主路径、Step 0.5-0.8、风险矩阵、触发门禁——无缺陷暴露。
+
 ## [v1.4.4] - 2026-07-31
 
 ### Fixed

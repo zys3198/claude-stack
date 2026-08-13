@@ -14,13 +14,13 @@
     {
         "id": 3,
         "prompt": "把我最近学的 React 知识做成一套系列教程",
-        "expected": "命中本域。分类：把主题做成系列教程（输出物）→ 做教程，主路径 tutorial-maker。若上游还要先调研，串行 deep-learn → tutorial-maker，不并行。",
+        "expected": "命中本域。分类：把主题做成系列教程（输出物）→ 做教程，主路径 tutorial-maker（给自己学会/作为学习产物）。若用户表述为「写给读者发布的教程文章」→ 转介 article-writing-guide（教程裁决）。若上游还要先调研，串行 deep-learn → tutorial-maker，不并行。",
         "scenario": "正向-做教程"
     },
     {
         "id": 4,
         "prompt": "最近社区对 Claude skills 的讨论有什么新观点？",
-        "expected": "命中本域。分类：查近 30 天社区/舆情 → 舆情调研，主路径 last30days。若为存证只要原文 → research；为学会 → deep-learn。",
+        "expected": "命中本域。分类：查近 30 天社区/舆情 → 舆情调研，主路径 last30days。若为存证只要原文 → agent-reach；为学会 → deep-learn。",
         "scenario": "正向-舆情调研"
     },
     {
@@ -38,7 +38,31 @@
     {
         "id": 7,
         "prompt": "帮我做个产品官网首页",
-        "expected": "不命中本域。前端/视觉任务 → 转介 frontend-guide。本 guide「组合顺序」段：前端/视觉走 frontend-guide。",
+        "expected": "不命中本域。前端/视觉任务 → 转介 ai-coding-guide 前端视觉子路径（frontend-guide 已定归档）。本 guide「组合顺序」段：前端/视觉走 ai-coding-guide 前端视觉子路径。验证 v1.5.0 前端转介改向。",
         "scenario": "跨界转介-前端视觉"
+    },
+    {
+        "id": 8,
+        "prompt": "帮我查一下 Redis 最新版有哪些新特性，整理成 md 笔记",
+        "expected": "命中本域。分类：委派后台查一手资料存 md → 查资料，主路径 agent-reach（多平台检索）；只为存证不为学会，不走 deep-learn。",
+        "scenario": "正向-查资料存证"
+    },
+    {
+        "id": 9,
+        "prompt": "我想给自己做一套学习 Go 的教程，边做边学",
+        "expected": "教程裁决：「给自己学会/作为学习产物」→ 留在本域「做教程」分类，主路径 tutorial-maker。只有「面向读者发布的教程文章」才转介 article-writing-guide。与 article-writing-guide test #13 互为镜像。",
+        "scenario": "教程归属裁决-给自己学会"
+    },
+    {
+        "id": 10,
+        "prompt": "我要写一套对外发布的 Java 入门系列教程，发在公众号上",
+        "expected": "教程裁决：「面向读者发布的教程文章」→ 转介 article-writing-guide（其 §1 ③ 起草-系统教程/课程 → tutorial-maker 执行）。不留在本域。",
+        "scenario": "教程归属裁决-对外发布"
+    },
+    {
+        "id": 11,
+        "prompt": "帮我把这个视频文件转成 MP3",
+        "expected": "三域外独立工具请求 → 按共享兜底 fallback-template 第一问 D 分支：仅需直接调用独立工具 → 直接执行，不制造第四 router，也不硬塞进学习分类。",
+        "scenario": "三域外收口-独立工具直接执行"
     }
 ]

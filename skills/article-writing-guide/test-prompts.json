@@ -2,17 +2,17 @@
   {
     "id": 1,
     "prompt": "审校一篇前端 React 渲染优化的技术文章，只出报告不改",
-    "expected": "非后端文体 + 只要报告 → 路由到 review-doc。不应走 tech-article-review（偏后端）或 multi-review-pipeline（会直接改）。验证 M3。"
+    "expected": "非后端文体 + 只要报告 → 路由到 multi-review-pipeline（停在报告阶段，用户确认后再批量改）。不应走 tech-article-review（偏后端）。review-doc 已移出路由表（2026-08-13 审计+拍板）。验证 M3。"
   },
   {
     "id": 2,
     "prompt": "查我这篇是不是抄了网上某篇博客",
-    "expected": "用户未给外部来源 → 不空跑 plagiarism-audit；先反问来源 URL/文件，或用 doc-finder/deep-research 拉候选来源。验证 C2 前置条件。"
+    "expected": "用户未给外部来源 → 不空跑 plagiarism-audit；先反问来源 URL/文件，或用 lean-ctx/agent-reach 拉候选来源。验证 C2 前置条件。"
   },
   {
     "id": 3,
     "prompt": "write an English tutorial on Docker networking, then edit it",
-    "expected": "英文文章 → article-writer/edit-article 可用，但跳过 chinese-markdown-normalizer 与 ai-text-polisher（中文专用）。验证 M4 语言边界。"
+    "expected": "英文文章 → article-writer/edit-article 可用，但跳过 chinese-markdown-normalizer 与 human-writing（中文专用）。验证 M4 语言边界。"
   },
   {
     "id": 4,
@@ -22,7 +22,7 @@
   {
     "id": 5,
     "prompt": "帮我改改这篇",
-    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→ai-text-polisher→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
+    "expected": "模糊请求 → 不擅猜路由。先按 REFERENCE §4 反问改哪层（骨架/肉/皮），或建议 edit-article→human-writing→chinese-markdown-normalizer 串行。验证 dim5 易混裁决。"
   },
   {
     "id": 6,
@@ -37,7 +37,7 @@
   {
     "id": 8,
     "prompt": "我想边学习边写 alibaba/open-code-review 这个开源项目，最后把学习记录自然沉淀进文章",
-    "expected": "命中边学边写路径：先用 agent-reach/doc-finder 拉官方/权威资料，生成学习路径和心智模型；若已有现稿则用 edit-article 按结构增量写入，若无现稿再用 article-writer 起草。验证 SKILL §1 边学边写路由和 REFERENCE §2。"
+    "expected": "命中边学边写路径：先用 agent-reach/lean-ctx 拉官方/权威资料，生成学习路径和心智模型；若已有现稿则用 edit-article 按结构增量写入，若无现稿再用 article-writer 起草。验证 SKILL §1 边学边写路由和 REFERENCE §2。"
   },
   {
     "id": 9,
@@ -47,11 +47,41 @@
   {
     "id": 10,
     "prompt": "给我做一套从零学 Redis 的系列教程，每课要有练习和折叠答案",
-    "expected": "系统教程/系列课/从零学习 → 路由到 tutorial-maker；不应误走 article-writer 单篇起草。验证 tutorial-maker 新路由。"
+    "expected": "对外发布的系统教程/系列课 → 路由到 tutorial-maker；不应误走 article-writer 单篇起草。若用户表述为「给自己学会」→ 转介 learning-guide（教程裁决）。验证 tutorial-maker 新路由。"
   },
   {
     "id": 11,
     "prompt": "从零写一篇介绍 PostgreSQL MVCC 的技术文章。",
     "expected": "即使用户没有主动要求讨论结构，从零创作也默认经过全篇细骨架闸门：先给结构方向，再一次性展示完整 H2/H3 细骨架，讨论并明确冻结后才写正文。除非用户明确说直接写或跳过骨架，不得立即起草正文。验证 SKILL §3、REFERENCE §1-2 和 article-writer §7.3-7.9。"
+  },
+  {
+    "id": 12,
+    "prompt": "帮我研究一下 Agent Memory 这个主题有哪些权威资料可以参考",
+    "expected": "命中本域。分类：选型/调研 → 深度调研主路径 agent-reach（多平台检索）；ecc:deep-research 为插件条件路径（当前会话可调用才走）；deep-research 本机未装仅作备选。先走轻量 🪶 项。"
+  },
+  {
+    "id": 13,
+    "prompt": "我想给自己做一套学习 Java 的教程，边做边学",
+    "expected": "教程裁决：「给自己学会/作为学习产物」→ 转介 learning-guide，不留在本路由。只有「面向读者发布的教程文章」才走本路由 §1 ③ 起草-系统教程/课程（tutorial-maker）。验证 A4 教程裁决。"
+  },
+  {
+    "id": 14,
+    "prompt": "这篇文章 AI 味太重了，帮我改得像人写的",
+    "expected": "走 §1 ⑤ 去 AI 味 → 主路径 human-writing（2026-08-08 拍板替代 ai-text-polisher）。若用户点名 ai-text-polisher → 重定向 human-writing（§0 废弃 skill 重定向）。验证 v1.6.0 去 AI 味路径切换。"
+  },
+  {
+    "id": 15,
+    "prompt": "帮我写一个登录页的文案，页面设计也一起做",
+    "expected": "含「登录页」且要视觉产出 → 转介 ai-coding-guide 前端视觉子路径（不再转介 frontend-guide）。验证 v1.6.0 兄弟域转介条款。"
+  },
+  {
+    "id": 16,
+    "prompt": "先出审校报告我看看，别改",
+    "expected": "走 multi-review-pipeline 并停在报告阶段（修订清单先给用户看）；用户确认后才执行批量改。不路由到 review-doc（已移出路由表）。验证审校两选裁决。"
+  },
+  {
+    "id": 17,
+    "prompt": "帮我把这个视频文件转成 MP3",
+    "expected": "三域外独立工具请求 → 按共享兜底 fallback-template 第一问 D 分支：仅需直接调用独立工具 → 直接执行，不制造第四 router，也不硬塞进写作分类。与 ai-coding-guide test #32、learning-guide test #11 互为镜像。"
   }
 ]

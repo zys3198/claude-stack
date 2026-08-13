@@ -7,7 +7,7 @@
     },
     {
         "id": 2,
-        "prompt": "frontend-guide 老是被 ai-coding-guide 抢单，帮我排查",
+        "prompt": "article-writing-guide 老是被 ai-coding-guide 抢单，帮我排查",
         "expected": "命中本 skill。问题=兄弟域抢单/误路由 → 动态基线必跑（撞词场景），子代理裸跑边界 prompt 看第一跳；误路由记 P0。",
         "scenario": "正向触发：误路由排查"
     },
@@ -25,8 +25,8 @@
     },
     {
         "id": 5,
-        "prompt": "做个登录页，顺带看看 frontend-guide 要不要加路由",
-        "expected": "混合意图：主要求=视觉产出 → 先转介 frontend-guide（走 frontend 域）；次要求=guide 路由表改动属本 skill 范围，但须有真实事故/官方变更证据才动路由表。本 skill 不抢主要求的单。",
+        "prompt": "做个登录页，顺带看看 ai-coding-guide 的前端视觉子路径要不要加路由",
+        "expected": "混合意图：主要求=视觉产出 → 先转介 ai-coding-guide 前端视觉子路径（前端域入口已并入编码 router）；次要求=guide 路由表改动属本 skill 范围，但须有真实事故/官方变更证据才动路由表。本 skill 不抢主要求的单。",
         "scenario": "兄弟域边界：视觉产出 + guide 维护混合"
     },
     {

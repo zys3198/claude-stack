@@ -2,7 +2,7 @@
     {
         "id":  1,
         "prompt":  "想写个登录功能，用 SP 还是 ponytail？",
-        "expected":  "走『开发新功能』。新功能默认先 superpowers:brainstorming；需求清楚且跨模块再进入 superpowers:writing-plans；明确小改才在轻量确认后走 ponytail:ponytail。给 A/B/C AskUserQuestion 仅限路径无法判断时，不展示泛泛大全。",
+        "expected":  "走『开发新功能』。默认开工问询+缺口收齐后轻量确认目标：范围小直接实现、跨模块先给实现计划；插件流程（superpowers:* / ponytail:ponytail）为条件路径，仅在当前会话可调用时才推荐。给 A/B/C AskUserQuestion 仅限路径无法判断时，不展示泛泛大全。",
         "scenario":  "带任务信号的对比型问题"
     },
     {
@@ -14,25 +14,25 @@
     {
         "id":  3,
         "prompt":  "PRD 已经写好了，下一步怎么落地？",
-        "expected":  "走『有需求文档』。默认直接推荐 superpowers:writing-plans；轻量拆任务才给 planning-and-task-breakdown 作为 B 选项；计划批准后实际写代码再接 superpowers:test-driven-development 与横切收尾。",
+        "expected":  "走『有需求文档』。默认手动拆 4-6 切片 + PLAN.md（code-change-workflow §3）确认后实现；用户只想整理需求项才给 to-prd / to-issues；superpowers:writing-plans 为条件路径（会话可调用才推荐）。",
         "scenario":  "已有需求文档"
     },
     {
         "id":  4,
         "prompt":  "帮我 review 这个 auth 中间件，里面有 token 校验和权限判断。",
-        "expected":  "走『审查代码』高风险路径。对象已明确，不重复追问；用实际 reviewer 审代码，并叠加 security-review；需要加固建议时再加 security-and-hardening；不调用 verify。",
+        "expected":  "走『审查代码』高风险路径。对象已明确，不重复追问；用实际 reviewer 审代码，并叠加内置 security-review 双审；ecc:*review* 为条件路径；不调用 verify。",
         "scenario":  "高风险代码审查"
     },
     {
         "id":  5,
         "prompt":  "这个 bug 复现不稳定，先别改代码，帮我定位。",
-        "expected":  "走『调试 bug』。直接进入 superpowers:systematic-debugging；只在复现信息不足时补问错误信息、触发条件、最近改动；定位后若要修代码，再补失败测试并走 TDD。",
+        "expected":  "走『调试 bug』。默认 code-change-workflow §2：先补最小复现/失败测试，定位根因（检查所有调用方）；superpowers:systematic-debugging 为条件路径；只在复现信息不足时补问错误信息、触发条件、最近改动。",
         "scenario":  "系统化调试"
     },
     {
         "id":  6,
         "prompt":  "把这个按钮文案从『提交』改成『保存』，别走复杂流程。",
-        "expected":  "走『快速改动』。用户已明确别走复杂流程，直接 ponytail:ponytail；不弹 A/B/C；纯文案改动不强制端到端 verify，只做必要静态/视觉检查。",
+        "expected":  "走『快速改动』。用户已明确别走复杂流程，直接最小改动；不弹 A/B/C；纯文案改动不强制端到端 verify，只做必要静态/视觉检查。",
         "scenario":  "小范围最简改动"
     },
     {
@@ -56,49 +56,49 @@
     {
         "id":  10,
         "prompt":  "这段代码太绕了，帮我简化下，别改行为。",
-        "expected":  "走『重构/简化』。默认 simplify（行为不变提清晰，需先理解再改）；大重构先 request-refactor-plan；架构级 improve-codebase-architecture。",
+        "expected":  "走『重构/简化』。默认手动列坏味道 + 逐步改、每步跑测试（原则源：项目 CLAUDE.md §2.3/§2.4）；复杂/高风险走 code-change-workflow 条件路径。不再推荐 simplify / request-refactor-plan（审计判定移除+改路由，待用户拍板）。",
         "scenario":  "重构/简化"
     },
     {
         "id":  11,
         "prompt":  "改完了，帮我提交发个 PR。",
-        "expected":  "走『提交/收尾』。默认 A=commit（单提交）；B=commit-push-pr（一条命令自动 push+开 PR，不可逆，跑前确认）；C=superpowers:finishing-a-development-branch（长分支收尾）。",
+        "expected":  "走『提交/收尾』。默认手动 git add/commit + 展示 git diff --cached --stat 待确认（人工确认线）；commit-commands:commit / commit-push-pr 为条件路径（一条命令自动 push+开 PR，不可逆，跑前确认）。",
         "scenario":  "提交/收尾"
     },
     {
         "id":  12,
         "prompt":  "bug 修完了，帮我确认下真好了再提交。",
-        "expected":  "先走横切收尾：有运行时表面用 verify，无运行时表面跑相关 build/lint/test/check；再用 superpowers:verification-before-completion 组织证据。验证通过后继续进入『提交/收尾』，不误触发代码 review。",
+        "expected":  "先走横切收尾：有运行时表面用 run 驱动验证，无运行时表面跑相关 build/lint/test/check；随后组织验证证据（superpowers:verification-before-completion 为条件路径，不可用则手写证据清单）。验证通过后继续进入『提交/收尾』，不误触发代码 review。",
         "scenario":  "横切验证后提交"
     },
     {
         "id":  13,
         "prompt":  "React 项目 build 报错了，帮我看看。",
-        "expected":  "走『构建错误』。已知框架优先 ecc:react-build slash command；仅当 slash command 不可用但存在 resolver agent 时，才派 ecc:react-build-resolver；两者都没有才回到项目构建命令原文排查。frontend-design 不在此分类。",
+        "expected":  "走『构建错误』。默认跑项目构建命令按错误原文排查；ecc:react-build 为条件路径（当前会话可调用才走），不可用则不进插件路径。",
         "scenario":  "构建错误"
     },
     {
         "id":  14,
         "prompt":  "帮我审下这篇技术文章有没有错。",
-        "expected":  "走『文档写作』。默认先 article-writing-guide 总路由；该请求是审校已有技术文章，总路由应下钻到 review-doc；不直接绕过总路由调用文章专项。",
+        "expected":  "走『文档写作』。默认先 article-writing-guide 总路由；该请求是审校已有技术文章，总路由应下钻到其审校主路径；不直接绕过总路由调用文章专项。",
         "scenario":  "文档写作"
     },
     {
         "id":  15,
         "prompt":  "我看了腾讯那篇用 project_wiki / TECH_SPEC / 红线机制跑 AI 需求开发的文章，看看能不能优化进我的 ai-coding-guide。",
-        "expected":  "走『路由指南维护』。先判断是否值得迁移；只评估时不改文件。决定迁移后，先补 RED 场景或最小检查；小型路由修正最小修改并跑审计，行为变化或量化优化时才使用 superpowers:writing-skills + darwin-skill。只吸收触发词、分类、证据门槛、fallback、反模式；不迁移 8 阶段流水线、project_wiki 全套、TECH_SPEC 模板、红线 YAML、模拟器验证等项目专属重机制。",
+        "expected":  "走『路由指南维护』。先判断是否值得迁移；只评估时不改文件。决定迁移后，先补 RED 场景或最小检查；小型路由修正最小修改并跑审计，行为变化或量化优化时才使用 darwin-skill（superpowers:writing-skills 为条件路径）。只吸收触发词、分类、证据门槛、fallback、反模式；不迁移 8 阶段流水线、project_wiki 全套、TECH_SPEC 模板、红线 YAML、模拟器验证等项目专属重机制。",
         "scenario":  "外部 AI 编码实践迁移"
     },
     {
         "id":  16,
         "prompt":  "React 项目 build 报错，当前有 ecc:react-build 和 ecc:react-build-resolver，直接处理，不要让我选 skill。",
-        "expected":  "走『构建错误』。用户要求直接处理且 slash command 可用，先用 ecc:react-build；不弹 A/B/C；不派 resolver agent。",
-        "scenario":  "slash command 优先于 resolver agent"
+        "expected":  "走『构建错误』。用户点名且当前会话可调用清单里有 ecc:react-build → 先用它；不弹 A/B/C；不派 resolver agent。若会话清单里没有，则跑项目构建命令排查，并说明插件不可用。",
+        "scenario":  "条件路径-点名可用时直走"
     },
     {
         "id":  17,
         "prompt":  "请 review 当前 diff 的 auth 变更，不要运行程序。",
-        "expected":  "走『审查代码』。当前 diff + auth 高风险 → code-review + security-review；尊重不要运行程序，不调用 verify。",
+        "expected":  "走『审查代码』。当前 diff + auth 高风险 → 内置 code-review + 内置 security-review 双审；尊重不要运行程序，不调用 verify。",
         "scenario":  "review 不误触发 verify"
     },
     {
@@ -116,7 +116,7 @@
     {
         "id":  20,
         "prompt":  "直接把这个按钮文案改掉，别让我选 skill，也别走复杂流程。",
-        "expected":  "走『快速改动』。直接 ponytail:ponytail；不弹 A/B/C；范围扩大到跨模块时才重新分类。",
+        "expected":  "走『快速改动』。直接最小改动；不弹 A/B/C；范围扩大到跨模块时才重新分类。",
         "scenario":  "直接执行跳过询问"
     },
     {
@@ -134,7 +134,7 @@
     {
         "id":  23,
         "prompt":  "我要改 auth 权限判断，还涉及数据库迁移，能不能直接让 agent 改？",
-        "expected":  "按风险→闸门矩阵判为高风险。先计划/设计确认，再 TDD/复现，叠加专项 reviewer + security-review，最后 verify/证据；不可直接开改。",
+        "expected":  "按风险→闸门矩阵判为高风险。先计划/设计确认，再失败测试复现，叠加专项 reviewer + 内置 security-review，最后 verify/证据；不可直接开改。",
         "scenario":  "风险闸门矩阵"
     },
     {
@@ -152,25 +152,49 @@
     {
         "id":  26,
         "prompt":  "接了个需求但我完全没思路，连该问什么都列不出来，开工前先把盲点摊出来。",
-        "expected":  "走『判级/暴露未知』分类。主路径 expose-unknowns：判为未知的未知，先让 AI 采访扫盲（grill-me/brainstorming），扫盲后再进方案设计；不直接让 AI 出方案。",
+        "expected":  "走『判级/暴露未知』分类。主路径 expose-unknowns：判为未知的未知，先让 AI 采访扫盲，扫盲后再进方案设计；不直接让 AI 出方案。",
         "scenario":  "判级/暴露未知路由"
-    }
-    ,{
+    },
+    {
         "id":  27,
         "prompt":  "帮我做个落地页，现代一点好看一点，做完顺便把代码写了",
-        "expected":  "命中域边界转介：含「落地页」且要视觉产出 → 转介 frontend-guide，即使同时提到写代码。不进入 Step 1 分类，不按『开发新功能』处理。验证 v1.3.0 域边界条款（2026-07-22 基线：无此条款时误路由到本 guide）。",
-        "scenario":  "域边界转介-前端视觉"
+        "expected":  "命中『前端视觉』分类（留在本路由，不转介 frontend-guide）：含「落地页」且要视觉产出，设计方向先行。方向未定 → 决策点先问（给 2-3 个方向选项/问有无参考）→ 用户选定后走 hallmark；不得路由到 design-an-interface（模块 API 设计 skill）。验证 v1.5.0 前端接管条款（v1.4.5 及以前为转介 frontend-guide，v1.5.0 改为本 guide 前端子路径）。",
+        "scenario":  "前端视觉-P0 错配修复"
     },
     {
         "id":  28,
         "prompt":  "我想吃透 transformer 架构，两周后要给别人讲明白",
         "expected":  "命中域边界转介：学习/吃透 → 转介 learning-guide。不进入 Step 1 分类。验证 v1.3.0 域边界条款。",
         "scenario":  "域边界转介-学习"
-    }
-    ,{
+    },
+    {
         "id":  29,
         "prompt":  "帮我审查一下 learning-guide 这个路由 skill 有没有问题，顺便优化",
-        "expected":  "走『路由指南维护』分类。审查/优化任一 router 型 guide skill → 主路径 guide-skill-auditor（九查静态体检 + 子代理路由基线 + P0/P1/P2 分级修复）；不手搓审查清单，不直接上手改目标 guide。",
+        "expected":  "走『路由指南维护』分类。审查/优化任一 router 型 guide skill → 主路径 guide-skill-auditor（十查静态体检 + 子代理路由基线 + P0/P1/P2 分级修复）；不手搓审查清单，不直接上手改目标 guide。",
         "scenario":  "guide skill 审查路由"
+    },
+    {
+        "id":  30,
+        "prompt":  "帮我做个登录页，没设计稿，想要视觉方向",
+        "expected":  "走『前端视觉』分类「方向未定」：决策点先问，给 2-3 个视觉方向选项问用户（或问有无参考/品牌约束），不让设计 skill 自行推断；用户选定后进 hallmark。绝不路由到 design-an-interface（其 description 为模块 API 设计，非 UI）。验证 RED-01 P0 修复。",
+        "scenario":  "前端视觉-方向未定不得进 design-an-interface"
+    },
+    {
+        "id":  31,
+        "prompt":  "帮我用 superpowers:brainstorming 澄清下这个需求",
+        "expected":  "用户点名插件 skill → 先查当前会话可调用清单：若 superpowers:brainstorming 在列（settings.json enabledPlugins 启用），点名优先直接走；若不在（本会话无插件条目），明示不可用并走 Fallback：expose-unknowns 判级或手动单问单答澄清，不伪装直达。",
+        "scenario":  "点名插件-条件路径 fallback"
+    },
+    {
+        "id":  32,
+        "prompt":  "帮我把这个视频文件转成 MP3",
+        "expected":  "三域外独立工具请求 → 按 Step 4 第一问 D 分支：仅需直接调用独立工具（ffmpeg 等），直接执行，不制造第四 router，也不硬塞进编码/写作/学习分类。",
+        "scenario":  "三域外收口-独立工具直接执行"
+    },
+    {
+        "id":  33,
+        "prompt":  "我想给自己做一套学习 React 的教程，边做边学",
+        "expected":  "教程裁决（A4）：「给自己学会/作为学习产物」→ 转介 learning-guide（其路由表「做教程」分类），不留在本路由。若用户表述为「写给读者发布的教程文章」→ 转介 article-writing-guide。按最终交付物裁决，不猜。",
+        "scenario":  "教程归属裁决-给自己学会"
     }
 ]

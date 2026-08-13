@@ -1,6 +1,6 @@
 ---
 name: guide-skill-auditor
-description: Use when 审查、优化、新建 router 型 guide skill（各域开工路由器，如 ai-coding-guide / article-writing-guide / frontend-guide / learning-guide），或排查 guide 误路由、漏触发、兄弟域抢单问题。本 skill 是 router 型 guide 的质量审查器。触发词：审查 guide、优化 guide、路由 skill 体检、guide 抢单、误路由排查、新建路由器、route skill audit。不用于：非路由型执行 skill 的内容审查（走该 skill 自己的维护流程）。<!-- v1.5.0 -->
+description: Use when 审查、优化、新建 router 型 guide skill（各域开工路由器，如 ai-coding-guide / article-writing-guide / learning-guide），或排查 guide 误路由、漏触发、兄弟域抢单问题。本 skill 是 router 型 guide 的质量审查器。触发词：审查 guide、优化 guide、路由 skill 体检、guide 抢单、误路由排查、新建路由器、route skill audit。不用于：非路由型执行 skill 的内容审查（走该 skill 自己的维护流程）。<!-- v1.6.1 -->
 ---
 
 # Guide Skill 审查器
@@ -24,7 +24,7 @@ description: Use when 审查、优化、新建 router 型 guide skill（各域�
 | 3 | **「不用于」清单 + description 路由目标列表无范畴词** | 两处同查：①「不用于」显式枚举兄弟域转介条款，无「其他/等/任何」范畴词；②description 里枚举路由目标的列表同样无范畴词（「路由到 A/B…等」「各风格预设」类写法 = FAIL） | Superpowers #1301 范畴词被放大解释；2026-08-07 实测踩坑：learning-guide「路由到…等」、frontend-guide「各风格预设」（当日已修，learning v1.4.8 / frontend v1.5.5） |
 | 4 | **触发门禁** | 正文有显式 3 行输出模板：相关性 YES/NO + 目标存在性 + fallback，位置在分类/委派动作之前（范本：`ai-coding-guide` 触发门禁段） | 社区实测无门禁触发率 0-20%，forced-eval 84% |
 | 5 | **路由表无范畴词兜底行 + 撞词行内联负向边界** | 每行都是具体信号→具体路径；「其他」类兜底行必须给出具体反问模板，不是空泛「问用户」。与兄弟域共享触发词的高撞词行，须在行内内联「何时不选它/何时选兄弟域」；只靠 description 全局「不用于」兜底不算——全局清单管触发面，行内内联管正文分发时的近端防线 | #1301；ask-matt 条目级内联负向范式（「Triage is only for issues you didn't create… don't triage them」，社区一手路由器）；本地四域 tie-breaker 实践 |
-| 6 | **路由目标合法性（存在性 + 可直达性）** | ①存在性：路由表每个 skill 名核对证据链（严格降序）：ⓐ当前会话 available skills ⓑ磁盘 `~/.claude/skills/`、`~/.claude/plugins/cache/`、`~/.cc-switch/skills/`。三处都查不到 → 记 P0 幻觉。磁盘能查到但当前会话未装 → **不算幻觉**，记「待本机会话验证」。禁止仅因审查会话没装就判 FAIL。②可直达性：直达目标的 description 若自声明「不主动响应 / 被 X 引用 / 判定源」类参考层身份 → P0 误路由面（用户会被分发到一个声明不接客的 skill）；参考层只应被其他 skill 在流程内部引用，不作路由终点 | §12 证据门槛 + 2026-07-22 reviewer 误报教训；ask-matt「vocabulary underneath」参考层分层（社区一手路由器）；javaguide-style-guide 自声明「不主动响应写作请求…终检时被 publish-final-check 引用」（本地一手实例） |
+| 6 | **路由目标合法性（存在性 + 可直达性 + 归属）** | ①存在性：路由表每个 skill 名核对证据链（严格降序）：ⓐ当前会话 available skills ⓑ磁盘 `~/.claude/skills/`、`~/.claude/plugins/cache/`、`~/.cc-switch/skills/`。三处都查不到 → 记 P0 幻觉。磁盘能查到但当前会话未装 → **不算幻觉**，记「待本机会话验证」。禁止仅因审查会话没装就判 FAIL。②可直达性：直达目标的 description 若自声明「不主动响应 / 被 X 引用 / 判定源」类参考层身份 → P0 误路由面（用户会被分发到一个声明不接客的 skill）；参考层只应被其他 skill 在流程内部引用，不作路由终点。③归属错位：路由目标是「每轮任务都要遵守的项目约定 / 漏一次就出事的机械约束」类 skill（该进 CLAUDE.md/AGENTS.md 或 hook/CI/linter，非 skill 职责）→ P1 归属错位，建议改路由移除该目标、把规则挪到规则文件/hook | §12 证据门槛 + 2026-07-22 reviewer 误报教训；ask-matt「vocabulary underneath」参考层分层（社区一手路由器）；javaguide-style-guide 自声明「不主动响应写作请求…终检时被 publish-final-check 引用」（本地一手实例）；JavaGuide《Skill 的选择与精简》(2026-08-13) 规则分流框架（项目约定→AGENTS.md、机械约束→hook/CI/linter、特定任务流程→Skill） |
 | 7 | **默认值先于菜单 + 分支点问句化** | A/B/C 仅在「路径选择改变成本/风险/产物且无法判断」时出现；用户意图明确时直接给默认路径。菜单合理存在时，每个分支须写成用户/Claude 可立即判定的是非/二选一问句（如「这是多会话构建吗？」），且每支给具体下一步路径；开放式「你想要哪种」式空泛菜单 = FAIL | Anthropic defaults-not-menus；ask-matt 分支点问句化范式（「can you settle every question in conversation?」/「is this a multi-session build?」，社区一手路由器） |
 | 8 | **路由表门禁** | 文末有 HTML 注释声明：增删路由表条目须引用真实事故或官方变更证据 | 防无证据漂移 |
 | 9 | **配套文件** | 必须：`test-prompts.json`、`CHANGELOG.md`。推荐：`references/MAINTENANCE.md`（单文件 guide 可缓建）。审查器自身按同一标准执行 | 四域 v1.3.0 对齐结构 |
@@ -80,21 +80,21 @@ P1/P2: <清单>
 | 路由表某区没暴露缺陷 | 明确记录「未动 + 原因」 | 顺手「优化」措辞 |
 | description 改完 | 补兄弟 guide 的镜像 test-prompt | 只改单边，回归断链 |
 | 子代理会话缺目标 skill | 验证「不抢单」侧即可，端到端标注「待用户本机跑」 | 假装端到端已验证 |
-| 用户要看的是「四域拼起来合不合理」 | 主会话直接组合审（域边界/重叠/交接/兜底/下游归属），单 guide 十查照跑 | 把组合审硬塞进单 guide 审查流程 |
+| 用户要看的是「三域拼起来合不合理」 | 主会话直接组合审（域边界/重叠/交接/兜底/下游归属），单 guide 十查照跑 | 把组合审硬塞进单 guide 审查流程 |
 
-## 组合审查（审四域整套，非单个）
+## 组合审查（审三域整套，非单个）
 
 用户问「skill 的组合/搭配是否合理」时，除逐 guide 跑十查外，加审六维（主会话即可，子代理故障降级同第 2 步）：
 
-1. **域边界覆盖**：四域拼起来有没有两不管地带（翻译/录屏/运维等第五域信号归谁）。
-2. **边界重叠**：正向触发词重叠时 tie-breaker 是否四家一致（看交付物/目标）。
+1. **域边界覆盖**：三域拼起来有没有两不管地带（翻译/录屏/运维等域外信号归谁——按 fallback-template D 分支收口）。
+2. **边界重叠**：正向触发词重叠时 tie-breaker 是否三家一致（看交付物/目标）。
 3. **跨界交接一致性 + 组合边声明**：A 说转 B、B 是否对称接 A；无死循环、无转介进虚空。另查两类组合边是否显式声明——产物边（A 的产物是 B 的输入时，A 处是否指明「下一步去 B」）；内部驱动边（B 内部驱动 C 时，用户拿到 B 的产出是否知道 C 已被覆盖、无需单独触发）。
-4. **共享兜底有效性**：fallback-template 被几家引用、能否兜住「四域都不命中」。
+4. **共享兜底有效性**：fallback-template 被几家引用、能否兜住「三域都不命中」。
 5. **下游 skill 归属冲突**：同一下游被多域引用时是否有归属说明（如 `expose-unknowns` 判级按主域分界）。
-6. **下游角色分层**：四域下游 skill 按角色分层审（开工链上 / 独立工具 / 参考层 / 维护类），guide 是否区别对待——参考层不出现在直达路由表（与十查第 6 项②呼应）；链上存在天然先后关系的，路由表是否表达顺序或显式声明单跳即终态。
+6. **下游角色分层**：三域下游 skill 按角色分层审（开工链上 / 独立工具 / 参考层 / 维护类），guide 是否区别对待——参考层不出现在直达路由表（与十查第 6 项②呼应）；链上存在天然先后关系的，路由表是否表达顺序或显式声明单跳即终态。
 
 ## 实证来源
 
-本检查清单从 2026-07-22 四域 v1.3.0 改造实战提炼（handoff：`C:\ZYS\Code\lab-area\exp\2026-07-22-guide-skills-v130\handoff.md`）。RED 基线证明：裸审代理能自发发现幻觉引用/自相矛盾/菜单僵化约 4/9 项，但系统漏掉 description 流程摘要、范畴词兜底行、防漂移门禁三类——本 skill 把这三类变成强制检查项。
+本检查清单从 2026-07-22 四域 v1.3.0 改造实战提炼（handoff：`C:\ZYS\Code\lab-area\exp\2026-07-22-guide-skills-v130\handoff.md`）。RED 基线证明：裸审代理能自发发现幻觉引用/自相矛盾/菜单僵化约 4/9 项，但系统漏掉 description 流程摘要、范畴词兜底行、防漂移门禁三类——本 skill 把这三类变成强制检查项。第 6 项③归属错位判据来自 JavaGuide《Skill 的选择与精简》(2026-08-13) 规则分流框架（项目约定→AGENTS.md、机械约束→hook/CI/linter、特定任务流程→Skill）。
 
-<!-- 检查清单门禁：增删检查项前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.5.0 -->
+<!-- 检查清单门禁：增删检查项前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.6.1 -->

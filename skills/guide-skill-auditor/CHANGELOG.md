@@ -2,6 +2,18 @@
 
 本文件记录 guide-skill-auditor 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.6.1] - 2026-08-13
+
+### Fixed（guide-router 重建：frontend-guide 引用迁移）
+
+- description 审查对象列举删 `frontend-guide`（其已定归档，前端域入口并入 ai-coding-guide 前端视觉子路径）：「ai-coding-guide / article-writing-guide / frontend-guide / learning-guide」→「ai-coding-guide / article-writing-guide / learning-guide」；版本戳 v1.6.0 → v1.6.1。
+- `test-prompts.json` id 2 抢单排查场景换保留的 guide（frontend-guide 被抢单 → article-writing-guide 被抢单，场景语义不变）；id 5 混合场景转介改 ai-coding-guide 前端视觉子路径。
+- 十查第 3 项依据中「frontend-guide『各风格预设』」为 2026-08-07 历史事故证据，按历史记录保留不做语义替换。
+
+### 备注
+
+- v1.6.0 版本戳存在于 SKILL.md 但 CHANGELOG 缺该条目——既有记录缺口，非本轮引入；本轮改动记为 v1.6.1。
+
 ## [v1.5.0] - 2026-08-11
 
 ### Changed（借鉴 ask-matt 设计思路，用户拍板全采纳）

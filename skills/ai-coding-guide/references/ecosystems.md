@@ -8,62 +8,57 @@
 
 ## 生态角色（Claude Code 当前环境）
 
-### Superpowers
+**全局规则（2026-08-13 起）：** 所有插件条目（`superpowers:*` / `ecc:*` / `ponytail:*` / `commit-commands:*` / `understand-anything:*` 等）一律按**条件路径**处理——当前会话可调用清单里出现才走，否则走各分类 Fallback。判定依据：`settings.json` 的 `enabledPlugins` + 当前会话 `Available skills` 清单；磁盘 cache 只证明「已安装/可候选」。
+
+### Superpowers（条件路径）
 
 **定位：** 流程纪律层。负责 `brainstorming`、`writing-plans`、`test-driven-development`、`systematic-debugging`、`verification-before-completion` 这类硬门禁流程。
 
-**什么时候优先用：**
+**什么时候优先用（会话可调用时）：**
 - 新功能需要设计
 - 已有 spec 需要落地计划
 - bug 需要根因分析
 - 完工前需要证据驱动验证
 
-**不要把它当成：** 所有小改动的默认入口。小改动先看 `ponytail:ponytail`。
+**默认替代（会话不可调用时）：** 开工问询 + Step 0.7 缺口收齐 + 手动计划/实现；复杂/高风险走 `code-change-workflow`。不要把插件流程写死成所有任务的默认链。
 
-### Matt Pocock skills
+### 顶层独立 skill（直达路径）
 
-**定位：** SDLC 补充层。本机独立 skill 集（来源 Matt Pocock skills 仓库，经 cc-switch 同步），补上 spec、breakdown、review、security、debugging 这类可拆分能力。代表项：`grill-me`、`planning-and-task-breakdown`、`to-prd`、`to-issues`、`review-doc`、`security-and-hardening`、`triage`、`tdd`。注意是独立 skill，不是插件 namespace——调用用裸名（`grill-me`），不要写成 `agent-skills:grill-me`。社区泛称 agent skills，但本机无 agent-skills 插件。
+本机 `~/.claude/skills/` 下的裸 skill 为直达路径（96 项全库审计 2026-08-13：全部当前会话可见）。与路由相关的代表项：
 
-**证据锚点：** 来源标记见 `setup-matt-pocock-skills`（独立 skill，其描述列 `to-issues`/`to-prd`/`triage`/`tdd` 为其管辖）；本机 `~/.cc-switch/skills/` 下裸名存在、无 namespace 前缀。属「官方可证实 + 本机目录可见」级别，非运行时实测。
-
-**什么时候优先用：**
-- 已经知道要做 review / security / planning-and-task-breakdown
-- 想给 Superpowers 主流程补一个专项环节
-
-**不要把它当成：** 替代 Superpowers 的总流程默认层。两套都能做时，先按主文件路由决定谁做主、谁做补充。
+- `ai-coding-coach`（学习型开发）、`expose-unknowns`（判级）、`lean-ctx`（读代码）、`gitnexus-*`（调用链/影响面）、`code-change-workflow`（复杂/高风险改动流程）、`neat-freak`（知识收尾）、`guide-skill-auditor`（十查审查 guide）、`darwin-skill`（skill 优化）、`to-prd` / `to-issues`（需求整理）、`article-writer` / `chinese-markdown-normalizer`（写作域）、`last30days`（舆情调研）。
+- 前端视觉直达：`hallmark`（新页面/redesign）、`impeccable`（提质/审计）、`emil-design-eng`（动画综合）、`improve-animations`（全库动画改造）、`find-animation-opportunities`（找该动哪）、`shadcn-vue-guide`（Vue 项目已采用时）、`apple-design`（Apple 风格参考）。
+- 历史：Matt Pocock 系独立 skill 经 2026-07 skill 精简审计大部分已移 `~/.cc-switch/skills/_weak-model-backup/`（`grill-me` / `triage` / `tdd` / `setup-matt-pocock-skills` / `planning-and-task-breakdown` 等）；`review-doc` / `security-and-hardening` / `simplify` / `request-refactor-plan` 的去留见全库审计报告（2026-08-13），用户拍板前不再作为本指南直达项。
 
 ### ponytail / caveman
 
-**定位：** 最简实现层。`ponytail:ponytail` 负责最短工作路径，caveman 负责压缩表达。
-
-**什么时候优先用：**
-- 单点小改
-- 不值得开完整设计/计划流程
-- 用户明确要「快、少、别铺开」
+**定位：** 最简实现层（条件路径）+ 全局表达模式。`ponytail:ponytail` 负责最短工作路径（当前会话可调用才走；默认替代=直接最小改动）；`caveman` 是全局输出模式开关，不进路由面。
 
 **升级条件：** 一旦改动跨 3 个以上文件、跨模块、开始触及架构边界，就回到主流程。
 
-### claude-plugins-official 补充层
+### claude-plugins-official 补充层（条件路径）
 
 **代表项：** `frontend-design`、`feature-dev:*`、`code-review:*`、`commit-commands:*`。
 
-**作用：** 在主流程确定后，补前端、特性开发、代码审查、提交收尾这些专项动作。`code-review` 面向当前 diff；`review` 面向 PR、分支或指定基线对比；`superpowers:requesting-code-review` 更适合实现完成后请求独立复核。
+**作用：** 在主流程确定后，补前端、特性开发、代码审查、提交收尾这些专项动作。
 
-### ecc 语言专项层
+**frontend-design 实测状态（2026-08-13）：** 候选第一跳测试 FAIL——当前会话 `Unknown skill: frontend-design:frontend-design`，`settings.json` 无 `enabledPlugins`。故前端视觉默认走本机裸 skill（`hallmark` / `impeccable` 系），`frontend-design` 仅在启用后重测通过才可升级为默认。
+
+### ecc 语言专项层（条件路径）
 
 **代表项：** `ecc:*review*`、`ecc:*build*`。
 
-**作用：** 当任务已经明确落在某个语言或框架上时，提供更窄的 reviewer 或 build resolver。构建失败优先用 `ecc:<lang>-build` slash command；slash command 不在但 resolver agent 存在时，才派 `ecc:<lang>-build-resolver` agent。
+**作用：** 当任务已经明确落在某个语言或框架上时，提供更窄的 reviewer 或 build resolver。构建失败优先用 `ecc:<lang>-build` slash command；slash command 不在但 resolver agent 存在时，才派 `ecc:<lang>-build-resolver` agent。会话不可调用 → 跑项目构建命令按错误原文排查。
 
 **用法：** 先确定任务类型，再决定是否需要专项层；不要先按语言插件倒推任务。
 
 ### 上下文 / 理解层
 
-**代表项：** `lean-ctx`、`understand`、`gitnexus-*`。
+**代表项：** `lean-ctx`、`gitnexus-*`（直达）；`understand-anything:understand`（条件路径）。
 
 **作用：** 看结构、看依赖、看影响范围、压缩上下文。
 
-**默认顺序：** 先 `lean-ctx`，再按需要上 `understand` 或 `gitnexus-*`。
+**默认顺序：** 先 `lean-ctx`，调用链接 `gitnexus-*`；大范围建模在会话可调用时再上 `understand-anything:understand`。
 
 ---
 
@@ -71,12 +66,12 @@
 
 | 冲突场景 | 默认裁决 | 原因 |
 |---|---|---|
-| `superpowers:brainstorming` vs `ponytail:ponytail` | 新功能走 Superpowers，小改动走 ponytail | 先按任务规模分层 |
-| `superpowers:writing-plans` vs `planning-and-task-breakdown` | 已有 spec 默认 `superpowers:writing-plans` | 计划质量和落地细节更稳 |
-| `superpowers:requesting-code-review` vs `review` / `code-review` | 当前 diff 走 `code-review`；PR/分支/指定基线走 `review`；实现完成后请求复核再用 `superpowers:requesting-code-review` | 审查入口和流程门禁不是同一层 |
-| `security-review` / `security-and-hardening` vs 通用 review | 高风险任务用实际 reviewer + `security-review`；需要加固方案再叠 `security-and-hardening` | 安全审查和加固建议是额外维度，不是替代关系 |
-| `frontend-design` vs `feature-dev:*` | UI/页面骨架先 `frontend-design`，功能实现再 `feature-dev:*` | 先定界面，再做交互 |
-| `lean-ctx` vs `understand` | 日常查代码先 `lean-ctx`，大范围建模再 `understand` | 成本更低 |
+| `superpowers:brainstorming`（条件） vs 手动澄清 | 会话可调用且任务复杂 → Superpowers；否则开工问询 + `expose-unknowns` 判级 | 先按运行时可用性分层，再按任务规模 |
+| `superpowers:writing-plans`（条件） vs `to-prd`/`to-issues` | 默认手动拆切片 + PLAN.md；用户只想整理需求项 → `to-prd` / `to-issues` | 计划质量优先但不过度依赖插件 |
+| `code-review`（内置） vs `ecc:*review*`（条件） vs `ocr review`（条件） | 轻量走内置 `code-review`；语言专项/独立重量审查在会话可调用时叠加 | 审查入口和流程门禁不是同一层 |
+| 内置 `security-review` vs 通用 review | 高风险任务用实际 reviewer + 内置 `security-review` 双审 | 安全审查是额外维度，不是替代关系 |
+| `frontend-design`（候选 FAIL） vs `hallmark`/`impeccable` | 前端视觉默认 `hallmark`（新页面）/ `impeccable`（提质）；候选重测通过再议 | 实测当前会话不可调用，不伪装直达 |
+| `lean-ctx` vs `understand-anything:understand`（条件） | 日常查代码先 `lean-ctx`，大范围建模在可调用时再上 understand | 成本更低 |
 
 ---
 
@@ -84,11 +79,12 @@
 
 | 默认路径不可用 | 降级到 |
 |---|---|
-| `grill-me` 不在 | `superpowers:brainstorming` 或手动单问单答 |
-| `security-review` 不在 | 实际 reviewer + `security-and-hardening`，并明示缺少安全审查入口 |
-| 专项 build slash command 不在 | 对应 build resolver agent；再不在则项目构建原文 + 手动排查 |
-| `understand` / `gitnexus-*` 不在 | 继续用 `lean-ctx` 聚焦读取；`lean-ctx` 也不可用才退原生搜索 + 精读文件 |
+| `superpowers:*` 不可用 | 手动流程：开工问询 + 缺口收齐 + 手动计划/实现（复杂走 `code-change-workflow`） |
+| `ecc:*review*` 不可用 | 通用 Code Reviewer agent + 内置 `code-review` / `security-review` |
+| 专项 build slash command 不可用 | 项目构建原文 + 手动排查 |
+| `understand-anything:understand` / `gitnexus-*` 不可用 | 继续用 `lean-ctx` 聚焦读取；`lean-ctx` 也不可用才退原生搜索 + 精读文件 |
 | `/loop` 不可用 | 明示不可用，改手动执行 |
+| `hallmark` / `impeccable` 不可用 | 手动给方向选项 + 按项目栈直接实现，收尾自查 AI 味 |
 
 ---
 
@@ -96,6 +92,6 @@
 
 - 当前会话 reminder 里有没有该 skill
 - `~/.claude/skills/` 是否存在独立 skill
-- `~/.claude/plugins/cache/` 是否存在插件附带 skill
+- `~/.claude/plugins/cache/` 是否存在插件附带 skill；`settings.json` 的 `enabledPlugins` 是否启用
 - 推荐语气是否越界成「硬事实」
 - 主文件是否又长回百科全书

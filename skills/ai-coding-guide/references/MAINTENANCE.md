@@ -32,6 +32,8 @@
 
 - `SKILL.md`
 - `references/ecosystems.md`
+- `references/cheatsheet.md`
+- `references/fallback-template.md`（跨 guide 共享兜底，改动会影响另三个 guide 的兜底行为，必须同步 CHANGELOG 说明）
 - `references/MAINTENANCE.md`
 - `test-prompts.json`
 - `scripts/audit.ps1`
@@ -61,6 +63,8 @@
 
 | 日期 | 动作 | 原因 |
 |---|---|---|
+| 2026-08-13 | v1.5.0：前端视觉接管（删 frontend-guide 转介，新增前端视觉分类+子路径）；插件条目全部降条件路径（新增路径角色标记）；删 simplify/request-refactor-plan/review/review-doc/security-and-hardening 路由引用（审计移除+改路由档）；A4 两裁决落地（教程归属+三域外收口）；A2 本域不可直达清单（gitnexus-guide/animation-vocabulary）；Step 0.7 加多会话缺口行；cheatsheet/ecosystems/test-prompts 漂移修复+4 新回归用例 | guide-router 重建步骤 3：RED-01（design-an-interface P0 错配）/ RED-03（插件伪装直达）/ RED-04（三域外无收口）/ RED-05（单多会话）；96 项全库审计建议档；详见 CHANGELOG [v1.5.0] |
+| 2026-08-13 | v1.4.5：Step1「做个新页面」撞词行加内联负向；grill-me / improve-codebase-architecture（已移备份）改手动/fallback；understand→understand-anything:understand；research→agent-reach | guide-skill-auditor 组合审查 #5 撞词行内联负向 + #6 死引用；详见 CHANGELOG [v1.4.5] |
 | 2026-07-07 | 重写维护说明为 Claude Code 专用准确性维护手册 | 与 accuracy spec 对齐，去掉旧多 IDE 残留和历史包袱 |
 | 2026-07-12 | 清死引用 `/goal`（SKILL.md+ecosystems.md+test-prompts）；`agent-skills` 归属改 Matt Pocock skills（SKILL.md 描述+生态表+ecosystems.md 段）；audit.ps1 加死 slash 命令 P2 巡检 | 对齐当前装机栈：`goal` skill 不存在、`loop` 同时覆盖定时与条件驱动；SDLC 补充层经 setup-matt-pocock-skills 证实为 Matt Pocock 独立 skill，非 agent-skills namespace |
 | 2026-07-12 | 加 4 路由分类：理解代码（`lean-ctx`/`understand`/`gitnexus-exploring`）、完工验证（`verify`/`superpowers:verification-before-completion`）、重构/简化（`simplify`/`request-refactor-plan`）、提交/收尾（`commit-commands:*`/`superpowers:finishing-a-development-branch`）；SKILL.md 信号表+分类块+决策速查同步 | 填高频任务路由 holes（原 0 路由），11 个 skill 全部已装核实；spec §3 禁大全，仅加 universal 缺口，TDD 不开独立分类 |

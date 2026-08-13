@@ -14,7 +14,7 @@
 | 当前会话 system reminder 新增或删除 skill / agent / 工具名 | 先对照当前会话，再对照 `~/.claude/skills/` 与 `~/.claude/plugins/cache/` |
 | 用户指出推荐过时、死引用、错归属、错默认路径 | 先查证据，再修正文案，再补 changelog |
 | 路由决策改了分类、主路径或 fallback | 同步 `SKILL.md`、`test-prompts.json` |
-| 兄弟路由器（ai-coding-guide / article-writing-guide / frontend-guide）边界改动 | 复核 description「不用于」清单与「组合顺序」段 |
+| 兄弟路由器（ai-coding-guide / article-writing-guide）边界改动 | 复核 description「不用于」清单与「组合顺序」段 |
 
 ## 证据源
 
@@ -55,6 +55,8 @@
 
 | 日期 | 动作 | 原因 |
 |---|---|---|
+| 2026-08-13 | v1.5.0：前端视觉转介改 ai-coding-guide 前端子路径（三入口架构）；教程裁决落地（做教程行：给自己学会留本域/对外发布转 article-writing-guide）；拆学习任务行矛盾标注清理；test-prompts 同步+3 新回归 | guide-router 重建步骤 5：RED-02 教程两域抢单 + 96 项全库审计（planning-and-task-breakdown 标注矛盾）；详见 CHANGELOG [v1.5.0] |
+| 2026-08-13 | v1.4.9：description 删「等。」范畴词全枚举；research→agent-reach（查资料行+裁决规则3）；/teach 标注待验证 | guide-skill-auditor 组合审查 #3 范畴词 + #6 死引用（2026-08-07 修复磁盘丢失回归）；详见 CHANGELOG [v1.4.9] |
 | 2026-07-22 | 新建本文件 | v1.3.0 四域路由统一补维护文档，对齐 ai-coding-guide/references/MAINTENANCE.md 模式 |
 | 2026-07-24 | 裁决规则 3 补 expose-unknowns 判级归属（v1.3.2） | 组合审查：expose-unknowns 双挂 ai-coding/learning 无 tie-breaker，按主域分界 |
 | 2026-07-31 | v1.4.3：description 删流程摘要「先分类…再路由」；路由表 `planning-and-task-breakdown` 主路径改「手动列清单」（该 skill 已移入 _weak-model-backup） | guide-skill-auditor 组合审查 #1 FAIL（流程摘要）+ #6 死引用；详见 CHANGELOG [v1.4.3] |

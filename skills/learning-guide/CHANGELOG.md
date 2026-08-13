@@ -2,6 +2,37 @@
 
 本文件记录 learning-guide 路由 skill 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.5.0] - 2026-08-13
+
+### Changed（guide-router 重建：兄弟域边界 + 教程裁决）
+
+- **前端视觉转介改向**：description「不用于」与「组合顺序」段「前端/视觉 → frontend-guide」→「前端/视觉 → ai-coding-guide 前端视觉子路径」（frontend-guide 已定归档）；组合顺序段「四个路由器/无第五域」→「三个路由器/无第四域」。依据：2026-08-13 交接文档三入口架构。
+- **教程裁决落地（A4）**：路由表「做教程」行主路径标注「给自己学会/作为学习产物」，Fallback 补「对外发布的教程文章转介 article-writing-guide」。依据：RED-02（tutorial-maker 被学习/写作两域同时路由，无归属裁决点）。
+- **「拆学习任务」行矛盾标注清理**：删「--（planning-and-task-breakdown 已移入备份）」注（磁盘实测该目录仍存在，标注与状态矛盾；skill 去留待全库审计报告用户拍板，guide 侧不引用）。依据：96 项全库审计（2026-08-13，归档候选档）。
+
+### Fixed
+
+- `test-prompts.json`：id 3 补教程裁决、id 7 前端转介改向；新增 #9（给自己做教程 → 本域，与 article test #13 镜像）、#10（对外发布教程 → article-writing-guide）、#11（三域外独立工具直接执行）。
+
+### Rationale
+
+- 依据：2026-08-13 交接文档 RED 基线 + 96 项全库审计报告（planning-and-task-breakdown 标注矛盾）；前端改向与 ai-coding-guide v1.5.0 / article-writing-guide v1.6.0 同步。
+- 未动：触发门禁、开工问询、裁决规则 1/2/4、反模式、其余路由表行——无缺陷暴露。
+
+## [v1.4.9] - 2026-08-13
+
+### Fixed
+
+- description 路由目标列表删「等。」范畴词，全枚举：deep-learn / cram-engine / tutorial-maker / tech-learning-roadmap / agent-reach / last30days / wiki-sediment / expose-unknowns。
+- `research` 已移 `_weak-model-backup` → 路由表「查资料」行与裁决规则 3 改 `agent-reach`（多平台检索）。
+- `/teach` 行标注「本会话未装，待用户本机确认」。
+- `test-prompts.json` #4 expected 同步 + 新增 #8 查资料镜像。
+
+### Rationale
+
+- guide-skill-auditor 组合审查（2026-08-13）：#3「…等。」范畴词 FAIL（Superpowers #1301）；#6 research 移备份仍为主路径（磁盘实证 `_weak-model-backup/research`）。2026-08-07 修复（v1.4.8）磁盘丢失（git 历史实证），本版 v1.4.9 重新落地。
+- 未动：路由表其余行、裁决规则 1/2/4、反模式——无缺陷暴露。
+
 ## [v1.4.3] - 2026-07-31
 
 ### Fixed

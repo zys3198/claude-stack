@@ -4,6 +4,40 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.6.0] - 2026-08-13
+
+### Changed（guide-router 重建：兄弟域边界 + 路由拍板落地）
+
+- **前端视觉转介改 ai-coding-guide 前端视觉子路径**：description 与 §0「不用于」删除「走 frontend-guide」，改为「走 ai-coding-guide 前端视觉子路径」（frontend-guide 已定归档）。依据：2026-08-13 交接文档三入口架构。
+- **去 AI 味路径改 `human-writing`**：§1 ⑤、§2 改写四选、§3 pipeline、§7 示例、REFERENCE §1/§4/§8/§9 全部 `ai-text-polisher` → `human-writing`；§0 新增废弃 skill 重定向（点名 ai-text-polisher → human-writing）。依据：用户拍板（2026-08-08「human-writing 完全替代」；本轮 2026-08-13 复核确认按 08-08 决策执行）。skill 本体移动待全库审计报告逐项确认。
+- **审校三选 → 两选**：删 `review-doc` 全部路由引用（§1 ⑧、§2、§7 示例、REFERENCE §5/§9），「先出报告」场景归 multi-review-pipeline 报告阶段。依据：2026-08-13 全库审计（review-doc 纯 D 类零资产、与 multi-review-pipeline 高度重叠）+ 用户拍板「留两个删 review-doc」。
+- **教程裁决落地（A4）**：§0「不用于」+ §1 ③ + REFERENCE 决策树加「给自己学会 → learning-guide；对外发布 → 本路由 tutorial-maker」。
+- **A2 清单落位**：§0 规范源标注 `javaguide-style-guide` 仅终检流程内部引用、不作为用户第一跳。
+
+### Fixed（活跃漂移文件点名修复）
+
+- `REFERENCE.md`：`writing-fragments`/`writing-shape`/`writing-beats` 死指向（:21-27）改 `article-writer` 协作模式；`doc-finder` 死目标（:17-18,30,82,159）改 `lean-ctx`/`agent-reach`；`hv-analysis`（:35）改 `agent-reach`/`ecc:deep-research`（插件条件路径）；`deep-research` 补「本机未装」（:34）。
+- `test-prompts.json`：id 1/2/3/5/8/10/12 同步新路由；新增 #13（教程裁决）、#14（去 AI 味 → human-writing + 点名重定向）、#15（登录页文案+设计 → ai-coding-guide 前端子路径）、#16（先出报告 → multi-review-pipeline 报告阶段）。
+
+### Rationale
+
+- 依据：2026-08-13 交接文档 RED 基线（RED-02 教程两域抢单 / RED-06 去 AI 味路径与 08-08 决策冲突）+ 96 项全库审计报告 §三（ai-text-polisher 复活疑案、审校三选一）。
+- 未动：生命周期路由表其余行、写作纪律依据表/basis map、协作流、边学边写、JavaGuide 模式、§4 规则——无缺陷暴露。
+
+## [v1.5.2] - 2026-08-13
+
+### Fixed
+
+- `aihot` 已删（2026-08-07 快照）→ §1 ① / §2 调研七选 / REFERENCE 决策树改 `agent-reach`（公众号/多平台，中文）。
+- `research` 已移 `_weak-model-backup` → 深度调研主路径改 `agent-reach` / `ecc:deep-research`（§1 ①、§2 七选、§7 示例、§0 系统内置提示）。
+- 调研七选裁决行重写（删「前五个 🪶」失效计数）。
+- `test-prompts.json` 新增 #12 深度调研镜像。
+
+### Rationale
+
+- guide-skill-auditor 组合审查（2026-08-13）：#6 两目标已删/移备份仍为主路径（`aihot` 实证 `~/.cc-switch/skill-backups/20260807_082542_aihot`，`research` 实证 `_weak-model-backup/research`）。
+- 未动：生命周期路由表其余行、写作纪律、§4 规则——无缺陷暴露。
+
 ## [v1.5.1] - 2026-08-11
 
 ### Added
