@@ -80,12 +80,19 @@
 | alvinunreal/oh-my-opencode-slim | worktrees, codemap, clonedeps, deepwork, simplify, reflect |
 | mattpocock/skills（插件外裸名） | to-prd, to-issues, request-refactor-plan, qa, design-an-interface, zoom-out |
 | abhigyanpatwari/GitNexus（`npx gitnexus analyze` 自动装） | gitnexus-cli, gitnexus-debugging, gitnexus-exploring, gitnexus-guide, gitnexus-impact-analysis, gitnexus-pdg-query, gitnexus-pr-review, gitnexus-refactoring, gitnexus-taint-analysis |
-| leonxlnx/taste-skill（含改名副本，description 逐字相同实锤） | gpt-taste, image-to-code, minimalist-ui, industrial-brutalist-ui, redesign-existing-projects, stitch-design-taste, design-taste-frontend, design-taste-frontend-v1, high-end-visual-design, full-output-enforcement, brandkit, imagegen-frontend-mobile, imagegen-frontend-web |
 | 单件 | agent-reach=Panniantong/Agent-Reach, douyin-video-summary=liu-wei-ai, shuorenhua=MrGeDiao/shuorenhua, find-skills=vercel-labs/skills, lean-ctx=yvgude/lean-ctx, hatch-pet=openai/skills, officecli=officecli/officecli, markdown-viewer=markdown-viewer/skills, bili-note=BiliNote 系（精确上游未锁定） |
 
 插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
 
 仍未锁定来源（公网搜不到且非用户自建）：human-writing、ppt-master、qiaomu-ai-prd、remotion、playwright（本地含 LICENSE/NOTICE）、ruthless-review、tech-learning-roadmap、writing-great-skills、doc-finder 之外的 review/slop-review/design/apikey-image-gen/grok-image-to-video/hyperframes/github-task/loop-engineering 等——以磁盘现状为用，重装时按名再查。
+
+### taste-skill 插件版（Leonxlnx/taste-skill）
+- 来源：https://github.com/Leonxlnx/taste-skill
+- 安装日期：2026-08-13
+- 安装方法：用户手动安装插件（命令原文未提供，待补；结果经 `installed_plugins.json` 实测确认）
+- 装到哪：`~/.claude/plugins/cache/taste-skill/taste-skill/1.0.0`（插件 `taste-skill@taste-skill`，scope=user，version 1.0.0，commit `e988add20dab0fa97d7a76781c48961c8184288e`，installedAt 2026-08-13T02:21）
+- 依赖：无
+- 备注：与上方反查表「leonxlnx/taste-skill」裸名散件同源双形态。插件版自带 13 个 skill，前缀 `taste-skill:`（brandkit / brutalist-skill / gpt-tasteskill / image-to-code-skill / imagegen-frontend-mobile / imagegen-frontend-web / minimalist-skill / output-skill / redesign-skill / soft-skill / stitch-skill / taste-skill / taste-skill-v1）。当日确认本会话可用。
 
 ## 待补来源（安装时没记，回溯困难——以后装完当轮登记）
 - 除 last30days/hallmark 外，以上散件的逐仓库 GitHub 地址与安装日期均未记录；需要重装时按名字在 cc-switch 源或对应作者仓库检索。

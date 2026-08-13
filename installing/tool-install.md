@@ -20,7 +20,6 @@
 | i-have-adhd | https://github.com/ayghri/i-have-adhd | marketplace 在，无启用插件 |
 | better-harness | https://github.com/QoderAI/better-harness | 启用中 |
 | minimalist-entrepreneur | https://github.com/slavingia/skills | 已加 marketplace，无启用插件 |
-| taste-skill | 本地目录 `C:\ZYS\Code\lab-area\taste-skill`（上游实为公开项目 https://github.com/leonxlnx/taste-skill，plugin.json 实锤；本地目录只是副本） | 已加 marketplace，启用状态见 settings.json |
 
 安装方法（通用）：
 ```
@@ -50,6 +49,14 @@
 
 ### GitNexus / cloudcli
 - 见 [mcp-install.md](mcp-install.md)（npm 全局/npx 形态）
+
+### GitLab CLI（glab）
+- 来源：https://gitlab.com/gitlab-org/cli（winget 包 `GLab.GLab`）
+- 安装日期：2026-08-13
+- 安装命令原文：`winget install --exact --id GLab.GLab --scope user --accept-package-agreements --accept-source-agreements --disable-interactivity`
+- 装到哪：`C:\Users\zys31\AppData\Local\Programs\glab\glab.exe`（用户 PATH 已包含该目录）
+- 依赖：Windows Package Manager（winget）；GitLab 登录或 API Token 才能执行远端写操作
+- 备注：已验证 `glab 1.113.0 (d628813)`；当前终端可能需重开后才能直接解析 `glab` 命令。
 
 ### OpenAI Codex CLI（已卸载）
 - 来源：https://github.com/openai/codex（npm 包 `@openai/codex`）
