@@ -6,6 +6,10 @@
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
+ *
+ * Context bar: shows usage relative to the auto-compact window
+ * (CLAUDE_CODE_AUTO_COMPACT_WINDOW), so 100% == compaction point,
+ * matching /context. Not relative to the model's full context window.
  */
 
 'use strict';
@@ -15,7 +19,6 @@ const os = require('os');
 const path = require('path');
 const { sanitizeSessionId, readBridge, writeBridgeAtomic } = require('./lib/session-bridge');
 
-const AUTO_COMPACT_BUFFER_PCT = 16.5;
 const MAX_STDIN = 1024 * 1024;
 
 /**
@@ -37,14 +40,16 @@ function formatDuration(isoTimestamp) {
 
 /**
  * Build context progress bar with ANSI colors.
- * @param {number} remaining - Raw remaining percentage from Claude Code
+ * Usage measured against the auto-compact window, so 100% == compaction
+ * point (matches /context). Ignores the model's full context window.
+ * @param {number} totalInputTokens - Input tokens currently in context window
+ * @param {number} autoCompactWindow - Compaction trigger point in tokens
  * @returns {string} Colored bar string
  */
-function buildContextBar(remaining) {
-  if (remaining === null || remaining === undefined) return '';
+function buildContextBar(totalInputTokens, autoCompactWindow) {
+  if (totalInputTokens === null || totalInputTokens === undefined || !autoCompactWindow) return '';
 
-  const usableRemaining = Math.max(0, ((remaining - AUTO_COMPACT_BUFFER_PCT) / (100 - AUTO_COMPACT_BUFFER_PCT)) * 100);
-  const used = Math.max(0, Math.min(100, Math.round(100 - usableRemaining)));
+  const used = Math.min(100, Math.round((totalInputTokens / autoCompactWindow) * 100));
 
   const filled = Math.floor(used / 10);
   const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(10 - filled);
@@ -156,7 +161,11 @@ function runStatusline() {
       const model = resolveModelName(data.model);
       const dir = data.workspace?.current_dir || process.cwd();
       const session = data.session_id || '';
-      const remaining = data.context_window?.remaining_percentage;
+      const cw = data.context_window || {};
+      const remaining = cw.remaining_percentage;
+      const totalInputTokens = cw.total_input_tokens;
+      // Compaction point = AUTO_COMPACT_WINDOW env; fall back to reported window size
+      const autoCompactWindow = Number(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW) || cw.context_window_size || 0;
 
       const sessionId = sanitizeSessionId(session);
       const bridge = sessionId ? readBridge(sessionId) : null;
@@ -196,8 +205,8 @@ function runStatusline() {
         }
       }
 
-      // Context bar
-      const ctx = buildContextBar(remaining);
+      // Context bar (usage vs auto-compact window, so 100% == compaction point)
+      const ctx = buildContextBar(totalInputTokens, autoCompactWindow);
 
       // Build output
       const dirname = path.basename(dir);

@@ -11,6 +11,7 @@ VERIFY_PATTERNS = [
     r"(?<![\w-])\btsc\b", r"\bnpm\s+(?:run\s+)?(?:test|build|lint|check|typecheck)\b",
     r"\byarn\s+(?:test|build|lint|typecheck)\b", r"\bpnpm\s+(?:test|build|lint|typecheck)\b",
     r"\bbun\s+(?:test|run\s+build)\b",
+    r"\bnode\s+(?:--check|--test)\b", r"\bnode\s+-e\b",
     r"\bgo\s+(?:test|build|vet|check)\b", r"\bcargo\s+(?:test|build|check|clippy)\b",
     r"\bmvn\s+(?:test|verify|compile)\b", r"\bgradle\s+(?:test|build|check)\b", r"\bgradlew\b",
     r"\bruff\b", r"\bflake8\b", r"\bpylint\b", r"\bmypy\b", r"\bpyright\b",
