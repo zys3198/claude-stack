@@ -19,8 +19,8 @@
     },
     {
         "id": 4,
-        "prompt": "帮我润色 ai-text-polisher 这个 skill 的改写规则",
-        "expected": "不命中本 skill。ai-text-polisher 是执行型 skill（非路由型），命中 description 的「不用于」条款 → 走该 skill 自己的维护流程。",
+        "prompt": "帮我润色 human-writing 这个 skill 的改写规则",
+        "expected": "不命中本 skill。human-writing 是执行型 skill（非路由型），命中 description 的「不用于」条款 → 走该 skill 自己的维护流程。",
         "scenario": "负向触发：执行型 skill 内容审查（不用于条款）"
     },
     {

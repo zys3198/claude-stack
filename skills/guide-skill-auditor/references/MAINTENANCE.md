@@ -41,6 +41,7 @@
 
 | 日期 | 动作 | 原因 |
 |---|---|---|
+| 2026-08-13 | 拍板执行批：test id 4 负向示例载体 ai-text-polisher → human-writing（原载体已移入备份） | 用户逐组拍板（审计报告组 A）：载体 skill 移动后换在库执行型 skill，保持负向场景有效 |
 | 2026-08-13 | description 审查对象列举删 frontend-guide（前端域入口并入 ai-coding-guide 前端视觉子路径）；test-prompts id 2/5 场景换保留 guide/转介改向 | v1.6.1：frontend-guide 已定归档，引用迁移防死引用；十查第 3 项依据中的历史事故证据保留；详见 CHANGELOG [v1.6.1] |
 | 2026-07-22 | 新建本文件 | v1.0.1 review 后补（reviewer P1：自身不满足九查第 9 项） |
 | 2026-07-23 | 新增第 10 项「模糊信号的意图摸查（条件触发）」 | v1.1.0：用户提出「不问清背景/决策点没法做好路由」；证据=grill-me 存在 + ai-coding-guide Step 0.7 已收敛按需摸查；收窄为条件触发避免与第 7 项冲突 |

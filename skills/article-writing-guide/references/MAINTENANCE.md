@@ -57,6 +57,7 @@
 
 | 日期 | 动作 | 原因 |
 |---|---|---|
+| 2026-08-13 | 拍板执行批：28 个 skill 移入备份后清理死引用——test id 7 obsidian-vault 场景改「已移备份→报告缺失+wiki-sediment 替代」；publish-final-check 三处引用改（ai-text-polisher→human-writing、删 review-doc） | 用户逐组拍板（审计报告组 A-E）：obsidian-vault 移除、review-doc/ai-text-polisher 移除后清理下游 skill 引用（本机决议 #1） |
 | 2026-08-13 | v1.6.0：前端视觉转介改 ai-coding-guide 前端子路径；去 AI 味改 human-writing（08-08 拍板落地，加 ai-text-polisher 点名重定向）；审校三选改两选删 review-doc；教程裁决落地；REFERENCE 漂移修复（writing-* 三件套/doc-finder/hv-analysis）；test-prompts 同步+4 新回归 | guide-router 重建步骤 4：RED-02/RED-06 + 全库审计 §三（ai-text-polisher 复活疑案、审校三选一）+ 用户拍板；详见 CHANGELOG [v1.6.0] |
 | 2026-08-13 | v1.5.2：aihot（已删）与 research（已移备份）→ agent-reach / ecc:deep-research（§1① §2七选 §7示例 §0提示 REFERENCE 决策树） | guide-skill-auditor 组合审查 #6 死引用（aihot 实证 skill-backups/20260807_082542_aihot）；详见 CHANGELOG [v1.5.2] |
 | 2026-07-22 | 新建本文件 | v1.3.0 四域路由统一补维护文档，对齐 ai-coding-guide/references/MAINTENANCE.md 模式 |

@@ -32,7 +32,7 @@
   {
     "id": 7,
     "prompt": "用 javaguide-writer 写，再用 obsidian-vault 查资料",
-    "expected": "javaguide-writer 已删 → §4 规则7 存在性校验命中：改用 article-writer JavaGuide 模式；obsidian-vault 在 available skills → 正常委派。两步前都过存在性校验。验证 §4 规则7。"
+    "expected": "javaguide-writer 已删 → §4 规则7 存在性校验命中：改用 article-writer JavaGuide 模式；obsidian-vault 已移入备份（2026-08-13 用户拍板）→ 不在 available skills → 报告缺失项 + 最接近替代（wiki-sediment 已覆盖笔记落库）。两步前都过存在性校验。验证 §4 规则7。"
   },
   {
     "id": 8,

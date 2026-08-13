@@ -5,7 +5,7 @@ description: Use when 用户要在中文技术文章发布前做最终把关，�
 
 # Publish Final Check（发布前强制关卡）
 
-发布前最后一道闸。不审"写得好不好"（multi-review-pipeline/review-doc 的事），只审"**能不能发**"——有没有硬伤让你发出去后悔。
+发布前最后一道闸。不审"写得好不好"（multi-review-pipeline/tech-article-review 的事），只审"**能不能发**"——有没有硬伤让你发出去后悔。
 
 ## 0. 定位与边界
 
@@ -78,7 +78,7 @@ JavaGuide 模式：是
 | SHOULD | 禁 AI 味过渡词（首先/其次/由此可见/综上所述/总而言之/值得注意的是） | **自检**（grep 黑名单） | 警告 + 列位置 |
 | SHOULD | 段落长短交错，无连续 3 段等长（字符数差 <30%） | 自检（按 javaguide-style-guide §2 阈值） | 警告 |
 
-**注意**：③ **不委派 `ai-text-polisher`**——polisher 是交互式多轮改写 skill，不适合"只扫不改"。AI 味用自检关键词黑名单（上两行），深度去 AI 味改写另起 polisher。非 JavaGuide 文章跳过第一行，只跑后三行。
+**注意**：③ **不委派 `human-writing`**——它是交互式多轮改写 skill，不适合"只扫不改"。AI 味用自检关键词黑名单（上两行），深度去 AI 味改写另起 human-writing。非 JavaGuide 文章跳过第一行，只跑后三行。
 
 ### 子项 ④ 发布面
 
@@ -134,13 +134,13 @@ JavaGuide 模式：是
 
 - 查重 → `plagiarism-audit`（只比贴源，禁主动搜）
 - 风格判定 → 读 `javaguide-style-guide` §1 M1-M10 + §2 阈值
-- AI 味 → **自检关键词黑名单**（不委派 polisher，polisher 交互式不适用）
+- AI 味 → **自检关键词黑名单**（不委派 human-writing，交互式不适用）
 - 链接/编号/标签 → 自检（grep/HEAD，无网标待核）
 - 改文章 → 用户拿报告后另起 `multi-review-pipeline` 或对应 skill
 
 ## 6. 与审校 skill 区分
 
-- `tech-article-review`/`multi-review-pipeline`/`review-doc` = **审 + 改**，发布前任意阶段用。
+- `tech-article-review`（逐段审）/`multi-review-pipeline`（并行审+改） = **审 + 改**，发布前任意阶段用。
 - 本 skill = **发布闸**，全链路最后一步，只放行不改。
 - 典型顺序：`multi-review-pipeline`（改完）→ `chinese-markdown-normalizer`（排好版）→ **`publish-final-check`（放行）**。
 

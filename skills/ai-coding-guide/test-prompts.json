@@ -56,7 +56,7 @@
     {
         "id":  10,
         "prompt":  "这段代码太绕了，帮我简化下，别改行为。",
-        "expected":  "走『重构/简化』。默认手动列坏味道 + 逐步改、每步跑测试（原则源：项目 CLAUDE.md §2.3/§2.4）；复杂/高风险走 code-change-workflow 条件路径。不再推荐 simplify / request-refactor-plan（审计判定移除+改路由，待用户拍板）。",
+        "expected":  "走『重构/简化』。默认手动列坏味道 + 逐步改、每步跑测试（原则源：项目 CLAUDE.md §2.3/§2.4）；复杂/高风险走 code-change-workflow 条件路径。不再推荐 simplify / request-refactor-plan（2026-08-13 审计判定移除+改路由，用户拍板已移入备份）。",
         "scenario":  "重构/简化"
     },
     {

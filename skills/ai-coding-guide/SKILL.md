@@ -73,7 +73,7 @@ ai-coding-guide 在当前会话？ YES/NO
 
 **路径角色标记：** 本文各分类的推荐分两种——**直达路径**（当前会话可见的裸 skill / 内置命令，直接走）与**条件路径**（插件 skill，标记「条件」：仅在当前会话可调用清单中出现时才走，否则用该分类 Fallback，不伪装直达）。判定依据 = 环境自检第 1 条。
 
-**角色分层（不可直达清单）：** 以下只可被流程内部引用或作为参考层，**不作为用户第一跳**——`gitnexus-guide`（GitNexus 家族参考层，其内部路由到兄弟 skill）、`animation-vocabulary`（动画术语参考层，前端子路径内部查阅用）。
+**角色分层（不可直达清单）：** 以下只可被流程内部引用或作为参考层，**不作为用户第一跳**——`gitnexus-guide`（GitNexus 家族参考层，其内部路由到兄弟 skill）。
 
 ## 证据门槛
 
@@ -208,7 +208,7 @@ Fallback:
   - **方向未定**（新页面、没设计稿、要视觉方向）→ 决策点先问：给 2-3 个方向选项问用户（或问有无参考/品牌约束），**不让设计 skill 自行拍脑袋定方向**；用户选定后 → `hallmark`（新页面/redesign/URL 抽取，反 AI 大路货）
   - **已有页面提质**（页面太丑、去 AI 味）→ `impeccable`（先审现有 AI 味再改）/ `hallmark`（要 audit/redesign 时）
   - **实现**（方向已定、只写组件/代码）→ 按项目栈直接实现；**组件库原则：先检查项目现有依赖并复用**，Vue 项目已采用或点名才走 `shadcn-vue-guide`
-  - **动画动效**（做/改/审动画、加动效、手感不对）→ `emil-design-eng`（综合/审）/ `improve-animations`（全库改）/ `find-animation-opportunities`（找该动哪）；专用严审由用户显式运行 `review-animations`（当前会话可见才可运行）；术语命名内部查阅 `animation-vocabulary`（参考层，不作第一跳）
+  - **动画动效**（做/改/审动画、加动效、手感不对）→ `emil-design-eng`（综合/审）/ `improve-animations`（全库改）/ `find-animation-opportunities`（找该动哪）；专用严审由用户显式运行 `review-animations`（当前会话可见才可运行）
   - **风格叠加**（可选，点名才套）→ `apple-design`（Apple 风格参考）等；默认 1 个阶段主路径 + 可选 1 个风格叠加，不堆叠
   - **特殊产物** → claude.ai artifact 用内置 Artifact 工具；视频产物无会话已验证默认路径（手动实现；候选工具去留待全库审计报告用户拍板）
 - 负边界：`design-an-interface` 是**模块 API/interface 设计**，不进视觉路径；不涉及视觉方向的纯前端工程问题走编码通用分支
