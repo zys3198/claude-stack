@@ -6,6 +6,17 @@
 
 ---
 
+## git_guard.py 修改（2026-08-14）
+
+- **位置**：`~/.claude/hooks/git_guard.py`（PreToolUse git 守卫，Python，约 120 行）
+- **改动**：新建分支（`git checkout -b` / `git switch -c`）从无条件 deny 改为与 commit/push 一致的「用户确认放行」——`user_confirmed(data)`（读会话 transcript 检测用户最近消息含 确认/批准/授权/confirm 等词）命中则放行，否则 deny。仅改这一个 elif 分支。
+- **保持不变**：BLOCK 列表（89-108 行）不可逆/破坏性操作（git reset --hard、branch -D、push --force、clean -f、rm -rf、SQL DROP、--no-verify、npm publish 等）仍无条件拦截；commit/push 确认放行逻辑未动。
+- **需求来源**：用户指令「git_guard 修改成，除了不可逆的操作，在我确认之后都可以直接执行」（2026-08-14，子代理执行）。
+- **验证**：`python -m py_compile git_guard.py` 通过（PY_COMPILE_OK）。
+- **回退**：还原该 elif 分支为 `deny("CLAUDE.md §1.1: 新建分支前确认 git status 干净...")` 一行。
+
+---
+
 ## 自建 skill（~/.claude/skills/ 下，非 cc-switch 同步）
 
 ### 四域开工路由器（v1.4.x，持续演进）

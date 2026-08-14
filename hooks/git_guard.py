@@ -116,6 +116,8 @@ elif re.search(r'git\s+push\b', cmd):
         sys.exit(0)  # 用户已显式确认 -> 放行 push
     deny("CLAUDE.md §1.3: push 前确认分支/远端,展示待 push commits 给用户确认。")
 elif re.search(r'git\s+(?:checkout\s+-b|switch\s+-c)\b', cmd):
+    if user_confirmed(data):
+        sys.exit(0)  # 用户已确认 -> 放行新建分支
     deny("CLAUDE.md §1.1: 新建分支前确认 git status 干净(无未提交改动)。")
 
 sys.exit(0)
