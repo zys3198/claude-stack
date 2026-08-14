@@ -80,15 +80,33 @@
 - ecc 系 hooks（Fact-Forcing Gate / GateGuard 等）随 ecc 插件来；另有自建/调整个别脚本
 - 备份：`~/.claude/hooks/HOOKS_BACKUP.md`
 - **~~turn_counter.py~~ / ~~learning_nudge.py~~（2026-08-08 已删）**：曾为死代码（settings.json 未引用），2026-08-08 经用户确认物理删除；状态文件 `turn_state.json` / `learning_state.json` 同删。hooks/ 现仅留 settings.json 引用的 7 个 Python hook。
+- **settings-degrade-guard.py（2026-08-13 新建）**：SessionStart 自动检测 cc-switch 切 provider 降级 settings.json（缺 statusLine/enabledPlugins/extraKnownMarketplaces/permissions.deny 或 >3 个 hook），从 cc-switch DB `common_config_claude` 快照并集合并恢复（保留 provider env），原子写+备份到 `~/.claude/backups/settings.bak-guard-<ts>.json`。静默运行，恢复时输出 JSON 提示。注册在 settings.json SessionStart `*` matcher。与 cc-switch-setting-sync skill 的 `--restore` 同源逻辑（见该 skill SKILL.md §4）。
 
 ### statusline（已脱离 ecc）
 - 位置：`~/.claude/statusline`，含 cost + git 分支段（memory `statusline-independent-of-ecc`）
 - 文件清单（2026-08-08 实测）：`statusline.js`（入口，settings.json statusLine 调它）+ `cost-tracker.js` + `context-monitor.js` + `metrics-bridge.js` + `lib/`（agent-data-home.js / session-bridge.js / utils.js）
-- 坑：ecc 升级可能重置 settings.json 里的 statusLine 路径，升级后检查。
+- **2026-08-13 数据源剥离完成**：statusline 脚本早已独立，但其 cost/工具计数数据源（`post:ecc-metrics-bridge` hook 写 `/tmp/ecc-metrics-{session}.json`）此前仍绑 ecc 插件。已复制为自建 hook：`~/.claude/hooks/ecc-metrics-bridge.js` + `~/.claude/hooks/lib/`（agent-data-home.js / session-bridge.js / utils.js，ecc 版；require 路径已改 `./lib/`）。settings.json PostToolUse 已注册 `*` matcher 调它。验证：喂真实 session 数据 → bridge 文件生成 → statusline 输出含 `Nt 时长` 段。cc-switch `common_config_claude` 快照已同步。
+- **2026-08-13 晚：ecc 插件整体卸载**（见下方「ecc 剥离/卸载」章节），原 `env.ECC_DISABLED_HOOKS`（禁 ecc 原版 metrics-bridge + gateguard）已随卸载删除。自建 metrics-bridge 是唯一 bridge 数据源，无双写问题。
 
 ### settings.json 关键本机定制
 - `enabledPlugins` 清单快照见 tool-install.md
 - lean-ctx 注入段在 CLAUDE.md 尾部（`<!-- lean-ctx -->` 包围，官方注入，别手改）
+
+## ecc 剥离/卸载（2026-08-13）
+
+- **来源**：ecc 插件 2.0.0（`~/.claude/plugins/cache/ecc/ecc/2.0.0/`，市场源 affaan-m/ECC）。271 skills + 67 agents + 92 commands + 28 hooks 噪声大，用户拍板卸载，仅剥 3 个 hooks + 1 MCP 成自建。
+- **剥离成自建**（复制自 ecc `scripts/`，均已改 require 指向 `./lib/`，不依赖 ecc 插件路径）：
+  - `~/.claude/hooks/mcp-health-check.js`（零依赖；settings.json PreToolUse + PostToolUseFailure 注册）
+  - `~/.claude/hooks/check-console-log.js`（require `./lib/utils`，复用已有 hooks/lib/utils.js；Stop 注册）
+  - `~/.claude/hooks/gateguard-destructive.js`（原 ecc `gateguard-fact-force.js` 复制改名 + 加自执行入口；require `./lib/shell-substitution`；PreToolUse Bash 注册）——**只留 destructive 门**（rm -rf / reset --hard / force push / find -exec 等），Edit/Write 事实门与 routine Bash 门不保留（routine 靠 `env.GATEGUARD_BASH_ROUTINE_DISABLED=1` 关）
+  - `~/.claude/hooks/lib/shell-substitution.js`（零依赖）
+  - 未剥离：format-typecheck / suggest-compact / memory-persistence（用户不要，随 ecc 消失）
+- **MCP**：chrome-devtools 独立保留 → `claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest`（写入 `~/.claude.json` 顶层 mcpServers，user scope；原 ecc `.mcp.json` 定义）。**注意**：settings.json 顶层不支持 `mcpServers`（死配置，官方确认），别放那。
+- **settings.json 变更**：`ecc@ecc:false`；删 `ECC_DISABLED_HOOKS`；加 `GATEGUARD_BASH_ROUTINE_DISABLED=1`；PreToolUse Bash 加 gateguard-destructive + mcp-health-check；PostToolUseFailure 加 mcp-health-check；Stop 加 check-console-log。备份 `settings.json.bak-ecc-rm-20260813`（更早 `settings.json.bak-ecc-20260813` 在卸载前；**注意该备份含死配置 mcpServers 段，回退时删掉**）。
+- **卸载**：`claude plugin uninstall ecc@ecc`（2026-08-13）。缓存 `plugins/cache/ecc/` 目录残留（未删，留作回退对照）。
+- **marketplace 删除**（2026-08-13）：`claude plugin marketplace remove ecc`（市场源 affaan-m/ECC），登记 + 缓存 `plugins/marketplaces/ecc/` 一并清除，其余 11 个 marketplace 不受影响。`~/.claude.json` 的 `ecc@ecc`/`ecc@inline` pluginUsage 统计段已手术式清除（Python 字节级替换 + JSON 校验通过）。
+- **依赖**：gateguard-destructive 需 `~/.claude/hooks/lib/shell-substitution.js`；check-console-log 需 `hooks/lib/utils.js`（已有）。gateguard 状态文件 `~/.gateguard/`（会话记忆，无害）。
+- **回退**：`claude plugin install ecc@ecc` + 还原 `settings.json.bak-ecc-rm-20260813`（保留 settings 自建 hooks 需再评估是否与新装 ecc 冲突）。cc-switch 同步备份 `~/.cc-switch/backups/sync-backup-20260813_142504.json`。
 
 ### CLAUDE.md 本身
 - 2026-07-29 瘦身至 ~8.3KB，备份 `CLAUDE.md.bak-20260729`

@@ -7,6 +7,7 @@ STATE = "C:/Users/zys31/.claude/hooks/edited_state.json"
 
 VERIFY_PATTERNS = [
     r"\bpytest\b", r"\bpython\s+-m\s+unittest\b", r"\bnosetests\b",
+    r"\bpy_compile\b", r"\bpython\S*\s+-m\s+py_compile\b",
     r"\bnx\s+test\b", r"\bjest\b", r"\bvitest\b", r"\bmocha\b", r"\bkarma\b",
     r"(?<![\w-])\btsc\b", r"\bnpm\s+(?:run\s+)?(?:test|build|lint|check|typecheck)\b",
     r"\byarn\s+(?:test|build|lint|typecheck)\b", r"\bpnpm\s+(?:test|build|lint|typecheck)\b",

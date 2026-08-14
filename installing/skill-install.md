@@ -1,6 +1,6 @@
 # Skill 安装台账（外部来源）
 
-记录从外部装入的 skill / skill 套件。权威源 = `~/.claude/skills/<name>/`（真目录本体，禁 symlink 指向外部），`~/.cc-switch/skills/` 仅作备份镜像、复制同步、用户手动。不用 agent-skills CLI 跨工具同步（见 memory `skill-mgmt-cc-switch-only`）。
+记录从外部装入的 skill / skill 套件。权威源 = `~/.claude/skills/<name>/`（真目录本体，禁 symlink 指向外部）。**2026-08-13 起 cc-switch 不再管理 skills**（镜像/skill-backups/repos 已全清，见 memory `skill-mgmt-cc-switch-only`），装法统一为 clone/copy 进 skills/。不用 agent-skills CLI 跨工具同步。
 
 套装按**仓库级**记一条，内部保留/裁剪写备注，不逐个开条目。自建 skill 不在这里，见 [custom-setup.md](custom-setup.md)。
 
@@ -13,7 +13,7 @@
 ### Matt Pocock skills（主力套件）
 - 来源：https://github.com/mattpocock/skills
 - 安装日期：2026-06/07（精确日待补）
-- 安装方法：cc-switch 同步裸名形态进 `~/.claude/skills/`（model-invoked 可调）；另启用插件版 `mattpocock-skills@mattpocock`（`/plugin install`，见 tool-install.md marketplace 清单）
+- 安装方法：clone/copy 进 `~/.claude/skills/` 裸名形态（model-invoked 可调）；另启用插件版 `mattpocock-skills@mattpocock`（`/plugin install`，见 tool-install.md marketplace 清单）
 - 装到哪：`~/.claude/skills/` 裸名 + 插件版前缀 `mattpocock-skills:`。**更正 2026-08-11**：旧称「裸名里 11 个是指向插件 cache 的 symlink」已过期——当日实测 skills/ 下 0 个 junction/symlink，裸名全是真目录本体；装回需复制或重装，不再「启用插件即恢复」。
 - 依赖：无
 - 备注：**双形态并存**（memory `matt-skills-dual-form`）：裸名 model-invoked 可调；插件版 14 个 user-invoked 模型调不到需手动敲（含 ask-matt，见 `ask-matt-key-flow-decision`）。选型拍板：Matt 主力 + Superpowers 备用 + ECC 跳过（memory `skill-ecosystem-choice-2026-07`）。
@@ -21,20 +21,21 @@
 ### Superpowers（备用套件）
 - 来源：https://github.com/obra/superpowers
 - 安装日期：2026-06/07（待补）
-- 安装方法：cc-switch 同步 + 插件版 `superpowers@claude-plugins-official` 启用
+- 安装方法：clone/copy 进 `~/.claude/skills/` + 插件版 `superpowers@claude-plugins-official` 启用
 - 装到哪：`~/.claude/skills/`（brainstorming、systematic-debugging、test-driven-development、writing-plans、worktrees 等）
 - 备注：定位=备用（流程类与 Matt 重叠时以 Matt 优先，画像匹配见选型 memory）。
 
-### anthropic 官方 example-skills
+### ~~anthropic 官方 example-skills~~（2026-08-13 卸载）
 - 来源：https://github.com/anthropics/skills
 - 安装日期：待补
-- 安装方法：cc-switch 同步 + 插件版 `example-skills@anthropic-agent-skills`
+- 安装方法：clone/copy 进 `~/.claude/skills/` + 插件版 `example-skills@anthropic-agent-skills`
 - 装到哪：`~/.claude/skills/`（docx / pptx / xlsx / pdf / canvas-design / theme-factory / web-artifacts-builder / skill-creator 等）
+- 卸载：`claude plugin uninstall example-skills@anthropic-agent-skills`；原因=17 个官方教学示例与 `claude-plugins-official` 重复（frontend-design/skill-creator），全局 skills 无同名备份；cc-switch `common_config_claude` 已同步去该条目。可逆：`claude plugin install example-skills@anthropic-agent-skills`
 
 ### 仓颉 cangjie-skill + first-principles pack
 - 来源：https://github.com/Yeadon8888/cangjie-skill（仓颉）+ https://github.com/kangarooking/first-principles-skill（第一性原理 pack；2026-08-11 公网反查锁定）
 - 安装日期：2026-07（采用记录见 memory `cangjie-skill-adoption-2026-07`）
-- 安装方法：cc-switch 同步
+- 安装方法：clone/copy 进 `~/.claude/skills/`
 - 装到哪：`~/.claude/skills/cangjie-skill` + first-principles pack 7 个在案（axiomatic-thinking / contrarian-decision / implicit-assumption / logic-triple-check / multi-mental-models / organizational-refresh / reductionism-deconstruction）
 - 备注：RIA++ 质量扎实；20+ pack 可用性分级见该 memory。更正 2026-08-11：critical-thinking 经用户人工复核认定为自建，已入 git 白名单；zoom-out 实为 mattpocock/skills 成员，不属此 pack；founder-cognitive-boundary 磁盘已不在。
 
@@ -42,11 +43,11 @@
 - 来源：https://github.com/affaan-m/ECC
 - 安装日期：待补
 - 安装方法：插件 marketplace（`/plugin marketplace add affaan-m/ECC`）+ 全插件启用；部分资产（statusline）已剥离（memory `statusline-independent-of-ecc`）
-- 装到哪：插件 `ecc@ecc`；hooks（Fact-Forcing Gate / GateGuard 等）；cc-switch 侧另有裸名 skill
+- 装到哪：插件 `ecc@ecc`；hooks（Fact-Forcing Gate / GateGuard 等）；cc-switch 侧裸名 skill 已随 skills 域清除（2026-08-13）
 - 备注：用户拍板插件全开不关（memory `ecc-plugin-evaluation`）。升级会重置 settings 路径需留意。
 
-### 思维/写作/学习类散件（cc-switch 同步）
-- 安装方法：cc-switch 同步进 `~/.claude/skills/`
+### 思维/写作/学习类散件
+- 安装方法：clone/copy 进 `~/.claude/skills/`（`npx skills add <owner/repo>` 或手动 copy）
 - **口径更正 2026-08-11**：旧「2026-08-08 实测 105 个（94 真目录 + 11 junction/symlink）」作废——当日实测 0 symlink；全量复核后 skills/ 为 184 目录 = 31 自建（入 git，见 custom-setup.md）+ 约 150 非自建（仓库级来源多已锁定，见上方「散件来源反查登记」）。原分类示例段已删（把自建误列第三方，与 custom-setup.md 冲突）。
 
 ## 单件登记（含地址/装法/位置）
@@ -95,10 +96,11 @@
 - 备注：与上方反查表「leonxlnx/taste-skill」裸名散件同源双形态。插件版自带 13 个 skill，前缀 `taste-skill:`（brandkit / brutalist-skill / gpt-tasteskill / image-to-code-skill / imagegen-frontend-mobile / imagegen-frontend-web / minimalist-skill / output-skill / redesign-skill / soft-skill / stitch-skill / taste-skill / taste-skill-v1）。当日确认本会话可用。
 
 ## 待补来源（安装时没记，回溯困难——以后装完当轮登记）
-- 除 last30days/hallmark 外，以上散件的逐仓库 GitHub 地址与安装日期均未记录；需要重装时按名字在 cc-switch 源或对应作者仓库检索。
+- 除 last30days/hallmark 外，以上散件的逐仓库 GitHub 地址与安装日期均未记录；需要重装时按名字在对应作者仓库检索（cc-switch 侧镜像源 2026-08-13 已删）。
 - **cram-engine / edit-article**（2026-08-11 移入本类）：原在 Git 白名单当自建追踪，2026-08-11 用户逐个复核时未认领为自建 → 按「非自定义进 installing」规则移出白名单（磁盘目录保留）。cram-engine 来源已锁定：https://github.com/liuliu667/cram-engine（README 实锤，`npx skills add liuliu667/cram-engine`）；edit-article 来源仍待补。注：二者仍被 tracked 路由器引用（learning-guide / article-writing-guide / deep-learn / tutorial-maker）——本机可用，clean clone 后需按来源重装。
 - 2026-08-11 用户复核全量结论：skills/ 下 187 目录 = 31 自定义（已全入 Git 白名单）+ 154 非自定义（本台账管辖，来源大多待补）+ learned 空目录 + .ruff_cache。用户标记待删：darwin-weekly-audit、learned、obsidian-vault——**均已于 2026-08-11 物理删除并验证**（均未入 Git，无 git 历史残留）。
 
 ## 已卸载/备份
-- `_weak-model-backup/`：2026-07-28 Carl 文章二轮精简移入 16 个（memory `skill-trim-carl-article-2026-07-28`）；判定原则见 skill-trimmer。
-- E 类 5 份移备份夹（memory `skill-slim-audit-2026-07`）。
+- `_weak-model-backup/`：2026-07-28 Carl 文章二轮精简移入 16 个（memory `skill-trim-carl-article-2026-07-28`）；判定原则见 skill-trimmer。**2026-08-13 随 cc-switch skills 域全清物理删除**，仅剩记录。
+- E 类 5 份移备份夹（memory `skill-slim-audit-2026-07`）。**2026-08-13 备份夹已随 cc-switch skills 域清除**。
+- **2026-08-13 插件同名冗余清理**：55 个裸技能（`~/.claude/skills/`）与已启用插件同名 → 判定冗余，移入 `_weak-model-backup/`（原备份夹 README 2026-08-13 追加一行，备份夹已随 cc-switch skills 域清除）。来源=5 插件：caveman 7（裸名同名，插件版 dmi=0 模型可调）、mattpocock 28（其中 15 个插件版 dmi=true 仅手动：ask-matt/grill-me/grill-with-docs/handoff/teach/implement/improve-codebase-architecture/setup-matt-pocock-skills/to-spec/to-tickets/triage/wayfinder/writing-beats/writing-fragments/writing-shape；删裸名后模型调不到仅手敲）、taste-skill 13（dmi=0）、superpowers 1（test-driven-development）、understand-anything 8（dmi=0）。**可逆**：该批唯一副本已随备份夹清除，恢复=重装对应插件（见上方套件记录），不再有裸名副本可移回。判定依据=「插件已有则 skills/ 副本冗余」（用户 2026-08-13 拍板「全部 55 个」）。

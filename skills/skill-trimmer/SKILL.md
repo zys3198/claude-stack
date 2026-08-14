@@ -1,13 +1,13 @@
 ---
 name: skill-trimmer
-description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill 值得保留、哪些该移入备份。判定基准来自 JavaGuide《再见 Superpowers！很多 Skill 真的可以扔掉了》的强模型时代保留观（个人偏好沉淀 / 专业判断脚本 / 防方向错误三类才留），叠加本机护栏（路由引用=免删、模型×复杂度矩阵、分类建议必须用户拍板）。触发词：精简 skill、skill 精简、哪些 skill 该删、盘点 skill、审计 skill 库、skill 太多、清理 skill、trim skills、skill audit、review my skills、这个 skill 还值不值得留。当用户想给 skill 库瘦身、或对某篇"skill 断舍离"文章想落地执行时使用；也适用于装了新套件后评估旧 skill 是否冗余。不用于：新建 skill（走 skill-creator）、审查 router 型 guide 质量（走 guide-skill-auditor）、优化单个 skill 内容（走 darwin-skill / skill-creator）。
+description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill 值得保留、哪些该移入备份；也评估是否该装新 skill。判定基准来自 JavaGuide《再见 Superpowers！很多 Skill 真的可以扔掉了》+《Skill 的选择与精简》的强模型时代保留观（个人偏好沉淀 / 专业判断脚本 / 防方向错误三类才留）+ 主流 Agent Skill 去留框架（知识增量三级 Expert/Activation/Redundant、工程与安全体检、任务适配性、生命周期/SLIM、数据驱动），叠加本机护栏（被引用 D 类=改路由、流程型留兜底、分类建议必须用户拍板）。触发词：精简 skill、skill 精简、哪些 skill 该删、盘点 skill、审计 skill 库、skill 太多、清理 skill、trim skills、skill audit、review my skills、这个 skill 还值不值得留、去留标准、要不要装这个 skill、这个 skill 该不该装、装前评估。当用户想给 skill 库瘦身、评估是否装新 skill、或对某篇"skill 断舍离"文章想落地执行时使用；也适用于装了新套件后评估旧 skill 是否冗余。不用于：新建 skill（走 skill-creator）、审查 router 型 guide 质量（走 guide-skill-auditor）、优化单个 skill 内容（走 darwin-skill / skill-creator）。
 ---
 
 # Skill Trimmer — Skill 库精简判定
 
 强模型时代，skill 的收益是「沉淀模型猜不到的东西」，成本是「路由噪声 + 描述上下文 + 互相抢活」。本 skill 把「哪些留、哪些删」变成可复用的判定流程，而不是每次凭感觉重想。
 
-**本 skill 是「文章基准 + 本机先例」的融合版，不是纯文章转写。** 判定依据分两层——`【文章】` 来自 JavaGuide《再见 Superpowers！很多 Skill 真的可以扔掉了》(2026-07-23)；`【本机】` 来自你 2026-07-23 审计先例 + 2026-07-25 你亲口拍板的 3 条冲突决议。文章与本机一致处直接判；3 个曾有的冲突点你已拍板（见「已定冲突」），不再呈分歧、直接按决议判。
+**本 skill 是「文章基准 + 主流框架 + 本机先例」的融合版，不是纯文章转写。** 判定依据分三层——`【文章】` 来自 JavaGuide《再见 Superpowers！很多 Skill 真的可以扔掉了》(2026-07-23) + 《Skill 的选择与精简》(2026-08-13，skill-selection-and-pruning，两篇同一作者同立场，后者补「装前反向测试 / 维护量 <20 / 描述列表预算 / 规则分流」四项，见核心立场 #5-7 与流程第 1.5 步)；`【框架】` 来自主流 Agent Skill 去留框架（2026-08-13 调研整合：知识增量三级 / 工程与安全 / 任务适配 / 生命周期 SLIM / 数据驱动，来源核验见文末）；`【本机】` 来自你 2026-07-23 审计先例 + 2026-07-25 你亲口拍板的 3 条冲突决议。三层一致处直接判；3 个曾有的冲突点你已拍板（见「已定冲突」），不再呈分歧、直接按决议判。框架与文章/本机目前无冲突，只在判据更细处增强。
 
 ## 核心立场（先立住，再判定）
 
@@ -20,6 +20,9 @@ description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill
    - 反面即删：**D 流程步骤型**——只提醒「先读项目、再写代码、最后跑测试」的，强模型本来就会做，零增量信息。
 3. **套件流程型要重审启用时机（文章主论点）——但 Superpowers 套件你已拍板不审（见决议 #3），本条只对「其他套件 / 散装流程型 skill」生效。** 流程完整性 ≠ 价值：brainstorm→plan→TDD→worktree→subagent→review 全套，对复杂/陌生/高风险改动有价值，对小改动是从保护变负担、白烧 token。判定**非 SP** 套件或散装流程 skill 时加问一句：**它的启用时机有没有写清？小任务会不会被它拖着走全流程？** 时机模糊 → 标「过度流程」候选。
 4. **同一地方反复翻车、且翻车代价不低，才值得单独留/写一个 skill。**（文章的兜底判据。）
+5. **装前反向测试（新增【文章】）：** 评估新 skill 时**先不用它跑一次**——能跑好就不装；同一个问题反复出现，才把那一小段流程留下来。装了之后装前四问仍适用（见流程第 1.5 步），过期能删。
+6. **维护量基线 <20（新增【文章】）：** 作者「经常使用、愿意长期维护的不到 20 个」。盘点时若 `~/.claude/skills/` 总量远超 20 且大量零使用，是「书签心态」信号——绝大多数应进移除候选，别让「装得多」自我合理化。
+7. **描述列表预算 ~2% / 8000 字符（新增【文章】）：** 渐进式披露下 skill 名称+描述常驻上下文，有预算上限，超限先缩短描述、再移除 skill。判定时若描述列表逼近预算且含 Activation/Redundant 类长描述 → 优先「收窄描述」或「移除」，而非只在库里新增。
 
 **本机叠加规则（用户已拍板，2026-07-25）：**
 5. **被 router 引用的 D 类 → 删 skill + 顺手改路由。** 理由：skill 真没用，引用它的路由那行也该改。判定动作：标「移除+改路由」，移动后必须同步修掉 router/CLAUDE.md 里对应引用（交 guide-skill-auditor 或手动），不留死引用。不再是免死牌。
@@ -56,6 +59,17 @@ python ~/.claude/skills/skill-trimmer/scripts/scan_skills.py
 
 输出 → `skill-trimmer-workspace/inventory.json`（workspace 建在 skill 目录旁，避免污染）。拿到清单后按 description 分组：写作 / 编码 / 前端 / 学习 / 绘图 / 运营 / 元管理 等。
 
+### 1.5 装前评估（评估「要不要装新 skill」时走此步；盘点已装库时跳过）
+
+每装一个 skill 前，对照四问（文章原判据）：
+
+1. **这件事模型原本就会做吗？** 会 → 不装（或仅作 Activation 提醒、描述收短）。
+2. **没有它时，我是否反复在同一个地方翻车？** 没有 → 不装。
+3. **它有没有沉淀脚本、模板、专业资料或个人偏好？** 没有 → 不装。
+4. **规则过期后我能及时发现并删掉吗？** 不能 → 标待审，或要求装后设复查点。
+
+**反向测试优先**：能用一句话描述「装前先用现有能力裸跑一次，跑不好再考虑装」的，先裸跑，别直接装。**装前必看安全面**：至少读一遍该 skill 的 SKILL.md + scripts/ + references/，查危险命令/过宽权限（SKILL.md 语义供应链风险）。判定结果：装 / 不装 / 先裸跑再定。
+
 ### 2. 引用扫描（记录引用方，非免删）
 
 对**每个候选 skill 的名字**，grep 它被谁引用：
@@ -68,27 +82,33 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
 - 按决议 #1：被引用的 skill 若判定为「没用（D类）」→ **删 skill 且必须同步改掉这些引用**，不留死引用。引用方清单就是移动后要逐一修的清单。
 - 被引用的 skill 若判定为「有用（A/B/C 类）」→ 保留，引用不动。
 
-### 3. 逐个判定（四维 + 触发面）
+### 3. 逐个判定（七维 + 触发面）
 
 对过筛的 skill，逐个问（详细判据与示例见 `references/retention-rubric.md`）：
 
 | 维度 | 问法 | 指向 |
 |------|------|------|
-| 增量信息 | 模型（Fable 5 级）本来就会做吗？有没有项目特有约束/脚本/模板/检查项？ | 只会常规步骤 → D 类候选删 |
+| 增量信息(三级)【框架】 | Expert：模型（Fable 5 级）不知道它讲的东西？→ 必须留。Activation：模型知道但**不会主动想起**？→ 可留作提醒，描述宜收短、少占路由。Redundant：模型本来就会？→ D 类候选删。 | Expert → 留；Activation → 「保留-Activation」；Redundant → D 类删 |
 | 资产 | 带 scripts/ references/ assets/ 模板吗？ | 有 → 偏 A/B 留 |
 | 偏好/方向 | 沉淀个人固定产物？或防开工走错方向？ | 是 → A/C 留 |
 | 使用面 | 过去用到过吗？同一个坑翻过吗？翻车代价高吗？ | 反复翻车+代价高 → 留；从没用过+D 类 → 删 |
 | 套件时机 | 属**非 SP** 套件/散装流程型吗？启用时机写清了吗？小任务会被拖全流程吗？（SP 套件按决议 #3 跳过本行） | 时机模糊+拖全流程 → 「保留-流程兜底」，仅标注不删 |
+| 工程体检【框架】 | frontmatter/description 有效吗？内容完整（任务步骤 / 输入输出 / 前置条件 / 错误处理）？含危险命令或过宽权限吗？移除会断别的 skill 依赖吗？ | 残缺 → 「需工程修复」；危险 → 「删前确认/隔离」；依赖脆弱 → 「需工程修复」 |
+| 生命周期/被覆盖【框架】 | 模型升级后已能覆盖它吗？别的 skill 已覆盖同能力吗？反复翻车的场景另有兜底吗？ | 被覆盖 → 「移除-被覆盖」候选 |
 | 触发面 | description 写得宽不宽？会不会和普通改动抢路由？ | 太宽 → 不删也应收窄描述（转 guide-skill-auditor / darwin-skill） |
 
-判定结果五档：
+判定结果（十档）：
 - **保留**：A/B/C 类，或反复翻车兜底。
+- **保留-Activation**【框架】：模型知道但不主动想起、有提醒价值——留但描述收短、少占路由（知识增量二级）。
 - **保留-流程兜底**：流程型/E 类——按决议 #2 留兜底，不审。
 - **保留-SP套件**：Superpowers 套件成员——按决议 #3 豁免，不审。
+- **需工程修复**【框架】：能力该留但 frontmatter/内容残缺或依赖脆弱——修不删；修完复查是否降级为冗余。
 - **移除+改路由**：D 类且没用，但被 router/CLAUDE.md/其他 skill 引用——按决议 #1 删 skill，同时列出引用方清单，移动后逐一修掉引用（交 guide-skill-auditor 或手动），不留死引用。
+- **移除-被覆盖**【框架】：模型能力提升或他 skill 已覆盖同能力，Expert 已降级 Redundant——移入备份，不留死引用（引用方清单同「移除+改路由」）。
 - **收窄描述**：能力该留但触发面太宽抢路由——问题在 description 不在能力，改描述而非删。
+- **移入 CLAUDE.md/规则文件**：D 类里只有 1-2 条真正项目特有/每轮要遵守的 → 把那几条挪进 CLAUDE.md/AGENTS.md，然后删 skill；机械约束（漏一次就出事）挪进 hook/CI/linter/测试，不靠自然语言提醒（【文章】规则分流框架）。
 - **移入备份**：D 类 AND 零引用 AND 无不可替代资产。移 `_weak-model-backup/` 不删。
-- **删前用户确认**：拿不准的、有资产但疑似用不上的、疑似重复能力的——列出证据让你定。
+- **删前用户确认**：拿不准的、有资产但疑似用不上的、疑似重复能力、含危险命令/过宽权限的——列出证据让你定。
 
 ### 4. 报告 + 拍板
 
@@ -101,6 +121,19 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
 - **AI 只出建议，不自动移动任何 skill。** 用户逐项拍板后，移动动作才执行（移动属「文件删除」级人工确认线）。
 - 执行移动用 `mv` 到 `_weak-model-backup/`（软链）或 lab-area 备份（直管目录），并在备份夹 README 追加一行：skill 名 / 判定分类 / 移动日期 / 理由。
 
+## 数据驱动：现状与轻量替代【框架】
+
+主流框架用「遥测计数 + 溯源标签 + A/B 评测」做留删决策（Curator 机制：active → stale → archived；skill-up 工具做因果对照）。**本机现状没有遥测基建，不假装有。** 用轻量信号近似，证据链列全：
+
+- **轻量信号**（替代遥测计数器）：
+  - 文件 mtime / git 历史：半年未动 + 零引用 + D 类 → stale 候选（对应 Curator 的 stale→archived）。
+  - 引用方活跃度：被 router 引用且 router 在迭代 → active；只有 memory 里历史提过 → 偏 stale。
+  - `installing/` 台账日期：装后从未用过、台账无后续 → 可疑。
+  - 用户实测：同任务「开/关该 skill」各跑一次对比 = 穷人版 A/B，不搭评测集。
+  - **总量健康度（新增【文章】）**：库总量 vs 维护基线 <20——远超且大量零使用 = 书签心态信号，push 整体收敛，别因单个看似合理就放行。
+- **演进方向（当前不建）**：`github.com/alibaba/skill-up`（已验证存在的官方评测工具）做正式 A/B 需评测数据集，成本高；哪天想上再建。
+- **状态映射**：active（在用/有引用）→ stale（mtime 久 + 零引用）→ archived（移入 `_weak-model-backup/`）。审计报告里给每个候选标当前状态。
+
 ## 红线（不要做）
 
 - 不把「路由引用」当免死牌，也不删了 skill 留下死引用——被引用的 D 类走「移除+改路由」，移动后必逐一修掉引用方（决议 #1）。
@@ -109,10 +142,25 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
 - 不动插件整包（ecc 等）、不动 `learned/`。
 - 不在没有引用扫描的情况下直接建议删除——引用扫描是「改路由清单」，省不得。
 - 不把「看起来没用」当证据——判据必须是分类 + 引用 + 资产，三样俱查。
-- 不混淆两层判据——建议里每条理由标清是【文章】还是【本机决议】。
+- 不把「装得久 / 记得住 / 当时有用」当证据——能力可能已被模型或别的 skill 覆盖，按「生命周期/被覆盖」维复查。
+- 不假装有遥测数据——使用证据只列轻量信号（mtime / 引用 / 台账 / 实测），缺失就标缺失。
+- 不混淆三层判据——建议里每条理由标清是【文章】【框架】还是【本机决议】。
 
 ## 与其他 skill 的分工
 
 - **guide-skill-auditor**：审 router 型 guide 的质量/误路由/抢单——它管「router 健不健康」，本 skill 管「库里哪些该留」。精简后若发现 router 引用了被移 skill，用 guide-skill-auditor 修 router。
-- **darwin-skill / skill-creator**：优化单个 skill 的内容与描述。本 skill 判定「收窄描述」的，交给它们改。
-- **skill-creator**：判定结果是「这个坑没有 skill 兜、值得新建一个」时，走它。
+- **darwin-skill / skill-creator**：优化单个 skill 的内容与描述。本 skill 判定「收窄描述」「需工程修复（内容深度部分）」的，交给它们改（darwin-skill 已集成 SkillLens 9 维内容评分）。
+- **skill-creator**：判定结果是「这个坑没有 skill 兜、值得新建一个」（SLIM 的失败场景→新建触发）时，走它。
+- **skill-up（演进）**：将来要做正式 A/B 评测（开/关 skill 对比任务完成率）时，用 `github.com/alibaba/skill-up`，本 skill 当前只做轻量信号判定。
+
+## 来源与核验（2026-08-13）
+
+【文章】层 = JavaGuide 两篇：《再见 Superpowers！很多 Skill 真的可以扔掉了》(2026-07-23，本 skill 原始基准) + 《Skill 的选择与精简》(2026-08-13，javaguide.cn/ai-coding/practices/skill-selection-and-pruning.html，同作者同立场演进版——补充装前四问、先不装裸跑、维护量 <20、描述列表预算 ~2%/8000 字符、规则分流框架、装前必看 SKILL.md 安全面)。两篇一致处按原判据；后篇新增判据已并入核心立场 #5-7、流程 1.5、十档「移入 CLAUDE.md/规则文件」。
+
+【框架】层来自主流 Agent Skill 去留框架（用户 2026-08-13 提供调研稿）。关键引用已核验：
+
+- **skill-up**：真实存在——`github.com/alibaba/skill-up`（Go 写的 Agent Skill 评测/演进工具）。
+- **SLIM**：真实存在——arXiv《Dynamic Skill Lifecycle Management for Agentic RL》（Junhao Shen 等，机构未核）；「贡献变小→退役、失败场景→新建」机制与调研稿一致。
+- **SkillLens / SkillOpt**：darwin-skill 已集成引用（arXiv 2605.23899 / 2605.23904，MS Research 系）；2605.23899 实题《From Raw Experience to Skill Consumption》，覆盖 skill 生命周期三阶段效用评测。
+- **佐证论文**：Agent Skill Security 威胁模型、SkillWiki 治理基础设施、SKILL.md 语义供应链攻击（均在 arXiv 可查）。
+- **Curator 遥测机制**：通用概念（多框架采用），无单一权威来源，本 skill 只取「轻量信号近似」做法。
