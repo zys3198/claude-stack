@@ -1,16 +1,18 @@
 ---
 name: ai-coding-guide
-description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器（含前端视觉任务判定）。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.5.0 -->
+description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器（含前端视觉任务判定）。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.7.0 -->
 ---
 
 # AI 编码路由指南（Claude Code）
 
+本文件是**路由骨架**：通用规则约定 + 分类索引。命中低频分类或前端视觉时，先读对应 `references/` 文件再给完整路径；不读 references 也要能给出默认路径一句话。主文件负责路由，references 负责细节。
+
 ## 定位与质量标准
 
-**定位：** 本 skill 是 Claude Code 当前环境下的**开工路由器**。它先回答「这类任务先走哪条流程、该用哪个 skill、哪些能力要组合、哪些质量闸门必须保留」。生态地图、质量闸门、学习陪跑都服务这个开工路由：
+**定位：** 本 skill 是 Claude Code 当前环境下的**开工路由器**。先回答「这类任务先走哪条流程、该用哪个 skill、哪些能力要组合、哪些质量闸门必须保留」。生态地图、质量闸门、学习陪跑都服务这个开工路由：
 
 1. **开工路由（主目标）**：把用户意图分到正确流程，少选错工具。
-2. **生态地图**：解释 Superpowers / ECC / ponytail / Matt Pocock / lean-ctx 等边界和组合方式。
+2. **生态地图**：解释 Superpowers / ponytail / Matt Pocock 等边界和组合方式（详情 [`references/ecosystems.md`](references/ecosystems.md)）。
 3. **质量闸门**：让 review / verify / TDD / 提交前检查各归其位，防假完成、误提交、错用危险 fallback。
 4. **学习陪跑**：用户想练 AI coding 判断力时，路由到 `ai-coding-coach`，让用户先想方案，助手纠偏和复盘。
 
@@ -25,7 +27,7 @@ description: Use when user asks which skill/tool/ecosystem to use inside Claude 
 
 **质量底线：**
 - **准确**：skill 名、命令名、目录路径、插件归属先查当前会话或本地文件，再写结论。
-- **AI 可读**：主文件只放路由和最小速查；长解释外置到 [`references/ecosystems.md`](references/ecosystems.md)。
+- **AI 可读**：主文件只放路由和最小速查；长解释外置到 references/（分类细节见 [`references/classification-details.md`](references/classification-details.md)、前端视觉见 [`references/frontend-visual.md`](references/frontend-visual.md)、生态见 [`references/ecosystems.md`](references/ecosystems.md)、速查/反模式见 [`references/cheatsheet.md`](references/cheatsheet.md)）。
 - **可进化**：发现死引用、错归属、错默认路径时当场修，并同步 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
 - **默认值先于菜单**：各分类 AskUserQuestion 是例外而非默认；默认路径明确、用户点名、或说「直接做」时直接执行不问。每分类至多一次提问。
 
@@ -46,6 +48,7 @@ ai-coding-guide 在当前会话？ YES/NO
 **触发：** 需求模糊/缺背景/没明说模式 -> 走；明确任务/机械任务/用户说"直接做" -> 跳过，走默认。
 
 **问询顺序：**
+
 1. **模式**：这次 coach（我练）/ pair（一起想）/ driver（直接做讲为什么）？**按任务类型给推荐**——该你长期持有的核心技能/有学习点 → 推荐 coach；不熟的库/偶用模式/要权衡 → 推荐 pair；一次性/胶水/样板/明确交付 → 推荐 driver
    - coach：该你长期持有的核心技能，你先给判断，AI 纠偏 + 对照标杆 + 复盘 why
    - pair：不熟的库/偶用模式/要权衡，AI 给 2-3 选项你定
@@ -63,7 +66,7 @@ ai-coding-guide 在当前会话？ YES/NO
 触发本 skill 后，先按 Claude Code 当前环境复核可用性：
 
 1. **先看当前会话可用清单**：只把当前 `Available skills` / `Available tools` / `Available agent types` 视为已证实；历史摘要、memory、prior-session 内容不算可用性证据。
-2. **再看顶层独立 skill**：`~/.claude/skills/`（本机常由 cc-switch 同步，源目录通常是 `~/.cc-switch/skills/`）。
+2. **再看顶层独立 skill**：`~/.claude/skills/`。
 3. **再看插件附带 skill**：`~/.claude/plugins/cache/*/skills/`；插件是否启用以 `settings.json` 的 `enabledPlugins` 为准。
 4. **关键提醒**：reminder 没列出 ≠ 一定不存在；关键推荐前要按磁盘再复核一次。
 
@@ -71,7 +74,7 @@ ai-coding-guide 在当前会话？ YES/NO
 - 生态部分缺失 → 正常推荐主路径，但写清 fallback。
 - 不自检就推荐不存在的工具 = 最严重的路由失败。
 
-**路径角色标记：** 本文各分类的推荐分两种——**直达路径**（当前会话可见的裸 skill / 内置命令，直接走）与**条件路径**（插件 skill，标记「条件」：仅在当前会话可调用清单中出现时才走，否则用该分类 Fallback，不伪装直达）。判定依据 = 环境自检第 1 条。
+**路径角色标记：** 各分类的推荐分两种——**直达路径**（当前会话可见的裸 skill / 内置命令，直接走）与**条件路径**（插件 skill，标记「条件」：仅在当前会话可调用清单中出现时才走，否则用该分类 Fallback，不伪装直达）。判定依据 = 环境自检第 1 条。
 
 **角色分层（不可直达清单）：** 以下只可被流程内部引用或作为参考层，**不作为用户第一跳**——`gitnexus-guide`（GitNexus 家族参考层，其内部路由到兄弟 skill）。
 
@@ -95,11 +98,27 @@ ai-coding-guide 在当前会话？ YES/NO
 ### Step 0：组合顺序
 
 1. **点名优先**：用户点名某个已装 skill/slash command → 先用它；若与安全、不可逆操作或当前环境冲突，先说明冲突再停。
-2. **插件能力走条件路径**：`superpowers:*` / `ecc:*` / `ponytail:*` / `commit-commands:*` / `understand-anything:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
+2. **插件能力走条件路径**：`superpowers:*` / `ponytail:*` / `commit-commands:*` / `understand-anything:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
 3. **流程优先**：同一任务命中多个 skill 时，先主路径，再专项型（审查/安全/文档），不先按插件名倒推任务。
 4. **少叠加**：默认 1 个主路径 + 必要 1 个专项 + 收尾验证；不要把所有相关 skill 一次性全调用。高风险审查、构建失败、外部发布例外。
 5. **能组合就组合**：用户同时问结构和调用链、实现和验证、提交前确认时，按顺序串联能力，不让用户在互补能力之间二选一。
 6. **收尾固定**：产生产品代码改动后才进横切收尾；纯理解、纯审查、纯文档不强行 verify。
+
+### Step 0.4：流程深度裁决（全套 / 拆单 / 最小）
+
+先按任务复杂度 + 代码熟悉度定流程深度，再选 skill。三档：
+
+| 档位 | 触发 | 路径 |
+|---|---|---|
+| **全套流程** | 复杂项目 / 陌生代码库 / 高风险改动 / 跨模块设计 | 完整链：澄清 → 设计 → 计划 → 执行 → 审查 → 验证（`superpowers:*` 条件路径：`brainstorming` → `writing-plans` → `test-driven-development` → 分段执行 → `requesting-code-review` → `verification-before-completion`） |
+| **拆单轻量** | 任务需要某一环、不值整套 | 按需启用单环：`mattpocock-skills:grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前） |
+| **直接最小** | 单点改动 / 机械任务 / 模型已能自做 | 直接实现 + 补必要约束 + 关键验证；`ponytail:ponytail`（条件路径） |
+
+**裁决依据（强模型时代）：** 模型已能自做的基础步骤不再套流程教；复杂度/陌生度/风险越高 → 越值得全套，任务不够复杂时全套从保护变负担。模型执行越快、走错方向代价越大 → 需求模糊先澄清，不先动手。同一环节连续翻车才单独上 skill，够解决问题就停。
+
+**⚠️ mattpocock-skills 插件版 user-invoked**：`grilling` / `diagnosing-bugs` / `tdd` / `code-review` 等 matt 系 skill 模型无法自动调用（需用户手动启用）。路由到它们时必须明确提醒用户手动启用，不能自己调就提示用户调用。
+
+**复杂度无法判断** → 问一句任务规模 / 代码熟悉度，再定档（不逢任务强弹菜单）。
 
 ### Step 0.5：路由输出契约
 
@@ -127,7 +146,7 @@ ai-coding-guide 在当前会话？ YES/NO
 | 高 | auth、权限、DB schema、迁移、支付、外部 IO、安全边界、架构 | 计划/设计确认 → TDD/复现 → 专项 reviewer + security-review → verify/证据 |
 | 不可逆/外发 | commit、push、PR、删除文件、清理未跟踪文件、密钥、数据库写操作 | 先展示范围/状态/diff 或删除清单，得到用户确认后才执行 |
 
-### Step 0.7：最小信息清单
+### Step 0.7：最小信息清单（任务级缺口速查）
 
 开工问询已问过的背景（为什么做/什么场景/谁触发）此处不重复收；本清单只补任务级技术缺口。
 
@@ -204,65 +223,8 @@ Fallback:
 - 仍失败 → AskUserQuestion「你的真实目标是什么？」重分类
 
 分类: 前端视觉
-- 先判交付物/阶段（阶段先于风格）：
-  - **方向未定**（新页面、没设计稿、要视觉方向）→ 决策点先问：给 2-3 个方向选项问用户（或问有无参考/品牌约束），**不让设计 skill 自行拍脑袋定方向**；用户选定后 → `hallmark`（新页面/redesign/URL 抽取，反 AI 大路货）
-  - **已有页面提质**（页面太丑、去 AI 味）→ `impeccable`（先审现有 AI 味再改）/ `hallmark`（要 audit/redesign 时）
-  - **实现**（方向已定、只写组件/代码）→ 按项目栈直接实现；**组件库原则：先检查项目现有依赖并复用**，Vue 项目已采用或点名才走 `shadcn-vue-guide`
-  - **动画动效**（做/改/审动画、加动效、手感不对）→ `emil-design-eng`（综合/审）/ `improve-animations`（全库改）/ `find-animation-opportunities`（找该动哪）；专用严审由用户显式运行 `review-animations`（当前会话可见才可运行）
-  - **风格叠加**（可选，点名才套）→ `apple-design`（Apple 风格参考）等；默认 1 个阶段主路径 + 可选 1 个风格叠加，不堆叠
-  - **特殊产物** → claude.ai artifact 用内置 Artifact 工具；视频产物无会话已验证默认路径（手动实现；候选工具去留待全库审计报告用户拍板）
-- 负边界：`design-an-interface` 是**模块 API/interface 设计**，不进视觉路径；不涉及视觉方向的纯前端工程问题走编码通用分支
-- 验证：需要浏览器行为、可访问性或视觉证据 → 实现后串联 `browser-testing-with-devtools`（chrome-devtools MCP 本机已配置），不另建 router
-- 组合顺序：定方向 → 实现 → （可选提质）；串行不并联
-
-AskUserQuestion:
-- A: 先选视觉方向（给 2-3 个方向选项，推荐）
-- B: 已有方向/参考，直接实现
-- C: 已有页面提质（进 `impeccable`）
-
-Fallback:
-- 用户说「直接做/你定」→ 跳过方向问询，走 `hallmark`（新页面）或 `impeccable`（提质）默认
-- `hallmark` / `impeccable` 不在 → 手动给方向选项 + 按项目栈直接实现，收尾自查 AI 味
-
-分类: 学习型开发
-- 默认主路径 → `ai-coding-coach`
-- 模式已由「开工问询」定（按任务类型推荐），此处不重复问；按已定模式进 `ai-coding-coach`
-- 与代码改动叠加时：先用 `ai-coding-coach` 定协作模式，再按实际任务进入开发新功能 / 调试 bug / 重构简化 / 快速改动
-- 高风险或用户明确要练判断 → coach；赶交付 → driver 但保留 why-review
-
-AskUserQuestion:
-- A: 进 `ai-coding-coach`（按开工问询定的模式，推荐）
-- B: 先看这套协作方式怎么工作
-- C: 跳过 coach 直接进开发分类（收尾仍 why-review）
-
-Fallback:
-- `ai-coding-coach` 不在 → 手动执行：用户先给第一版方案，助手纠偏，对照项目标杆/官方做法，最后让用户讲 why
-
-分类: 判级/暴露未知
-- 默认主路径 → `expose-unknowns`（判四象限 → 按级选技巧 → 任务后反考）
-- 判「未知的已知/未知的未知」需采访澄清 → `expose-unknowns` 内嵌路由到 `superpowers:brainstorming`（条件路径，不可用则手动采访），不重复展开
-- 只问四象限概念、不开工 → 直接解释，不强拉进流程
-
-AskUserQuestion:
-- A: `expose-unknowns`（默认）
-- B: 只看判级方法说明
-- C: 跳过判级直接开工
-
-Fallback:
-- `expose-unknowns` 不在 → 手动执行 `code-change-workflow` skill §1.1「动手前先判级」一行规则
-- 需求模糊但用户未提判级/暴露词 → 仍走「开发新功能」的澄清步骤，不抢路由
-
-分类: 有需求文档
-- 默认主路径 → 手动拆 4-6 切片 + PLAN.md（按 `code-change-workflow` §3），确认后实现
-- 用户只想先整理需求项 → `to-prd` / `to-issues`
-- 条件路径：`superpowers:writing-plans`（当前会话可调用才走）
-
-AskUserQuestion:
-- A: 先拆切片出计划
-- B: 先整理需求项（`to-prd` / `to-issues`）
-
-Fallback:
-- 用户只要结论不要计划 → 直接回答，不强拉进计划流程
+- 决策骨架：**阶段先于风格**——方向未定先给 2-3 个方向选项问用户（`hallmark` 反 AI 大路货）、已有页面提质 → `impeccable`、实现复用项目现有依赖、动画走 `emil-design-eng` 系
+- **5 分支完整细节 / 组合顺序 / 验证 / AskUserQuestion / Fallback → [`references/frontend-visual.md`](references/frontend-visual.md)（命中即读）**
 
 分类: 理解代码
 - 日常查结构/看某处实现 → `lean-ctx`（成本最低，先走）
@@ -346,85 +308,20 @@ Fallback:
 - 框架未知 → 先问语言/框架
 - 仍失败 → 停止自动清理，展示工作区状态和完整错误；如需删除未跟踪文件，单独确认删除范围
 
-分类: 文档写作
-- 默认先走 `article-writing-guide`（写作总路由）
-- 从零写且分类已明确 → `article-writer`
-- 规范格式/统一 Markdown → `chinese-markdown-normalizer`
+### Step 2 低频分类索引（命中即读 [`references/classification-details.md`](references/classification-details.md) 对应小节，先给一句话主路径）
 
-AskUserQuestion:
-- A: 从零写
-- B: 规范/润色
-- C: 审校
-
-Fallback:
-- skill 不在 → 回到基础人工流程
-
-分类: 路由指南维护
-- 先判断是否值得迁移；只评估外部做法 → 只给结论，不改文件
-- 审查/优化/新建任一 router 型 guide skill（含本指南自身）→ `guide-skill-auditor`（十查 + 基线测试 + 分级修复）
-- 小型路由/测试修正 → 补 RED 场景或最小检查，最小改 `SKILL.md` / `test-prompts.json` / 必要参考文件，并跑审计
-- 行为变化或要量化优化 → `darwin-skill`；条件路径：`superpowers:writing-skills`
-- 迁移内容只吸收路由规则：触发词、分类、证据门槛、fallback、反模式
-
-AskUserQuestion:
-- A: 只做最小迁移（推荐）
-- B: 先完整评估再改
-- C: 只给方案不改文件
-
-Fallback:
-- 外部做法太项目化 → 不迁移，建议做项目专属 skill
-- 缺少可验证测试场景 → 先补 test prompt，不直接改正文
-- 用户要求"直接做" → 仍保留 RED 检查和审计，跳过 A/B/C 选择
-
-分类: 提交/收尾
-- 默认主路径 → 手动 git add/commit；commit/push 前展示 `git diff --cached --stat` 待确认（CLAUDE.md §1.3 人工确认线）
-- 条件路径：`commit-commands:commit`（单提交）、`commit-commands:commit-push-pr`（**一条命令自动 push 远端 + gh 开 PR，不可逆**）、`superpowers:finishing-a-development-branch`（长分支收尾）、`ocr review`（commit 前独立审查）
-
-AskUserQuestion:
-- A: 手动提交（展示 diff 待确认）
-- B: `commit-commands:commit`（条件路径）
-- C: `commit-commands:commit-push-pr`（自动 push + 开 PR，跑前务必确认）
-
-Fallback:
-- 都不在 → 手动 git add/commit；`commit-push-pr` 类一条命令推远端，跑前务必确认
-
-分类: 知识收尾
-- 默认主路径 → `neat-freak`
-- 用于会话/阶段完成后同步 docs、README、AGENTS/CLAUDE、memory，清理过期/重复/冲突知识
-- 不用于代码重构；代码重构仍走「重构/简化」
-
-AskUserQuestion:
-- A: `neat-freak`（知识库收尾，推荐）
-- B: 只同步 memory
-- C: 只更新项目 docs
-
-Fallback:
-- `neat-freak` 不在 → 手动枚举 docs / README / AGENTS / memory，按受众同步，删过期重复
-
-分类: 循环任务
-- 循环/轮询/条件驱动 → `/loop`（固定间隔走定时；省略间隔让模型自定步调，覆盖条件驱动）
-
-AskUserQuestion:
-- A: 直接 `/loop`
-- B: 先确认终止条件再 `/loop`
-- C: 展示循环任务路径
-
-Fallback:
-- `/loop` 不可用 → 说明不可用并回到手动执行
-
-分类: 了解指南
-- 展示最小速查 + `references/ecosystems.md`
-- 展示完后再问「现在要执行什么」
-
-分类: 编码域调研（社区/舆情/最近动态）
-- 编码场景下查「最近 X 有什么更新/讨论」 → `last30days`（近 30 天社区真实用户声音，跨 Reddit/X/HN/YouTube/TikTok）
-- 不替代 `lean-ctx`（读代码）/ `gitnexus-exploring`（调用链）/ `agent-reach`（存证调研）：这些是结构性查询，本分类是时间敏感的舆情/动态
-- Fallback：`last30days` 不在 → WebSearch 限时 + 用户口径限定
-
-AskUserQuestion:
-- A: 走 `last30days` 查近 30 天（推荐）
-- B: 用 WebSearch 限时查
-- C: 我只要一手官方 changelog
+| 分类 | 主路径一句话 | 条件路径 / Fallback 概要 |
+|---|---|---|
+| 学习型开发 | `ai-coding-coach` | 叠加代码改动时先定协作模式；coach 不在→手动先给方案+纠偏+讲 why |
+| 判级/暴露未知 | `expose-unknowns` | 需采访→内嵌 `superpowers:brainstorming`（条件）；不在→`code-change-workflow` §1.1 判级一行 |
+| 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 只想整理需求项→`to-prd` / `to-issues`；`superpowers:writing-plans`（条件） |
+| 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→`chinese-markdown-normalizer` |
+| 路由指南维护 | `guide-skill-auditor` | 行为变化→`darwin-skill`；小修最小改+审计；只评估→给结论不改文件 |
+| 提交/收尾 | 手动 git + diff 展示待确认 | `commit-commands:*`（条件，push 类不可逆跑前确认）；`ocr review` |
+| 知识收尾 | `neat-freak` | 只同步 memory / 只更新 docs 见 A/B/C；不在→手动枚举 docs/README/AGENTS/memory |
+| 循环任务 | `/loop` | 省略间隔让模型自定步调；不在→说明不可用回手动 |
+| 了解指南 | 最小速查 + `references/ecosystems.md` | 展示完问「现在要执行什么」 |
+| 编码域调研 | `last30days` | 与 `lean-ctx` / `gitnexus` / `agent-reach` 不重叠；不在→WebSearch 限时 |
 
 ### Step 3：收敛规则（🛑 同分类重复触发时执行）
 
@@ -449,7 +346,12 @@ AskUserQuestion:
 
 ## 参考内容（新手 & 深度了解用）
 
-速查与反模式见 [`references/cheatsheet.md`](references/cheatsheet.md)（决策速查 / 生态速查 / 反模式 / 迁移闸门 / 重机制黑名单）；生态详情见 [`references/ecosystems.md`](references/ecosystems.md)。用户选「展示选项」或分类为「了解指南」时展开。
+- **速查/反模式/迁移闸门/重机制黑名单** → [`references/cheatsheet.md`](references/cheatsheet.md)
+- **生态详情**（Superpowers / mattpocock / ponytail / 重叠区 / 降级路径） → [`references/ecosystems.md`](references/ecosystems.md)
+- **低频分类细节**（Step 2 下放的 10 个分类完整路径） → [`references/classification-details.md`](references/classification-details.md)
+- **前端视觉子路径**（5 分支 + 组合 + 验证） → [`references/frontend-visual.md`](references/frontend-visual.md)
+
+命中「了解指南」或用户选「展示选项」时展开速查与生态；命中低频分类或前端视觉时展开对应细节。
 
 ---
 
@@ -457,4 +359,4 @@ AskUserQuestion:
 
 维护规则、证据源、同步清单、变更记录见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
 
-<!-- 路由表门禁：Step 1 信号表、Step 2 分类路径由人工维护；删除任何分类/条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.5.0 -->
+<!-- 路由表门禁：Step 1 信号表、Step 2 分类路径由人工维护；删除任何分类/条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）。v1.7.0 -->

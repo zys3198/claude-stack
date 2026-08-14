@@ -10,17 +10,32 @@
 
 **全局规则（2026-08-13 起）：** 所有插件条目（`superpowers:*` / `ecc:*` / `ponytail:*` / `commit-commands:*` / `understand-anything:*` 等）一律按**条件路径**处理——当前会话可调用清单里出现才走，否则走各分类 Fallback。判定依据：`settings.json` 的 `enabledPlugins` + 当前会话 `Available skills` 清单；磁盘 cache 只证明「已安装/可候选」。
 
-### Superpowers（条件路径）
+### Superpowers：完整流程套件（条件路径）
 
-**定位：** 流程纪律层。负责 `brainstorming`、`writing-plans`、`test-driven-development`、`systematic-debugging`、`verification-before-completion` 这类硬门禁流程。
+**定位：** 完整软件开发流程套件。`brainstorming`（需求澄清）→ `writing-plans`（设计/计划）→ `test-driven-development`（执行）→ `requesting-code-review`（审查）→ `verification-before-completion`（验证）一条完整链。
 
-**什么时候优先用（会话可调用时）：**
-- 新功能需要设计
-- 已有 spec 需要落地计划
-- bug 需要根因分析
+**什么时候才值得走全套（会话可调用时）：**
+- 复杂项目、陌生代码库、高风险改动、跨模块设计
+- 已有 spec 需要落地完整计划
 - 完工前需要证据驱动验证
 
+**什么时候不要走：** 单点改动、机械任务、强模型已能自做的基础步骤（读项目、找调用链、跑基础测试）。任务不够复杂时，全套流程从保护变负担（依据：JavaGuide 2026-08《强模型时代，AI 编程 Skills 还有必要装吗？》——Superpowers 容易让小任务背上过重流程）。
+
 **默认替代（会话不可调用时）：** 开工问询 + Step 0.7 缺口收齐 + 手动计划/实现；复杂/高风险走 `code-change-workflow`。不要把插件流程写死成所有任务的默认链。
+
+### mattpocock-skills：轻量工具箱（user-invoked，条件路径）
+
+**定位：** 可拆开使用的小 skill 组合，不默认要求任务走完同一条流程。哪个环节反复出错就只补哪块，任务变复杂再把几个组合起来。
+
+**常用单环：**
+- `grilling` — 动手前持续追问需求（一次一问，能查的自己查、取舍的交给用户），减少方向错误
+- `diagnosing-bugs` — bug 定位
+- `tdd` — 红绿重构
+- `code-review` — 提交前检查
+
+**用法：** 任务需要某一环时单独启用，不整套启用。模型写代码够快时返工多发生在开工太早（需求没定就动手），所以需求模糊时先 `grilling`。
+
+**⚠️ user-invoked 提醒：** mattpocock-skills 插件版模型无法自动调用（需用户手动启用）。路由到这些 skill 时必须明确提醒用户手动启用（不能自己调就提示用户调用）。
 
 ### 顶层独立 skill（直达路径）
 
@@ -72,6 +87,7 @@
 | 内置 `security-review` vs 通用 review | 高风险任务用实际 reviewer + 内置 `security-review` 双审 | 安全审查是额外维度，不是替代关系 |
 | `frontend-design`（候选 FAIL） vs `hallmark`/`impeccable` | 前端视觉默认 `hallmark`（新页面）/ `impeccable`（提质）；候选重测通过再议 | 实测当前会话不可调用，不伪装直达 |
 | `lean-ctx` vs `understand-anything:understand`（条件） | 日常查代码先 `lean-ctx`，大范围建模在可调用时再上 understand | 成本更低 |
+| Superpowers 全套（条件） vs mattpocock 拆单（user-invoked） vs 直接最小 | 复杂/陌生/高风险 → 全套；任务需要某一环 → 拆单用 matt；单点/机械 → 直接最小 | 流程深度由任务复杂度定，不全套兜底 |
 
 ---
 
@@ -85,6 +101,7 @@
 | `understand-anything:understand` / `gitnexus-*` 不可用 | 继续用 `lean-ctx` 聚焦读取；`lean-ctx` 也不可用才退原生搜索 + 精读文件 |
 | `/loop` 不可用 | 明示不可用，改手动执行 |
 | `hallmark` / `impeccable` 不可用 | 手动给方向选项 + 按项目栈直接实现，收尾自查 AI 味 |
+| `mattpocock-skills:*` 不可用 / 用户不启用 | grilling → 开工问询 + `expose-unknowns` 判级；diagnosing-bugs → `code-change-workflow` §2 / `superpowers:systematic-debugging`（条件）；tdd → 手动红绿小步改；code-review → 内置 `code-review` |
 
 ---
 

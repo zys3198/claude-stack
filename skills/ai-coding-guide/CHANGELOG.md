@@ -4,6 +4,41 @@
 
 详细维护规则与变更证据见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md) 的变更记录表（2026-07-22 之前的历史改动以该表为准）。
 
+## [v1.7.0] - 2026-08-14
+
+### Added
+
+- **`references/classification-details.md`（新建）**：Step 2 低频 10 分类完整细节（学习型开发 / 判级/暴露未知 / 有需求文档 / 文档写作 / 路由指南维护 / 提交/收尾 / 知识收尾 / 循环任务 / 了解指南 / 编码域调研），每分类含默认路径 / AskUserQuestion / Fallback，文件头带分类索引表。
+- **`references/frontend-visual.md`（新建）**：前端视觉 5 分支完整细节（方向未定 / 提质 / 实现 / 动画 / 特殊产物 / 风格叠加）+ 负边界 + 组合顺序 + 验证 + AskUserQuestion / Fallback。
+
+### Changed
+
+- **主文件渐进披露重构（481 → 362 行）**：Step 2 由「18 个分类全部内联」改为「7 个高频分类内联 + 前端视觉决策骨架一行索引 + 低频 10 分类索引表」。低频索引表每行给**一句话主路径 + 条件路径/Fallback 概要 + 「命中即读 references/classification-details.md」提示**，防 references 不自动加载导致路由残缺。
+
+### Rationale
+
+- 依据：渐进披露原则——主文件只放基本通用规则约定 + 真实索引路由，长细节下放 references（SKILL.md 质量底线「AI 可读」已有此约定，本轮执行到位）。references 不自动加载，故索引行必须保留一句话主路径（不读 references 也能正确路由）并显式提示命中即读。
+- **高频分类刻意内联**：路由判定核心不外置——开发新功能 / 理解代码 / 审查代码 / 调试 bug / 重构/简化 / 快速改动 / 构建错误是最高频编码任务，内联保证路由骨架自包含。
+- **未做进一步格式压缩**（Step 0.4/0.7 表、高频分类 AskUserQuestion 保持完整）：用户确认 5 文件范围（SKILL.md + 2 新建 references + MAINTENANCE.md + CHANGELOG.md）；主文件 362 行高于预估 210，原因=保留核心规则与高频分类内联。是否继续压缩由用户后续拍板。
+- 死引用检查：`grep -oE 'references/[a-z-]+\.md' SKILL.md | sort -u` vs 实际目录文件，diff 为空（无死引用）。
+
+## [v1.6.0] - 2026-08-14
+
+### Added
+
+- **Step 0.4 新增流程深度裁决（全套 / 拆单 / 最小三档）**：先按任务复杂度 + 代码熟悉度定流程深度再选 skill——复杂项目/陌生代码库/高风险改动/跨模块设计走全套（`superpowers:*` 完整链：澄清 → 设计 → 计划 → 执行 → 审查 → 验证）；任务需要某一环走拆单（`mattpocock-skills:grilling` / `diagnosing-bugs` / `tdd` / `code-review`）；单点/机械走直接最小（`ponytail:ponytail` 条件路径）。复杂度无法判断才问一句任务规模。
+- **mattpocock-skills 轻量工具箱段（ecosystems.md 新增）**：可拆开使用、不默认走完整流程，哪个环节反复出错只补哪块；含 **user-invoked 提醒**——插件版模型无法自动调用，路由到这些 skill 时必须明确提醒用户手动启用。
+
+### Changed
+
+- `references/ecosystems.md` Superpowers 段重写：从「流程纪律层」改为「完整流程套件」，明确全套只在复杂/陌生/高风险值得走，任务不够复杂时从保护变负担（引用文章判据）。
+- 重叠区处理加「Superpowers 全套 vs mattpocock 拆单 vs 直接最小」裁决行；降级路径表补 matt 不可用时的 fallback（grilling → 开工问询 + `expose-unknowns`；diagnosing-bugs → `code-change-workflow` §2；tdd → 手动红绿小步改；code-review → 内置 `code-review`）。
+
+### Rationale
+
+- 依据：JavaGuide《强模型时代，AI 编程 Skills 还有必要装吗？》（2026-08-14 阅读）——强模型已能自做读项目/找调用链/跑基础测试等基础步骤，全套流程对小任务从保护变负担；模型执行越快走错方向代价越大，需求模糊先澄清（`grilling`）；mattpocock 轻量组合按需拆单优于 Superpowers 式整套默认。用户确认 4 文件范围（SKILL.md / ecosystems.md / MAINTENANCE.md / CHANGELOG.md），test-prompts.json 用例待补。
+- 未动：分类路径主体、风险矩阵、触发门禁、Step 1 信号表——本轮只补「流程深度」裁决维度，不删已有路由。
+
 ## [v1.5.0] - 2026-08-13
 
 ### Changed（guide-router 重建：吸收前端域 + 插件路径降级）
