@@ -9,6 +9,7 @@ CLAUDE.md §1 只留路由与高代价确认线，本文件是完整流程。来
 
 ## 1.1 改前
 
+- **多步任务/跨目录先跑 preflight-check**：开工前验证 repo root、目标路径存在性、文件编码、容器路径、shell 引号（见 `preflight-check` skill），不猜。
 - `git status` 干净才动手。脏工作区先处理，不叠加。
 - 新建分支：`feat/<name>` / `fix/<issue>`。项目无 Git 则 `git init` + `.gitignore`（试验场 lab-area 例外：不强制 init，按需）。
 - Plan 按不确定性和协同范围而非文件数：方案未知/架构决策/数据结构变动/多模块协同才 Plan（具体执行见 §3）；改动明确（bug 修复、加字段、机械重命名）直接改。出错（测试失败/lint error/用户否定当前方向/连续 2 次同类偏离验收）立刻切回重规划。

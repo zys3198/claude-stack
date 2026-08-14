@@ -98,7 +98,7 @@ ai-coding-guide 在当前会话？ YES/NO
 ### Step 0：组合顺序
 
 1. **点名优先**：用户点名某个已装 skill/slash command → 先用它；若与安全、不可逆操作或当前环境冲突，先说明冲突再停。
-2. **插件能力走条件路径**：`superpowers:*` / `ponytail:*` / `commit-commands:*` / `understand-anything:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
+2. **插件能力走条件路径**：`superpowers:*` / `ponytail:*` / `understand-anything:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
 3. **流程优先**：同一任务命中多个 skill 时，先主路径，再专项型（审查/安全/文档），不先按插件名倒推任务。
 4. **少叠加**：默认 1 个主路径 + 必要 1 个专项 + 收尾验证；不要把所有相关 skill 一次性全调用。高风险审查、构建失败、外部发布例外。
 5. **能组合就组合**：用户同时问结构和调用链、实现和验证、提交前确认时，按顺序串联能力，不让用户在互补能力之间二选一。
@@ -317,7 +317,7 @@ Fallback:
 | 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 只想整理需求项→`to-prd` / `to-issues`；`superpowers:writing-plans`（条件） |
 | 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→`chinese-markdown-normalizer` |
 | 路由指南维护 | `guide-skill-auditor` | 行为变化→`darwin-skill`；小修最小改+审计；只评估→给结论不改文件 |
-| 提交/收尾 | 手动 git + diff 展示待确认 | `commit-commands:*`（条件，push 类不可逆跑前确认）；`ocr review` |
+| 提交/收尾 | 手动 git + diff 展示待确认 | `ocr review` |
 | 知识收尾 | `neat-freak` | 只同步 memory / 只更新 docs 见 A/B/C；不在→手动枚举 docs/README/AGENTS/memory |
 | 循环任务 | `/loop` | 省略间隔让模型自定步调；不在→说明不可用回手动 |
 | 了解指南 | 最小速查 + `references/ecosystems.md` | 展示完问「现在要执行什么」 |

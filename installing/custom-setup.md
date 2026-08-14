@@ -61,6 +61,13 @@
 - 交付：分析报告 + 草稿到 `docs/ai-context/`，不直接改项目文件
 - 依赖：无
 
+### preflight-check（2026-08-14，全局）
+- 位置：`~/.claude/skills/preflight-check/SKILL.md`（单文件）
+- 出处：/insights 2026-08-14 friction #1（git add 错 repo root / JSON 引号断裂 / GBK 乱码）；「防方向错误」类 skill
+- 内容：多步任务开工环境预检——repo root、目标路径存在性、文件编码、容器路径、shell 引号；只验证不执行，猜错即停
+- 触发：多步任务/跨目录/容器路径/编码/shell 引号假设；code-change-workflow §1.1 已接线
+- 依赖：无
+
 ### 前端 skill（自建 1 个）
 - shadcn-vue-guide（中文手写 + 本机 .bak 编辑痕）
 
