@@ -8,6 +8,7 @@
   "silentStartup": true,
   "enableLocalProxy": true,
   "proxyConfirmed": true,
+  "usageConfirmed": true,
   "enableFailoverToggle": false,
   "showProfileSwitcher": true,
   "preserveCodexOfficialAuthOnSwitch": true,
@@ -28,10 +29,9 @@
     "hermes": false
   },
   "currentProviderClaude": "7f8c8fed-6ceb-4874-b60f-daccd44c9fcd",
-  "currentProviderClaudeDesktop": "52074f7c-f816-4b64-b8af-428eb18e4b78",
   "currentProviderCodex": "939905fe-e925-4d63-be61-212f31fcf5d5",
-  "skillSyncMethod": "symlink",
-  "skillStorageLocation": "cc_switch",
+  "skillSyncMethod": "copy",
+  "skillStorageLocation": "unified",
   "preferredTerminal": "powershell",
   "localMigrations": {
     "codexThirdPartyHistoryProviderBucketV1": {
