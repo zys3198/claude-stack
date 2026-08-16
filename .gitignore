@@ -136,5 +136,7 @@ skills/*
 !skills/tech-article-review/
 !skills/tutorial-maker/
 !skills/wiki-sediment/
+!skills/ai-readable-project/
+!skills/preflight-check/
 # 释放被全局 plans/ 规则误伤的自建计划文档目录
 !skills/ai-coding-guide/docs/superpowers/plans/
