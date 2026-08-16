@@ -58,7 +58,7 @@
 ### ~~2026-08-11 复核新增自建（7 个，已入 Git 白名单）~~（2026-08-16 核实全不在磁盘，白名单已清）
 - ~~ai-text-polisher / answer-evidence-finder / critical-thinking / doc-finder / humanizer-zh / interview-ai-agent-dev / interview-java-backend~~
 - 出处：用户逐个勾选自认定稿（推翻此前「ignored 即第三方」的机器推断）。注：critical-thinking、humanizer-zh 公网存在同名项目，以用户判定为准——若实为改过/重写版本，建议日后在 SKILL.md 注明 fork 来源。
-- **2026-08-16 审查实测**：7 个磁盘目录均不存在（疑 2026-08-13 清理随备份夹消失），`.gitignore` 白名单条目已移除；若需重装——interview-ai-agent-dev / interview-java-backend / humanizer-zh / answer-evidence-finder / doc-finder 为自建脚本类按自建重建，critical-thinking 见 skill-install.md 更正，ai-text-polisher 见下文终判。
+- **2026-08-16 审查实测**：7 个磁盘目录均不存在（疑 2026-08-13 清理随备份夹消失），`.gitignore` 白名单条目已移除；**恢复口径更正（2026-08-16 盘查）**：7 个全部在 git 历史（`42c694a` 增补批次 / `d57e5c0` 移入备份），`git checkout <父提交> -- skills/<名>` 即恢复，无需重建；ai-text-polisher 例外——已删、被 human-writing 替代，**不恢复**，见下文终判。critical-thinking 来源见 skill-install.md 更正。
 
 ### ai-readable-project（2026-08-13，全局）
 - 位置：`~/.claude/skills/ai-readable-project/`（SKILL.md + references/DESIGN.md + references/templates/ 3 模板）
