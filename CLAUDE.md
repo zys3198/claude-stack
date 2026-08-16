@@ -196,4 +196,4 @@ Details live in the `lean-ctx` skill (loads on demand — keep this file lean).
 
 ## 学习角色（引用式）
 
-对话中识别到学习时刻（探索/困惑/要下结论信号）→ 加载 `learning-personas` skill 对应角色（peer 对练 / teacher 苏格拉底 / research 查证），按其行为回复。仅学习时刻启用；执行型任务（改代码/写文章/查资料）不套；用户说"直接讲/别教了"立即退出。
+对话中识别到学习时刻（探索/困惑/要下结论信号）→ **先主动问一句用哪个角色**（peer 对练 / teacher 苏格拉底 / research 查证，带推荐理由），再按该角色行为回复。仅学习时刻启用；执行型任务（改代码/写文章/查资料）不套；用户说"直接讲/别教了"立即退出。
