@@ -27,14 +27,14 @@
 ## 学习型开发
 
 - 默认主路径 → `ai-coding-coach`
-- 模式已由「开工问询」定（按任务类型推荐），此处不重复问；按已定模式进 `ai-coding-coach`
-- 与代码改动叠加时：先用 `ai-coding-coach` 定协作模式，再按实际任务进入开发新功能 / 调试 bug / 重构/简化 / 快速改动
-- 高风险或用户明确要练判断 → coach；赶交付 → driver 但保留 why-review
+- 归属+persona 已由「开工问询」定（按任务类型推荐），此处不重复问；按已定归属进 `ai-coding-coach`
+- 与代码改动叠加时：先用 `ai-coding-coach` 定归属（你练/我讲/我动手），再按实际任务进入开发新功能 / 调试 bug / 重构/简化 / 快速改动
+- 高风险或用户明确要练判断 → 你练（peer 加深）；赶交付 → 我动手但保留 why-review
 
 AskUserQuestion:
-- A: 进 `ai-coding-coach`（按开工问询定的模式，推荐）
+- A: 进 `ai-coding-coach`（按开工问询定的归属，推荐）
 - B: 先看这套协作方式怎么工作
-- C: 跳过 coach 直接进开发分类（收尾仍 why-review）
+- C: 跳过你练直接进开发分类（收尾仍 why-review）
 
 Fallback:
 - `ai-coding-coach` 不在 → 手动执行：用户先给第一版方案，助手纠偏，对照项目标杆/官方做法，最后让用户讲 why

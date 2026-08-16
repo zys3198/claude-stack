@@ -1,6 +1,6 @@
 ---
 name: learning-guide
-description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / tech-learning-roadmap / agent-reach / last30days / wiki-sediment / expose-unknowns。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 ai-coding-guide 前端视觉子路径）、提升 AI 辅助编码能力/练 AI coding 判断力（走 ai-coding-guide → ai-coding-coach）。<!-- v1.5.0 -->
+description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / tech-learning-roadmap / agent-reach / last30days / wiki-sediment / expose-unknowns。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。学习模式/说话层词汇统一走 learning-personas（peer/teacher/research）。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 ai-coding-guide 前端视觉子路径）、提升 AI 辅助编码能力/练 AI coding 判断力（走 ai-coding-guide → ai-coding-coach）。<!-- v1.6.0 -->
 ---
 
 # 学习路由指南（Claude Code）
@@ -28,24 +28,22 @@ learning-guide 相关？ YES/NO —— <一句理由>
 **触发：** 需求模糊/缺背景/没明说模式 -> 走；明确任务/机械任务/用户说"直接讲" -> 跳过，走默认。
 
 **问询顺序：**
-1. **模式**：这次 coach（深学吃透）/ pair（概念解释）/ driver（速成备考）？**按任务类型给推荐**——该你深学吃透的核心 → 推荐 coach；概念解释/追问读懂 → 推荐 pair；速成/备考 → 推荐 driver
-   - coach：该你深学吃透的核心，你先探索/给理解，AI 纠偏 + 补盲点
-   - pair：概念解释，AI 讲 + 你追问读懂
-   - driver：速成/备考，AI 讲 + 你练，收尾复盘
-   - 卡壳 -> AI 递参考判断
-2. **背景**（模糊时）：为什么学/什么场景要用/有无范围/何时验收；能查的不问
-3. -> 进路由表
+1. **归属**：这技能归你吗？——归你/该练 → **你练**（AI 纠偏）；不归你/只要会用 → **我讲**（AI 生成你追问）；太大 → 存起来另会话。**按任务类型给推荐**——该你深学吃透的核心 → 你练；概念解释/追问读懂 → 我讲；速成/备考 → 你练 + 判对错
+2. **场景**：深学吃透 / 概念解释 / 速成备考 / 学习路线 / 记笔记 —— 决定走哪个流程 skill
+3. **说话层**：按当下认知状态取 persona（探索→peer / 求讲清→teacher / 要下结论→research），执行细节见 `learning-personas`
+4. **背景**（模糊时）：为什么学/什么场景要用/有无范围/何时验收；能查的不问
+5. -> 进路由表
 
-**例外（不问，直接 driver）**：纯查资料存证、已指名 skill、用户说"直接讲"。
+**例外（不问，直接我讲）**：纯查资料存证、已指名 skill、用户说"直接讲"。
 
-**与现有机制分工：** 开工问询管 why+how；裁决规则 4 管深浅/产出形态方向。不重叠。
+**与现有机制分工：** 开工问询管归属+场景+persona；裁决规则 4 管深浅/产出形态方向。不重叠。
 
 ## 环境自检
 
 触发后按顺序复核可用性，**只在会话 `Available skills` 里出现的才算已证实**：
 
 1. 先看当前会话可用清单（唯一可信源）。
-2. 再看顶层独立 skill：`~/.claude/skills/`（本机常由 cc-switch 同步，源目录 `~/.cc-switch/skills/`）。
+2. 再看顶层独立 skill：`~/.claude/skills/`。
 3. **关键提醒**：reminder 没列出 ≠ 一定不存在；关键推荐前按磁盘再复核一次。
 4. 生态缺失 → 跳过该路径给已装替代，不硬推不存在的工具。下表是本机 cc-switch 盘点，会话里没列出的当不存在。
 
@@ -74,7 +72,7 @@ learning-guide 相关？ YES/NO —— <一句理由>
    - 「速成」有范围 → `cram-engine`；无范围纯陌生 → `deep-learn`。
    - 「查资料」只为存证 → `agent-reach`；为学会 → `deep-learn`。
    - 「开工判级/扫盲」归属：判级/暴露未知不分域，统一 → `expose-unknowns`；本 guide 只负责在学习任务入口路由到它。编码任务同样由 `ai-coding-guide` 路由进 `expose-unknowns`（v1.2.1 组合审查新增；v1.4.1 删除域分半句，判级不切开）。
-4. **决策点先问 + 开工问询（默认问、可直接做）**：开工问询先定模式（coach 深学 / pair 概念解释 / driver 速成备考，按任务类型推荐）+ 背景；分类不清或深浅/产出形态不明时，只问一个关键问题收口——「你是想自己学会，还是要产出教程/文章？深学吃透还是只要概念解释？」，不堆选项，也不让下游学习 skill 自行推断深浅；用户说"直接讲/你定"则跳过走默认。
+4. **决策点先问 + 开工问询（默认问、可直接做）**：开工问询先定归属（你练/我讲）+ 场景（深学/概念/速成，按任务类型推荐）+ 背景；说话层 persona 按认知状态从 `learning-personas` 取（探索→peer / 求讲清→teacher / 要下结论→research）。分类不清或深浅/产出形态不明时，只问一个关键问题收口——「你是想自己学会，还是要产出教程/文章？深学吃透还是只要概念解释？」，不堆选项，也不让下游学习 skill 自行推断深浅；用户说"直接讲/你定"则跳过走默认。
 
 ## 反模式
 

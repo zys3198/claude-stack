@@ -40,6 +40,12 @@
 ### cc-switch-setting-sync
 - 出处：防 cc-switch 切换 provider 降级 settings.json 的同步流程
 
+### learning-personas
+- 出处：2026-08-16 从 DeepTutor（eduhub.deeptutor.info，本地装于 `C:\ZYS\Code\deep-tutor`）三 persona（peer/teacher/research-assistant）提炼，用户拍板独立 skill + CLAUDE.md 引用式
+- 内容：**学习系统总纲 + 说话层角色库**。三个正交决定：判级查（expose-unknowns）/ 归属问（这技能归你吗→你练/我讲/存起来）/ 说话层（peer/teacher/research）。全系统学习模式唯一词汇源
+- 接线：CLAUDE.md 尾部「## 学习角色（引用式）」被动触发规则（学习时刻才套，执行型任务不启用）；四 guide（learning-guide / ai-coding-guide / article-writing-guide / ai-coding-coach）开工问询词汇统一换为归属+persona 并引用本 skill（渐进式披露，不散落展开）；learning-first memory 四分支并进归属一问
+- 迁移要点：SKILL.md 单文件；无脚本无依赖；与 cram-engine/deep-learn/expose-unknowns 互补（流水线 vs 说话方式）；换词涉及 guide 时同步改 CHANGELOG + references + test-prompts
+
 ### 写作 skill（自建 11 个）
 - article-writer / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / review-doc / tech-article-review / content-to-note
 - 出处：2026-06/07 写作流程沉淀；publish-final-check 演进耦合在 article-writing-guide/CHANGELOG.md；plagiarism-audit 针对实战漏网（Codex-book 整源漏审）设计；tech-article-review 与 review-doc 划边界（单 agent 逐段增量 vs 4 agent 并行）
@@ -91,6 +97,12 @@
 - 出处：spec `C:\ZYS\Wiki\docs\superpowers\specs\2026-08-11-wiki-sediment-design.md`（原 commit 3cdfb7e 为 wiki 项目级，同日用户拍板改全局）
 - 内容：沉淀四路径（书籍→knowledge-note / 对话→learning-record / 错误→memory feedback / 仪表盘刷新），复用 wiki-structure 规约；wiki 目标路径硬编码 `C:\ZYS\Wiki`（迁机需改）
 - 依赖：`C:\ZYS\Wiki` 的 wiki-structure skill、`93-templates/`、`scripts/refresh-due.py`
+
+### /fy 翻译命令（2026-08-14，全局）
+- 位置：`~/.claude/commands/fy.md`（全局自定义命令，单文件，随 ~/.claude git 迁移）
+- 出处：需求「/ 命令菜单描述看不懂，想要预翻译/实时翻译功能」→ 边界澄清后拍板做按需翻译命令。约束依据（官方 docs 已核）：内置命令/内置 skill 描述硬编码、无 i18n 无本地化、同名命令无法覆盖；`/` 菜单由 TUI 渲染、hook 无法改写显示。故「实时改菜单」形态不存在，能做的是「按需翻译」+「自有 skill 描述预翻译」（后者用户本次未选）。
+- 内容：`/fy <英文>` 或 `/fy <粘贴的英文描述>` → 当前会话 Claude 直接翻成中文；只输出译文；输入已中文则原样返回并提示；空输入有提示。零依赖（走本会话 LLM，不配 API、无脚本）。
+- 验证：重启会话后 `/` 菜单出现 /fy；`/fy /permissions` 或 `/fy statusline` 应返回中文说明。
 
 ## hooks / statusline / 配置
 

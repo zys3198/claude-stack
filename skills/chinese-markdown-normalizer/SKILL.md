@@ -87,7 +87,7 @@ description: 中文 Markdown 规范化专家：把用户给出的 Markdown 内�
 3. 排版规范：处理中英文空格、标点、列表样式、代码块语言标签和链接格式。
 4. **引号修复（最后执行）**：所有格式编辑完成之后，运行脚本统一修复引号。**必须在最后一步执行**，因为后续的编辑操作会覆盖脚本的正确输出。
    ```bash
-   python3 ~/.agents/skills/chinese-markdown-normalizer/scripts/normalize_chinese_quotes.py “<文件路径>” --in-place
+   python3 ~/.claude/skills/chinese-markdown-normalizer/scripts/normalize_chinese_quotes.py “<文件路径>” --in-place
    ```
    **脚本运行后，不得再对文件进行任何编辑操作。** 引号在此步已最终定稿，手动微调极易把正确的改成错误的。
 5. 自检：确认”**文字内容未改变**、格式已统一、可直接发布”。

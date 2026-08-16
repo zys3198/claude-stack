@@ -1,6 +1,6 @@
 ---
 name: ai-coding-guide
-description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器（含前端视觉任务判定）。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v1.7.0 -->
+description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器（含前端视觉任务判定）。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。协作参与度/说话层统一走 learning-personas（归属问 + peer/teacher/research）。<!-- v1.8.0 -->
 ---
 
 # AI 编码路由指南（Claude Code）
@@ -49,17 +49,14 @@ ai-coding-guide 在当前会话？ YES/NO
 
 **问询顺序：**
 
-1. **模式**：这次 coach（我练）/ pair（一起想）/ driver（直接做讲为什么）？**按任务类型给推荐**——该你长期持有的核心技能/有学习点 → 推荐 coach；不熟的库/偶用模式/要权衡 → 推荐 pair；一次性/胶水/样板/明确交付 → 推荐 driver
-   - coach：该你长期持有的核心技能，你先给判断，AI 纠偏 + 对照标杆 + 复盘 why
-   - pair：不熟的库/偶用模式/要权衡，AI 给 2-3 选项你定
-   - driver：一次性/胶水/样板，AI 直接做，收尾 why-review
-   - 用户卡壳给不出判断 -> AI 递参考判断，不死等
-2. **背景**（模糊时才问）：为什么做/什么场景/谁触发/约束；能查的不问；**Step 0.7 已覆盖的缺口（复现步骤、错误原文、审查对象、提交范围等）此处不重复问，留给 Step 0.7**
-3. -> 进 Step 1 分类
+1. **归属**：这技能归你吗？——归你/该练 → **你练**（AI 纠偏 + 对照标杆 + 复盘 why）；不归你/只要能用 → **我讲**（AI 生成，你追问理解）；一次性/胶水/样板 → **我动手**（直接做，收尾 why-review）。**按任务类型给推荐**——该你长期持有的核心技能/有学习点 → 你练；不熟的库/偶用模式/要权衡 → 我讲；一次性/胶水/样板/明确交付 → 我动手
+2. **说话层**：由当下认知状态取 persona（peer/teacher/research，定义见 `learning-personas`，不重复展开）；用户卡壳给不出判断 -> AI 递参考判断，不死等
+3. **背景**（模糊时才问）：为什么做/什么场景/谁触发/约束；能查的不问；**Step 0.7 已覆盖的缺口（复现步骤、错误原文、审查对象、提交范围等）此处不重复问，留给 Step 0.7**
+4. -> 进 Step 1 分类
 
-**例外（不问，直接 driver）：** 机械任务（1-2 步单文件/改文案/格式）、明确 bug、已指名标杆；用户说"直接做"。
+**例外（不问，直接我动手）：** 机械任务（1-2 步单文件/改文案/格式）、明确 bug、已指名标杆；用户说"直接做"。
 
-**与现有机制分工：** 开工问询管 why（背景）+ how（模式）；决策点先问管 which（方向 A/B/C）；Step 0.7 管 what（缺口）。不重叠。
+**与现有机制分工：** 开工问询管 why（背景）+ 归属/persona（怎么协作）；决策点先问管 which（方向 A/B/C）；Step 0.7 管 what（缺口）。不重叠。
 
 ## 环境自检
 
@@ -128,7 +125,7 @@ ai-coding-guide 在当前会话？ YES/NO
 分类：<Step 1 分类>
 主路径：<第一个要调用的 skill / slash command / agent>
 组合：<必要附加能力；没有写"无">
-参与度：<coach / pair / driver -- 一句理由>
+参与度：<归属+persona，如 你练/peer -- 一句理由>
 闸门：<TDD / review / verify / 提交确认 / 无>
 下一步：<直接执行 / 问 1 个关键问题 / 等用户确认>
 ```
@@ -160,15 +157,15 @@ ai-coding-guide 在当前会话？ YES/NO
 | 学习陪跑 | 想练：方案设计 / debug / review / 工具选择；希望我教练还是直接做 |
 | 多会话工作 | 是否跨多个会话、需要什么显式交接物（计划/状态文件）、断点续跑方式 |
 
-### Step 0.8：参与度模式（coach/pair/driver）
+### Step 0.8：参与度（归属 + 说话层）
 
-三模式是**路由词汇**，不是下游 skill 的执行定义。开工问询已在路由入口定好模式（按任务类型推荐，见开工问询第 1 条），此处只做两件事：一、把词汇带上路由输出契约（Step 0.5）和「学习型开发」分类；二、指向真正拥有执行定义的下游 skill——进 `ai-coding-coach` 后，协作行为以该 skill 为准（partner-coach / coach / engineer），本表不再重复定义。
+归属+persona 是**路由词汇**，不是下游 skill 的执行定义。开工问询已在路由入口定好（按任务类型推荐，见开工问询第 1 条），此处只做两件事：一、把词汇带上路由输出契约（Step 0.5）和「学习型开发」分类；二、指向真正拥有执行定义的下游 skill——进 `ai-coding-coach` 后，协作行为以该 skill 为准；说话层 persona 以 `learning-personas` 为准。
 
-| 模式 | 触发 | 路由动作 |
+| 归属 | 触发 | 路由动作 |
 |---|---|---|
-| coach | "我先想""你别直接给答案""训练判断力" / 默认（有学习点） | 路由到 `ai-coding-coach`；进 coach 后按该 skill 的 coach mode 执行 |
-| pair | "一起想""帮我权衡" | 助手给 2-3 个可选路径和取舍，用户定方向后按实际分类执行 |
-| driver | "直接做，但讲为什么" / 机械任务 | 助手按工程师模式执行，收尾用 3 行复盘关键判断 |
+| 你练（peer） | "我先想""你别直接给答案""训练判断力" / 默认（有学习点） | 路由到 `ai-coding-coach`；按该 skill 的对练行为执行 |
+| 我讲（teacher） | "一起想""帮我权衡" | 助手讲/给 2-3 个可选路径和取舍，用户定方向后按实际分类执行 |
+| 我动手 | "直接做，但讲为什么" / 机械任务 | 助手直接做，收尾用 3 行复盘关键判断（research 判对错） |
 
 ### Step 1：提取用户意图
 
@@ -312,7 +309,7 @@ Fallback:
 
 | 分类 | 主路径一句话 | 条件路径 / Fallback 概要 |
 |---|---|---|
-| 学习型开发 | `ai-coding-coach` | 叠加代码改动时先定协作模式；coach 不在→手动先给方案+纠偏+讲 why |
+| 学习型开发 | `ai-coding-coach` | 叠加代码改动时先定归属+persona；`ai-coding-coach` 不在→手动先给方案+纠偏+讲 why |
 | 判级/暴露未知 | `expose-unknowns` | 需采访→内嵌 `superpowers:brainstorming`（条件）；不在→`code-change-workflow` §1.1 判级一行 |
 | 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 只想整理需求项→`to-prd` / `to-issues`；`superpowers:writing-plans`（条件） |
 | 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→`chinese-markdown-normalizer` |

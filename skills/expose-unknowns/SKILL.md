@@ -54,4 +54,4 @@ AI 执行撞到设计没覆盖的边界时，必须抛回给人决策，不闷�
 
 - 采访澄清 → `grill-me`（手动触发，见上注）/ `superpowers:brainstorming`
 - 主动抛问拿方案 → 直接问，附约束 + 「给出推理思路」
-- 练习判断力 → `ai-coding-coach`（coach 模式）
+- 练习判断力 → `ai-coding-coach`（你练/peer）

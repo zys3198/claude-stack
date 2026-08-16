@@ -12,9 +12,11 @@ os.path.islink() 认不出，须用「realpath 是否偏离 abspath」判定—�
 junction 与 symlink 通吃。只读 link 目标，不创建不解 link。
 """
 
+import hashlib
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 SKILLS_DIR = Path.home() / ".claude" / "skills"
@@ -85,6 +87,75 @@ def scan() -> list:
     return rows
 
 
+def to_contract(rows: list) -> dict:
+    """把 scan 结果转成 review_server 的 inventory 契约（references/audit-contract.md）。
+
+    契约要求稳定 skillId + contentHash：skillId 从 name+dir+source 派生（跨轮次不变），
+    contentHash = 原始 SKILL.md bytes 的 sha256（决定上轮决定能否复用）。
+    没有遥测的字段标「不可用」，不用 0 假装（skill-trimmer 红线）。
+    """
+    def stable_id(row: dict) -> str:
+        basis = f"{row['name']}|{row['dir']}|{row.get('source', '')}"
+        return "skill-" + hashlib.sha256(basis.encode("utf-8")).hexdigest()[:16]
+
+    skills = []
+    for row in rows:
+        unresolved = row.get("unresolved", False)
+        entry = SKILLS_DIR / row["dir"] / "SKILL.md" if not unresolved else None
+        content_hash = ""
+        if entry is not None:
+            try:
+                content_hash = hashlib.sha256(entry.read_bytes()).hexdigest()
+            except OSError:
+                content_hash = ""
+        skills.append({
+            "skillId": stable_id(row),
+            "name": row["name"],
+            "summary": row["description"] or "暂无能力摘要",
+            "entryPath": str(entry) if entry else "",
+            "contentHash": content_hash,
+            "sourceGroup": ("msys symlink (unresolved)" if unresolved
+                            else (row["source"] if row["source"] else "direct")),
+            "sourceLabel": row["source"] if row["source"] else "直接安装",
+            "sourceConfidence": "inferred" if unresolved else "verified",
+            "category": "其他与待分类",
+            "specificUse": "AI 辅助分类",
+            "managementPolicy": "reviewable",
+            "managementReason": "",
+            "ownershipTags": ["用户安装"],
+            "hosts": ["Claude Code"],
+            "rareCritical": False,
+            "suggestedDecision": "undecided",
+            "currentStartupTokens": 0,
+            "shellStartupTokens": 0,
+            "postCallTokens": 0,
+            "tokenMeasurement": "不可用",
+            "usageMeasurement": "不可用",
+            "lastUsedMeasurement": "不可用",
+            "triggerTerms": [],
+            "appliedProjects": [],
+            "hostOverrideState": "unknown",
+            "entryHealth": "ok" if not unresolved else "broken-symlink",
+            "globalTier": "unknown",
+        })
+    return {
+        "schemaVersion": 1,
+        "auditId": f"audit-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
+        "environmentId": "claude-code-win",
+        "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "counts": {
+            "installedInstances": {"value": len(rows), "measurement": "精确值"},
+            "exposedEntries": {"value": len(rows), "measurement": "精确值"},
+            "contentVariants": {"value": len(rows), "measurement": "精确值"},
+            "uniqueNames": {"value": len({r["name"].casefold() for r in rows}), "measurement": "精确值"},
+        },
+        "projects": [],
+        "plugins": [],
+        "mcps": [],
+        "skills": skills,
+    }
+
+
 def main() -> int:
     rows = scan()
     WORKSPACE.mkdir(exist_ok=True)
@@ -92,11 +163,16 @@ def main() -> int:
     out.write_text(
         json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    review_out = WORKSPACE / "inventory-review.json"
+    review_out.write_text(
+        json.dumps(to_contract(rows), ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     direct = sum(1 for r in rows if not r["is_symlink"])
     links = len(rows) - direct
     with_assets = sum(1 for r in rows if r["has_assets"])
     print(f"total={len(rows)}  direct={direct}  symlink={links}  with_assets={with_assets}")
     print(f"-> {out}")
+    print(f"-> {review_out}  (review_server contract)")
     return 0
 
 

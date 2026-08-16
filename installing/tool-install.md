@@ -90,3 +90,12 @@
 - 装到哪：WSL Ubuntu 系统包 `breeze-cursor-theme`；主题目录 `/usr/share/icons/breeze_cursors`
 - 依赖：APT；本次仅新增该包
 - 备注：当前用户通过 `gsettings` 设置 `org.gnome.desktop.interface cursor-theme` 为 `breeze_cursors`，大小 24。
+
+## @deepseek-ai/dsh uninstall 2026-08-16
+- action: uninstalled deepseek harness CLI (@deepseek-ai/dsh), full cleanup
+- install cmd: npm i -g @deepseek-ai/dsh + npx @deepseek-ai/dsh web
+- uninstall cmd: npm uninstall -g @deepseek-ai/dsh (removed 528 packages)
+- cleaned: npm global pkg + bin links (dsh/dsh.cmd/dsh.ps1); entire C:\Users\zys31\.dsh\ (243 files: .credentials.yaml, sessions/storages, skills/agents/commands copies of ~/.claude, profiles with nested node_modules + web)
+- kept: ~/.claude/skills original (69 dirs verified intact); npm/npx cache checked clean
+- note: .dsh/skills(162) & .dsh/agents were independent copies not junctions; no dsh process running before delete
+- 2026-08-16 residue sweep: removed persistent user env vars OPENCODE_GO_KEY + OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS (dsh opencode-go provider config); removed 5 TEMP dsh-* dirs (acl-locks + spill). settings.json ANTHROPIC_DEFAULT_*_MODEL_NAME deepseek/glm mappings KEPT (active Claude Code proxy config, not dsh residue). Verified gone.

@@ -1,6 +1,6 @@
 ---
 name: skill-trimmer
-description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill 值得保留、哪些该移入备份；也评估是否该装新 skill。判定基准来自 JavaGuide《再见 Superpowers！很多 Skill 真的可以扔掉了》+《Skill 的选择与精简》的强模型时代保留观（个人偏好沉淀 / 专业判断脚本 / 防方向错误三类才留）+ 主流 Agent Skill 去留框架（知识增量三级 Expert/Activation/Redundant、工程与安全体检、任务适配性、生命周期/SLIM、数据驱动），叠加本机护栏（被引用 D 类=改路由、流程型留兜底、分类建议必须用户拍板）。触发词：精简 skill、skill 精简、哪些 skill 该删、盘点 skill、审计 skill 库、skill 太多、清理 skill、trim skills、skill audit、review my skills、这个 skill 还值不值得留、去留标准、要不要装这个 skill、这个 skill 该不该装、装前评估。当用户想给 skill 库瘦身、评估是否装新 skill、或对某篇"skill 断舍离"文章想落地执行时使用；也适用于装了新套件后评估旧 skill 是否冗余。不用于：新建 skill（走 skill-creator）、审查 router 型 guide 质量（走 guide-skill-auditor）、优化单个 skill 内容（走 darwin-skill / skill-creator）。
+description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill 值得保留、哪些该移入备份；也评估是否该装新 skill。判定基准来自 JavaGuide《再见 Superpowers！很多 Skill 真的可以扔掉了》+《Skill 的选择与精简》的强模型时代保留观（个人偏好沉淀 / 专业判断脚本 / 防方向错误三类才留）+ 主流 Agent Skill 去留框架（知识增量三级 Expert/Activation/Redundant、工程与安全体检、任务适配性、生命周期/SLIM、数据驱动），叠加本机护栏（被引用 D 类=改路由、流程型留兜底、分类建议必须用户拍板）。触发词：精简 skill、skill 精简、哪些 skill 该删、盘点 skill、审计 skill 库、skill 太多、清理 skill、trim skills、skill audit、review my skills、生成复审页、我选好了、读取我的 Skill 设置、这个 skill 还值不值得留、去留标准、要不要装这个 skill、这个 skill 该不该装、装前评估。当用户想给 skill 库瘦身、评估是否装新 skill、或对某篇"skill 断舍离"文章想落地执行时使用；也适用于装了新套件后评估旧 skill 是否冗余。不用于：新建 skill（走 skill-creator）、审查 router 型 guide 质量（走 guide-skill-auditor）、优化单个 skill 内容（走 darwin-skill / skill-creator）。
 ---
 
 # Skill Trimmer — Skill 库精简判定
@@ -125,6 +125,38 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
 - **AI 只出建议，不自动移动任何 skill。** 用户逐项拍板后，移动动作才执行（移动属「文件删除」级人工确认线）。
 - 执行移动用 `mv` 到 `_weak-model-backup/`（软链）或 lab-area 备份（直管目录），并在备份夹 README 追加一行：skill 名 / 判定分类 / 移动日期 / 理由。
 
+### 4.5 网页复审页拍板（可选，吸收 skill-slimming 2026-08-14）
+
+盘点后可用本地网页复审页替代对话表格勾选。三个子命令：
+
+```bash
+# 校验契约（serve 前先跑，确保 inventory-review.json 合法）
+python ~/.claude/skills/skill-trimmer/scripts/review_server.py validate \
+  --inventory ~/.claude/skill-trimmer-workspace/inventory-review.json
+
+# 启动本地网页（127.0.0.1 随机端口 + 随机 token + 自动开浏览器；Ctrl+C 停止，停止不丢决定）
+python ~/.claude/skills/skill-trimmer/scripts/review_server.py serve \
+  --inventory ~/.claude/skill-trimmer-workspace/inventory-review.json \
+  --profile "claude-code-win"
+
+# 用户说完「我选好了」后读持久化决定
+python ~/.claude/skills/skill-trimmer/scripts/review_server.py read --require-complete
+```
+
+- 页面支持搜索 / 来源 / 宿主 / 决定筛选、批量设置、`RARE_CRITICAL` 二次确认；状态落 `~/.skill-trimmer/profiles/<profile>/current.json`（权限 0700/0600，原子写，保留近 50 版），关闭不丢，下次同 profile `serve` 恢复。新 inventory 只保留 `skillId + contentHash` 均未变化的决定，变化项回到待复审。
+- 页面 decision 只有 `global / project / trigger` 三值，与判定十一档映射：
+  - `保留` / `保留-Activation` / `保留-流程兜底` / `保留-SP套件` / `需工程修复` / `收窄描述` → **`global`**（常驻可发现）
+  - `移入备份` / `移除+改路由` / `移除-被覆盖` / `移入 CLAUDE.md` → **`trigger`**（归档留触发空壳，见「触发空壳合同」；备份位置 / 改路由清单写进 notes）
+  - `需试运行验证` / `删前用户确认` → 留 **`undecided` + `needsReview`**
+  - `project`：只服务已确认项目时选，需绑定项目 id
+- 仍是「AI 出建议、你拍板」：页面只存决定，不自动执行任何移动。控制台中文乱码时加 `PYTHONIOENCODING=utf-8` 前缀（§6.1）。
+
+## 触发空壳合同（吸收 skill-slimming 2026-08-14）
+
+`移入备份` / `移除+改路由` / `移除-被覆盖` / `移入 CLAUDE.md` 类判定升级为**归档 + 留触发空壳**：全局只保留名称、一句话能力摘要、2–5 个自然语言触发词、归档位置、当前项目恢复方式、观察截止日。命中空壳只提示「该能力对应的 Skill 已归档，是否要为当前项目临时加载？」——未经明确同意不安装 / 不复制 / 不恢复 / 不执行；同意后只恢复到当前项目，多项目持续高频并再次确认，才建议恢复全局。
+
+观察期从实际归档日起 **60 天**：期间再次触发 → 恢复到项目级；60 天 0 次触发且非 `RARE_CRITICAL` → 进入删除候选（仍需单独确认授权删除）。`RARE_CRITICAL` 不得仅因低频自动归档；人工改为项目或触发需二次确认，永远不自动进删除。
+
 ## 数据驱动：现状与轻量替代【框架】
 
 主流框架用「遥测计数 + 溯源标签 + A/B 评测」做留删决策（Curator 机制：active → stale → archived；skill-up 工具做因果对照）。**本机现状没有遥测基建，不假装有。** 用轻量信号近似，证据链列全：
@@ -135,6 +167,7 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
   - `installing/` 台账日期：装后从未用过、台账无后续 → 可疑。
   - 用户实测：同任务「开/关该 skill」各跑一次对比 = 穷人版 A/B，不搭评测集。
   - **总量健康度（新增【文章】）**：库总量 vs 维护基线 <20——远超且大量零使用 = 书签心态信号，push 整体收敛，别因单个看似合理就放行。
+  - **三维上下文成本（新增【工具】）**：`currentStartupTokens`（当前可发现入口启动成本）/ `shellStartupTokens`（触发空壳入口成本）/ `postCallTokens`（命中后完整内容成本）。`startup_delta = currentStartupTokens - shellStartupTokens`：正数写「入口缩短」、负数写「入口反增」、0 写「仅治理收益」。触发空壳只有当 `shellStartupTokens < currentStartupTokens` 才真的省启动 token，不把倒挂显示成节省。本机无遥测时三值标 `不可用`，不硬填 0（对应「描述列表预算 ~2%」的定量化）。
 - **演进方向（当前不建）**：`github.com/alibaba/skill-up`（已验证存在的官方评测工具）做正式 A/B 需评测数据集，成本高；哪天想上再建。
 - **状态映射**：active（在用/有引用）→ stale（mtime 久 + 零引用）→ archived（移入 `_weak-model-backup/`）。审计报告里给每个候选标当前状态。
 
@@ -151,6 +184,7 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
 - 不混淆三层判据——建议里每条理由标清是【文章】【框架】还是【本机决议】。
 - 不把「静态看起来能跑」当证据——SKILL.md 规范 ≠ 能加载能跑；拿不准的 skill 先试运行出运行证据（立场 #8），缺运行验证的「删前确认」不算闭合。
 - 不因「判定有用」豁免安全面——含危险命令/过宽权限的 skill，无论多有用，先进隔离 + 「删前确认」，不默认放行（Trust 前置，同 SkillHub 把 Trust 放评测首位）。
+- 数字一律标测量等级：`精确值` / `日志观测值` / `估算值` / `不可用`，不用 0 表示不可用、不把估算写成精确值、不把文本提及写成实际调用（吸收 skill-slimming audit-contract 的测量标签纪律）。
 
 ## 与其他 skill 的分工
 
@@ -158,8 +192,11 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
 - **darwin-skill / skill-creator**：优化单个 skill 的内容与描述。本 skill 判定「收窄描述」「需工程修复（内容深度部分）」的，交给它们改（darwin-skill 已集成 SkillLens 9 维内容评分）。
 - **skill-creator**：判定结果是「这个坑没有 skill 兜、值得新建一个」（SLIM 的失败场景→新建触发）时，走它。
 - **skill-up（演进）**：将来要做正式 A/B 评测（开/关 skill 对比任务完成率）时，用 `github.com/alibaba/skill-up`，本 skill 当前只做轻量信号判定。
+- **skill-slimming（已吸收 2026-08-14）**：原 LearnPrompt/carl-skills 的全局治理 skill，其复用资产（review_server 复审页 / audit-contract / 触发空壳合同 / 三维 token 模型 / 测量标签纪律）已并入本 skill（见 4.5 与「触发空壳合同」）。未吸收部分：多宿主/插件/MCP 审计（本机 Claude Code 单宿主）、apply/delete 执行阶段与 verification_receipt、recheck 漂移复查、Codex agents 清单——当前判定流程不需要，不做。
 
 ## 来源与核验（2026-08-13）
+
+【工具】层 = skill-slimming（LearnPrompt/carl-skills，2026-08-14 吸收）：复用其工具资产——`scripts/review_server.py`（1069 行，loopback 复审服务，仅绑 127.0.0.1、随机 token、无 subprocess/shell/网络、只写自己的状态目录、不读密钥；安全面 Gen Safe / Socket 0 alerts）+ `assets/review.html`（复审页）+ `references/audit-contract.md`（inventory 证据契约）+ 触发空壳合同 + 三维 token 模型 + 测量标签纪律。判定基准不吸收——slimming 的四层判据浅（只用使用频率分 global/project/trigger），替代不了本 skill 的十一档判定脑。品牌已归并（skill-slimming → skill-trimmer，状态目录 `~/.skill-trimmer/`）。
 
 【文章】层 = JavaGuide 两篇：《再见 Superpowers！很多 Skill 真的可以扔掉了》(2026-07-23，本 skill 原始基准) + 《Skill 的选择与精简》(2026-08-13，javaguide.cn/ai-coding/practices/skill-selection-and-pruning.html，同作者同立场演进版——补充装前四问、先不装裸跑、维护量 <20、描述列表预算 ~2%/8000 字符、规则分流框架、装前必看 SKILL.md 安全面)。两篇一致处按原判据；后篇新增判据已并入核心立场 #5-7、流程 1.5、十一档「移入 CLAUDE.md/规则文件」。
 

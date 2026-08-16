@@ -60,12 +60,15 @@
 - 依赖：见 SKILL.md（拉 Reddit/X/YouTube/TikTok/HN/Polymarket/GitHub 数据，部分源需对应可用性；自带 doctor 健康检查）
 - 备注：原是指向 cc-switch 的 symlink，2026-08-07 复制为 .claude 真目录。
 
-### hallmark
-- 来源：待补（SKILL.md frontmatter 无 github/homepage，v1.1.0）
-- 安装日期：待补（2026-08-07 去链接化时复制进 .claude）
-- 安装方法：copy 进 `~/.claude/skills/hallmark`（真目录本体）
-- 装到哪：`~/.claude/skills/hallmark`（SKILL.md / references）
-- 备注：Anti-AI-slop 设计 skill（greenfield/audit/redesign/design 提取）。原是指向 cc-switch 的 symlink，2026-08-07 复制为 .claude 真目录。
+### modlens
+- 来源：https://github.com/liustack/modlens
+- 安装日期：2026-08-16
+- 安装方法：clone/copy 进 `~/.claude/skills/modlens`（官方 INSTALL.md Path A）
+- 装到哪：`~/.claude/skills/modlens`（SKILL.md / references / scripts/run.sh+run.ps1）
+- 依赖：node 22.19+ / npx / bun 任一（本机 node v24 ✓）+ 一个 vision 引擎
+- 用途：给纯文本模型（DeepSeek/GLM 等）加视觉，粘贴图片→结构化 JSON 证据（OCR/版面/语义）
+- 引擎：**openai 兼容 → 阿里云百炼 DashScope（qwen3-vl-plus）**，境内直连稳定，端到端验证通过（OCR 正确，~7.5s）。曾试 claude-cli（复用 Claude Code 登录）但 **Windows 上不稳**：claude.exe 派生后台 helper 进程泄漏不退出，导致 `spawn EINVAL` / 结果坏（"Unsupported Image"）/ temp 清理 EPERM 飘忽，4 次测试仅 1 次全对。定位为上游未覆盖的「原生 exe shim」+ 进程泄漏 bug。**SKILL.md 已打本地补丁**（「Run it」段 Windows claude-cli 说明：需 `-p claude-cli --provider-bin <claude.exe 绝对路径>`），重装会丢失需重打。也试过 gemini-api（key 已配）但 **403 被墙**（Gemini API 境内不可用），留作有代理时的备选。当前故障转移链：openai → gemini-api → claude-cli（后两者境内会失败，仅噪音）
+- 配置：`~/.modlens/config.json`（0600）。注意：环境变量 `ANTHROPIC_BASE_URL=http://127.0.0.1:15721`（本地网关），切 anthropic provider 会走到它
 
 ## 散件来源反查登记（2026-08-11 公网反查确认）
 
@@ -86,6 +89,14 @@
 插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
 
 仍未锁定来源（公网搜不到且非用户自建）：human-writing、ppt-master、qiaomu-ai-prd、remotion、playwright（本地含 LICENSE/NOTICE）、ruthless-review、tech-learning-roadmap、writing-great-skills、doc-finder 之外的 review/slop-review/design/apikey-image-gen/grok-image-to-video/hyperframes/github-task/loop-engineering 等——以磁盘现状为用，重装时按名再查。
+
+### ~~skill-slimming（LearnPrompt/carl-skills）~~（2026-08-14 已吸收后卸载）
+- 来源：https://github.com/LearnPrompt/carl-skills
+- 安装日期：2026-08-14；卸载日期：2026-08-14（`npx skills remove skill-slimming -g`，官方命令清理 universal store + 各宿主 symlink，验证 0 残留）
+- 安装方法：`npx skills add LearnPrompt/carl-skills --skill skill-slimming -g`（skills CLI v1.5.22）
+- 曾装到哪：`~/.agents/skills/skill-slimming/` + `~/.claude/skills/skill-slimming` symlink
+- 依赖：python3 + webbrowser（loopback HTTP 服务，无第三方包）
+- **处置：吸收式合并进 skill-trimmer（2026-08-14，用户拍板）**。复用资产已收编进 `~/.claude/skills/skill-trimmer/`：`scripts/review_server.py`（1069 行，品牌已归并 skill-slimming→skill-trimmer，状态目录 `~/.skill-trimmer/`）+ `assets/review.html` + `references/audit-contract.md`；scan_skills.py 新增输出 `inventory-review.json`（review 契约）。SKILL.md 接入：网页复审页（§4.5）、触发空壳合同、三维 token 模型、测量标签纪律。未吸收（有意）：多宿主/插件/MCP 审计、apply/delete 阶段+verification_receipt、recheck 漂移复查、agents/openai.yaml（Codex 专属）、probe 子命令（本机 settings.json 无 skillOverrides，空转）。判定基准不吸收（slimming 判据浅，仅 global/project/trigger 三值）。安全面已核：仅绑 127.0.0.1 随机端口、随机 token、无 subprocess/shell/网络、只写自己状态目录、不读密钥。端到端验证通过：scan→validate→serve 冒烟（health 200 / 页面 200 / 无 token 401 / 坏 Host 400 / bootstrap 69 skills）。可逆：`npx skills add LearnPrompt/carl-skills --skill skill-slimming -g` 重装。
 
 ### taste-skill 插件版（Leonxlnx/taste-skill）
 - 来源：https://github.com/Leonxlnx/taste-skill

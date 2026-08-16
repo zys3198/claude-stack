@@ -16,7 +16,7 @@ description: 把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki）。触发
 | 路径 | 参数 | 产出 |
 |---|---|---|
 | 书籍/教程 | `/wiki-save 书籍 <源路径> [范围]` | `0X-域/` knowledge-note |
-| 对话 | `/wiki-save 对话` | `80-records/NNNN-slug.md` learning-record + 候选 Anki 卡面 |
+| 对话 | `/wiki-save 对话` | `80-学习记录/NNNN-slug.md` learning-record + 候选 Anki 卡面 |
 | 错误 | `/wiki-save 错误` | memory feedback |
 | 仪表盘 | `/wiki-save 仪表盘` | 刷新 `00-index.md` |
 
@@ -25,7 +25,7 @@ description: 把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki）。触发
 1. 读源文件（本地优先；读不到 → 报缺失，禁止凭记忆编内容）。
 2. 提关键点：按源结构组织，每条带「为什么/易错点」，不抄原文大段。
 3. 判域（01-java-core … 06-system-design）。域不存在 → 先建目录；判断不准 → 报候选域等点头。
-4. 套 `93-templates/knowledge-note.md`，frontmatter 照 wiki-structure §3.2（mastery 默认 🟡、layer 默认 knowledge、staleness-window 14、next-review = 今天 +14）。
+4. 套 `93-笔记模板/knowledge-note.md`，frontmatter 照 wiki-structure §3.2（mastery 默认 🟡、layer 默认 knowledge、staleness-window 14、next-review = 今天 +14）。
 5. 文件名 `<slug>.md`（中文短横或英文 kebab，一眼看懂主题）；建好后路径不再改。
 6. 「源」段用相对路径指回原文件（`../../Tutorial/...` 形式）。
 7. 走 §收尾三步。
@@ -33,8 +33,8 @@ description: 把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki）。触发
 ## 路径二：对话收获
 
 1. 回顾当前会话，抽三类：会了什么 / 卡点 / 关键决策及理由。
-2. 扫 `80-records/` 取最大编号 +1，套 `93-templates/learning-record.md`，落 `80-records/NNNN-slug.md`。
-3. 列**候选 Anki 卡面**（front/back 草稿），只列不建——用户确认后才落 `91-anki/`（frontmatter 照 wiki-structure §3.1，新卡用 `category` 不用 `type`）。
+2. 扫 `80-学习记录/` 取最大编号 +1，套 `93-笔记模板/learning-record.md`，落 `80-学习记录/NNNN-slug.md`。
+3. 列**候选 Anki 卡面**（front/back 草稿），只列不建——用户确认后才落 `91-记忆卡/`（frontmatter 照 wiki-structure §3.1，新卡用 `category` 不用 `type`）。
 4. 走 §收尾三步。
 
 ## 路径三：AI 纠偏

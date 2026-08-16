@@ -4,6 +4,14 @@
 
 详细维护规则与变更证据见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md) 的变更记录表（2026-07-22 之前的历史改动以该表为准）。
 
+## [v1.8.0] - 2026-08-16
+
+### Changed（参与度词汇统一：集中化 + 引用）
+- 开工问询「模式」三选（coach/pair/driver）替换为「归属问（你练/我讲/我动手）+ 说话层」。
+- 说话层 persona 定义集中到 `learning-personas`，本 guide 只引用不重复展开（渐进式披露）；Step 0.8 表同步换归属词。
+- references/classification-details.md、test-prompts.json 同步换词。
+- description 增补「协作参与度/说话层统一走 learning-personas」。
+
 ## [v1.7.0] - 2026-08-14
 
 ### Added

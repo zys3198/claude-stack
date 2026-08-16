@@ -2,6 +2,13 @@
 
 本文件记录 learning-guide 路由 skill 的演进。格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
 
+## [v1.6.0] - 2026-08-16
+
+### Changed（学习模式词汇统一：集中化 + 引用）
+- 开工问询「模式」三选（coach 深学 / pair 概念解释 / driver 速成备考）替换为「归属问（你练/我讲）+ 场景 + 说话层」。
+- 说话层词汇统一走 `learning-personas`（peer/teacher/research），本 guide 只引用不展开（渐进式披露）。
+- description 增补「学习模式/说话层词汇统一走 learning-personas」。
+
 ## [v1.5.0] - 2026-08-13
 
 ### Changed（guide-router 重建：兄弟域边界 + 教程裁决）
