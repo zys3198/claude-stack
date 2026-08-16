@@ -66,6 +66,13 @@ usage-data/session-meta/
 # ----- better-harness: run outputs (transient analysis artifacts) -----
 better-harness/
 
+# ----- lib: 第三方整库不入 git (2026-08-16 移出追踪) -----
+lib/awesome-design-md/
+
+# ----- 会话/任务运行时目录 (2026-08-16 补) -----
+task-queue/
+worktrees/
+
 # ----- skills (cc-switch links resolved to real files, tracked) -----
 skill-trimmer-workspace/
 

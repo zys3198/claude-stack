@@ -2,7 +2,7 @@
 
 记录自建 skill / hook / statusline / 全局配置的出处与迁移要点。外部装的见 skill-install.md / mcp-install.md / tool-install.md。
 
-自建资产迁移原则：**git 仓库已追踪全部自建**（32 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单；2026-08-11 用户人工复核定稿：勾选确认的进 Git，未认领的移出），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
+自建资产迁移原则：**git 仓库已追踪全部自建**（26 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单；2026-08-11 用户人工复核定稿：勾选确认的进 Git，未认领的移出），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
 
 ---
 
@@ -46,8 +46,8 @@
 - 接线：CLAUDE.md 尾部「## 学习角色（引用式）」被动触发规则（学习时刻先主动问角色+归属，再套用；执行型任务不启用）；四 guide（learning-guide / ai-coding-guide / article-writing-guide / ai-coding-coach）开工问询词汇统一换为归属+persona 并引用本 skill（渐进式披露，不散落展开）；learning-first memory 四分支并进归属一问
 - 迁移要点：SKILL.md 单文件；无脚本无依赖；与 cram-engine/deep-learn/expose-unknowns 互补（流水线 vs 说话方式）；换词涉及 guide 时同步改 CHANGELOG + references + test-prompts；**已入 git 白名单**（`.gitignore` skills/ 白名单新增 `!skills/learning-personas/`，2026-08-16）
 
-### 写作 skill（自建 11 个）
-- article-writer / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / review-doc / tech-article-review / content-to-note
+### 写作 skill（自建 10 个）
+- article-writer / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / tech-article-review / content-to-note
 - 出处：2026-06/07 写作流程沉淀；publish-final-check 演进耦合在 article-writing-guide/CHANGELOG.md；plagiarism-audit 针对实战漏网（Codex-book 整源漏审）设计；tech-article-review 与 review-doc 划边界（单 agent 逐段增量 vs 4 agent 并行）
 - ~~edit-article~~：2026-08-11 复核用户未认领为自建，移出 Git 白名单（归 skill-install.md 待补来源）
 
@@ -55,9 +55,10 @@
 - deep-learn / tutorial-maker
 - ~~cram-engine~~：2026-08-11 复核用户未认领为自建，移出 Git 白名单（归 skill-install.md 待补来源）
 
-### 2026-08-11 复核新增自建（7 个，已入 Git 白名单）
-- ai-text-polisher / answer-evidence-finder / critical-thinking / doc-finder / humanizer-zh / interview-ai-agent-dev / interview-java-backend
+### ~~2026-08-11 复核新增自建（7 个，已入 Git 白名单）~~（2026-08-16 核实全不在磁盘，白名单已清）
+- ~~ai-text-polisher / answer-evidence-finder / critical-thinking / doc-finder / humanizer-zh / interview-ai-agent-dev / interview-java-backend~~
 - 出处：用户逐个勾选自认定稿（推翻此前「ignored 即第三方」的机器推断）。注：critical-thinking、humanizer-zh 公网存在同名项目，以用户判定为准——若实为改过/重写版本，建议日后在 SKILL.md 注明 fork 来源。
+- **2026-08-16 审查实测**：7 个磁盘目录均不存在（疑 2026-08-13 清理随备份夹消失），`.gitignore` 白名单条目已移除；若需重装——interview-ai-agent-dev / interview-java-backend / humanizer-zh / answer-evidence-finder / doc-finder 为自建脚本类按自建重建，critical-thinking 见 skill-install.md 更正，ai-text-polisher 见下文终判。
 
 ### ai-readable-project（2026-08-13，全局）
 - 位置：`~/.claude/skills/ai-readable-project/`（SKILL.md + references/DESIGN.md + references/templates/ 3 模板）
@@ -86,8 +87,8 @@
 ### ~~obsidian-vault~~（2026-08-07 删除）
 - 曾硬编码 wiki 路径（C:\ZYS\Code\wiki），用户拍板删除磁盘目录。若日后需要按 skill-install.md 散件检索重装。
 
-### ai-text-polisher（更正 2026-08-11）
-- 此前记录「2026-08-08 删除，被 human-writing 替代」**有误**：磁盘目录完整存在，用户复核确认为自建，已恢复 `.gitignore` 白名单追踪。human-writing 用户未认领，归第三方。
+### ~~ai-text-polisher~~（2026-08-16 终判：磁盘无、白名单已清）
+- 2026-08-11 更正曾称「磁盘目录完整存在，已恢复 `.gitignore` 白名单追踪」**有误**：2026-08-16 审查实测磁盘无此目录、未追踪，白名单条目已移除；2026-08-08「删除，被 human-writing 替代」为有效终态。human-writing 用户未认领，归第三方。
 
 ### learning-guide 配套归档
 - 学习记录归档流程，归档目录 `C:\ZYS\Wiki\80-records`（外部路径，迁移时另拷）

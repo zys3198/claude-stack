@@ -1,7 +1,7 @@
 # Claude Code 配置清单表（速查 · 全量）
 
 > 生成日期：2026-07-03 ｜ **2026-08-08 盘查刷新** ｜ 扫描方式：实盘 `~/.claude/` + `~/.claude.json` + `~/.cc-switch/cc-switch.db`
-> **口径头注 2026-08-11**：本表多项计数/归属已过时（skills 白名单 32 个、marketplace 已不入 git、obsidian-vault/darwin-weekly-audit/learned 已删、Codex 已卸载、cram-engine/edit-article 移出白名单）。权威口径以 `README.md` + `installing/` 台账为准。
+> **口径头注 2026-08-11**：本表多项计数/归属已过时（skills 白名单 26 个、marketplace 已不入 git、obsidian-vault/darwin-weekly-audit/learned 已删、Codex 已卸载、cram-engine/edit-article 移出白名单）。权威口径以 `README.md` + `installing/` 台账为准。
 > 列约定：`路径 / 对象` · `用途` · `状态 / 计数` · `维护要点`
 > **替代** 旧的 `config-inventory.md`（散文版，计数已过时，见文末「废弃说明」）。
 
@@ -16,7 +16,7 @@
 | `~/.claude/settings.local.json` | 本机覆盖（不入库） | 未扫到独立项 | secrets 放这，别进 `settings.json` |
 | `~/.claude/keybindings.json` | 快捷键绑定 | 存在 | - |
 | `~/.claude/WORKFLOW_QUICKREF.md` | 工作流速查 | 存在 | - |
-| `~/.claude/long-complex-task-prompt.md` | 长复杂任务 prompt（§10 引用） | 存在 | - |
+| `~/.claude/long-complex-task-prompt.md` | 长复杂任务 prompt（CLAUDE.md 已不引用，手工使用） | 存在 | - |
 | `~/.claude.json` | Claude Code 根状态 | **59 projects / 5 mcpServers / 42 顶层键**（2026-08-08 实测） | 见 §7 / §9；含 `userID` `machineID` |
 | `~/.mcp.json` | 用户级 MCP（独立于 settings） | **0 servers（空）** | 实际 MCP 走 `~/.claude.json` 根 + ccswitch db |
 | `~/.claude/.claude.json`（项目级） | claude 自身目录的 project 配置 | 存在（属 §9 的 59 条之一） | - |
@@ -326,7 +326,7 @@
 .claude/
 ├── CLAUDE.md                      # 全局规则
 ├── WORKFLOW_QUICKREF.md           # 速查
-├── long-complex-task-prompt.md    # §10 引用
+├── long-complex-task-prompt.md    # 手工使用（CLAUDE.md 已不引用）
 ├── settings.json                  # 主配置
 ├── keybindings.json               # 快捷键
 ├── agents/      (25 .md)          # 自定义 agent（旧 217，已精简）

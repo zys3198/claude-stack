@@ -9,7 +9,7 @@
 | `CLAUDE.md` | 全局指令（给 AI 的规则） |
 | `agents/` | 自定义 agent 定义（design/engineering/security/testing） |
 | `hooks/` | 拦截/守卫 hook（verify_gate、git_guard、secret_guard、placeholder_guard 等） |
-| `skills/` | 只追踪自建 skill（`.gitignore` 白名单制，31 个，2026-08-11 用户人工复核定稿）；第三方 skill 不进 git，来源登记在 `installing/skill-install.md` |
+| `skills/` | 只追踪自建 skill（`.gitignore` 白名单制，26 个，2026-08-16 复核：追踪=白名单=26）；第三方 skill 不进 git，来源登记在 `installing/skill-install.md` |
 | `statusline/` | 状态栏 JS（statusline.js、cost-tracker、context-monitor、metrics-bridge） |
 | `docs/` | 配置清单、盘点、迁移计划 |
 | `external-configs/` | cc-switch 非敏感配置**快照副本**（复制非 symlink，同步见该目录 README） |

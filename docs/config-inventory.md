@@ -36,7 +36,7 @@
 | §12 | 证据门槛 | 确认性问题先查证据；记忆默认 suspect；不适用：建议/风格/开放讨论 |
 | §13 | 交互纪律 | caveman 句型；教程内容不用 caveman；广播意图一句；3+ 步任务 TaskCreate |
 
-> `long-complex-task-prompt.md` 在 §10 引用。
+> `long-complex-task-prompt.md` 原在 §10 引用；CLAUDE.md 瘦身后已不引用，文件保留手工使用。
 
 ---
 
