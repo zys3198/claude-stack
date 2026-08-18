@@ -1,0 +1,13 @@
+id: rt-compare-task-signal
+title: 带任务信号的对比型问题走开发新功能
+description: 带开工信号的「用 A 还是 B」不走泛泛介绍，按任务分类直接判「开发新功能」；插件流程为条件路径，不展示大全。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：想写个登录功能，用 SP 还是 ponytail？
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["开发新功能"]

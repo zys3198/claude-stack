@@ -21,7 +21,7 @@
 
 ### ai-coding-guide（编码域总入口系统，2026-08-18 fork 自 LoopForge devflow）
 - 出处：devflow 官方骨架彻底 fork 脱轨 + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入；用户拍板「基于 devflow 为骨架做成一个系统，包含路由分类功能，面向 AI 不是人类」。上游仓库 `C:\ZYS\Code\loopforge` 仅作参考窗口，人工挑拣吸收，不 pull 升级
-- 构成：状态机骨架（scripts/templates/rules/agents/adapters=claude+shared）+ 编码路由 stopgap（`references/routing-stopgap.md`，Phase 2 将完整吸收归档 guide 分类树）
+- 构成：状态机骨架（scripts/templates/rules/agents/adapters=claude+shared）+ 编码分诊路由（`references/routing.md` 等 5 文件，2026-08-18 完成归档分类树吸收，stopgap 已删）+ `evals/`（34 用例）
 - 路由入口：CLAUDE.md §2.1「编码任务自动找 ai-coding-guide」不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留历史）
 - 依赖：`references/clarify-requirements.md`（REQUIREMENT 阶段；2026-08-18 起顶层 `devflow-clarify-requirements/` skill 吸收入本体，原目录已删）+ 根级 `manifest.json`；Python 3.8+ stdlib
 - 测试：`python -m pytest tests/` 基线 20/2（2 = Windows 路径断言平台差异勿修；跑前清 PYTHONIOENCODING/PYTHONUTF8 防 GBK 假失败）；`scripts/validate_config.py` OK

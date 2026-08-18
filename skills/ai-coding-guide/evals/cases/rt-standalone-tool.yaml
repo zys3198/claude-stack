@@ -1,0 +1,13 @@
+id: rt-standalone-tool
+title: 三域外独立工具直接执行
+description: 视频转 MP3 → Step 4 第一问 D 分支：仅需直接调用独立工具（ffmpeg 等），直接执行，不制造第四 router，不硬塞进三域分类。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我把这个视频文件转成 MP3。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["直接执行"]

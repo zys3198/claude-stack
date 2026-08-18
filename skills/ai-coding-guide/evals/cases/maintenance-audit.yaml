@@ -1,0 +1,13 @@
+id: maintenance-audit
+title: 指南维护-审计 router guide
+description: 审查/优化 router 型 guide skill → 主路径 guide-skill-auditor，不手搓审查清单、不直接执行审计。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我审查一下 learning-guide 这个路由 skill 有没有问题，顺便优化
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["guide-skill-auditor"]

@@ -1,13 +1,13 @@
 ---
 name: ai-coding-guide
-description: Use when the user asks which skill/tool to use in Claude Code, how installed plugins compare, or starts any coding task needing routing — and whenever a task needs structured, resumable, multi-stage delivery (or to resume an existing workflow). 本 skill 是编码域总入口系统：先按任务类型分诊，交付型任务进入脚本化状态机（需求→设计→实现→审查→测试→总结，可断点续跑）。中文触发：用哪个工具、该用什么、怎么配合、重任务跨会话/分阶段交付、继续之前的任务、断点续跑、刚装了X插件。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。
+description: Use when the user asks which skill/tool/ecosystem to use in Claude Code, how installed plugins/skills differ or compare, starts any coding task needing routing, or needs structured, resumable, multi-stage delivery (or to resume an existing workflow). 本 skill 是编码域总入口系统：先按任务类型分诊，交付型任务进入脚本化状态机（需求→设计→实现→审查→测试→总结，可断点续跑）。中文触发：用哪个工具、X和Y区别/冲突吗、该用什么、怎么配合、哪个更好、刚装了X插件、X不能用了、重任务跨会话/分阶段交付、继续之前的任务、断点续跑、这篇文章/做法能不能优化进路由；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。
 ---
 
 # ai-coding-guide（编码域总入口系统）
 
-## 编码路由（stopgap，待 Phase 2 重设计）
+## 编码路由（分诊层）
 
-本系统同时承担编码域路由（原 ai-coding-guide v1.9.0 职责，已归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`）。**非交付型任务**（工具选型 / 调试 / 理解代码 / 澄清 / 学习陪跑等）先读 [references/routing-stopgap.md](references/routing-stopgap.md) 分诊，不进入交付状态机；**交付型任务**（要写代码并交付可验收结果）才走下方「必须执行」。
+本系统同时承担编码域路由。**先读 [references/routing.md](references/routing.md) 分诊**：非交付型任务（工具选型/调试/理解代码/澄清/学习陪跑等）按其中分类路径执行，不进状态机；交付型任务（要写代码并交付可验收结果）由 routing.md Step 0.4 定档——默认精简路径，升档信号命中或用户明说规模时才走下方「必须执行」状态机；前端视觉任务读 [references/frontend-visual.md](references/frontend-visual.md)。
 
 ## 必须执行
 

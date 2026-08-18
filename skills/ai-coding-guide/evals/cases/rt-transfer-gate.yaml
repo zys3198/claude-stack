@@ -1,0 +1,15 @@
+id: rt-transfer-gate
+title: 外部实践迁移先过闸门
+description: 外部 AI 编码长文要吸收 → 「路由指南维护」：先判是否值得迁移，只吸收触发词/分类/证据门槛/fallback/反模式；重机制（TECH_SPEC 等）不迁移。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：我看了篇用 project_wiki / TECH_SPEC / 红线机制跑 AI 需求开发的文章，看看能不能优化进我的 ai-coding-guide。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["路由指南维护"]
+    - output_contains:
+        not: ["TECH_SPEC"]

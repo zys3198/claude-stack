@@ -1,0 +1,15 @@
+id: frontend-nodesign
+title: 前端视觉-方向未定先问
+description: 没设计稿时决策点先问视觉方向，不给选项前不让设计 skill 自行推断；绝不路由 design-an-interface。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我做个登录页，没设计稿，想要视觉方向
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["方向"]
+    - output_contains:
+        not: ["design-an-interface"]

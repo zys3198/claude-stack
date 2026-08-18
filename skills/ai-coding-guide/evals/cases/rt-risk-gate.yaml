@@ -1,0 +1,13 @@
+id: rt-risk-gate
+title: 风险闸门矩阵高风险判定
+description: auth 权限+数据库迁移 → 高风险：先计划/设计确认 → 失败测试复现 → 专项 reviewer + 内置 security-review → verify/证据；不可直接开改。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：我要改 auth 权限判断，还涉及数据库迁移，能不能直接让 agent 改？
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["高风险", "security-review"]

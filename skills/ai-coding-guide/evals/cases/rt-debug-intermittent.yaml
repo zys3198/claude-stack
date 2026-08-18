@@ -1,0 +1,13 @@
+id: rt-debug-intermittent
+title: 系统化调试先复现定位
+description: bug 复现不稳定先别改 → 「调试 bug」：code-change-workflow §2 最小复现→定位根因（查所有调用方）；信息不足只补复现/错误原文/最近改动。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：这个 bug 复现不稳定，先别改代码，帮我定位。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["调试 bug", "复现"]

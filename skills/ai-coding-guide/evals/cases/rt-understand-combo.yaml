@@ -1,0 +1,13 @@
+id: rt-understand-combo
+title: 理解代码组合路径不二选一
+description: 问结构+谁调用 → 「理解代码」组合：先 lean-ctx 查结构，再 gitnexus-exploring 查调用链；互补串联不让用户二选一。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：这项目 auth 模块怎么工作的？谁调用了 login？
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["lean-ctx", "gitnexus"]

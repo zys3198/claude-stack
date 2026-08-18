@@ -1,0 +1,13 @@
+id: rt-named-plugin-priority
+title: 点名插件可用则直走
+description: 用户点名 superpowers:brainstorming → 先查当前会话可调用清单：在列则点名优先直走；不在则明示不可用走 Fallback（expose-unknowns 或手动澄清），不伪装直达。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我用 superpowers:brainstorming 澄清下这个需求。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["superpowers:brainstorming"]

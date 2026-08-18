@@ -1,0 +1,13 @@
+id: rt-named-direct-build
+title: 用户说直接处理就不弹菜单
+description: 构建错误+用户说「直接处理，不要让我选」→ 跳过 A/B/C，直接跑项目构建命令排查；专项 slash 为条件路径，会话可调用才走。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：React 项目 build 报错，直接处理，不要让我选 skill。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["构建错误", "构建命令"]

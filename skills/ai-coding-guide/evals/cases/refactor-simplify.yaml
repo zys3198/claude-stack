@@ -1,0 +1,15 @@
+id: refactor-simplify
+title: 重构-不推荐已移除工具
+description: 2026-08-13 审计移除 simplify/request-refactor-plan；重构请求不得再推荐这两个已移除工具。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：这段代码太绕了，帮我简化下，别改行为
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["重构"]
+    - output_contains:
+        not: ["simplify"]

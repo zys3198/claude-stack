@@ -1,0 +1,13 @@
+id: rt-verify-then-commit
+title: 横切验证后再进提交
+description: 「确认真好了再提交」→ 先横切收尾验证（run 驱动或 build/lint/test + 证据清单），通过后进「提交/收尾」；不误触发代码 review。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：bug 修完了，帮我确认下真好了再提交。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["验证", "提交"]

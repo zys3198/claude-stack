@@ -1,0 +1,13 @@
+id: rt-commit-pr
+title: 提交收尾展示 diff 待确认
+description: 提交+发 PR → 「提交/收尾」：手动 git + 展示 git diff --cached --stat 待确认（人工确认线）；push 类一条命令不可逆跑前确认。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：改完了，帮我提交发个 PR。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["提交", "diff --cached --stat"]

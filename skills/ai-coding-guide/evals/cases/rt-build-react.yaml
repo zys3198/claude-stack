@@ -1,0 +1,15 @@
+id: rt-build-react
+title: 构建错误按原文排查
+description: build 报错 → 「构建错误」：跑项目构建命令按错误原文排查；ecc 已卸载不得引用其专项命令。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：React 项目 build 报错了，帮我看看。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["构建错误"]
+    - output_contains:
+        not: ["ecc"]

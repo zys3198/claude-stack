@@ -1,0 +1,13 @@
+id: rt-quick-direct
+title: 直接执行跳过询问
+description: 直接改+别让我选+别走复杂流程 → 「快速改动」直接最小改动，不弹 A/B/C；范围扩大到跨模块才重新分类。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：直接把这个按钮文案改掉，别让我选 skill，也别走复杂流程。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["快速改动"]

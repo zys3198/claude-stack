@@ -1,0 +1,13 @@
+id: rt-build-info-gap
+title: 最小信息清单只问缺口
+description: build 报错问还需要什么 → 只问最小信息清单：语言/框架、执行命令、完整错误、最近改动；不泛问项目背景。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：build 报错了。你还需要我给什么？
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["完整错误", "最近改动"]

@@ -1,0 +1,15 @@
+id: rt-heavy-multisession
+title: 重任务跨会话进交付状态机
+description: 大任务跨会话 → 「开发新功能」Step 0.4 进状态机档：本系统交付状态机（workflow-state.json 断点续跑）；提醒口令明说 small/medium/large；SP 单环仅手法借用。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：这个改造任务比较大，估计要跨几个会话，怎么管？
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["状态机", "small/medium/large"]
+    - output_contains:
+        not: ["devflow"]

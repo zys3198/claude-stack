@@ -1,0 +1,15 @@
+id: rt-review-auth-highrisk
+title: 高风险代码审查双审
+description: auth 中间件审查 → 「审查代码」高风险路径：实际 reviewer + 内置 security-review 双审；ecc 已卸载不得引用；不调 verify。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我 review 这个 auth 中间件，里面有 token 校验和权限判断。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["审查代码", "security-review"]
+    - output_contains:
+        not: ["ecc", "verify"]

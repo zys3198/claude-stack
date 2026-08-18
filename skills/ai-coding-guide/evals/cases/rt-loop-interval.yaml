@@ -1,0 +1,13 @@
+id: rt-loop-interval
+title: 循环任务走 /loop
+description: 每 5 分钟检查 → 「循环任务」：间隔已明确，先确认终止条件后用 /loop 5m，不再询问其他路径。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：每 5 分钟帮我检查一次这个任务状态。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["循环任务", "/loop"]

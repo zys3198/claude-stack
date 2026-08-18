@@ -1,0 +1,13 @@
+id: rt-tutorial-self
+title: 教程归属裁决给自己学会
+description: 给自己做教程边做边学 → 转介 learning-guide；写给读者发布 → article-writing-guide。按最终交付物裁决，不猜。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：我想给自己做一套学习 React 的教程，边做边学。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["learning-guide"]

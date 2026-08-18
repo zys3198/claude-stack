@@ -1,0 +1,13 @@
+id: expose-unknown
+title: 判级-暴露未知路由
+description: 完全没思路、列不出问题 → 走 expose-unknowns 判级扫盲，不让 AI 直接出方案。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：接了个需求但我完全没思路，连该问什么都列不出来，开工前先把盲点摊出来
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["expose-unknowns"]

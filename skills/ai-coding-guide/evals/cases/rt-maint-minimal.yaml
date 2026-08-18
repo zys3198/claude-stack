@@ -1,0 +1,13 @@
+id: rt-maint-minimal
+title: 轻量迁移最小改动
+description: 只补一个触发词 → 「路由指南维护」小型修正：先补 RED 用例（evals/），最小修改路由文本；不默认调 darwin-skill，不强制完整评估。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：只把这篇文章里的一个触发词补进 ai-coding-guide，保持最小改动。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["最小", "eval"]

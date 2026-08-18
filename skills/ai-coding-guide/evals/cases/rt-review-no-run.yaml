@@ -1,0 +1,15 @@
+id: rt-review-no-run
+title: 审查不误触发 verify
+description: review 当前 diff 且明说不要运行程序 → 「审查代码」：auth 高风险双审；尊重不运行，不调 verify。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：请 review 当前 diff 的 auth 变更，不要运行程序。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["审查代码", "security-review"]
+    - output_contains:
+        not: ["verify"]

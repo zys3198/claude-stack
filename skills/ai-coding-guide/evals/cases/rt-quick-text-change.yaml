@@ -1,0 +1,13 @@
+id: rt-quick-text-change
+title: 小范围最简改动不弹菜单
+description: 用户明确别走复杂流程的文案改动 → 「快速改动」直接最小改动，不弹 A/B/C，不强制端到端 verify。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：把这个按钮文案从『提交』改成『保存』，别走复杂流程。
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["快速改动"]

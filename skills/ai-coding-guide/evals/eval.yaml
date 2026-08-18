@@ -1,0 +1,65 @@
+schema_version: v1alpha1
+
+environment:
+  type: none
+
+skills:
+  - source: local_path
+    path: .
+
+engine:
+  name: claude_code
+  model:
+    provider: anthropic
+    name: claude-sonnet-4-6
+
+cases:
+  files:
+    # 继承自归档 v1.9.0（8）
+    - evals/cases/expose-unknown.yaml
+    - evals/cases/frontend-landing.yaml
+    - evals/cases/frontend-nodesign.yaml
+    - evals/cases/maintenance-audit.yaml
+    - evals/cases/peer-learning.yaml
+    - evals/cases/refactor-simplify.yaml
+    - evals/cases/transfer-article.yaml
+    - evals/cases/transfer-learning.yaml
+    # 转写自归档 test-prompts.json（26，死引用已清）
+    - evals/cases/rt-compare-task-signal.yaml
+    - evals/cases/rt-eco-pure-compare.yaml
+    - evals/cases/rt-prd-ready.yaml
+    - evals/cases/rt-review-auth-highrisk.yaml
+    - evals/cases/rt-debug-intermittent.yaml
+    - evals/cases/rt-quick-text-change.yaml
+    - evals/cases/rt-maint-new-skill.yaml
+    - evals/cases/rt-loop-interval.yaml
+    - evals/cases/rt-understand-combo.yaml
+    - evals/cases/rt-commit-pr.yaml
+    - evals/cases/rt-verify-then-commit.yaml
+    - evals/cases/rt-build-react.yaml
+    - evals/cases/rt-transfer-gate.yaml
+    - evals/cases/rt-named-direct-build.yaml
+    - evals/cases/rt-review-no-run.yaml
+    - evals/cases/rt-maint-minimal.yaml
+    - evals/cases/rt-build-untracked.yaml
+    - evals/cases/rt-quick-direct.yaml
+    - evals/cases/rt-identity.yaml
+    - evals/cases/rt-output-contract.yaml
+    - evals/cases/rt-risk-gate.yaml
+    - evals/cases/rt-build-info-gap.yaml
+    - evals/cases/rt-named-plugin-priority.yaml
+    - evals/cases/rt-standalone-tool.yaml
+    - evals/cases/rt-tutorial-self.yaml
+    - evals/cases/rt-heavy-multisession.yaml
+  defaults:
+    timeout_seconds: 240
+    max_turns: 10
+  parallelism: 3
+
+judge:
+  type: rule_based
+
+report:
+  formats: [json, html]
+  artifacts:
+    - transcript
