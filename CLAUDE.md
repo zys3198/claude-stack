@@ -38,7 +38,7 @@
 
 ### 2.1 工作流
 
-- 编码任务自动找 `ai-coding-guide`:所有编码任务先经它分拣,由其按分类树分层路由到各执行 skill/流程(普通改动/重任务/调试/澄清等);CLAUDE.md 不直接挂执行 skill。
+- 编码任务自动找 `ai-coding-guide`:所有编码任务先经它分拣,由其按分诊表路由到各执行 skill/流程(普通改动/重任务/调试/澄清等);CLAUDE.md 不直接挂执行 skill。交付规模可口令 small/medium/large 指定,不说会被自判 small。
 
 ### 2.2 目标驱动
 
