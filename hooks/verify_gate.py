@@ -5,7 +5,6 @@ sys.stderr.reconfigure(encoding="utf-8")
 
 STATE = "C:/Users/zys31/.claude/hooks/edited_state.json"
 
-CODE_EXT = (".py",".pyi",".ts",".tsx",".js",".jsx",".mjs",".cjs",".go",".rs",".java",".kt",".kts",".c",".cc",".cpp",".cxx",".h",".hh",".hpp",".hxx",".cs",".rb",".php",".swift",".m",".mm",".scala",".sc",".vue",".svelte",".ex",".exs",".dart",".lua",".clj",".cljs",".cljc",".hs",".ml",".mli",".fs",".fsx",".nim",".zig",".v",".sv",".jl",".pl",".pm",".r",".R")
 MAX_BLOCKS = 3
 
 def load(sid):
@@ -38,13 +37,18 @@ if st is None:
     sys.exit(0)
 
 paths = st.get("paths", [])
-code_paths = [p for p in paths if p.lower().endswith(CODE_EXT)]
+# code_pending 由 edited_tracker 维护（仅代码文件）；缺省视为空——历史 paths 里的旧代码文件不回溯追究
+code_paths = st.get("code_pending", [])
 if not code_paths:
     sys.exit(0)
 
 last_edit = float(st.get("last_edit_ts", 0))
 last_verify = float(st.get("last_verify_ts", 0))
 if last_verify >= last_edit:
+    # 验证已覆盖全部改动：清空代码监视，防 markdown 编辑重新武装门禁
+    st["code_pending"] = []
+    st["stop_blocks"] = 0
+    save(st)
     sys.exit(0)
 
 if data.get("stop_hook_active"):
@@ -59,6 +63,9 @@ hint = "、".join(verify_cmds[-5:]) if verify_cmds else "无"
 
 if blocks >= MAX_BLOCKS:
     auto_reason = (f"verify_gate AUTO-RELEASE ({blocks}/{MAX_BLOCKS}): 防死循环放行。代码改动未跑验证，但已达拦截上限。\n  改动文件({len(code_paths)}): {', '.join(code_paths[:5])}\n  最近验证命令: {hint}\n  -> 建议下次改动后主动跑验证。")
+    st["code_pending"] = []
+    st["stop_blocks"] = 0
+    save(st)
     print(json.dumps({"decision": "approve", "reason": auto_reason}, ensure_ascii=False))
     sys.exit(0)
 

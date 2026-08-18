@@ -5,9 +5,10 @@ sys.stderr.reconfigure(encoding="utf-8")
 
 STATE = "C:/Users/zys31/.claude/hooks/edited_state.json"
 EDIT_TOOLS = ("Edit", "Write", "MultiEdit", "NotebookEdit", "apply_patch", "update", "str_replace_based_edit_tool", "file_edit")
+CODE_EXT = (".py",".pyi",".ts",".tsx",".js",".jsx",".mjs",".cjs",".go",".rs",".java",".kt",".kts",".c",".cc",".cpp",".cxx",".h",".hh",".hpp",".hxx",".cs",".rb",".php",".swift",".m",".mm",".scala",".sc",".vue",".svelte",".ex",".exs",".dart",".lua",".clj",".cljs",".cljc",".hs",".ml",".mli",".fs",".fsx",".nim",".zig",".v",".sv",".jl",".pl",".pm",".r",".R")
 
 def new_state(sid):
-    return {"session_id": sid, "paths": [], "edits_per_path": {}, "last_edit_ts": 0.0, "last_verify_ts": 0.0, "verify_cmds": [], "stop_blocks": 0}
+    return {"session_id": sid, "paths": [], "edits_per_path": {}, "last_edit_ts": 0.0, "last_verify_ts": 0.0, "verify_cmds": [], "stop_blocks": 0, "code_pending": []}
 
 def load(sid):
     try:
@@ -60,6 +61,8 @@ if event == "PostToolUse" and tool in EDIT_TOOLS:
         if path not in st["paths"]:
             st["paths"].append(path)
         st["edits_per_path"][path] = st["edits_per_path"].get(path, 0) + 1
+        if path.lower().endswith(CODE_EXT) and path not in st.setdefault("code_pending", []):
+            st["code_pending"].append(path)
         st["last_edit_ts"] = now
         st["stop_blocks"] = 0
         save(st)
