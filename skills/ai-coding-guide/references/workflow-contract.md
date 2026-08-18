@@ -9,20 +9,15 @@
 - 初始化：`<PYTHON> <SKILL_ROOT>/scripts/workflow_state.py init --project-root . --slug <slug> --size <small|medium|large> --mode <auto|manual> [--require-design-artifacts] [--execution-mode <isolated|single-context>] [--host-adapter <adapter-id>]`
 - 准备阶段：`prepare --state artifacts/<slug>/workflow-state.json --stage <stage>`
 - 准备并生成阶段提示：`<PYTHON> <SKILL_ROOT>/scripts/workflow_state.py prepare --state ... --stage <stage> --emit-prompt [--request <用户目标>] [--input <额外路径>] [--profile <确认适用的专项规则>]`。这是一条调用；只有恢复一个已经 prepare 的阶段时才单独运行 `build_stage_prompt.py`。下游 prompt 以已确认上游产物为交接，不再重复嵌入原始需求文本；原始需求仍只用于专项规则匹配。
-- 登记阶段执行者：`assign --state ... --stage <stage> --role <required-role> --executor-type <adapter-stage-executor> --executor-id <host-agent-id> --dispatch-tool <adapter-dispatch-tool> [--team-name <workflow-team>]`（协调者阶段不执行；Team adapter 必须传状态中的 team_name）
-- 登记只读检索助手：`helper --state ... --stage <stage> --role <helper-role> --executor-type <adapter-research-executor> --executor-id <host-agent-id> --purpose <bounded-purpose> --dispatch-tool <adapter-dispatch-tool> [--team-name <workflow-team>]`
+- 登记阶段执行者：`assign --state ... --stage <stage> --role <required-role> --executor-type <adapter-stage-executor> --executor-id <host-agent-id> --dispatch-tool <adapter-dispatch-tool>`（协调者阶段不执行）
+- 登记只读检索助手：`helper --state ... --stage <stage> --role <helper-role> --executor-type <adapter-research-executor> --executor-id <host-agent-id> --purpose <bounded-purpose> --dispatch-tool <adapter-dispatch-tool>`
 - 开始阶段：`start --state artifacts/<slug>/workflow-state.json --stage <stage>`
 - 结束阶段：`finish --state ... --stage <stage> --result <completed|failed|overflow>`
 - 用户/手动门禁批准：`approve --state ... --stage <stage> [--user-confirmed]`。REQUIREMENT 必须在用户明确确认需求报告后传 `--user-confirmed`；不得由 Agent 自行推断确认。
-- 恢复建议：`resume --project-root . --slug <slug> [--fresh-team]`；也兼容 `resume --state ...`（只读返回下一动作，不重新初始化）
-- 升级旧 CodeBuddy 状态：`upgrade-team --state ...`（仅 policy v2 且尚未登记/执行任何中间阶段 Agent 时允许，原地切换为 Team v3）
-- 更换 Team 所有者：`rotate-team --state ...`（Team 拓扑恢复时直接放弃旧 executor 绑定，把旧 in-progress 阶段恢复为 pending，并返回新 Team 名）
+- 恢复建议：`resume --project-root . --slug <slug>`；也兼容 `resume --state ...`（只读返回下一动作，不重新初始化）；状态文件不存在时返回 `restart-required`，停止恢复并报告
 - 检查：`status|validate --state ...`
 
 同一 slug 已存在时 `init` 拒绝覆盖；恢复任务对现有状态运行 `resume`，按返回的 action 继续，禁止重新 `init`。设计稿任务传 `--require-design-artifacts`。medium/large 默认 `isolated`，必须选择与真实生命周期工具匹配的 `--host-adapter`。
-
-Team 拓扑的 `team_name` 是状态机在初始化时根据 task slug 和随机 `run_id` 分配的运行实例标识。调用方只能使用状态文件返回的完整名称，不得仅按 slug 重建名称或附着到历史同名 Team；同一 slug 的新流程与旧 Team 必须拥有不同名称。
-在另一个 CodeBuddy 主会话中恢复时使用 `resume --fresh-team`。返回结果会给出 `delete_team_name`：直接删除这个精确 Team，不读取其配置、成员、inbox 或状态，再调用 `rotate-team` 并创建新 Team。状态文件不存在时返回 `restart-required`，删除返回的旧 Team 名后停止恢复，不重复尝试。
 
 ## 固定路由
 

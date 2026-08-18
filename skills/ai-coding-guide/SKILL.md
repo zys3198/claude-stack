@@ -22,7 +22,7 @@ description: Use when the user asks which skill/tool to use in Claude Code, how 
 ## 按需读取
 
 - 前端、后端、Go、SQL 和设计稿专项规则由阶段 Prompt 自动选择；分类不明确但用户或项目已确认时，用 `build_stage_prompt.py --profile <id>` 显式追加。
-- 审查、测试和知识沉淀规则按阶段自动注入；规则入口见 [references/quality.md](references/quality.md)。
+- 审查、测试和知识沉淀规则按阶段自动注入，唯一事实源：[rules/stages/review.md](rules/stages/review.md)、[rules/stages/test.md](rules/stages/test.md)、[rules/stages/knowledge.md](rules/stages/knowledge.md)；专项叠加由 [rules/manifest.json](rules/manifest.json) 选择。
 - 用户明确要求预览或部署：[references/preview-deploy.md](references/preview-deploy.md)
 
 无法分类时先检查项目证据；不要为了“可能相关”注入全部专项规则。混合项目可以组合多个 profile。

@@ -9,7 +9,7 @@
 每次修改状态前复制为 `workflow-state.json.bak`，然后完整写入新 JSON：
 
 1. `prepare`：仅允许 `stage == next_stage`、无待批准且阶段为 `pending|failed`。先记录必需产物哈希，再复制缺失模板并记录 `prepared_at`；不得覆盖已有产物。
-2. `assign`：REQUIREMENT、SUMMARY 直接登记协调者身份，不创建或分配阶段 Agent；其他 isolated 阶段在 prepare 后创建新 Agent，登记固定逻辑角色、adapter 执行器类型、拓扑和宿主返回的 executor ID。Team adapter 还必须登记状态中的同一个 `team_name`；只读检索 Agent 同理。禁止将普通 subagent 冒充 Team member，也禁止将 reviewer 用于 REVIEW 前调研。
+2. `assign`：REQUIREMENT、SUMMARY 直接登记协调者身份，不创建或分配阶段 Agent；其他 isolated 阶段在 prepare 后创建新 Agent，登记固定逻辑角色、adapter 执行器类型、拓扑和宿主返回的 executor ID。只读检索 Agent 同理。禁止将 reviewer 用于 REVIEW 前调研。
 3. `start`：必须已 prepare；isolated 模式还必须已有合法 assign。改为 `in_progress` 并记录事件和时间。
 4. `completed`：确认必需产物相对 prepare 基线为新建或变化，再检查未填占位、空内容和关键语义；设计稿任务额外检查设计上下文；通过后移动到下一阶段。
 5. `failed`：失败计数加一并清除 prepare 基线；达到 2 次改为 `blocked`。REVIEW 失败回到 IMPLEMENT，其他阶段重试自身。
