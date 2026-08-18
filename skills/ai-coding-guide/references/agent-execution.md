@@ -6,7 +6,7 @@ medium/large 默认使用 `isolated`：REQUIREMENT 由协调上下文完成；DE
 
 | 阶段 | 必需角色 | 职责边界 |
 |---|---|---|
-| REQUIREMENT | `devflow-requirement-owner` | 协调者调研必要证据、调用 `$devflow-clarify-requirements` 完成交互并写需求报告；不创建阶段 Agent |
+| REQUIREMENT | `devflow-requirement-owner` | 协调者调研必要证据、按 [clarify-requirements.md](clarify-requirements.md) 完成交互并写需求报告；不创建阶段 Agent |
 | DESIGN | `devflow-architect` | 根据需求报告设计方案和计划 |
 | IMPLEMENT | `devflow-developer` | 仅实现计划内改动并写 change report |
 | REVIEW | `devflow-code-reviewer` | 仅审查已完成的实现和实际 diff |

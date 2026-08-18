@@ -15,7 +15,7 @@ description: Use when the user asks which skill/tool to use in Claude Code, how 
 2. 开始任何阶段前读取 [rules/core.md](rules/core.md)。`rules/` 不会被宿主自动加载；`build_stage_prompt.py` 按 [rules/manifest.json](rules/manifest.json) 确定性注入核心规则、当前阶段规则，以及由项目证据命中的专项规则。
 3. 完整流程读取 [references/workflow-contract.md](references/workflow-contract.md)。medium/large 额外读取 [references/agent-execution.md](references/agent-execution.md) 和 [references/runtime-core.md](references/runtime-core.md)，并且只加载一个匹配的 `adapters/` 实现。
 4. 每阶段优先用 `workflow_state.py prepare ... --emit-prompt` 一次完成模板准备和提示生成，再执行 `start → finish`；仅对已经 prepare 的恢复状态单独调用 `build_stage_prompt.py`。REQUIREMENT 和 SUMMARY 由协调者在当前上下文执行，不创建阶段 Agent；isolated 模式的其他 route 阶段在 prompt 后、start 前增加 `spawn → assign`。只有宿主真实返回 executor ID 后才能 `assign`，并登记 adapter 要求的 `executor_type`。
-5. REQUIREMENT 调用 `$devflow-clarify-requirements` 完成证据分析、用户交互和需求报告。报告通过内容校验后必须向用户展示摘要并等待明确确认；只有确认后才能执行 `approve --stage REQUIREMENT --user-confirmed` 并进入 DESIGN。DESIGN 及后续 isolated 阶段只读取清单允许的上游产物和当前必要证据，协调者不得代写。
+5. REQUIREMENT 按 [references/clarify-requirements.md](references/clarify-requirements.md) 完成证据分析、用户交互和需求报告。报告通过内容校验后必须向用户展示摘要并等待明确确认；只有确认后才能执行 `approve --stage REQUIREMENT --user-confirmed` 并进入 DESIGN。DESIGN 及后续 isolated 阶段只读取清单允许的上游产物和当前必要证据，协调者不得代写。
 
 脚本仅依赖 Python 3.8+ 标准库。Python 不可用时读取 [references/manual-runtime.md](references/manual-runtime.md) 执行等价门禁，不得跳过。
 

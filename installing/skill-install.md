@@ -49,8 +49,8 @@
 ### ~~LoopForge devflow~~ → 已 fork 脱轨为自有系统 ai-coding-guide（2026-08-18）
 - 来源：https://github.com/Tencent/LoopForge（上游 clone 在 `C:\ZYS\Code\loopforge`，HEAD 09c7652，仅作「看官方更新」参考窗口，**不再 pull 升级**，好更新人工挑拣吸收）
 - 安装日期：2026-08（fork 脱轨定案 2026-08-18，用户拍板）
-- 现状：`~/.claude/skills/ai-coding-guide/` = devflow 官方骨架彻底 fork + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入，CLAUDE.md §2.1 入口行不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留，Phase 2 路由吸收源料）。已入 git 白名单（`!skills/ai-coding-guide/` + `!skills/devflow-clarify-requirements/` + `!skills/manifest.json`）
-- 装到哪/构成：状态机骨架（scripts/templates/rules/agents/adapters=仅 claude+shared）+ `devflow-clarify-requirements/` + 根级 `manifest.json`（adapter_registry.py 依赖，load-bearing）
+- 现状：`~/.claude/skills/ai-coding-guide/` = devflow 官方骨架彻底 fork + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入，CLAUDE.md §2.1 入口行不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留，Phase 2 路由吸收源料）。已入 git 白名单（`!skills/ai-coding-guide/` + `!skills/manifest.json`）
+- 装到哪/构成：状态机骨架（scripts/templates/rules/agents/adapters=仅 claude+shared）+ `references/clarify-requirements.md`（2026-08-18 起顶层 `devflow-clarify-requirements/` skill 吸收入本体，原目录已删）+ 根级 `manifest.json`（adapter_registry.py 依赖，load-bearing）
 - 定制点：SKILL.md 名前/描述/标题 + 编码路由 stopgap 段、`commands/ai-coding-guide.md`（claude 化重写）、`references/routing-stopgap.md`（新建）、`references/runtime-core.md` 适配器段改 claude、`rules/stages/summary.md` 第 4 条（82-能力沉淀证据草稿）；删 `adapters/{codebuddy,codex,cursor}` + `agents/openai.yaml`；tests 删 7 个 codebuddy 专项、4 个适配 claude
 - 依赖：Python 3.8+ 标准库
 - 测试基线：**20 passed / 2 failed**（2 失败 = Windows 路径分隔符断言，平台差异勿修）；`scripts/validate_config.py` OK（adapters=1）。注意：跑 pytest 先清 `PYTHONIOENCODING`/`PYTHONUTF8` 环境变量（harness 注入 utf-8 会致子进程输出被 GBK 解码假失败）

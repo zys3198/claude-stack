@@ -23,9 +23,9 @@
 - 出处：devflow 官方骨架彻底 fork 脱轨 + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入；用户拍板「基于 devflow 为骨架做成一个系统，包含路由分类功能，面向 AI 不是人类」。上游仓库 `C:\ZYS\Code\loopforge` 仅作参考窗口，人工挑拣吸收，不 pull 升级
 - 构成：状态机骨架（scripts/templates/rules/agents/adapters=claude+shared）+ 编码路由 stopgap（`references/routing-stopgap.md`，Phase 2 将完整吸收归档 guide 分类树）
 - 路由入口：CLAUDE.md §2.1「编码任务自动找 ai-coding-guide」不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留历史）
-- 依赖：`devflow-clarify-requirements/`（REQUIREMENT 阶段）+ 根级 `manifest.json`；Python 3.8+ stdlib
+- 依赖：`references/clarify-requirements.md`（REQUIREMENT 阶段；2026-08-18 起顶层 `devflow-clarify-requirements/` skill 吸收入本体，原目录已删）+ 根级 `manifest.json`；Python 3.8+ stdlib
 - 测试：`python -m pytest tests/` 基线 20/2（2 = Windows 路径断言平台差异勿修；跑前清 PYTHONIOENCODING/PYTHONUTF8 防 GBK 假失败）；`scripts/validate_config.py` OK
-- Phase 2 待开：归档分类树并入（stage-0 脚本化 vs 前门散文，待设计）、stopgap 重写、`devflow-clarify-requirements` 去留、内部 `devflow-*` 代号与散文残留清理、系统内重复审计合并
+- Phase 2 待开：归档分类树并入（stage-0 脚本化 vs 前门散文，待设计）、stopgap 重写、内部 `devflow-*` 代号与散文残留清理、系统内重复审计合并（~~`devflow-clarify-requirements` 去留~~ 已定 2026-08-18：吸收入本体）
 
 ### 四域开工路由器（v1.4.x，持续演进）
 - ~~`ai-coding-guide`（编码域，v1.4.9）~~ **更正 2026-08-18**：编码域散文路由器终版 v1.9.0 已退役归档（`~/.claude/archive/ai-coding-guide-v1.9.0/`），职责由上方 fork 新系统接替 / `article-writing-guide`（写作域）/ `learning-guide`（学习域，v1.4.6）/ `frontend-guide`（前端域，v1.5.3）
