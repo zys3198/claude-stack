@@ -59,7 +59,7 @@ hint = "、".join(verify_cmds[-5:]) if verify_cmds else "无"
 
 if blocks >= MAX_BLOCKS:
     auto_reason = (f"verify_gate AUTO-RELEASE ({blocks}/{MAX_BLOCKS}): 防死循环放行。代码改动未跑验证，但已达拦截上限。\n  改动文件({len(code_paths)}): {', '.join(code_paths[:5])}\n  最近验证命令: {hint}\n  -> 建议下次改动后主动跑验证。")
-    print(json.dumps({"decision": "allow", "reason": auto_reason, "auto_release": True}, ensure_ascii=False))
+    print(json.dumps({"decision": "approve", "reason": auto_reason}, ensure_ascii=False))
     sys.exit(0)
 
 reason = (f"verify_gate BLOCKED ({blocks}/{MAX_BLOCKS}): 检测到代码改动但未跑验证就收工。\n  改动文件({len(code_paths)}): {', '.join(code_paths[:5])}\n  CLAUDE.md §1.3: 改动后跑 lint + test + 编译(tsc/go build/pytest...).\n  最近验证命令: {hint}\n  -> 跑验证命令, 或纯结构改动跑任一相关命令记录后即可收工.\n  -> 第 {MAX_BLOCKS} 次拦截后自动放行(防死循环).")
