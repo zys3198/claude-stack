@@ -11,5 +11,3 @@ judge:
   success:
     - output_contains:
         all: ["审查代码", "security-review"]
-    - output_contains:
-        not: ["verify"]

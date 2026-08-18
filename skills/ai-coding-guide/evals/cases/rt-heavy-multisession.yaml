@@ -10,6 +10,6 @@ judge:
   type: rule_based
   success:
     - output_contains:
-        all: ["状态机", "small/medium/large"]
+        all: ["状态机", "口令"]
     - output_contains:
         not: ["devflow"]

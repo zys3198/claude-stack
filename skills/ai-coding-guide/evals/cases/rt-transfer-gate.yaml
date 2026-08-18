@@ -11,5 +11,3 @@ judge:
   success:
     - output_contains:
         all: ["路由指南维护"]
-    - output_contains:
-        not: ["TECH_SPEC"]

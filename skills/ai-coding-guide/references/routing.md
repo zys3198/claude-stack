@@ -131,6 +131,8 @@ ai-coding-guide 在当前会话？ YES/NO
 ```
 
 - 解释只补"为什么不是另一路径"的关键一句。
+- 用户要求简短/直接给结论 ≠ 豁免契约：6 行契约即最简形态；只有用户要求展开时才加解释。
+- 进交付状态机档（Step 0.4）时，「下一步」必附口令提醒：规模可明说 small/medium/large，不说会被自判 small。
 - 用户问生态对比时，再展开 `references/ecosystems.md`。
 - 用户进入学习陪跑时，输出先改为 `模式 / 你先做什么 / 我怎么纠偏 / 收尾复盘什么`。
 
@@ -187,6 +189,7 @@ ai-coding-guide 在当前会话？ YES/NO
 | 文档写作 | 文档写作 | "写文章""润色""审文档" |
 | 外部 AI 编码实践 | 路由指南维护 | "这篇文章能不能优化进路由""把某个 AI 编码流程吸收进 ai-coding-guide""某做法要不要加进路由" |
 | 审查/优化 guide skill | 路由指南维护 | "审查这个 guide""优化路由 skill""guide 体检""误路由排查""新建一个路由器 skill" |
+| 改 guide 触发词/描述/路由文本 | 路由指南维护 | "补个触发词进 ai-coding-guide""description 加类触发词""改 routing.md 表述" |
 | 要提交/收尾 | 提交/收尾 | "帮我提交""发个 PR""这分支收尾" |
 | 知识收尾/同步 | 知识收尾 | "同步一下""整理文档""更新记忆""这个阶段做完了""新人能直接上手""阶段完成后同步 docs / README / AGENTS/CLAUDE / memory" |
 | 循环任务 | 循环任务 | "每 5 分钟检查""持续跑到满足条件" |
@@ -313,7 +316,7 @@ Fallback:
 | 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 只想整理需求项→`to-prd` / `to-issues`；`superpowers:writing-plans`（条件） |
 | 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→`chinese-markdown-normalizer` |
 | 路由指南维护 | `guide-skill-auditor` | 行为变化→`darwin-skill`；小修最小改+补 eval 用例；只评估→给结论不改文件 |
-| 提交/收尾 | 手动 git + diff 展示待确认 | `ocr review` |
+| 提交/收尾 | 手动 git + `git diff --cached --stat` 展示待确认 | `ocr review` |
 | 知识收尾 | `neat-freak` | 只同步 memory / 只更新 docs 见 A/B/C；不在→手动枚举 docs/README/AGENTS/memory |
 | 循环任务 | `/loop` | 省略间隔让模型自定步调；不在→说明不可用回手动 |
 | 了解指南 | 最小速查 + `references/ecosystems.md` | 展示完问「现在要执行什么」 |

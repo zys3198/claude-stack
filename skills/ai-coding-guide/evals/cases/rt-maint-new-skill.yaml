@@ -10,4 +10,4 @@ judge:
   type: rule_based
   success:
     - output_contains:
-        all: ["当前会话", "路由"]
+        all: ["路由指南维护"]

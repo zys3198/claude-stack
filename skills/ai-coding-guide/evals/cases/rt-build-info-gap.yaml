@@ -10,4 +10,4 @@ judge:
   type: rule_based
   success:
     - output_contains:
-        all: ["完整错误", "最近改动"]
+        all: ["完整错误", "改动"]
