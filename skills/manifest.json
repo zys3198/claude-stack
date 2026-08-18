@@ -1,0 +1,6 @@
+{
+  "version": "1.0",
+  "skill_sets": {
+    "portable": ["ai-coding-guide", "devflow-clarify-requirements"]
+  }
+}

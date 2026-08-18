@@ -119,6 +119,8 @@ skills/*
 !skills/code-change-workflow/
 !skills/content-to-note/
 !skills/deep-learn/
+!skills/devflow-clarify-requirements/
+!skills/manifest.json
 !skills/drawio-article-illustration/
 !skills/drawio-chart/
 !skills/expose-unknowns/

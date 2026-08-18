@@ -19,8 +19,16 @@
 
 ## 自建 skill（~/.claude/skills/ 下，非 cc-switch 同步）
 
+### ai-coding-guide（编码域总入口系统，2026-08-18 fork 自 LoopForge devflow）
+- 出处：devflow 官方骨架彻底 fork 脱轨 + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入；用户拍板「基于 devflow 为骨架做成一个系统，包含路由分类功能，面向 AI 不是人类」。上游仓库 `C:\ZYS\Code\loopforge` 仅作参考窗口，人工挑拣吸收，不 pull 升级
+- 构成：状态机骨架（scripts/templates/rules/agents/adapters=claude+shared）+ 编码路由 stopgap（`references/routing-stopgap.md`，Phase 2 将完整吸收归档 guide 分类树）
+- 路由入口：CLAUDE.md §2.1「编码任务自动找 ai-coding-guide」不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留历史）
+- 依赖：`devflow-clarify-requirements/`（REQUIREMENT 阶段）+ 根级 `manifest.json`；Python 3.8+ stdlib
+- 测试：`python -m pytest tests/` 基线 20/2（2 = Windows 路径断言平台差异勿修；跑前清 PYTHONIOENCODING/PYTHONUTF8 防 GBK 假失败）；`scripts/validate_config.py` OK
+- Phase 2 待开：归档分类树并入（stage-0 脚本化 vs 前门散文，待设计）、stopgap 重写、`devflow-clarify-requirements` 去留、内部 `devflow-*` 代号与散文残留清理、系统内重复审计合并
+
 ### 四域开工路由器（v1.4.x，持续演进）
-- `ai-coding-guide`（编码域，v1.4.9）/ `article-writing-guide`（写作域）/ `learning-guide`（学习域，v1.4.6）/ `frontend-guide`（前端域，v1.5.3）
+- ~~`ai-coding-guide`（编码域，v1.4.9）~~ **更正 2026-08-18**：编码域散文路由器终版 v1.9.0 已退役归档（`~/.claude/archive/ai-coding-guide-v1.9.0/`），职责由上方 fork 新系统接替 / `article-writing-guide`（写作域）/ `learning-guide`（学习域，v1.4.6）/ `frontend-guide`（前端域，v1.5.3）
 - 出处：2026-07 多轮会话沉淀；质量标准见 memory `router-guide-skill-quality-bar`；审查工具 `guide-skill-auditor`
 - 迁移要点：四个一起拷；各有 CHANGELOG.md 记演进；互相有跨域转介引用，别只拷一个。
 
@@ -112,6 +120,10 @@
 - 备份：`~/.claude/hooks/HOOKS_BACKUP.md`
 - **~~turn_counter.py~~ / ~~learning_nudge.py~~（2026-08-08 已删）**：曾为死代码（settings.json 未引用），2026-08-08 经用户确认物理删除；状态文件 `turn_state.json` / `learning_state.json` 同删。hooks/ 现仅留 settings.json 引用的 7 个 Python hook。
 - **settings-degrade-guard.py（2026-08-13 新建）**：SessionStart 自动检测 cc-switch 切 provider 降级 settings.json（缺 statusLine/enabledPlugins/extraKnownMarketplaces/permissions.deny 或 >3 个 hook），从 cc-switch DB `common_config_claude` 快照并集合并恢复（保留 provider env），原子写+备份到 `~/.claude/backups/settings.bak-guard-<ts>.json`。静默运行，恢复时输出 JSON 提示。注册在 settings.json SessionStart `*` matcher。与 cc-switch-setting-sync skill 的 `--restore` 同源逻辑（见该 skill SKILL.md §4）。
+- **skill_ledger.py（2026-08-17 新建）**：PostToolUse 记账 hook，matcher `Skill`。记 Skill 调用 → `~/.claude/metrics/skill-usage.log`（JSONL，坏输入/非 Skill 静默 exit(0) 不阻塞）。配 skill-trimmer 的 scan_skills.py 做使用计数（`load_usage()` 读它，剥 `plugin:` 前缀归一）。Python312 调用。
+- **hooks/scripts/transcript_sweep.py（2026-08-17 新建）**：周复盘脚本，非 hook（不进 settings.json）。扫最近 N 天会话 user 消息 → 去重/CJK 高频主题 → `~/.claude/metrics/transcript-weekly-YYYYMMDD.md`。纯 stdlib。周惯例手动跑：`python ~/.claude/hooks/scripts/transcript_sweep.py 7`。
+- **2026-08-17 settings.json**：PostToolUse 末尾加独立 `Skill` matcher 分组（调 skill_ledger.py）；备份见常规 settings 快照。
+- **2026-08-17 skill 修改（非新建，git 已追踪）**：code-change-workflow 加 §1.4.1「Agent 汇报核对清单」（JavaGuide Redis 案例）；skill-trimmer 加保鲜维度——scan_skills.py 每 skill 输出 `last_modified`/`usage_count`/`staleCandidate`（STALE_DAYS=180）+ SKILL.md 数据驱动段加「本机自动化三件套」命令引用。
 
 ### statusline（已脱离 ecc）
 - 位置：`~/.claude/statusline`，含 cost + git 分支段（memory `statusline-independent-of-ecc`）

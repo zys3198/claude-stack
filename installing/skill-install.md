@@ -46,13 +46,15 @@
 - 装到哪：插件 `ecc@ecc`；hooks（Fact-Forcing Gate / GateGuard 等）；cc-switch 侧裸名 skill 已随 skills 域清除（2026-08-13）
 - 备注：用户拍板插件全开不关（memory `ecc-plugin-evaluation`）。升级会重置 settings 路径需留意。
 
-### LoopForge devflow(重任务状态机)
-- 来源:https://github.com/Tencent/LoopForge
-- 安装日期:2026-08(精确日待补)
-- 安装方法:官方仓库 clone 到 `C:\ZYS\Code\loopforge`(HEAD 09c7652)+ copy 进 `~/.claude/skills/`
-- 装到哪:`~/.claude/skills/devflow/`(81 文件)+ `devflow-clarify-requirements/` + 根级 `manifest.json`/`.gitignore`/`README.md`(adapter_registry.py 依赖,缺了脚本崩)
-- 依赖:Python 3.8+ 标准库
-- 备注:定位=重任务并行通道(Q1 渐进)。官方原版+规则层定制:`rules/stages/summary.md` 第 4 条(82-能力沉淀证据草稿);路由定制 2026-08-18 彻底集中——ai-coding-guide v1.9.0 devflow 叶子(Step 0.4 全套档主路径),CLAUDE.md §2.1 不再直挂(只挂「编码任务自动找 ai-coding-guide」入口行)。升级=repo pull 后全覆盖拷贝,重贴 summary.md 第 4 条(guide 叶子不随 devflow 仓库升级)。测试基线 27 passed/2 failed(2 失败=Windows 路径分隔符断言,平台差异勿修)。codebuddy/codex/cursor adapters 为死资产,不删(Q10)。
+### ~~LoopForge devflow~~ → 已 fork 脱轨为自有系统 ai-coding-guide（2026-08-18）
+- 来源：https://github.com/Tencent/LoopForge（上游 clone 在 `C:\ZYS\Code\loopforge`，HEAD 09c7652，仅作「看官方更新」参考窗口，**不再 pull 升级**，好更新人工挑拣吸收）
+- 安装日期：2026-08（fork 脱轨定案 2026-08-18，用户拍板）
+- 现状：`~/.claude/skills/ai-coding-guide/` = devflow 官方骨架彻底 fork + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入，CLAUDE.md §2.1 入口行不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留，Phase 2 路由吸收源料）。已入 git 白名单（`!skills/ai-coding-guide/` + `!skills/devflow-clarify-requirements/` + `!skills/manifest.json`）
+- 装到哪/构成：状态机骨架（scripts/templates/rules/agents/adapters=仅 claude+shared）+ `devflow-clarify-requirements/` + 根级 `manifest.json`（adapter_registry.py 依赖，load-bearing）
+- 定制点：SKILL.md 名前/描述/标题 + 编码路由 stopgap 段、`commands/ai-coding-guide.md`（claude 化重写）、`references/routing-stopgap.md`（新建）、`references/runtime-core.md` 适配器段改 claude、`rules/stages/summary.md` 第 4 条（82-能力沉淀证据草稿）；删 `adapters/{codebuddy,codex,cursor}` + `agents/openai.yaml`；tests 删 7 个 codebuddy 专项、4 个适配 claude
+- 依赖：Python 3.8+ 标准库
+- 测试基线：**20 passed / 2 failed**（2 失败 = Windows 路径分隔符断言，平台差异勿修）；`scripts/validate_config.py` OK（adapters=1）。注意：跑 pytest 先清 `PYTHONIOENCODING`/`PYTHONUTF8` 环境变量（harness 注入 utf-8 会致子进程输出被 GBK 解码假失败）
+- 维护归属：自有系统，日常维护见 custom-setup.md「ai-coding-guide（编码域总入口系统）」；本条目仅留来源与 fork 前史
 
 ### 思维/写作/学习类散件
 - 安装方法：clone/copy 进 `~/.claude/skills/`（`npx skills add <owner/repo>` 或手动 copy）
