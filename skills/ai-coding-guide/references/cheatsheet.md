@@ -19,7 +19,7 @@
 | 「这个 bug 怎么回事」 | `code-change-workflow` §2：失败测试/最小复现 → 定位根因（查所有调用方）→ 修复 → 验证（`superpowers:systematic-debugging` 为条件路径） |
 | 「改个小文案」 | 直接最小改动，不弹 A/B/C（`ponytail:ponytail` 为条件路径）；超出 3 文件重新分类 |
 | 「build 报错」 | 跑项目构建命令按错误原文排查（`ecc:*build*` 为条件路径） |
-| 「这库怎么结构/X 怎么工作」 | 先 `lean-ctx`，调用链 `gitnexus-exploring`；大范围建模 `understand-anything:understand`（条件路径） |
+| 「这库怎么结构/X 怎么工作」 | 先 `lean-ctx`，调用链 `gitnexus-exploring` |
 | 「帮我提交/发 PR」 | 手动 git + `git diff --cached --stat` 展示待确认（`commit-commands:*` 为条件路径，push 类一条命令不可逆跑前确认） |
 | 「同步一下 / 整理文档 / 更新记忆 / 新人能接手」 | `neat-freak`：知识库收尾，不替代代码重构 |
 | 「这篇 AI 编码文章/实践能不能优化进指南」 | 走「路由指南维护」：先判断是否值得迁移；小修最小改+审计；行为变化才上 `darwin-skill`（`superpowers:writing-skills` 为条件路径） |
@@ -39,7 +39,7 @@
 | 快速小改 | 直接最小改动 | 小范围改动、YAGNI、最短路径（`ponytail:ponytail` 为条件路径） |
 | 前端/体验 | `hallmark` / `impeccable` / `emil-design-eng` 系 | 视觉方向、提质、动效；插件 `frontend-design` 当前会话不可调用（候选测试 FAIL），不写默认 |
 | 语言专项 | `ecc:*review*` / `ecc:*build*`（条件路径） | 语言或框架专用 reviewer / build resolver，会话可调用才用 |
-| 代码理解 | `lean-ctx` / `gitnexus-*` | 查结构、看影响范围、压缩上下文（`understand-anything:understand` 为条件路径） |
+| 代码理解 | `lean-ctx` / `gitnexus-*` | 查结构、看影响范围、压缩上下文 |
 | 文档写作 | `article-writing-guide` | 中文技术文章/教程写、审、润色、发布前总路由 |
 | 指南维护 | `guide-skill-auditor` / `darwin-skill` | 外部 AI 编码实践、插件变化、死引用修复要进本指南 |
 

@@ -1,0 +1,13 @@
+id: peer-learning
+title: 学习陪跑-你练模式
+description: 用户要先想、别直接修 → 走学习型开发你练（peer），路由 ai-coding-coach，不直接进交付修复。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：我想练 debug 判断力，我先说假设，你来纠偏，别直接修
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["ai-coding-coach"]

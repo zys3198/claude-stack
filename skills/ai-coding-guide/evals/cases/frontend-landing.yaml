@@ -1,0 +1,15 @@
+id: frontend-landing
+title: 前端视觉-落地页留本路由
+description: 含「落地页」且要视觉产出 → 留在本路由前端视觉子路径，方向未定先问，主路径 hallmark；绝不路由 design-an-interface。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我做个落地页，现代一点好看一点，做完顺便把代码写了
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["hallmark"]
+    - output_contains:
+        not: ["design-an-interface"]

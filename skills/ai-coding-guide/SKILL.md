@@ -1,6 +1,6 @@
 ---
 name: ai-coding-guide
-description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器（含前端视觉任务判定）。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、这篇文章/做法能不能优化进指南；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。协作参与度/说话层统一走 learning-personas（归属问 + peer/teacher/research）。<!-- v1.8.0 -->
+description: Use when user asks which skill/tool/ecosystem to use inside Claude Code, how Superpowers/Matt Pocock skills/ponytail/ecc (or any installed plugin) differ or compare, which fits a task, how to combine them, when a new plugin/skill is installed, or when external AI-coding practices should be evaluated for this guide. 本 skill 是 Claude Code 编码域开工路由器（含前端视觉任务判定）。中文触发：用哪个工具、X和Y区别/冲突吗、有什么工具能用、刚装了X插件、X不能用了、SP/Matt Pocock skills 怎么选、哪个更好、该用什么、怎么配合、重任务跨会话/分阶段交付怎么管、这篇文章/做法能不能优化进指南；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。协作参与度/说话层统一走 learning-personas（归属问 + peer/teacher/research）。<!-- v1.9.0 -->
 ---
 
 # AI 编码路由指南（Claude Code）
@@ -95,7 +95,7 @@ ai-coding-guide 在当前会话？ YES/NO
 ### Step 0：组合顺序
 
 1. **点名优先**：用户点名某个已装 skill/slash command → 先用它；若与安全、不可逆操作或当前环境冲突，先说明冲突再停。
-2. **插件能力走条件路径**：`superpowers:*` / `ponytail:*` / `understand-anything:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
+2. **插件能力走条件路径**：`superpowers:*` / `ponytail:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
 3. **流程优先**：同一任务命中多个 skill 时，先主路径，再专项型（审查/安全/文档），不先按插件名倒推任务。
 4. **少叠加**：默认 1 个主路径 + 必要 1 个专项 + 收尾验证；不要把所有相关 skill 一次性全调用。高风险审查、构建失败、外部发布例外。
 5. **能组合就组合**：用户同时问结构和调用链、实现和验证、提交前确认时，按顺序串联能力，不让用户在互补能力之间二选一。
@@ -107,7 +107,7 @@ ai-coding-guide 在当前会话？ YES/NO
 
 | 档位 | 触发 | 路径 |
 |---|---|---|
-| **全套流程** | 复杂项目 / 陌生代码库 / 高风险改动 / 跨模块设计 | 完整链：澄清 → 设计 → 计划 → 执行 → 审查 → 验证（`superpowers:*` 条件路径：`brainstorming` → `writing-plans` → `test-driven-development` → 分段执行 → `requesting-code-review` → `verification-before-completion`） |
+| **全套流程** | 复杂项目 / 陌生代码库 / 高风险改动 / 跨模块设计 / 重任务跨会话 | 直达：`/devflow` 状态机（澄清 → 设计 → 执行 → 审查 → 测试 → 总结，脚本写 `workflow-state.json` 可断点续跑）。口令必须明说规模 small/medium/large，不说会被自判 small；断点续跑已装未实测，首次真断线即验收。单环手法仍可借 `superpowers:*`（条件路径）：`brainstorming` / `test-driven-development` / `requesting-code-review` / `verification-before-completion` |
 | **拆单轻量** | 任务需要某一环、不值整套 | 按需启用单环：`mattpocock-skills:grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前） |
 | **直接最小** | 单点改动 / 机械任务 / 模型已能自做 | 直接实现 + 补必要约束 + 关键验证；`ponytail:ponytail`（条件路径） |
 
@@ -155,7 +155,7 @@ ai-coding-guide 在当前会话？ YES/NO
 | 验证生效 | 要证明的行为、入口/命令、验收信号 |
 | 提交/PR | 提交范围、是否 push/开 PR、目标分支 |
 | 学习陪跑 | 想练：方案设计 / debug / review / 工具选择；希望我教练还是直接做 |
-| 多会话工作 | 是否跨多个会话、需要什么显式交接物（计划/状态文件）、断点续跑方式 |
+| 多会话工作 | 是否跨多个会话、需要什么显式交接物（计划/状态文件）、断点续跑方式；重任务跨会话 → `/devflow`（脚本写 `workflow-state.json`，断点续跑） |
 
 ### Step 0.8：参与度（归属 + 说话层）
 
@@ -172,6 +172,7 @@ ai-coding-guide 在当前会话？ YES/NO
 | 信号 | 分类 | 示例 |
 |---|---|---|
 | 开发新功能 | 开发新功能 | "写个登录""加个 API""改个后端服务"（含『页面/界面/UI/落地页/登录页』且要视觉产出 → 前端视觉子路径，见 Step 2） |
+| 重任务/跨会话交付 | 开发新功能（Step 0.4 全套档 → `/devflow`） | "大任务""分阶段交付""跨多个会话做""断点续跑""重任务" |
 | 做/改页面视觉、UI/动画库选型、动效 | 前端视觉 | "做个登录页""页面太丑要提质""选个 UI 库""加个动画"（设计方向先行，实现阶段本分类已覆盖） |
 | 学习型 AI 编码 | 学习型开发 | "我想自己能力提高""别让我依赖 AI""和我一起想方案""我先想你纠偏" |
 | 判级/暴露未知 | 判级/暴露未知 | "暴露未知""判级""这个需求我没思路""让 AI 采访我""反考我""出题验收""开工前先把盲点摊出来" |
@@ -227,12 +228,9 @@ Fallback:
 - 日常查结构/看某处实现 → `lean-ctx`（成本最低，先走）
 - 调用链/影响范围/谁调用谁 → `gitnexus-exploring`
 - 同时问结构 + 调用链 → `lean-ctx` 后接 `gitnexus-exploring`，不让用户二选一
-- 条件路径：大范围建模/架构全貌 → `understand-anything:understand`
-
 AskUserQuestion:
 - A: 先 `lean-ctx`
 - B: `gitnexus-exploring` 查影响
-- C: 大范围建模（条件路径 `understand-anything:understand`）
 
 Fallback:
 - `lean-ctx` 不可用 → 原生搜索 + 精读文件

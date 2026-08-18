@@ -1,0 +1,13 @@
+id: transfer-learning
+title: 域边界转介-学习调研
+description: 学习/吃透任务属域边界，应转介 learning-guide，不进入编码分类。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：我想吃透 transformer 架构，两周后要给别人讲明白
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["learning-guide"]

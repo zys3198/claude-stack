@@ -1,0 +1,37 @@
+schema_version: v1alpha1
+
+environment:
+  type: none
+
+skills:
+  - source: local_path
+    path: .
+
+engine:
+  name: claude_code
+  model:
+    provider: anthropic
+    name: claude-sonnet-4-6
+
+cases:
+  files:
+    - evals/cases/transfer-learning.yaml
+    - evals/cases/transfer-article.yaml
+    - evals/cases/frontend-landing.yaml
+    - evals/cases/frontend-nodesign.yaml
+    - evals/cases/maintenance-audit.yaml
+    - evals/cases/peer-learning.yaml
+    - evals/cases/expose-unknown.yaml
+    - evals/cases/refactor-simplify.yaml
+  defaults:
+    timeout_seconds: 240
+    max_turns: 10
+  parallelism: 3
+
+judge:
+  type: rule_based
+
+report:
+  formats: [json, html]
+  artifacts:
+    - transcript

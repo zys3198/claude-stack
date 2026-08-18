@@ -46,6 +46,14 @@
 - 装到哪：插件 `ecc@ecc`；hooks（Fact-Forcing Gate / GateGuard 等）；cc-switch 侧裸名 skill 已随 skills 域清除（2026-08-13）
 - 备注：用户拍板插件全开不关（memory `ecc-plugin-evaluation`）。升级会重置 settings 路径需留意。
 
+### LoopForge devflow(重任务状态机)
+- 来源:https://github.com/Tencent/LoopForge
+- 安装日期:2026-08(精确日待补)
+- 安装方法:官方仓库 clone 到 `C:\ZYS\Code\loopforge`(HEAD 09c7652)+ copy 进 `~/.claude/skills/`
+- 装到哪:`~/.claude/skills/devflow/`(81 文件)+ `devflow-clarify-requirements/` + 根级 `manifest.json`/`.gitignore`/`README.md`(adapter_registry.py 依赖,缺了脚本崩)
+- 依赖:Python 3.8+ 标准库
+- 备注:定位=重任务并行通道(Q1 渐进)。官方原版+规则层定制:`rules/stages/summary.md` 第 4 条(82-能力沉淀证据草稿);路由定制 2026-08-18 彻底集中——ai-coding-guide v1.9.0 devflow 叶子(Step 0.4 全套档主路径),CLAUDE.md §2.1 不再直挂(只挂「编码任务自动找 ai-coding-guide」入口行)。升级=repo pull 后全覆盖拷贝,重贴 summary.md 第 4 条(guide 叶子不随 devflow 仓库升级)。测试基线 27 passed/2 failed(2 失败=Windows 路径分隔符断言,平台差异勿修)。codebuddy/codex/cursor adapters 为死资产,不删(Q10)。
+
 ### 思维/写作/学习类散件
 - 安装方法：clone/copy 进 `~/.claude/skills/`（`npx skills add <owner/repo>` 或手动 copy）
 - **口径更正 2026-08-11**：旧「2026-08-08 实测 105 个（94 真目录 + 11 junction/symlink）」作废——当日实测 0 symlink；全量复核后 skills/ 为 184 目录 = 31 自建（入 git，见 custom-setup.md）+ 约 150 非自建（仓库级来源多已锁定，见上方「散件来源反查登记」）。原分类示例段已删（把自建误列第三方，与 custom-setup.md 冲突）。

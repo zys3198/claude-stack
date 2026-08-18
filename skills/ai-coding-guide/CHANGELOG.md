@@ -4,6 +4,26 @@
 
 详细维护规则与变更证据见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md) 的变更记录表（2026-07-22 之前的历史改动以该表为准）。
 
+## [v1.9.0] - 2026-08-18
+
+### Changed（devflow 接入：全套流程槽位换主）
+
+- **Step 0.4 全套流程档主路径由 `superpowers:*` 链改为 `/devflow` 状态机（直达）**：触发补「重任务跨会话」；口令必须明说规模 small/medium/large，不说会被 agent 自判 small（canary 实测）；断点续跑已装未实测，首次真断线即验收。SP 链降为单环手法借用（条件路径），不再作整套默认。
+- **Step 0.7 多会话工作行**补 `/devflow` 指路（脚本写 `workflow-state.json` + 断点续跑）。
+- **Step 1 信号表**新增「重任务/跨会话交付」行 → 开发新功能（Step 0.4 全套档）。
+- description 触发词补「重任务跨会话/分阶段交付怎么管」。
+- ecosystems.md 新增 devflow 段 + 重叠区/降级路径各 1 行；test-prompts.json 新增回归用例 #34。
+
+### Rationale
+
+- 依据：devflow（Tencent/LoopForge）2026-08-18 落地本机「重任务并行通道」（官方原版 + 规则层定制，small 路线 canary 全绿）；SP 与 devflow 重叠仅在全套编排槽位，SP 单环保持独立价值不卸载。
+- 配套全局 CLAUDE.md §2.1 彻底集中（用户拍板）：编码任务一律先经本 guide 分拣，CLAUDE.md 不再直接挂执行 skill（code-change-workflow / devflow 路由行迁入本 guide）。
+
+## [v1.8.1] - 2026-08-17
+
+### Removed
+- understand-anything 插件已删（2026-08-17，用户判定鸡肋）。SKILL.md Step 0 条件路径列表、理解代码分类 C 选项、cheatsheet.md 2 处、ecosystems.md 5 处（全局规则列表/上下文层代表项/默认顺序/重叠区表/降级路径表）中的 `understand-anything:*` 条件路径引用全部清除。
+
 ## [v1.8.0] - 2026-08-16
 
 ### Changed（参与度词汇统一：集中化 + 引用）

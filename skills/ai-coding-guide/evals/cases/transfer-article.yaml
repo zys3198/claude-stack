@@ -1,0 +1,13 @@
+id: transfer-article
+title: 域边界转介-文章审校
+description: 中文技术文章写改审属域边界，应转介 article-writing-guide 总路由，不绕过。
+tag: routing
+input:
+  prompt: |
+    请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我审下这篇技术文章有没有错
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["article-writing-guide"]

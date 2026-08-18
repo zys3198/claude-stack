@@ -8,7 +8,7 @@
 
 ## 生态角色（Claude Code 当前环境）
 
-**全局规则（2026-08-13 起）：** 所有插件条目（`superpowers:*` / `ecc:*` / `ponytail:*` / `commit-commands:*` / `understand-anything:*` 等）一律按**条件路径**处理——当前会话可调用清单里出现才走，否则走各分类 Fallback。判定依据：`settings.json` 的 `enabledPlugins` + 当前会话 `Available skills` 清单；磁盘 cache 只证明「已安装/可候选」。
+**全局规则（2026-08-13 起）：** 所有插件条目（`superpowers:*` / `ecc:*` / `ponytail:*` / `commit-commands:*` 等）一律按**条件路径**处理——当前会话可调用清单里出现才走，否则走各分类 Fallback。判定依据：`settings.json` 的 `enabledPlugins` + 当前会话 `Available skills` 清单；磁盘 cache 只证明「已安装/可候选」。
 
 ### Superpowers：完整流程套件（条件路径）
 
@@ -36,6 +36,12 @@
 **用法：** 任务需要某一环时单独启用，不整套启用。模型写代码够快时返工多发生在开工太早（需求没定就动手），所以需求模糊时先 `grilling`。
 
 **⚠️ user-invoked 提醒：** mattpocock-skills 插件版模型无法自动调用（需用户手动启用）。路由到这些 skill 时必须明确提醒用户手动启用（不能自己调就提示用户调用）。
+
+### devflow：重任务状态机（直达路径）
+
+**定位：** Tencent/LoopForge 脚本化状态机，2026-08-18 落地为本机「重任务并行通道」（官方原版 + 规则层定制）。复杂项目 / 陌生代码库 / 高风险改动 / 跨模块设计 / 重任务跨会话 → Step 0.4 全套档主路径。澄清 → 设计 → 执行 → 审查 → 测试 → 总结，脚本写 `workflow-state.json`，断点可续跑。
+
+**用法：** 口令必须明说规模 small/medium/large，不说会被自判 small（canary 实测）；断点续跑已装未实测，首次真断线即验收。与 Superpowers 分工：devflow 管骨架（阶段/产物/门禁），SP 单环管手法（brainstorming / TDD / verification）；进了 devflow 不另套 SP 完整链。
 
 ### 顶层独立 skill（直达路径）
 
@@ -69,11 +75,11 @@
 
 ### 上下文 / 理解层
 
-**代表项：** `lean-ctx`、`gitnexus-*`（直达）；`understand-anything:understand`（条件路径）。
+**代表项：** `lean-ctx`、`gitnexus-*`（直达）。
 
 **作用：** 看结构、看依赖、看影响范围、压缩上下文。
 
-**默认顺序：** 先 `lean-ctx`，调用链接 `gitnexus-*`；大范围建模在会话可调用时再上 `understand-anything:understand`。
+**默认顺序：** 先 `lean-ctx`，调用链接 `gitnexus-*`。
 
 ---
 
@@ -86,8 +92,9 @@
 | `code-review`（内置） vs `ecc:*review*`（条件） vs `ocr review`（条件） | 轻量走内置 `code-review`；语言专项/独立重量审查在会话可调用时叠加 | 审查入口和流程门禁不是同一层 |
 | 内置 `security-review` vs 通用 review | 高风险任务用实际 reviewer + 内置 `security-review` 双审 | 安全审查是额外维度，不是替代关系 |
 | `frontend-design`（候选 FAIL） vs `hallmark`/`impeccable` | 前端视觉默认 `hallmark`（新页面）/ `impeccable`（提质）；候选重测通过再议 | 实测当前会话不可调用，不伪装直达 |
-| `lean-ctx` vs `understand-anything:understand`（条件） | 日常查代码先 `lean-ctx`，大范围建模在可调用时再上 understand | 成本更低 |
+| `lean-ctx` vs `gitnexus-*` | 日常查代码先 `lean-ctx`（成本最低），调用链/影响范围再上 `gitnexus-*` | 成本更低 |
 | Superpowers 全套（条件） vs mattpocock 拆单（user-invoked） vs 直接最小 | 复杂/陌生/高风险 → 全套；任务需要某一环 → 拆单用 matt；单点/机械 → 直接最小 | 流程深度由任务复杂度定，不全套兜底 |
+| `/devflow` 全套（直达） vs Superpowers 全套（条件） | 重任务 / 跨会话 / 要脚本强制 → `/devflow`；只需单环手法 → SP 单环 | devflow 管骨架门禁，SP 管手法，不双套流程 |
 
 ---
 
@@ -98,8 +105,9 @@
 | `superpowers:*` 不可用 | 手动流程：开工问询 + 缺口收齐 + 手动计划/实现（复杂走 `code-change-workflow`） |
 | `ecc:*review*` 不可用 | 通用 Code Reviewer agent + 内置 `code-review` / `security-review` |
 | 专项 build slash command 不可用 | 项目构建原文 + 手动排查 |
-| `understand-anything:understand` / `gitnexus-*` 不可用 | 继续用 `lean-ctx` 聚焦读取；`lean-ctx` 也不可用才退原生搜索 + 精读文件 |
+| `gitnexus-*` 不可用 | 继续用 `lean-ctx` 聚焦读取；`lean-ctx` 也不可用才退原生搜索 + 精读文件 |
 | `/loop` 不可用 | 明示不可用，改手动执行 |
+| `/devflow` 不可用 | 手动流程：开工问询 + 缺口收齐 + 手动计划/实现（复杂走 `code-change-workflow`；`superpowers:*` 链为条件路径） |
 | `hallmark` / `impeccable` 不可用 | 手动给方向选项 + 按项目栈直接实现，收尾自查 AI 味 |
 | `mattpocock-skills:*` 不可用 / 用户不启用 | grilling → 开工问询 + `expose-unknowns` 判级；diagnosing-bugs → `code-change-workflow` §2 / `superpowers:systematic-debugging`（条件）；tdd → 手动红绿小步改；code-review → 内置 `code-review` |
 

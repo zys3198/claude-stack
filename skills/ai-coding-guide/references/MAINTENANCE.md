@@ -65,6 +65,7 @@
 
 | 日期 | 动作 | 原因 |
 |---|---|---|
+| 2026-08-18 | v1.9.0：devflow 接入全套流程槽位（Step 0.4 主路径 `superpowers:*` 链 → `/devflow` 直达，SP 降单环手法借用）；Step 0.7 多会话行 + Step 1 信号行补 devflow 指路；description 触发词 + ecosystems.md devflow 段 + test #34；配套全局 CLAUDE.md §2.1 彻底集中（不再直接挂执行 skill） | devflow 落地重任务并行通道（canary 全绿）+ 用户拍板路由彻底集中：路由树单一事实源在 guide，CLAUDE.md 只挂入口行；详见 CHANGELOG [v1.9.0] |
 | 2026-08-14 | v1.7.0：渐进披露重构——Step 2 低频 10 分类（学习型开发/判级/有需求文档/文档写作/路由指南维护/提交收尾/知识收尾/循环任务/了解指南/编码域调研）迁至新建 `references/classification-details.md`；前端视觉 5 分支迁至新建 `references/frontend-visual.md`；主文件 Step 2 保留 7 个高频分类内联 + 低频分类索引表（每行给一句话主路径 + 条件路径/Fallback 概要 + 命中即读提示）；主文件 481→362 行。同步文件列表补两新文件 | 渐进披露原则（主文件=通用规则+真实索引路由）：低频与前端视觉细节外置，references 不自动加载故索引行必须带「命中即读」提示 + 保留一句话主路径防路由残缺；高频分类刻意内联（路由判定核心不外置）。主文件行数 362 高于预估 210——保留核心规则与高频分类内联所致，未做进一步格式压缩（详见对话决策） |
 | 2026-08-13 | 拍板执行批：28 个 skill 移入备份后清理死引用——SKILL.md 角色分层与前端子路径删 animation-vocabulary 提及（已移备份）；test id 10「待用户拍板」改「已移入备份」 | 用户逐组拍板（审计报告组 A-E）：移除+改路由 4 项与归档候选 20 项的移动必然伴随引用清理（本机决议 #1） |
 | 2026-08-13 | v1.5.0：前端视觉接管（删 frontend-guide 转介，新增前端视觉分类+子路径）；插件条目全部降条件路径（新增路径角色标记）；删 simplify/request-refactor-plan/review/review-doc/security-and-hardening 路由引用（审计移除+改路由档）；A4 两裁决落地（教程归属+三域外收口）；A2 本域不可直达清单（gitnexus-guide/animation-vocabulary）；Step 0.7 加多会话缺口行；cheatsheet/ecosystems/test-prompts 漂移修复+4 新回归用例 | guide-router 重建步骤 3：RED-01（design-an-interface P0 错配）/ RED-03（插件伪装直达）/ RED-04（三域外无收口）/ RED-05（单多会话）；96 项全库审计建议档；详见 CHANGELOG [v1.5.0] |
