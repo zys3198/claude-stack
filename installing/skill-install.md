@@ -90,7 +90,9 @@
 | kangarooking/first-principles-skill | axiomatic-thinking, contrarian-decision, implicit-assumption, logic-triple-check, multi-mental-models, organizational-refresh, reductionism-deconstruction（critical-thinking 已被用户认定为自建，入 git） |
 | Yeadon8888（仓颉生态） | cangjie-skill, nuwa-skill, darwin-skill |
 | KKKKhazix/khazix-skills | hv-analysis, leader, neat-freak, storage-analyzer |
-| emilkowalski/skills | emil-design-eng, animation-vocabulary, review-animations, improve-animations, find-animation-opportunities, apple-design, pick-ui-library |
+| emilkowalski/skills | emil-design-eng, animation-vocabulary, review-animations, improve-animations, find-animation-opportunities, apple-design, ~~pick-ui-library~~（2026-08-18 归档 `~/.claude/archive/pick-ui-library`，wayfinder ticket 02 拍板：未接路由+原生可覆盖） |
+
+> 2026-08-18 归档登记（wayfinder ticket 02「coding 域深耕判定」）：`design`（来源待补）、`pick-ui-library`（emilkowalski/skills）移入 `~/.claude/archive/`，可逆；判据=未接 frontend-visual 路由且模型原生可覆盖。
 | alvinunreal/oh-my-opencode-slim | worktrees, codemap, clonedeps, deepwork, simplify, reflect |
 | mattpocock/skills（插件外裸名） | to-prd, to-issues, request-refactor-plan, qa, design-an-interface, zoom-out |
 | abhigyanpatwari/GitNexus（`npx gitnexus analyze` 自动装） | gitnexus-cli, gitnexus-debugging, gitnexus-exploring, gitnexus-guide, gitnexus-impact-analysis, gitnexus-pdg-query, gitnexus-pr-review, gitnexus-refactoring, gitnexus-taint-analysis |

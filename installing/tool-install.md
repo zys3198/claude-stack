@@ -16,7 +16,7 @@
 | caveman | https://github.com/JuliusBrussee/caveman | 启用中 |
 | ponytail | https://github.com/DietrichGebert/ponytail | 启用中 |
 | open-code-review | https://github.com/alibaba/open-code-review | 启用中 |
-| understand-anything | https://github.com/Egonex-AI/Understand-Anything | 启用中 |
+| understand-anything | https://github.com/Egonex-AI/Understand-Anything | **已删 2026-08-18（二次）**：08-17 首删后插件文件+settings 注册被某机制回拉复活（原因未查明，疑插件同步），今日按 wayfinder ticket 02 拍板再删——settings.json 去 enabledPlugins+marketplace 注册、删 plugins/{marketplaces,cache,data}/understand-anything*、WORKFLOW_QUICKREF.md 引用改 gitnexus/lean-ctx。恢复=`claude plugin install understand-anything@understand-anything` 后重加 marketplace |
 | i-have-adhd | https://github.com/ayghri/i-have-adhd | marketplace 在，无启用插件 |
 | better-harness | https://github.com/QoderAI/better-harness | 启用中 |
 | minimalist-entrepreneur | https://github.com/slavingia/skills | 已加 marketplace，无启用插件 |
@@ -99,3 +99,51 @@
 - kept: ~/.claude/skills original (69 dirs verified intact); npm/npx cache checked clean
 - note: .dsh/skills(162) & .dsh/agents were independent copies not junctions; no dsh process running before delete
 - 2026-08-16 residue sweep: removed persistent user env vars OPENCODE_GO_KEY + OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS (dsh opencode-go provider config); removed 5 TEMP dsh-* dirs (acl-locks + spill). settings.json ANTHROPIC_DEFAULT_*_MODEL_NAME deepseek/glm mappings KEPT (active Claude Code proxy config, not dsh residue). Verified gone.
+
+## cc-connect 卸载 2026-08-16
+- 状态: 已删除(用户决定不再用, tmux agent 方案试完回滚后整体放弃)
+- 删除内容: npm 全局包 + ~/.cc-connect/ 全部(配置/会话/日志/微信 token) + schtasks 任务 cc-connect + daemon.ps1
+- 后果: 微信遥控 Claude Code 桥接已断, 需重装 + 重扫微信才可恢复
+- 相关记忆已清: cc-connect-weixin-bridge.md / cc-connect-session-storage.md
+- 备份残留: ~/.cc-connect/*.bak-pre-tmux-* (删目录时一并清); 会话 72c6103d 在 ~/.claude/projects 保留
+
+## alibaba/skill-up v0.9.0（已转正，2026-08-17）
+- 来源：https://github.com/alibaba/skill-up（阿里开源 Agent Skills 评估 CLI）
+- 安装日期：2026-08-17（lab 冒烟测试 → 同日转正）
+- 安装命令原文：`curl.exe -sL -o skill-up.zip https://github.com/alibaba/skill-up/releases/download/v0.9.0/skill-up_0.9.0_windows_amd64.zip` + `unzip`
+- 装到哪：`C:\Users\zys31\bin\skill-up.exe`（已在 PATH，与 mycode.exe 同目录）
+- 依赖：无（pre-built Go 二进制 26MB）；真实 agent 评测复用 claude CLI 登录态，无需 ANTHROPIC_API_KEY
+- 备注：核心价值=行为型回归测试（rule_based/script 免费确定，agent_judge 贵）；产出 Anthropic 兼容 grading.json/benchmark.json/result.json/HTML。实测 Windows 原生可跑 claude_code 引擎（与官方「仅 macOS/Linux」文档矛盾）。升级：v0.9.0 二进制替换；撤回=删 exe + skill 的 evals/ 目录
+- **evals 覆盖（2026-08-17 实盘，7 skill / 33 case 全过）**：ai-coding-guide 8 / article-writing-guide 8 / learning-guide 6 / guide-skill-auditor 5 / expose-unknowns 3 / code-change-workflow 2 / ai-readable-project 1。`ai-coding-coach/evals/` 为空壳（0 case，待补）。新增/补套件后当轮在此追加。跑法：`cd <skill目录> && skill-up run`（每 skill 的 evals/eval.yaml 自包含：claude_code 引擎 + rule_based 判官 + 240s 超时）。
+
+## 终端增强套件全卸载 2026-08-17
+- action: 卸载 PowerShell 终端增强软件(用户要求删干净,仅保留性能优化)
+- 卸载命令原文(逐个,均 winget uninstall,全部"已成功卸载"):
+  - `winget uninstall --id JanDeDobbeleer.OhMyPosh --disable-interactivity --accept-source-agreements`(Oh My Posh 30.6.1,提示符)
+  - `winget uninstall --id junegunn.fzf ...`(fzf 0.74.2,模糊搜索)
+  - `winget uninstall --id ajeetdsouza.zoxide ...`(zoxide 0.10.0,智能跳转)
+  - `winget uninstall --id eza-community.eza ...`(eza 0.23.5,ls)
+  - `winget uninstall --id sharkdp.bat ...`(bat 0.26.1,cat)
+  - `winget uninstall --id sxyazi.yazi ...`(Yazi 26.5.6,文件管理器)
+- 卸载位置: 全部在 `C:\Users\zys31\AppData\Local\Microsoft\WinGet\Links`(oh-my-posh 原在 WindowsApps 用户级);验证 `Get-Command` 6 命令全 gone
+- 模块清理: PSFzf 2.7.12(PowershellGallery,`C:\Users\zys31\Documents\PowerShell\Modules\PSFzf`)——PSFzf.dll 被运行中 pwsh 会话锁定,**待进程释放后删目录**
+- 文件删除: `~Documents\PowerShell\omp.omp.json` + `omp.omp.json.bak-20260817` + `-lite`(omp 配置及其备份)
+- profile 改动: `Microsoft.PowerShell_profile.ps1` 删除 omp/PSFzf/zoxide/eza/bat/yazi 六个块,保留:UTF-8 编码、`$isInteractive` 守卫、PATH 兜底、PSReadLine(预测+历史搜索)、cc/cr 别名
+- 保留的优化: PSReadLine 配置、非交互守卫、`cc`/`cr`(claude 启动)别名、git 全局 10 别名;实测冷启动 484ms/profile 开销 160ms
+- 依赖: winget、PowershellGallery;无其他
+- 备注: 恢复=winget install 各包后重写 profile 块;omp 主题文件已删需重建。相关记忆 `terminal-visual-default-preference`(用户偏好默认视觉,连 omp 纯黑白也停用)
+
+## pi coding agent（earendil-works/pi，DIY agent 实验室）2026-08-18
+- 来源：https://github.com/earendil-works/pi（fork：github.com/zys3198/pi，MIT）
+- 安装日期：2026-08-18
+- 安装命令原文：
+  1. `git clone https://github.com/zys3198/pi.git C:\ZYS\Code\pi` —— GitHub 直连 443 超时，实际经 `https://gh-proxy.com/https://github.com/zys3198/pi.git` 镜像克隆成功（5719 commits，HEAD=2509b5c03=上游最新）；clone 后 `git remote set-url origin` 钉回真 GitHub + `git remote add upstream https://github.com/earendil-works/pi.git`
+  2. `cd C:\ZYS\Code\pi && npm install --ignore-scripts`（exit 0，found 0 vulnerabilities）
+  3. `npm run build:offline` —— **失败**：a) 缺 model-data（`packages/ai/src/providers/data/` 在 gitignore，须 `npm run hydrate:model-data` 联网拉目录）；修复=经 gh-proxy 下载官方 release 源码包 `pi-0.84.2-source.tar.gz`（6.2MB），tar 提取 `packages/ai/src/providers/data/`（40 json + .manifest.json）与 `data-json.d.ts` 入仓库；b) 提取后 check:model-data 通过，但 tsgo 编译报 `src/providers/xai.ts(8,2)` 类型错（HEAD 比 v0.84.2 release 新，xai.ts 已认 openai-completions+responses，生成类型列旧）——**纯编译期错，dev 走 tsx 跑源码不受影响**
+- dev 跑法：`cd C:\ZYS\Code\pi && .\pi-test.ps1 [args]`（官方 Windows 入口，tsx 直跑 `packages/coding-agent/src/cli.ts`；`--no-env` 清约 35 个 provider env 隔离密钥）
+- 装到哪：仓库 `C:\ZYS\Code\pi`；配置 `~/.pi/agent/settings.json`（defaultProvider=opencode-go + shellPath=`C:/ZYS/Software/Git/bin/bash.exe` + enableAnalytics/enableInstallTelemetry=false）；`~/.pi/agent/APPEND_SYSTEM.md`（4 条用户核心规则：中文/不确定先问/多步报进度/极简不加戏）
+- 依赖：Node 24 / npm 11（本机已有）；**Git Bash 硬前置**——本机 Git 在 `C:\ZYS\Software\Git`（非 Program Files），且 PATH 里 `System32\bash.exe`（WSL 转发器）排前，必须 settings shellPath 钉死否则 pi 会误启 WSL bash
+- 模型：默认 opencode-go（env `OPENCODE_API_KEY`，**尚未配置** → `pi auth check --provider opencode-go` 报 `not_ready/credentials_not_configured`，属预期）。火山 Ark 走**官方配置式扩展**（非源码改动）：`~/.pi/agent/extensions/ark.ts` 用 `pi.registerProvider("ark", { baseUrl: https://ark.cn-beijing.volces.com/api/coding/v3, apiKey: "$ARK_API_KEY", api: "openai-completions", models: [7 个] })`——**必须用 `/api/coding/v3` 端点**（coding 工具专用；通用 `/api/v3` 对 coding 模型清单报 `InvalidEndpointOrModel.NotFound`，2026-08-18 实测 3/7 通：deepseek-v4-flash/kimi-k2.7-code/deepseek-v4-pro）；扩展目录 `~/.pi/agent/extensions/` 自动发现 + `/reload` 热重载（docs/extensions.md）。opencode-go 原生（env-api-keys.ts 确认）。用户 8/16 清 dsh 时已删 `OPENCODE_GO_KEY`，需重新申请
+- 冒烟：`--version`=0.84.2、`--list-models` 正常（无 key 只列默认可见集 anthropic13+minimax3，非缺数据）、`pi auth check` 命令可用
+- 备注：GH 直连本机不通、gh-proxy 镜像可用（clone/release 都靠它）；上游每日大 commit 量，策略=main 纯镜像+自定义走特性分支；构建类型错处理=跟上生成文件/连网 `npm run build`/或 checkout 贴近 release
+

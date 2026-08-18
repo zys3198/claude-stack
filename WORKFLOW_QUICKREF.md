@@ -17,7 +17,7 @@
 | 审 PR / 代码 | SP `requesting-code-review` | 日常自检 |
 | 安全审查 | codex-security `security-diff-scan` | auth / DB / 架构 |
 | 快速小改 | ponytail（常驻 active） | YAGNI / stdlib first |
-| 学新代码库 | understand-anything / Matt `zoom-out` | 深 vs 浅 |
+| 学新代码库 | gitnexus-exploring / lean-ctx | 深 vs 浅 |
 | 前端开发 | build-web-apps `frontend-app-builder` | |
 | 循环 / 定时 | 内置 `/loop` `/goal` | |
 
