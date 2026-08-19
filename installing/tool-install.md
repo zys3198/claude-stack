@@ -160,3 +160,15 @@
 - 背景决策：手法层不自建不自动借，matt 套件替代 SP；ask-matt = matt 套件内官方路由（idea→ship 主流程 grill-with-docs→to-spec→to-tickets→implement）
 - 依赖：mattpocock-skills@mattpocock 插件保持启用
 - 备注：恢复 = settings.json 加回 enabledPlugins 行 + 跑同一 sync 脚本
+
+
+## code-simplifier + claude-code-setup 插件卸载 2026-08-19
+- 来源：claude-plugins-official marketplace
+- 卸载日期：2026-08-19
+- 卸载动作原文：
+  1. ~/.claude/settings.json enabledPlugins 删 `code-simplifier@claude-plugins-official` 与 `claude-code-setup@claude-plugins-official` 两行（手动编辑）
+  2. python ~/.claude/skills/cc-switch-setting-sync/scripts/sync_claude_common.py（dry-run 9013→8905 后写入，备份 `~/.cc-switch/backups/sync-backup-20260819_141800.json`，readback MATCH）
+- 插件缓存留盘未删（不加载即不生效）
+- 判决依据：能力补丁型随模型变强贬值——code-simplifier=subagent 简化代码（强模型原生能力，ponytail 纪律已覆盖）；claude-code-setup=一次性配置推荐（用完即弃）。references 零引用，已扫确认
+- 同日已卸 superpowers（见前条）；可议未砍：claude-md-management、better-harness
+- 备注：恢复 = settings.json 加回 enabledPlugins 行 + 跑同一 sync 脚本
