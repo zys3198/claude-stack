@@ -42,7 +42,7 @@ Fallback:
 ## 判级/暴露未知
 
 - 默认主路径 → `expose-unknowns`（判四象限 → 按级选技巧 → 任务后反考）
-- 判「未知的已知/未知的未知」需采访澄清 → `expose-unknowns` 内嵌路由到 `superpowers:brainstorming`（条件路径，不可用则手动采访），不重复展开
+- 判「未知的已知/未知的未知」需采访澄清 → `expose-unknowns` 内嵌路由到 `grill-me` / `ask-matt`（user-invoked，提醒用户手动敲；不敲则手动采访），不重复展开
 - 只问四象限概念、不开工 → 直接解释，不强拉进流程
 
 AskUserQuestion:
@@ -58,7 +58,7 @@ Fallback:
 
 - 默认主路径 → 手动拆 4-6 切片 + PLAN.md（按 `code-change-workflow` §3），确认后实现
 - 用户只想先整理需求项 → `to-prd` / `to-issues`
-- 条件路径：`superpowers:writing-plans`（当前会话可调用才走）
+- 条件路径：`mattpocock-skills:to-spec`（需求成型为 spec，user-invoked 需提醒手动敲）
 - 中大型/跨会话 → 升档交付状态机（`routing.md` Step 0.4），REQUIREMENT 阶段以需求文档为输入
 
 AskUserQuestion:
@@ -87,7 +87,7 @@ Fallback:
 - 先判断是否值得迁移；只评估外部做法 → 只给结论，不改文件
 - 审查/优化/新建任一 router 型 guide skill（含本系统路由层）→ `guide-skill-auditor`（十查 + 基线测试 + 分级修复）
 - 小型路由/测试修正 → 补 RED 场景或最小检查，最小改 `references/routing*.md` / `evals/` / 必要参考文件，并跑审计
-- 行为变化或要量化优化 → `darwin-skill`；条件路径：`superpowers:writing-skills`
+- 行为变化或要量化优化 → `darwin-skill`；造/改 skill 结构 → `skill-creator`
 - 迁移内容只吸收路由规则：触发词、分类、证据门槛、fallback、反模式（闸门见 `ecosystems.md` §轻量迁移闸门）
 
 AskUserQuestion:
@@ -103,7 +103,7 @@ Fallback:
 ## 提交/收尾
 
 - 默认主路径 → 手动 git add/commit；commit/push 前展示 `git diff --cached --stat` 待确认（CLAUDE.md §1.3 人工确认线）
-- 条件路径：`commit-commands:commit`（单提交）、`commit-commands:commit-push-pr`（**一条命令自动 push 远端 + gh 开 PR，不可逆**）、`superpowers:finishing-a-development-branch`（长分支收尾）、`ocr review`（commit 前独立审查）
+- 条件路径：`commit-commands:commit`（单提交）、`commit-commands:commit-push-pr`（**一条命令自动 push 远端 + gh 开 PR，不可逆**）、`ocr review`（commit 前独立审查）
 
 AskUserQuestion:
 - A: 手动提交（展示 diff 待确认）

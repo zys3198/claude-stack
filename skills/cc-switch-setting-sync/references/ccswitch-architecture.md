@@ -45,7 +45,7 @@ provider 无关的全部配置，例如：
   "attribution": {"commit": "", "pr": ""},
   "effortLevel": "high",
   "includeCoAuthoredBy": false,
-  "enabledPlugins": {"superpowers@claude-plugins-official": true},
+  "enabledPlugins": {"mattpocock-skills@mattpocock": true},
   "extraKnownMarketplaces": {...},
   "hooks": {"PostToolUse": [...], "PreToolUse": [...]},
   "permissions": {"allow": [...]},

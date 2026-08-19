@@ -92,7 +92,7 @@ ai-coding-guide 在当前会话？ YES/NO
 ### Step 0：组合顺序
 
 1. **点名优先**：用户点名某个已装 skill/slash command → 先用它；若与安全、不可逆操作或当前环境冲突，先说明冲突再停。
-2. **插件能力走条件路径**：`superpowers:*` / `ponytail:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
+2. **插件能力走条件路径**：`ponytail:*` 等插件条目，只在当前会话可调用清单中出现时才走（环境自检第 1 条）；没有则走各分类的 Fallback，不把插件写成默认直达。
 3. **流程优先**：同一任务命中多个 skill 时，先主路径，再专项型（审查/安全/文档），不先按插件名倒推任务。
 4. **少叠加**：默认 1 个主路径 + 必要 1 个专项 + 收尾验证；不要把所有相关 skill 一次性全调用。高风险审查、构建失败、外部发布例外。
 5. **能组合就组合**：用户同时问结构和调用链、实现和验证、提交前确认时，按顺序串联能力，不让用户在互补能力之间二选一。
@@ -105,7 +105,7 @@ ai-coding-guide 在当前会话？ YES/NO
 | 档位 | 适用 | 路径 |
 |---|---|---|
 | **精简路径（默认）** | 多数任务：单点小改、机械任务、模型已能自做 | 直接理解 → 实现 → 自检 → 交付；条件路径 `ponytail:ponytail` |
-| **拆单轻量** | 任务需要某一环、不值整套 | 按需启用单环：`mattpocock-skills:grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前），均 user-invoked 需提醒用户手动启用 |
+| **拆单轻量** | 任务需要某一环、不值整套 | 按需启用单环：`mattpocock-skills:grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前），均 model-invoked |
 | **进交付状态机** | 升档信号：跨模块 / 陌生代码库 / 高风险域 / 需求模糊 / 用户明说「大任务」「跨会话」 | 本系统状态机（`SKILL.md`「必须执行」）：澄清 → 设计 → 实现 → 审查 → 测试 → 总结，脚本写 `workflow-state.json` 可断点续跑。口令明说规模 small/medium/large，不说会被自判 small |
 
 **裁决原则（用户定调：不要太严格限制模型发挥）：**
@@ -113,7 +113,7 @@ ai-coding-guide 在当前会话？ YES/NO
 - 模型判断是第一位的；升档信号只用于**给建议**（一句话理由），用户说「不用」就退回精简，不纠缠。
 - **口令优先**：用户明说 small/medium/large 或直接点名流程，永远覆盖模型判断。
 - **唯一硬门**：进状态机的任务，REQUIREMENT 的用户确认门禁不可跳过（详见 `SKILL.md`「不可绕过」）。
-- 单环手法仍可借 `superpowers:*`（条件路径）：`brainstorming` / `test-driven-development` / `requesting-code-review` / `verification-before-completion`。
+- 单环手法借 `mattpocock-skills` 单环（`grilling` / `tdd` / `diagnosing-bugs` / `code-review` 均 model-invoked，可自动走）；拿不定主意要决策咨询 → `ask-matt`（user-invoked，提醒用户手动敲）。
 
 **复杂度无法判断** → 问一句任务规模 / 代码熟悉度，再定档（不逢任务强弹菜单）。
 
@@ -205,12 +205,12 @@ ai-coding-guide 在当前会话？ YES/NO
 
 ### Step 2：匹配推荐路径
 
-> 🔴 **横切收尾（所有产生产品代码改动的分类通用）**：开发新功能 / 前端视觉 / 调试 bug / 重构简化 / 快速改动 / 构建错误 完工前，先按运行时表面验证：有可驱动流程 → 用 `run` 驱动真实流程验证；无运行时表面 → 跑相关 build / lint / test / check。随后组织验证证据（`superpowers:verification-before-completion` 为条件路径，当前会话可调用才用；不可用时手写证据清单：行为、命令、输出），再宣布完成。审查代码 ≠ 完工验证：review 是人读挑错，验证是跑起来证行为对，互补。**用户直接说「帮我验证/确认生效」→先确认最近改动属哪类改动，再走本检查点；若还要求提交，验证通过后继续进入「提交/收尾」。**
+> 🔴 **横切收尾（所有产生产品代码改动的分类通用）**：开发新功能 / 前端视觉 / 调试 bug / 重构简化 / 快速改动 / 构建错误 完工前，先按运行时表面验证：有可驱动流程 → 用 `run` 驱动真实流程验证；无运行时表面 → 跑相关 build / lint / test / check。随后组织验证证据（手写证据清单：行为、命令、输出），再宣布完成。审查代码 ≠ 完工验证：review 是人读挑错，验证是跑起来证行为对，互补。**用户直接说「帮我验证/确认生效」→先确认最近改动属哪类改动，再走本检查点；若还要求提交，验证通过后继续进入「提交/收尾」。**
 
 分类: 开发新功能
 - 默认主路径 → 开工问询 + Step 0.7 缺口收齐 → 轻量确认目标：范围小直接实现；跨模块/要设计先给实现计划（手动拆 4-6 切片 + PLAN.md，按 `code-change-workflow` §3）确认后实现
 - 需求很模糊 → 先 `expose-unknowns` 判级或 AskUserQuestion 澄清，再回本分类
-- 条件路径（当前会话可调用才走）：`superpowers:brainstorming`（澄清+方案探索）、`superpowers:writing-plans`（计划）、`superpowers:test-driven-development`（TDD）、`ponytail:ponytail`（最小实现）
+- 条件路径（当前会话可调用才走）：`ponytail:ponytail`（最小实现）；手法单环 → `mattpocock-skills:grilling`（澄清）/ `tdd`（TDD，均 model-invoked）/ `to-spec`（计划成型，user-invoked 需提醒手动敲）
 - 复杂/高风险改动 → `code-change-workflow`（改前/改中/改后清单 + Verify 分级）
 - 升档信号命中或用户明说规模 → 交付状态机（Step 0.4）
 
@@ -245,7 +245,7 @@ Fallback:
 - **轻量审查**（快速、有会话上下文）：当前 diff / PR / 分支 / 指定基线对比 → `code-review`（内置命令：commit / 分支 / tag / main / HEAD~N）
 - 指定文件 / 代码块 → 通用 Code Reviewer agent
 - 高风险（auth / DB / 架构 / 安全） → 轻量 reviewer + `security-review`（内置命令）+ 通用 Code Reviewer agent 双审，防"自己审自己"盲区
-- 条件路径：`ocr review` / `/open-code-review:review`（独立重量审查）、`superpowers:requesting-code-review`（实现完成后请求复核）、`mattpocock-skills:code-review`（提交前，user-invoked 需手动启用）
+- 条件路径：`ocr review` / `/open-code-review:review`（独立重量审查）、`mattpocock-skills:code-review`（提交前，Standards+Spec 双轴）
 
 AskUserQuestion:
 - A: 审当前 diff / 分支 / PR（轻量，会话内）
@@ -259,7 +259,7 @@ Fallback:
 
 分类: 调试 bug
 - 默认主路径 → `code-change-workflow` §2 调试工作流：先补失败测试/最小复现 → 定位根因（检查所有调用方）→ 修复 → 验证
-- 条件路径：`superpowers:systematic-debugging`（当前会话可调用才走）；`mattpocock-skills:diagnosing-bugs`（user-invoked 需手动启用）
+- 条件路径：`mattpocock-skills:diagnosing-bugs`（反馈循环变红 → 最小化 → 定位，model-invoked）
 - 定位后需要修代码 → 修复 + 横切收尾
 
 AskUserQuestion:
@@ -312,8 +312,8 @@ Fallback:
 | 分类 | 主路径一句话 | 条件路径 / Fallback 概要 |
 |---|---|---|
 | 学习型开发 | `ai-coding-coach` | 叠加代码改动时先定归属+persona；`ai-coding-coach` 不在→手动先给方案+纠偏+讲 why |
-| 判级/暴露未知 | `expose-unknowns` | 需采访→内嵌 `superpowers:brainstorming`（条件）；不在→`code-change-workflow` §1.1 判级一行 |
-| 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 只想整理需求项→`to-prd` / `to-issues`；`superpowers:writing-plans`（条件） |
+| 判级/暴露未知 | `expose-unknowns` | 需采访→`grill-me`/`ask-matt`（user-invoked 手动敲）；不在→`code-change-workflow` §1.1 判级一行 |
+| 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 只想整理需求项→`to-prd` / `to-issues`；成型 spec→`mattpocock-skills:to-spec`（user-invoked 手动敲） |
 | 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→`chinese-markdown-normalizer` |
 | 路由指南维护 | `guide-skill-auditor` | 行为变化→`darwin-skill`；小修最小改+补 eval 用例；只评估→给结论不改文件 |
 | 提交/收尾 | 手动 git + `git diff --cached --stat` 展示待确认 | `ocr review` |

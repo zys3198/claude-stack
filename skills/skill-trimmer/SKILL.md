@@ -28,7 +28,7 @@ description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill
 **本机叠加规则（用户已拍板，2026-07-25）：**
 9. **被 router 引用的 D 类 → 删 skill + 顺手改路由。** 理由：skill 真没用，引用它的路由那行也该改。判定动作：标「移除+改路由」，移动后必须同步修掉 router/CLAUDE.md 里对应引用（交 guide-skill-auditor 或手动），不留死引用。不再是免死牌。
 10. **E 类（流程型）留兜底。** 你按任务分级用模型：弱模型 + 复杂任务时流程型是兜底。流程型**不一刀切删**，只有「D 类 AND 零引用 AND 无资产」才进移除候选。
-11. **Superpowers 套件不审。** 整个 SP 套件豁免启用时机审查，不进「过度流程候选」，默认全留。（你已定：不审。）
+11. **Superpowers 套件不审。** 整个 SP 套件豁免启用时机审查，不进「过度流程候选」，默认全留。（你已定：不审。**2026-08-19 更新：SP 插件已卸载、手法层转 matt+ask-matt，本决议失效存档，下文 SP 相关条目随决议一并失效。**）
 12. **分类建议必须用户拍板，AI 不自动执行移除。**（2026-07-23 先例。）
 
 ## 已定冲突（不再纠结，直接按此判）
@@ -37,7 +37,7 @@ description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill
 |---|--------|---------|---------|
 | 1 | 被 router 引用的 D 类 | **改路由**——skill 没用就删，路由引用跟着改 | 「移除+改路由」，移动后同步修 router |
 | 2 | 流程型/E 类 | **留兜底**——弱模型+复杂任务需要 | 流程型不删，除非零引用+无资产的纯 D 类 |
-| 3 | Superpowers 套件 | **不审** | 整个套件豁免，全留 |
+| 3 | Superpowers 套件 | **不审** | 整个套件豁免，全留（2026-08-19 SP 已卸载，决议失效存档） |
 
 这三条已拍板，判定时不重新权衡、不列为「待你定」，直接按决定执行建议。
 
@@ -162,12 +162,16 @@ python ~/.claude/skills/skill-trimmer/scripts/review_server.py read --require-co
 主流框架用「遥测计数 + 溯源标签 + A/B 评测」做留删决策（Curator 机制：active → stale → archived；skill-up 工具做因果对照）。**本机现状没有遥测基建，不假装有。** 用轻量信号近似，证据链列全：
 
 - **轻量信号**（替代遥测计数器）：
-  - 文件 mtime / git 历史：半年未动 + 零引用 + D 类 → stale 候选（对应 Curator 的 stale→archived）。
+  - 文件 mtime / git 历史：半年未动 + 零引用 + D 类 → stale 候选（对应 Curator 的 stale→archived）。**已自动化（2026-08-17）**：scan_skills.py 每 skill 输出 `last_modified`（SKILL.md mtime）+ `usage_count`（读 metrics/skill-usage.log，由 PostToolUse 记账 hook 产生）+ `staleCandidate`（0 使用 + >180 天未改，STALE_DAYS=180），保鲜判据从人工回忆变数据驱动；插件 skill 不在 `~/.claude/skills` 下不纳入本扫描。
   - 引用方活跃度：被 router 引用且 router 在迭代 → active；只有 memory 里历史提过 → 偏 stale。
   - `installing/` 台账日期：装后从未用过、台账无后续 → 可疑。
   - 用户实测：同任务「开/关该 skill」各跑一次对比 = 穷人版 A/B，不搭评测集。
   - **总量健康度（新增【文章】）**：库总量 vs 维护基线 <20——远超且大量零使用 = 书签心态信号，push 整体收敛，别因单个看似合理就放行。
   - **三维上下文成本（新增【工具】）**：`currentStartupTokens`（当前可发现入口启动成本）/ `shellStartupTokens`（触发空壳入口成本）/ `postCallTokens`（命中后完整内容成本）。`startup_delta = currentStartupTokens - shellStartupTokens`：正数写「入口缩短」、负数写「入口反增」、0 写「仅治理收益」。触发空壳只有当 `shellStartupTokens < currentStartupTokens` 才真的省启动 token，不把倒挂显示成节省。本机无遥测时三值标 `不可用`，不硬填 0（对应「描述列表预算 ~2%」的定量化）。
+**本机自动化三件套（2026-08-17，使用信号的实际来源，命令在此）**：
+- 记账（全自动）：settings.json PostToolUse `Skill` matcher → `hooks/skill_ledger.py` → `~/.claude/metrics/skill-usage.log`。Skill 调用自动追加，无需人工跑。
+- 保鲜（想审计时跑）：`python ~/.claude/skills/skill-trimmer/scripts/scan_skills.py` → inventory.json 每 skill 带 `usage_count`/`last_modified`/`staleCandidate`，stale 候选直接列在 stdout；去留拍板仍走本 skill 判定流程。
+- 复盘（周惯例）：`python ~/.claude/hooks/scripts/transcript_sweep.py 7` → `~/.claude/metrics/transcript-weekly-YYYYMMDD.md`，读高频主题挑 2-3 个缺口补 memory/skill（补盲闭环）。
 - **演进方向（当前不建）**：`github.com/alibaba/skill-up`（已验证存在的官方评测工具）做正式 A/B 需评测数据集，成本高；哪天想上再建。
 - **状态映射**：active（在用/有引用）→ stale（mtime 久 + 零引用）→ archived（移入 `_weak-model-backup/`）。审计报告里给每个候选标当前状态。
 

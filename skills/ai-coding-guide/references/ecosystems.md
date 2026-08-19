@@ -8,13 +8,14 @@
 
 ## 生态角色（当前环境）
 
-### mattpocock-skills：主力套件（user-invoked，条件路径）
+### mattpocock-skills：主力套件（条件路径）
 
-- 模型调不到，需用户手动启用；路由到它们时必须提醒用户手动启用
-- 门面：`grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前）/ `wayfinder`（推图）
+- 单环手法 `grilling` / `diagnosing-bugs` / `tdd` / `code-review` 等 **model-invoked**，模型可自动走；编排件 `ask-matt` / `grill-me` / `to-spec` / `to-tickets` / `implement` / `wayfinder` / `handoff` 等 **user-invoked**，路由到它们时必须提醒用户手动敲（v1.2.3 磁盘 frontmatter 实测）
+- 门面：`grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前）/ `ask-matt`（套件内决策路由）
 - 套件随附：prototype / research / domain-modeling / codebase-design / resolving-merge-conflicts / wizard / writing-for-agents
+- 作者主推主流程（ask-matt 内地图）：grill-with-docs 澄清 → to-spec → to-tickets → implement（内驱 tdd + code-review 收尾）；大模糊工程 → wayfinder 决策图
 
-### superpowers：备用流程套件（条件路径）
+### superpowers：备用流程套件（2026-08-19 已卸载，仅留生态对比认知，路由不再指向）
 
 - 单环手法借用：`brainstorming` / `systematic-debugging` / `test-driven-development` / `writing-plans` / `requesting-code-review` / `verification-before-completion` / `using-git-worktrees`
 - 套件随附：executing-plans / receiving-code-review / subagent-driven-development / dispatching-parallel-agents / finishing-a-development-branch / writing-skills / using-superpowers（元 skill，每会话自动注入）
@@ -69,7 +70,7 @@
 | `gitnexus-*` 不可用 | 继续用 `lean-ctx` 聚焦读取；`lean-ctx` 也不可用才退原生搜索 + 精读文件 |
 | `/loop` 不可用 | 明示不可用，改手动执行 |
 | `hallmark` / `impeccable` 不可用 | 手动给方向选项 + 按项目栈直接实现，收尾自查 AI 味 |
-| `mattpocock-skills:*` 不可用 / 用户不启用 | grilling → 开工问询 + `expose-unknowns` 判级；diagnosing-bugs → `code-change-workflow` §2 / `superpowers:systematic-debugging`（条件）；tdd → 手动红绿小步改；code-review → 内置 `code-review` |
+| `mattpocock-skills:*` 不可用 / 用户不启用 | grilling → 开工问询 + `expose-unknowns` 判级；diagnosing-bugs → `code-change-workflow` §2；tdd → 手动红绿小步改；code-review → 内置 `code-review` |
 
 ---
 
@@ -96,7 +97,7 @@
 | 项目 wiki 三级知识库 | 只保留"理解代码先 lean-ctx/gitnexus，完成后 neat-freak" | 项目地图应在项目内维护 |
 | TECH_SPEC.md 完整模板 | 不内置；仅建议知识收尾时按项目需要沉淀 | 模板绑定项目复杂度 |
 | 红线 YAML + 分阶段加载 | 不内置；保留 CHECKPOINT + 风险闸门矩阵 | 对路由层过重 |
-| 模拟器/浏览器/构建专用验证 | 不内置；路由到 `run` / 相关 test/lint/build（`superpowers:verification-before-completion` 为条件路径）/ 下游测试 skill | 验证细节由项目和语言决定 |
+| 模拟器/浏览器/构建专用验证 | 不内置；路由到 `run` / 相关 test/lint/build / 下游测试 skill | 验证细节由项目和语言决定 |
 
 ---
 

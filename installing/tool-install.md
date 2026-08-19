@@ -147,3 +147,16 @@
 - 冒烟：`--version`=0.84.2、`--list-models` 正常（无 key 只列默认可见集 anthropic13+minimax3，非缺数据）、`pi auth check` 命令可用
 - 备注：GH 直连本机不通、gh-proxy 镜像可用（clone/release 都靠它）；上游每日大 commit 量，策略=main 纯镜像+自定义走特性分支；构建类型错处理=跟上生成文件/连网 `npm run build`/或 checkout 贴近 release
 
+
+
+## superpowers 插件卸载（手法层转 mattpocock-skills + ask-matt）2026-08-19
+- 来源：claude-plugins-official marketplace，原安装记录见本文件前文
+- 卸载日期：2026-08-19
+- 卸载动作原文：
+  1. ~/.claude/settings.json enabledPlugins 删 `superpowers@claude-plugins-official` 一行（手动编辑）
+  2. python ~/.claude/skills/cc-switch-setting-sync/scripts/sync_claude_common.py（dry-run 9062→9013 后写入，备份 `~/.cc-switch/backups/sync-backup-20260819_134401.json`，readback MATCH）——防切 provider 时 SP 复活
+- 插件缓存目录 `~/.claude/plugins/cache/claude-plugins-official/superpowers` 留盘未删（不加载即不生效；要彻底删另行确认）
+- 同步改动：ai-coding-guide routing.md/routing-classification-details.md/ecosystems.md 清全部 superpowers 条件路径→改指 matt 单环（grilling/tdd/diagnosing-bugs/code-review 为 model-invoked；ask-matt/grill-me/to-spec 等为 user-invoked 需手动敲）；expose-unknowns/skill-trimmer/ccswitch-architecture 同步；eval case rt-named-plugin-priority 改锚 ponytail
+- 背景决策：手法层不自建不自动借，matt 套件替代 SP；ask-matt = matt 套件内官方路由（idea→ship 主流程 grill-with-docs→to-spec→to-tickets→implement）
+- 依赖：mattpocock-skills@mattpocock 插件保持启用
+- 备注：恢复 = settings.json 加回 enabledPlugins 行 + 跑同一 sync 脚本
