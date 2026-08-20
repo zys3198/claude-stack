@@ -1,13 +1,22 @@
 ---
 name: ai-coding-guide
-description: Use when the user asks which skill/tool/ecosystem to use in Claude Code, how installed plugins/skills differ or compare, starts any coding task needing routing, or needs structured, resumable, multi-stage delivery (or to resume an existing workflow). 本 skill 是编码域总入口系统：先按任务类型分诊，交付型任务进入脚本化状态机（需求→设计→实现→审查→测试→总结，可断点续跑）。中文触发：用哪个工具、X和Y区别/冲突吗、该用什么、怎么配合、哪个更好、刚装了X插件、X不能用了、重任务跨会话/分阶段交付、继续之前的任务、断点续跑、这篇文章/做法能不能优化进路由；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。
+description: Use when the user asks which skill/tool/ecosystem to use in Claude Code, how installed plugins/skills differ or compare, starts any coding task needing routing, or needs structured, resumable, multi-stage delivery (or to resume an existing workflow). 本 skill 是 Claude Code 编码域总入口路由器，负责编码任务与前端视觉请求的开工分诊和路径选择。中文触发：用哪个工具、X和Y区别/冲突吗、该用什么、怎么配合、哪个更好、刚装了X插件、X不能用了、重任务跨会话/分阶段交付、继续之前的任务、断点续跑、这篇文章/做法能不能优化进路由；页面/界面/UI/落地页/登录页的视觉方向与实现也走本路由（前端视觉子路径）。不用于：中文技术文章写改审（走 article-writing-guide）、学习调研（走 learning-guide）。<!-- v2.3.0 -->
 ---
 
 # ai-coding-guide（编码域总入口系统）
 
 ## 编码路由（分诊层）
 
-本系统同时承担编码域路由。**先读 [references/routing.md](references/routing.md) 分诊**：非交付型任务（工具选型/调试/理解代码/澄清/学习陪跑等）按其中分类路径执行，不进状态机；交付型任务（要写代码并交付可验收结果）由 routing.md Step 0.4 定档——默认精简路径，升档信号命中或用户明说规模时才走下方「必须执行」状态机；前端视觉任务读 [references/frontend-visual.md](references/frontend-visual.md)。
+本系统同时承担编码域路由。**先读 [references/routing.md](references/routing.md) 分诊**：非交付型任务（工具选型/调试/理解代码/澄清/学习陪跑等）按其中分类路径执行，不进状态机；交付型任务（要写代码并交付可验收结果）由 routing.md Step 0.4 定档——1-2 步单文件机械改保留精简路径，其他非机械代码变更默认先走 Matt `/grill-with-docs`，命中升档信号或用户明说规模时才进入下方「必须执行」状态机；前端视觉任务读 [references/frontend-visual.md](references/frontend-visual.md)。
+
+### Matt skill 调用提示
+
+命中 Matt 路径时，路由输出必须同时给出具体 skill 和手动命令（例如 `/diagnosing-bugs`），不能只写“使用 Matt”。按插件 v1.2.3 的 invocation 分类处理：
+
+- **user-invoked**：`ask-matt`、`grill-with-docs`、`triage`、`improve-codebase-architecture`、`setup-matt-pocock-skills`、`to-spec`、`to-tickets`、`implement`、`wayfinder`、`grill-me`、`handoff`、`teach`、`to-questionnaire`、`wait-what`。必须提醒用户手动调用并等待，不得假装自动执行。
+- **model-invoked**：`prototype`、`diagnosing-bugs`、`research`、`tdd`、`domain-modeling`、`codebase-design`、`code-review`、`resolving-merge-conflicts`、`wizard`、`grilling`、`writing-for-agents`。模型可按任务自动调用；路由仍必须显示对应手动命令，用户明确想自己调用时才等待。
+- user-invoked skill 可以驱动 model-invoked skill，但不能自动调用另一个 user-invoked skill；本路由不把一串 Matt skill 静默展开。主流程由用户逐个手动推进：`/grill-with-docs` → `/to-spec` →（跨会话/并行/多人/需显式阻塞时 `/to-tickets`）→ `/implement`。各入口内部可按规则驱动 model-invoked skill；`implement` 在预先约定的 seam 按需驱动 `/tdd`，提交前必须完成 `/code-review`。
+- `implement` 的原始 skill 要求 commit；本地规则优先，commit 前仍必须展示范围和 `git diff --cached --stat`，得到用户确认后才能提交。
 
 ## 必须执行
 

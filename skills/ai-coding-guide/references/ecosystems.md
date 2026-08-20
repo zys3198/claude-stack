@@ -10,10 +10,56 @@
 
 ### mattpocock-skills：主力套件（条件路径）
 
-- 单环手法 `grilling` / `diagnosing-bugs` / `tdd` / `code-review` 等 **model-invoked**，模型可自动走；编排件 `ask-matt` / `grill-me` / `to-spec` / `to-tickets` / `implement` / `wayfinder` / `handoff` 等 **user-invoked**，路由到它们时必须提醒用户手动敲（v1.2.3 磁盘 frontmatter 实测）
-- 门面：`grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前）/ `ask-matt`（套件内决策路由）
-- 套件随附：prototype / research / domain-modeling / codebase-design / resolving-merge-conflicts / wizard / writing-for-agents
-- 作者主推主流程（ask-matt 内地图）：grill-with-docs 澄清 → to-spec → to-tickets → implement（内驱 tdd + code-review 收尾）；大模糊工程 → wayfinder 决策图
+依据当前插件 v1.2.3 的 README、manifest 和各 `SKILL.md` frontmatter，先按“谁启动”分层，再按任务选择，不把 25 个 skill 当成 25 个必走步骤。
+
+**user-invoked：必须提醒用户手动敲命令并等待**
+
+| skill | 手动命令 | 路由用途 |
+|---|---|---|
+| `ask-matt` | `/ask-matt` | 不知道下一步，询问 Matt 内部入口；只做选择，不替用户执行整套流程 |
+| `grill-with-docs` | `/grill-with-docs` | 非机械代码变更第一跳；对齐需求、术语并写入 CONTEXT / ADR |
+| `triage` | `/triage` | 外部原始 bug / request 尚未整理成可执行任务；不处理 `/to-tickets` 自产 Ticket |
+| `improve-codebase-architecture` | `/improve-codebase-architecture` | 扫描代码库，找值得深化的结构候选；选中后回主流程 |
+| `setup-matt-pocock-skills` | `/setup-matt-pocock-skills` | 仓库首次配置 issue tracker、标签和文档布局；不按任务重复运行 |
+| `to-spec` | `/to-spec` | 已达成共识后固化 Spec；不重新采访、不填补空白决定 |
+| `to-tickets` | `/to-tickets` | 跨会话、并行、多人，或需要显式阻塞关系时按用户结果拆 Ticket；单会话小任务可跳过 |
+| `implement` | `/implement` | 按 Spec / Ticket 实现；在预先约定 seam 按需驱动 TDD，提交前必须完成 code-review；commit 仍受本地确认线约束 |
+| `wayfinder` | `/wayfinder` | 目标大且路线不清；画 Decision Ticket 地图后回 `/to-spec` |
+| `grill-me` | `/grill-me` | 无工作目录的非仓库想法澄清；仓库编码优先 `/grill-with-docs` |
+| `handoff` | `/handoff` | 必须跨 Harness、目录或人员交接时生成临时交接物；普通会话过长先压缩 |
+| `teach` | `/teach` | 跨多会话系统学习；编码域只在用户明确点名时保留，否则转 `learning-guide` |
+| `to-questionnaire` | `/to-questionnaire` | 答案在客户、同事或专家手中；生成问卷，不让当前用户猜答案 |
+| `wait-what` | `/wait-what` | 上一条回答没听懂时只重讲当前消息，不建立永久风格规则 |
+
+**model-invoked：可自动调用；路由始终显示手动命令，用户明确要自己练时等待**
+
+| skill | 手动命令 | 路由用途 |
+|---|---|---|
+| `prototype` | `/prototype` | 讨论无法回答设计问题时做可抛弃、可追溯原型 |
+| `diagnosing-bugs` | `/diagnosing-bugs` | 难复现、原因不明的 bug / 性能回归；先建立变红反馈环 |
+| `research` | `/research` | 缺少外部事实或官方依据时查高信任一手资料 |
+| `tdd` | `/tdd` | 独立测试先行；`implement` 内部已覆盖时不重复手动调用 |
+| `domain-modeling` | `/domain-modeling` | 术语、领域模型持续混乱或漂移 |
+| `codebase-design` | `/codebase-design` | 模块、接口、Seam、深模块设计问题 |
+| `code-review` | `/code-review` | 固定范围 Diff 的 Standards + Spec 双轴审查 |
+| `resolving-merge-conflicts` | `/resolving-merge-conflicts` | 正在合并两组代码时按双方历史解决冲突 |
+| `wizard` | `/wizard` | 必须由人登录、输入凭证或执行控制台步骤时生成向导 |
+| `grilling` | `/grilling` | 被其他入口复用的分轮访谈底层能力；通常不作为第一跳 |
+| `writing-for-agents` | `/writing-for-agents` | 编写或压缩 Skill、AGENTS.md、CLAUDE.md、Spec 等 Agent 文档 |
+
+**主流程与跳步：**
+
+```text
+非机械代码变更：用户手动 /grill-with-docs →（需要固化需求时，用户手动 /to-spec）→ 实现
+1-2 步单文件机械改：保留精简路径，不强行 grilling
+跨会话 / 并行 / 多人 / 需显式阻塞关系：用户手动 /to-tickets
+已有 Spec / Ticket：用户手动 /implement
+实现内部：在预先约定 seam 按需 `/tdd` → 提交前必须 `/code-review`
+独立测试先行或独立审查：才单独手动调用 `/tdd` / `/code-review`
+路径本身不清且规模过大：先用户手动 `/wayfinder`，再回 `/to-spec`
+```
+
+`user-invoked` skill 可以驱动 `model-invoked` skill，但不能自动调用另一个 `user-invoked` skill；本路由把第一跳和后续 user-invoked 入口都交给用户逐个手动调用。`model-invoked` skill 可自动走，但路由始终显示对应手动命令，用户明确要自己练时才等待调用。
 
 ### superpowers：备用流程套件（2026-08-19 已卸载，仅留生态对比认知，路由不再指向）
 
@@ -51,7 +97,7 @@
 |---|---|---|
 | `superpowers:brainstorming`（条件） vs 手动澄清 | 会话可调用且任务复杂 → Superpowers；否则开工问询 + `expose-unknowns` 判级 | 先按运行时可用性分层，再按任务规模 |
 | `superpowers:writing-plans`（条件） vs `to-prd`/`to-issues` | 默认手动拆切片 + PLAN.md；用户只想整理需求项 → `to-prd` / `to-issues` | 计划质量优先但不过度依赖插件 |
-| `code-review`（内置） vs `ocr review`（条件） vs `mattpocock-skills:code-review`（user-invoked） | 轻量走内置 `code-review`；独立重量审查/提交前门禁在可用时叠加 | 审查入口和流程门禁不是同一层 |
+| `code-review`（内置） vs `ocr review`（条件） vs Matt `/code-review`（model-invoked） | 轻量走内置 `code-review`；独立重量审查/提交前门禁在可用时叠加；路由始终显示 Matt 手动命令，用户明确要自己练时等待 | 审查入口和流程门禁不是同一层 |
 | 内置 `security-review` vs 通用 review | 高风险任务用实际 reviewer + 内置 `security-review` 双审 | 安全审查是额外维度，不是替代关系 |
 | `frontend-design`（独立件） vs `hallmark`/`impeccable` | 前端视觉默认 `hallmark`（新页面）/ `impeccable`（提质）；`frontend-design` 用户显式调用才用 | 子路径已点名门面，不双头 |
 | `lean-ctx` vs `gitnexus-*` | 日常查代码先 `lean-ctx`（成本最低），调用链/影响范围再上 `gitnexus-*` | 成本更低 |

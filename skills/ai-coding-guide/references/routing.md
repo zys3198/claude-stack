@@ -78,6 +78,7 @@ ai-coding-guide 在当前会话？ YES/NO
 - **官方可证实**：官方 README、官方 marketplace 元数据、官方插件说明。
 - **经验判断**：默认建议、经验排序、惯用主路径；要写成推荐，不写成定律。
 - **证据不足**：影响主推荐结论时停下来问用户；不影响则标「不确定」或删除。
+- **交接不确定性**：交付型任务的需求/设计交接至少保留目标与背景、范围、红线或排除项、决策与理由、验收标准、假设与证据、未决问题；在“假设与证据”中分别标注已证实事实与推测，在“未决问题”中标注待确认决策。推测不得直接写成硬验收条件。
 
 ## 轻量迁移闸门 & 重机制黑名单
 
@@ -100,26 +101,35 @@ ai-coding-guide 在当前会话？ YES/NO
 
 ### Step 0.4：流程深度裁决（判断导向，不设硬门槛）
 
-交付型任务（有代码产物要验收）先由模型自判复杂度选执行方式，**默认往小走**：
+交付型任务（有代码产物要验收）先判断是否属于机械小改，再由模型自判复杂度选执行方式：**机械小改走精简路径，其他非机械代码变更默认先走 Matt**。
 
 | 档位 | 适用 | 路径 |
 |---|---|---|
-| **精简路径（默认）** | 多数任务：单点小改、机械任务、模型已能自做 | 直接理解 → 实现 → 自检 → 交付；条件路径 `ponytail:ponytail` |
-| **拆单轻量** | 任务需要某一环、不值整套 | 按需启用单环：`mattpocock-skills:grilling`（需求未清）/ `diagnosing-bugs`（定位）/ `tdd`（红绿重构）/ `code-review`（提交前），均 model-invoked |
+| **精简路径（例外）** | 1-2 步单文件机械改、纯文案/格式，或用户明确说「直接做」且无设计/风险 | 直接理解 → 实现 → 自检 → 交付；条件路径 `ponytail:ponytail` |
+| **Matt 默认起步** | 非机械代码变更，但还不需要完整状态机 | `/grill-with-docs`（user-invoked，提醒用户手动调用并等待）→ 按讨论结果需要时 `/to-spec`，再实现；独立测试先行才加 `/tdd` |
 | **进交付状态机** | 升档信号：跨模块 / 陌生代码库 / 高风险域 / 需求模糊 / 用户明说「大任务」「跨会话」 | 本系统状态机（`SKILL.md`「必须执行」）：澄清 → 设计 → 实现 → 审查 → 测试 → 总结，脚本写 `workflow-state.json` 可断点续跑。口令明说规模 small/medium/large，不说会被自判 small |
+
+**Matt 路由与手动调用契约：**
+
+1. 命中 Matt 时，`主路径`写具体命令，不写泛称“Matt skill”；同时输出 `Matt提示：<命令> · <自动/手动> · <原因>`。
+2. user-invoked 必须提示用户手动调用并等待：`/ask-matt`、`/grill-with-docs`、`/triage`、`/improve-codebase-architecture`、`/setup-matt-pocock-skills`、`/to-spec`、`/to-tickets`、`/implement`、`/wayfinder`、`/grill-me`、`/handoff`、`/teach`、`/to-questionnaire`、`/wait-what`。
+3. model-invoked 可由模型自动调用，但路由仍必须展示对应手动命令；用户明确要自己练习时，才暂停等待手动调用：`/prototype`、`/diagnosing-bugs`、`/research`、`/tdd`、`/domain-modeling`、`/codebase-design`、`/code-review`、`/resolving-merge-conflicts`、`/wizard`、`/grilling`、`/writing-for-agents`。
+4. 用户明确说「直接做 / 别问」时，model-invoked 不停；user-invoked 仍不能伪装执行，必须说明需要用户手动调用。
+5. 主流程作为用户可见的手动顺序，不能静默调用另一个 user-invoked skill：`/grill-with-docs` →（用户手动调用 `/to-spec`）→（跨会话/并行/多人/需显式阻塞时，用户手动调用 `/to-tickets`）→（用户手动调用 `/implement`）；`implement` 在预先约定的 seam 按需驱动 `/tdd`，提交前必须完成 `/code-review`。
+6. Matt 不可用时直接显示降级路径；不把“建议手动调用”写成“已调用”。
 
 **裁决原则（用户定调：不要太严格限制模型发挥）：**
 
 - 模型判断是第一位的；升档信号只用于**给建议**（一句话理由），用户说「不用」就退回精简，不纠缠。
 - **口令优先**：用户明说 small/medium/large 或直接点名流程，永远覆盖模型判断。
 - **唯一硬门**：进状态机的任务，REQUIREMENT 的用户确认门禁不可跳过（详见 `SKILL.md`「不可绕过」）。
-- 单环手法借 `mattpocock-skills` 单环（`grilling` / `tdd` / `diagnosing-bugs` / `code-review` 均 model-invoked，可自动走）；拿不定主意要决策咨询 → `ask-matt`（user-invoked，提醒用户手动敲）。
+- 非机械代码变更先走 `/grill-with-docs`；单环手法再借 Matt：`/diagnosing-bugs` / `/tdd` / `/code-review`；拿不定主意再提醒 `/ask-matt`，不得先启动完整状态机。
 
 **复杂度无法判断** → 问一句任务规模 / 代码熟悉度，再定档（不逢任务强弹菜单）。
 
 ### Step 0.5：路由输出契约
 
-默认输出 6 行，除非用户要求展开：
+默认输出 7 行，除非用户要求展开：
 
 ```markdown
 分类：<Step 1 分类>
@@ -127,11 +137,13 @@ ai-coding-guide 在当前会话？ YES/NO
 组合：<必要附加能力；没有写"无">
 参与度：<归属+persona，如 你练/peer -- 一句理由>
 闸门：<TDD / review / verify / 提交确认 / 无>
-下一步：<直接执行 / 问 1 个关键问题 / 等用户确认>
+Matt提示：<无；或具体 /命令 · 自动/手动 · 一句原因>
+下一步：<直接执行 / 手动调用 / 问 1 个关键问题 / 等用户确认>
 ```
 
-- 解释只补"为什么不是另一路径"的关键一句。
-- 用户要求简短/直接给结论 ≠ 豁免契约：6 行契约即最简形态；只有用户要求展开时才加解释。
+- 命中 Matt 时，`Matt提示`必须给具体 `/命令`；user-invoked 写“手动调用”，并把 `下一步`设为“等用户调用”；model-invoked 默认自动调用但仍展示手动命令，用户明确要自己练时改为等待手动调用。
+- 解释只补“为什么不是另一路径”的关键一句。
+- 用户要求简短/直接给结论 ≠ 豁免契约：7 行契约即最简形态；只有用户要求展开时才加解释。
 - 进交付状态机档（Step 0.4）时，「下一步」必附口令提醒：规模可明说 small/medium/large，不说会被自判 small。
 - 用户问生态对比时，再展开 `references/ecosystems.md`。
 - 用户进入学习陪跑时，输出先改为 `模式 / 你先做什么 / 我怎么纠偏 / 收尾复盘什么`。
@@ -140,7 +152,7 @@ ai-coding-guide 在当前会话？ YES/NO
 
 | 风险 | 触发 | 必要闸门 |
 |---|---|---|
-| 低 | 文案、样式微调、单文件机械改 | 最小检查；不强制 review / verify |
+| 低 | 文案、样式微调、单文件机械改 | 最小检查；AI 生成代码仍至少一次独立轻量复核，低风险不启动多 Agent 对抗审查；纯文案/非代码改动不套代码复核 |
 | 中 | 功能逻辑、bug 修复、重构 | 失败测试或最小复现 → 实现 → 相关 test/lint/build → 必要 review |
 | 高 | auth、权限、DB schema、迁移、支付、外部 IO、安全边界、架构 | 计划/设计确认 → TDD/复现 → 专项 reviewer + security-review → verify/证据 |
 | 不可逆/外发 | commit、push、PR、删除文件、清理未跟踪文件、密钥、数据库写操作 | 先展示范围/状态/diff 或删除清单，得到用户确认后才执行 |
@@ -208,9 +220,9 @@ ai-coding-guide 在当前会话？ YES/NO
 > 🔴 **横切收尾（所有产生产品代码改动的分类通用）**：开发新功能 / 前端视觉 / 调试 bug / 重构简化 / 快速改动 / 构建错误 完工前，先按运行时表面验证：有可驱动流程 → 用 `run` 驱动真实流程验证；无运行时表面 → 跑相关 build / lint / test / check。随后组织验证证据（手写证据清单：行为、命令、输出），再宣布完成。审查代码 ≠ 完工验证：review 是人读挑错，验证是跑起来证行为对，互补。**用户直接说「帮我验证/确认生效」→先确认最近改动属哪类改动，再走本检查点；若还要求提交，验证通过后继续进入「提交/收尾」。**
 
 分类: 开发新功能
-- 默认主路径 → 开工问询 + Step 0.7 缺口收齐 → 轻量确认目标：范围小直接实现；跨模块/要设计先给实现计划（手动拆 4-6 切片 + PLAN.md，按 `code-change-workflow` §3）确认后实现
+- 默认主路径 → 开工问询 + Step 0.7 缺口收齐 → 1-2 步单文件机械改直接实现；其他非机械代码变更先提醒用户手动调用 `/grill-with-docs`，讨论后按需要固化 `/to-spec`，再实现；跨模块/要设计先给实现计划（手动拆 4-6 切片 + PLAN.md，按 `code-change-workflow` §3）确认后实现
 - 需求很模糊 → 先 `expose-unknowns` 判级或 AskUserQuestion 澄清，再回本分类
-- 条件路径（当前会话可调用才走）：`ponytail:ponytail`（最小实现）；手法单环 → `mattpocock-skills:grilling`（澄清）/ `tdd`（TDD，均 model-invoked）/ `to-spec`（计划成型，user-invoked 需提醒手动敲）
+- 条件路径（当前会话可调用才走）：`ponytail:ponytail`（仅机械小改）；Matt 非机械变更默认 `/grill-with-docs`（user-invoked，提醒手动敲并等待），讨论后按需要 `/to-spec`（user-invoked，提醒手动敲），独立 TDD 走 `/tdd`（model-invoked，可自动或按学习需要手动）；已有 Spec/Ticket 才走 `/implement`（user-invoked，提醒手动敲）
 - 复杂/高风险改动 → `code-change-workflow`（改前/改中/改后清单 + Verify 分级）
 - 升档信号命中或用户明说规模 → 交付状态机（Step 0.4）
 
@@ -245,7 +257,7 @@ Fallback:
 - **轻量审查**（快速、有会话上下文）：当前 diff / PR / 分支 / 指定基线对比 → `code-review`（内置命令：commit / 分支 / tag / main / HEAD~N）
 - 指定文件 / 代码块 → 通用 Code Reviewer agent
 - 高风险（auth / DB / 架构 / 安全） → 轻量 reviewer + `security-review`（内置命令）+ 通用 Code Reviewer agent 双审，防"自己审自己"盲区
-- 条件路径：`ocr review` / `/open-code-review:review`（独立重量审查）、`mattpocock-skills:code-review`（提交前，Standards+Spec 双轴）
+- 条件路径：`ocr review` / `/open-code-review:review`（独立重量审查）、`/code-review`（Matt，model-invoked；路由始终显示手动命令，用户明确要自己练时等待，Standards+Spec 双轴）
 
 AskUserQuestion:
 - A: 审当前 diff / 分支 / PR（轻量，会话内）
@@ -258,8 +270,8 @@ Fallback:
 - 仍失败 → 停止审查，先问意图（审查/调试/当参考）再走对应分类
 
 分类: 调试 bug
-- 默认主路径 → `code-change-workflow` §2 调试工作流：先补失败测试/最小复现 → 定位根因（检查所有调用方）→ 修复 → 验证
-- 条件路径：`mattpocock-skills:diagnosing-bugs`（反馈循环变红 → 最小化 → 定位，model-invoked）
+- 默认主路径 → 只做诊断、不改代码时直接走 `code-change-workflow` §2 或 `/diagnosing-bugs`；需要产生修复代码时，先提醒用户手动调用 `/grill-with-docs` 并等待，再进入 `code-change-workflow` §2：失败测试/最小复现 → 定位根因（检查所有调用方）→ 修复 → 验证
+- 条件路径：`/diagnosing-bugs`（反馈循环变红 → 最小化 → 定位，model-invoked；路由始终显示手动命令）
 - 定位后需要修代码 → 修复 + 横切收尾
 
 AskUserQuestion:
@@ -271,7 +283,7 @@ Fallback:
 
 分类: 重构/简化
 - **前置**：行为未理解先走「理解代码」
-- 默认主路径 → 手动列坏味道 + 逐步改，每步跑测试（原则源：项目 CLAUDE.md §2.3 简洁优先 / §2.4 精准修改）
+- 默认主路径 → 非机械重构先提醒用户手动调用 `/grill-with-docs` 并等待，再手动列坏味道 + 逐步改，每步跑测试（原则源：项目 CLAUDE.md §2.3 简洁优先 / §2.4 精准修改）；1-2 步单文件机械改保留「快速改动」路径
 - 会话/阶段收尾、文档/记忆/README/AGENTS 同步清理 → `neat-freak`（知识库洁癖，不替代代码重构）
 - 复杂/高风险重构 → `code-change-workflow`（改前/改中/改后清单 + Verify 分级）
 
@@ -296,7 +308,7 @@ Fallback:
 - 用户说「别省，按完整流程来」 → 升到「开发新功能」
 
 分类: 构建错误
-- 默认主路径 → 跑项目已有构建命令，按错误原文排查（框架可跑 `inspect_context.py` 拿 manifests 证据，免问）
+- 默认主路径 → 只定位/解释构建错误时，按错误原文排查；需要产生修复代码时，先提醒用户手动调用 `/grill-with-docs` 并等待，再跑项目已有构建命令并按错误原文排查（框架可跑 `inspect_context.py` 拿 manifests 证据，免问）
 - 条件路径：对应语言/框架专项 slash command 或 resolver agent（当前会话可调用才走）
 
 AskUserQuestion:
@@ -307,13 +319,33 @@ Fallback:
 - 框架未知 → 先问语言/框架
 - 仍失败 → 停止自动清理，展示工作区状态和完整错误；如需删除未跟踪文件，单独确认删除范围
 
+### Step 2.1：Matt 具体路由（命中即给手动调用提示）
+
+| 明确信号 | 首选 Matt skill | 路由动作 |
+|---|---|---|
+| 仓库内需求仍有未决问题 | `/grill-with-docs` | 提醒用户手动调用并等待；不直接实现 |
+| 已完成讨论、需要固化共识 | `/to-spec` | 提醒用户手动调用并等待；不重新采访、不补猜测 |
+| 任务跨会话、多人、需要并行或需要显式阻塞关系 | `/to-tickets` | 提醒用户手动调用并等待；按用户可验证结果拆 Ticket；单会话无阻塞需求可跳过 |
+| 已有 Spec / Ticket，进入实现 | `/implement` | 提醒用户手动调用并等待；实现内部按需 TDD + review，commit 仍需本地确认 |
+| 不知道 Matt 内部下一步 | `/ask-matt` | 提醒用户手动调用；只让 Matt 选择入口，不代执行整套流程 |
+| 外部原始 bug / request 还未整理 | `/triage` | 提醒用户手动调用；`to-tickets` 自产 Ticket 不再 triage |
+| 目标大且路径不清 | `/wayfinder` | 提醒用户手动调用并等待；路线清楚后回 `/to-spec` |
+| 设计问题不能靠讨论回答 | `/prototype` | model-invoked 可自动走，但始终显示手动命令；用户明确要自己练时等待手动调用 |
+| Bug 难复现或原因不明 | `/diagnosing-bugs` | model-invoked 可自动走，但始终显示手动命令；用户明确要自己练时等待手动调用 |
+| 已知行为要测试先行 | `/tdd` | model-invoked 可自动走，但始终显示手动命令；`implement` 已覆盖时不重复调用 |
+| 固定范围 Diff 需要双轴审查 | `/code-review` | model-invoked 可自动走，但始终显示手动命令；用户明确要自己练时等待手动调用 |
+| 必须换 Harness、目录或人员 | `/handoff` | 提醒用户手动调用并等待；普通会话过长先用压缩 |
+| 上一条回答没听懂 | `/wait-what` | 提醒用户手动调用；只重讲当前消息 |
+
+上表只覆盖编码域的 Matt 入口；`teach` 等系统学习请求转 `learning-guide`，不因插件存在而抢域。命中 user-invoked 时，`下一步`必须是“等用户调用”；命中 model-invoked 时，始终展示手动命令，按用户是否要求自己练决定自动调用或等待手动调用。
+
 ### Step 2 低频分类索引（命中即读 [`references/routing-classification-details.md`](routing-classification-details.md) 对应小节，先给一句话主路径）
 
 | 分类 | 主路径一句话 | 条件路径 / Fallback 概要 |
 |---|---|---|
 | 学习型开发 | `ai-coding-coach` | 叠加代码改动时先定归属+persona；`ai-coding-coach` 不在→手动先给方案+纠偏+讲 why |
-| 判级/暴露未知 | `expose-unknowns` | 需采访→`grill-me`/`ask-matt`（user-invoked 手动敲）；不在→`code-change-workflow` §1.1 判级一行 |
-| 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 只想整理需求项→`to-prd` / `to-issues`；成型 spec→`mattpocock-skills:to-spec`（user-invoked 手动敲） |
+| 判级/暴露未知 | `expose-unknowns` | 需采访→`/grill-me` 或 `/ask-matt`（user-invoked，提醒用户手动敲）；目标过大且路线不清→`/wayfinder`（user-invoked，提醒手动敲）；不在→`code-change-workflow` §1.1 判级一行 |
+| 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 已达成共识→`/to-spec`（user-invoked，提醒手动敲）；跨会话/并行→`/to-tickets`（user-invoked，提醒手动敲）；已有 Spec/Ticket 要实现→`/implement`（user-invoked，提醒手动敲） |
 | 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→`chinese-markdown-normalizer` |
 | 路由指南维护 | `guide-skill-auditor` | 行为变化→`darwin-skill`；小修最小改+补 eval 用例；只评估→给结论不改文件 |
 | 提交/收尾 | 手动 git + `git diff --cached --stat` 展示待确认 | `ocr review` |

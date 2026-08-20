@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "prompt": "帮我写个 Python 脚本处理 CSV",
+    "expected": "编码域请求，转入 ai-coding-guide 编码路径，不转入 article-writing-guide 或 learning-guide。",
+    "scenario": "域内-编码交付"
+  },
+  {
+    "id": 2,
+    "prompt": "我想吃透 Transformer 架构，两周后要给别人讲明白",
+    "expected": "学习/吃透请求，转介 learning-guide，不进入编码分类。",
+    "scenario": "域边界-学习转介"
+  },
+  {
+    "id": 3,
+    "prompt": "从零写一篇 PostgreSQL MVCC 技术文章",
+    "expected": "对外技术文章请求，转介 article-writing-guide，不在编码域起草。",
+    "scenario": "域边界-写作转介"
+  },
+  {
+    "id": 4,
+    "prompt": "帮我做个落地页，现代一点好看一点，做完顺便把代码写了",
+    "expected": "前端视觉请求留在 ai-coding-guide 前端视觉子路径；方向未定时先走决策点，不转介已归档 frontend-guide。",
+    "scenario": "前端视觉-方向先行"
+  },
+  {
+    "id": 5,
+    "prompt": "这个 auth 权限判断还涉及数据库迁移，能不能直接让 agent 改？",
+    "expected": "高风险编码请求，先经过需求/设计、失败测试、审查和验证闸门，不直接开改。",
+    "scenario": "风险边界-权限与数据库"
+  },
+  {
+    "id": 6,
+    "prompt": "把按钮文案从提交改成保存，别走复杂流程",
+    "expected": "明确的小范围快速改动，直接走最小路径，不弹泛化菜单。",
+    "scenario": "默认值-快速改动"
+  },
+  {
+    "id": 7,
+    "prompt": "这个改造任务比较大，估计要跨几个会话，怎么管？",
+    "expected": "跨会话重任务，进入可恢复的 DevFlow 状态机；未明确规模时先按规模/复杂度定档。",
+    "scenario": "流程深度-跨会话"
+  },
+  {
+    "id": 8,
+    "prompt": "帮我把这个视频文件转成 MP3",
+    "expected": "三域外独立工具请求，按共享 fallback-template D 分支直接执行，不制造第四 router。",
+    "scenario": "共享兜底-独立工具"
+  },
+  {
+    "id": 9,
+    "prompt": "这项目 auth 模块怎么工作？谁调用了 login？",
+    "expected": "理解代码请求，先查结构、实现和调用链，不误进交付状态机。",
+    "scenario": "非交付-理解代码"
+  },
+  {
+    "id": 10,
+    "prompt": "帮我审查一下 learning-guide 这个路由 skill 有没有问题，顺便优化",
+    "expected": "路由 skill 维护/审查请求，先走 guide-skill-auditor，不直接猜改动。",
+    "scenario": "维护-路由审查"
+  },
+  {
+    "id": 11,
+    "prompt": "仓库里有个新功能想法，但需求还没想清楚，先帮我理一理",
+    "expected": "编码域命中 Matt /grill-with-docs；明确这是 user-invoked，提醒用户手动调用并等待，不直接进入实现或静默调用 grilling。",
+    "scenario": "Matt-仓库需求澄清-手动调用"
+  },
+  {
+    "id": 12,
+    "prompt": "这个接口偶发 500，原因还不清楚，帮我系统查一下",
+    "expected": "命中 /diagnosing-bugs；这是 model-invoked，可自动调用，但路由输出仍显示手动命令供用户学习；默认不启动完整 DevFlow。",
+    "scenario": "Matt-未知原因调试-可自动或手动"
+  },
+  {
+    "id": 13,
+    "prompt": "这个行为已经确定了，我想先写测试再实现",
+    "expected": "命中 /tdd；model-invoked 可自动调用，也显示手动命令；不先启动 grill-with-docs 或完整状态机。",
+    "scenario": "Matt-独立 TDD-可自动或手动"
+  },
+  {
+    "id": 14,
+    "prompt": "帮我审查从 main 到现在的代码改动，想学 Matt 的双轴 review",
+    "expected": "命中 /code-review；说明 Standards + Spec 双轴，并提醒用户可手动调用；不把它误判成 user-invoked，也不宣称已完成审查。",
+    "scenario": "Matt-双轴审查-手动学习"
+  },
+  {
+    "id": 15,
+    "prompt": "Spec 和 Ticket 都已经准备好了，请按 Ticket 实现这个功能",
+    "expected": "命中 /implement；这是 user-invoked，提醒用户手动调用并等待；实现内部在预先约定 seam 按需驱动 /tdd，提交前必须完成 /code-review。",
+    "scenario": "Matt-已有任务实现-手动调用"
+  },
+  {
+    "id": 16,
+    "prompt": "这个功能要跨三个会话完成，还可能并行交给多个 Agent，应该怎么走？",
+    "expected": "先建议 /grill-with-docs → /to-spec；因为跨会话/并行才加入 /to-tickets，再进入 /implement；每个 user-invoked 入口都提醒用户手动调用，不把五步强制套在小任务上。",
+    "scenario": "Matt-跨会话主流程-条件拆票"
+  },
+  {
+    "id": 17,
+    "prompt": "外部有人提了一个还很原始的 bug 报告，先帮我整理",
+    "expected": "命中 /triage；这是 user-invoked，提醒用户手动调用；明确 /to-tickets 产生的自有 Ticket 不再进入 triage。",
+    "scenario": "Matt-外部问题整理-手动调用"
+  },
+  {
+    "id": 18,
+    "prompt": "目标非常大，我连应该先做什么都不知道，想先画清路线",
+    "expected": "命中 /wayfinder；这是 user-invoked，提醒用户手动调用并等待；路线清楚后回到 /to-spec，不直接写代码。",
+    "scenario": "Matt-超大模糊目标-手动调用"
+  },
+  {
+    "id": 19,
+    "prompt": "这个交互逻辑光讨论说不清，先做个可以打开的原型验证",
+    "expected": "命中 /prototype；model-invoked 可自动调用，也显示手动命令；原型用于回答设计问题，不直接进入生产代码。",
+    "scenario": "Matt-设计原型-可自动或手动"
+  },
+  {
+    "id": 20,
+    "prompt": "我不知道 Matt 这套里现在该用哪个 skill",
+    "expected": "命中 /ask-matt；这是 user-invoked，提醒用户手动调用；只让 Matt 选择入口，不代替用户执行整个流程。",
+    "scenario": "Matt-套件内路由-手动调用"
+  },
+  {
+    "id": 21,
+    "prompt": "这个仓库第一次使用 Matt skills，先配置一下",
+    "expected": "命中 /setup-matt-pocock-skills；这是 user-invoked，提醒用户手动调用；不把 setup 当作每个任务都要重复执行的前置步骤。",
+    "scenario": "Matt-首次配置-手动调用"
+  },
+  {
+    "id": 22,
+    "prompt": "我需要把当前工作交给另一个目录继续，但不想丢掉上下文",
+    "expected": "命中 /handoff；这是 user-invoked，提醒用户手动调用；普通当前会话过长优先压缩，不滥用 handoff。",
+    "scenario": "Matt-跨目录交接-手动调用"
+  },
+  {
+    "id": 23,
+    "prompt": "答案在客户和法务那里，不在我这里，别让我猜",
+    "expected": "命中 /to-questionnaire；这是 user-invoked，提醒用户手动调用；生成问卷后回到原需求流程，不让 Agent 代替外部专家回答。",
+    "scenario": "Matt-外部决策人问卷-手动调用"
+  },
+  {
+    "id": 24,
+    "prompt": "我想系统学会软件架构，做一个跨几周的学习计划",
+    "expected": "学习域请求转 learning-guide，不由 ai-coding-guide 抢路由到 Matt /teach；只有用户明确点名 /teach 时才按点名优先处理。",
+    "scenario": "域边界-系统学习不抢域"
+  },
+  {
+    "id": 25,
+    "prompt": "给管理后台加一个批量导出功能，需求大致清楚，按正常开发流程开始",
+    "expected": "非机械代码变更默认命中 Matt /grill-with-docs；这是 user-invoked，提醒用户手动调用并等待；不能因为需求大致清楚就直接实现，也不强行进入完整状态机。",
+    "scenario": "Matt-非机械变更默认澄清-手动调用"
+  },
+  {
+    "id": 26,
+    "prompt": "这个接口偶发 500，已经确认需要改代码修复，按系统流程处理",
+    "expected": "因为会产生修复代码，先命中 /grill-with-docs；这是 user-invoked，提醒用户手动调用并等待，再进入 /diagnosing-bugs 或 code-change-workflow，不直接绕过澄清。",
+    "scenario": "Matt-代码修复先澄清-手动调用"
+  },
+  {
+    "id": 27,
+    "prompt": "把这个订单服务重构一下，行为不能变，直接开始",
+    "expected": "非机械重构先命中 /grill-with-docs；这是 user-invoked，提醒用户手动调用并等待，再理解代码、列坏味道和逐步重构；不把直接开始误当成静默执行。",
+    "scenario": "Matt-非机械重构先澄清-手动调用"
+  },
+  {
+    "id": 28,
+    "prompt": "项目 build 报错了，帮我修掉，不只是解释错误",
+    "expected": "因为需要改代码修复，先命中 /grill-with-docs；这是 user-invoked，提醒用户手动调用并等待，再运行构建命令和排查错误。",
+    "scenario": "Matt-构建修复先澄清-手动调用"
+  },
+  {
+    "id": 29,
+    "prompt": "计划已经确定，请拆成带明确阻塞关系的 tickets",
+    "expected": "命中 /to-tickets；即使不是跨会话或多人协作，只要需要显式阻塞关系就提醒用户手动调用并等待。",
+    "scenario": "Matt-显式阻塞拆票-手动调用"
+  },
+  {
+    "id": 30,
+    "prompt": "我刚执行完 /grill-with-docs，你自动继续 /to-spec 和 /implement",
+    "expected": "不能静默自动调用另一个 user-invoked skill；提醒用户逐个手动调用 /to-spec、/to-tickets（如需要）和 /implement；只有 model-invoked skill 可由当前流程自动驱动。",
+    "scenario": "Matt-user-invoked不可静默串联"
+  }
+]
