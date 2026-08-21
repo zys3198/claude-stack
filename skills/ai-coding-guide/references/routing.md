@@ -124,6 +124,8 @@ ai-coding-guide 在当前会话？ YES/NO
 - **口令优先**：用户明说 small/medium/large 或直接点名流程，永远覆盖模型判断。
 - **唯一硬门**：进状态机的任务，REQUIREMENT 的用户确认门禁不可跳过（详见 `SKILL.md`「不可绕过」）。
 - 非机械代码变更先走 `/grill-with-docs`；单环手法再借 Matt：`/diagnosing-bugs` / `/tdd` / `/code-review`；拿不定主意再提醒 `/ask-matt`，不得先启动完整状态机。
+- **Matt 首入口歧义**：任务明确属于 Matt，但存在多个互斥首入口，或任务性质/阶段无法高置信判断时，提示 `/ask-matt`；若只有一个主线、其他只是后续专项能力，直接提示主线并列附加能力。用户未明说“我不知道”不影响触发。
+- **Matt 归属证据**：强证据是用户点名 Matt/具体 skill/流程，或明确要需求澄清、路线、原型、triage、Spec/Ticket/handoff 等 Matt 专属流程；仅非机械代码变更是弱证据，只支持默认 `/grill-with-docs`，不单独触发 `/ask-matt`。完整场景表复用 `references/ecosystems.md`。
 
 **复杂度无法判断** → 问一句任务规模 / 代码熟悉度，再定档（不逢任务强弹菜单）。
 

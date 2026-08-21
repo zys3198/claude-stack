@@ -178,5 +178,35 @@
     "prompt": "我刚执行完 /grill-with-docs，你自动继续 /to-spec 和 /implement",
     "expected": "不能静默自动调用另一个 user-invoked skill；提醒用户逐个手动调用 /to-spec、/to-tickets（如需要）和 /implement；只有 model-invoked skill 可由当前流程自动驱动。",
     "scenario": "Matt-user-invoked不可静默串联"
+  },
+  {
+    "id": 31,
+    "prompt": "这个模块感觉不对，帮我看看该重构、建模还是补测试",
+    "expected": "命中 /ask-matt；虽然用户未明确说不知道，但重构、建模和 TDD 是多个互斥首入口；提醒用户手动调用，不直接替用户选入口。",
+    "scenario": "Matt-隐式歧义-多个互斥首入口"
+  },
+  {
+    "id": 32,
+    "prompt": "这个登录问题可能是 bug，也可能是权限模型设计错了，帮我处理",
+    "expected": "命中 /ask-matt；diagnosing-bugs、domain-modeling 和 codebase-design 都可能成为首入口；提醒用户手动调用，不把某个默认路径伪装成确定答案。",
+    "scenario": "Matt-隐式歧义-问题性质未定"
+  },
+  {
+    "id": 33,
+    "prompt": "我有个产品想法，不知道先写需求、做原型还是拆任务",
+    "expected": "命中 /ask-matt；grill-with-docs、prototype、wayfinder 和 to-tickets 存在多个合理首步；提醒用户手动调用，让 Matt 选择入口。",
+    "scenario": "Matt-隐式歧义-流程阶段未定"
+  },
+  {
+    "id": 34,
+    "prompt": "给订单服务加批量导出，需求还需要对齐，后面可能再做原型",
+    "expected": "命中 /grill-with-docs；需求对齐是当前唯一首入口，prototype 只是后续专项能力；不因为存在附加能力就转 /ask-matt。",
+    "scenario": "Matt-单一主线-附加能力不触发兜底"
+  },
+  {
+    "id": 35,
+    "prompt": "把用户列表分页改成游标分页，需求已确定，按正常流程实现",
+    "expected": "命中 /grill-with-docs；这是普通非机械代码变更的弱 Matt 证据，只走默认入口；不提示 /ask-matt。",
+    "scenario": "Matt-弱证据-默认入口不进兜底"
   }
 ]
