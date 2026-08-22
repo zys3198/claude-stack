@@ -1,0 +1,15 @@
+id: out-of-domain
+title: 三域外-直接执行独立工具
+description: 三域外独立工具请求 → 直接执行，不制造第四 router，不硬塞进写作分类。
+tag: routing
+input:
+  prompt: |
+    请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我把这个视频文件转成 MP3
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        not: ["article-writer"]
+    - output_contains:
+        not: ["tutorial-maker"]

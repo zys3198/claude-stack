@@ -1,0 +1,13 @@
+id: english-tutorial
+title: 语言适配-英文文章
+description: 英文文章 → article-writer 可用，跳过中文专用工具（human-writing/chinese-markdown-normalizer）。
+tag: routing
+input:
+  prompt: |
+    请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：write an English tutorial on Docker networking, then edit it
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["article-writer"]

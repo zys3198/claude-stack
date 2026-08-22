@@ -1,0 +1,13 @@
+id: de-ai
+title: 去 AI 味-human-writing
+description: 去 AI 味 → 主路径 human-writing（替代已删 ai-text-polisher）。
+tag: routing
+input:
+  prompt: |
+    请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：这篇文章 AI 味太重了，帮我改得像人写的
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["human-writing"]

@@ -1,0 +1,13 @@
+id: deleted-skill
+title: 存在性校验-已删 skill 重定向
+description: javaguide-writer 已删除（并入 article-writer）→ 迁移提示改用 article-writer JavaGuide 模式，不空跑。
+tag: routing
+input:
+  prompt: |
+    请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：用 javaguide-writer 给我写篇 Java 并发面试文章
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["article-writer"]

@@ -1,0 +1,13 @@
+id: sentiment
+title: 舆情调研-近30天社区观点
+description: 查近 30 天社区/舆情 → 主路径 last30days。
+tag: routing
+input:
+  prompt: |
+    请用 learning-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：最近社区对 Claude skills 的讨论有什么新观点？
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["last30days"]

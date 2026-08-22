@@ -1,0 +1,13 @@
+id: frontend-transfer
+title: 兄弟域转介-前端视觉
+description: 含「登录页」且要视觉产出 → 转介 ai-coding-guide 前端视觉子路径，不留在写作域。
+tag: routing
+input:
+  prompt: |
+    请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我写一个登录页的文案，页面设计也一起做
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["ai-coding-guide"]

@@ -1,0 +1,13 @@
+id: not-hit-polish
+title: 不命中-执行型 skill 润色
+description: human-writing 是执行型 skill 非路由型 → 不命中，走其自身维护流程，不跑十查审计。
+tag: routing
+input:
+  prompt: |
+    请用 guide-skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。
+    请求：帮我润色 human-writing 这个 skill 的改写规则
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["不命中", "转介"]

@@ -1,0 +1,13 @@
+id: deep-learn
+title: 深度调研-陌生领域吃透
+description: 陌生领域要系统吃透到能聊 → 主路径 deep-learn。
+tag: routing
+input:
+  prompt: |
+    请用 learning-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：我想吃透 transformer 架构，两周后要给别人讲明白
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["deep-learn"]

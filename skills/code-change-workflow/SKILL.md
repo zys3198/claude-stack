@@ -1,6 +1,6 @@
 ---
 name: code-change-workflow
-description: 代码改动全流程细则——改前/改中/改后清单、AI 代码审查方法论、调试工作流、Agent 调度与 Verify 分级、止血回退。当 ai-coding-guide 分类为「执行代码改动」、或用户直接要求改代码/修 bug/重构/审查 AI 代码/回退改动时加载。不用于：纯问答、文章写作、学习调研。
+description: 代码改动全流程细则——改前/改中/改后清单、AI 代码审查方法论、SDD 规范驱动流水线、调试工作流、Agent 调度与 Verify 分级、止血回退。当 ai-coding-guide 分类为「执行代码改动」、或用户直接要求改代码/修 bug/重构/审查 AI 代码/回退改动时加载。不用于：纯问答、文章写作、学习调研。
 ---
 
 # 代码改动全流程细则
@@ -44,7 +44,7 @@ CLAUDE.md §1 只留路由与高代价确认线，本文件是完整流程。来
 
 适用范围：AI 生成的代码（含 learning 模式骨架、vibe coding 产出、agent 批量改）。**AI 代码默认必审**，无「小到不用审」豁免——一行配置可搞挂整站。AI 擅长写「语法漂亮、逻辑自洽、语义错误」的代码，读着顺 ≠ 对。
 
-**审查强度复用 §3 Verify 分级**：高（auth/DB schema/架构/安全）→ 三 agent adversarial 或 `ecc:santa-loop` 双审；中（功能改动）→ 单 reviewer + 自检；低（机械/重命名）→ 不额外 verify，走 tsc+lint+test。
+**审查强度复用 §3 Verify 分级**：高（auth/DB schema/架构/安全）→ 三 agent adversarial；涉及安全边界时追加已证实的 `security-review`；中（功能改动）→ 单 reviewer + 自检；低（机械/重命名）→ 一次独立轻量复核 + 项目已有的最小相关检查，不启动多 Agent 对抗审查。
 **学习价值补充**：值得学的框架/工程代码，§3 高风险分支触发「亲自逐行 cr 一遍再合入」；纯业务/一次性脚本走 §3 常规分级。
 
 **审查三维（必查）：**
@@ -54,13 +54,31 @@ CLAUDE.md §1 只留路由与高代价确认线，本文件是完整流程。来
 
 **审查动作清单**（与 §1.3 三查互补，三查已覆盖项不重复列出）：
 - 关键设计决策有压测/benchmark 数据支撑（无数据 → 不接受结论，让 AI 跑）；边界条件（空集/重复/类型不符/超阈值）走代码路径核对一遍；底层结构选型与「为何不选另一种」能讲清（dict vs map、intset vs 数组等）
-- 审查报告输出走输出完整性约束（见 CLAUDE.md §10）
+- 审查报告输出走输出完整性约束（见 CLAUDE.md §4.1）
 
 **沟通技巧**：抛见解 + 问 AI「你的看法」；让 AI 用压测/可运行代码印证假设，不接受「应该/可能/大概」；自己先读先怀疑，再让 AI 印证。
 
 **权限归属：** 单 reviewer = 询问确认；三 agent 对抗 = 必须确认。
 
 **反模式**：「读着顺 → 合入」（AI 最擅长「看起来对」）；「AI 自己 review 自己」（无对照基线）；「靠 harness 自动验收代替人工闸门」。
+
+## 1.4.1 Agent 汇报核对清单（一页）
+
+Agent 报「改完/修好」后逐项勾，再合入。三查/审查三维见 §1.3/§1.4，本清单管「汇报这关」：先验结论再采信——Agent 给结论 ≠ 结论对（JavaGuide Redis SCAN 案例）。
+
+- [ ] **现象可解释**：结论能否用日志/指标/调用链复现验证？给不出可观测证据 → 打回（§1.4：不接受「应该/可能/大概」）。
+- [ ] **机制说得通**：根因叙述是否符合底层机制？反例——SCAN 增量迭代本为避免 KEYS 长时间阻塞，Agent 却写「SCAN 导致服务端阻塞」；机制解释错=方向错，查得越深错越大。
+- [ ] **上下流兼容**：调用方/被调方接口、字段名、依赖版本一致；同概念 Spec→代码字段对齐（§1.3 字段对齐）。
+- [ ] **资源与阈值**：新增并发/连接/内存/超时占用？告警阈值/超时/并发数按实际 SLO 定，不照搬默认。
+- [ ] **证据留档**：测试/lint/实测输出贴结果；无实测写「待验证」（§1.3）。
+
+## 1.5 规范驱动产物
+
+进入 Plan 后，统一使用 `ai-coding-guide/references/workflow-contract.md` 定义的 `artifacts/<task-slug>/` 产物和 `workflow_state.py` 状态机，不另建第二套 `plan/` 事实源。
+
+- REQUIREMENT 产出 `01-requirement/requirement-report.md`，DESIGN 产出 `02-design/tech-design.md` 与 `02-design/execution-plan.md`。
+- 需求报告先经人工确认；执行计划列出每项任务和验证方式；阶段结束由状态机校验产物和门禁。
+- small 任务仍走精简路径；只有进入 medium/large 状态机时才使用上述完整合同。
 
 ## 2. 调试工作流
 
@@ -71,16 +89,16 @@ CLAUDE.md §1 只留路由与高代价确认线，本文件是完整流程。来
 
 本节只定义进入 Plan 后的拆解、agent 与 verify 规则。Plan 触发条件见 §1.1。
 
-- 分解 4-6 独立切片，`PLAN.md` 协调（文件范围/API 契约/共享类型/验证命令）。Plan 审批通过后执行。
+- 分解 4-6 独立切片，`02-design/execution-plan.md` 协调（文件范围/API 契约/共享类型/验证命令）。Plan 审批通过后执行。
 - 独立任务并行派 agent（code-reviewer/security-reviewer）。依赖任务串行。
 - **先串行后并行**：同类型串行 2 次无回退（未触发 §4 止血/git revert）且 review 无业务 Bug/安全漏洞/数据丢失/架构违规后再启用并行。
 - **Verify 分级**（按风险不按文件数）：
-  - 低（机械/重命名/格式）→ 不 verify，`tsc` + lint + test 过即可。
+  - 低（机械/重命名/格式）→ 一次独立轻量 reviewer + 项目已有的最小相关检查；不启动多 Agent adversarial，但不因改动小而跳过独立复核。
   - 中（功能改动）→ 单 reviewer agent。
   - 高（auth/DB schema/架构/安全敏感）→ 三 agent adversarial（找问题/求证/反驳），2/3 通过。
 - 全部完成后集成测试。
 - **Agent 使用**：subagent 跑自己模型+工具、更耗 token、继承当前 sandbox——审批请求看清是哪个 agent 发起。小改动（改 DTO 字段）别开多 agent，沟通成本 > 修改本身。只读探索用 `Explore`，通用多步用 `general-purpose`。
-- **护栏靠 hooks 不靠自觉**：危险命令拦截（rm -rf / DROP TABLE / 密钥外泄）已由 ~/.claude/hooks 的 PreToolUse hooks 负责（见 ~/.claude/hooks/HOOKS_BACKUP.md），不靠"按场景授权"的人肉自觉。长链编排（>3 agent）用 PLAN.md 协调并设步数上限，超限即停，防 agent 无限烧。
+- **护栏靠 hooks 不靠自觉**：危险命令拦截（rm -rf / DROP TABLE / 密钥外泄）已由 ~/.claude/hooks 的 PreToolUse hooks 负责（见 ~/.claude/hooks/HOOKS_BACKUP.md），不靠"按场景授权"的人肉自觉。长链编排（>3 agent）用 `02-design/execution-plan.md` 协调并设步数上限，超限即停，防 agent 无限烧。
 
 ## 4. 止血与回退
 

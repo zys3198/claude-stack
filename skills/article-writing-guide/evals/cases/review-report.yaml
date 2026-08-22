@@ -1,0 +1,13 @@
+id: review-report
+title: 审校-非后端文体走批量管线
+description: 非后端技术文章且只要报告 → 路由 multi-review-pipeline 停在报告阶段，不走 tech-article-review（偏后端）。
+tag: routing
+input:
+  prompt: |
+    请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：审校一篇前端 React 渲染优化的技术文章，只出报告不改
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["multi-review-pipeline"]

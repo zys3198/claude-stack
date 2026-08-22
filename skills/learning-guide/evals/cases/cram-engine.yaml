@@ -1,0 +1,13 @@
+id: cram-engine
+title: 速成备考-有考试范围
+description: 有考试范围、期末速成 → 主路径 cram-engine；无范围才降 deep-learn。
+tag: routing
+input:
+  prompt: |
+    请用 learning-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：下周考试，帮我把这门课的重点整理成速成计划
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["cram-engine"]

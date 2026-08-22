@@ -1,0 +1,38 @@
+id: create-ai-context
+title: 为迷你项目产出 AI 上下文
+description: >
+  Agent 使用 ai-readable-project skill 分析迷你项目，
+  产出 docs/ai-context/ 下的知识索引（CLAUDE.md + AGENTS.md），
+  不直接改项目源文件。
+tag: functional_test
+input:
+  prompt: |
+    用 ai-readable-project 把这个项目梳理成 AI 可读的。
+    产出 docs/ai-context/ 目录，包含根 CLAUDE.md 知识索引和 AGENTS.md 模块说明。
+    项目很小，直接读 src/ 和 README.md 即可。
+context:
+  files:
+    README.md: |
+      # tiny-app
+      最小的 Go Web 服务示例，用于测试 AI 上下文工程。
+      - src/main.go: HTTP 入口
+      - src/db.go: 数据库连接
+      - src/handler.go: 业务 handler
+    src/main.go: |
+      package main
+      func main() { startServer() }
+    src/db.go: |
+      package main
+      func connect() error { return nil }
+    src/handler.go: |
+      package main
+      func handler() string { return "hello" }
+constraints:
+  timeout_seconds: 240
+  max_turns: 8
+expect:
+  files_exist:
+    - docs/ai-context/CLAUDE.md
+    - docs/ai-context/AGENTS.md
+judge:
+  type: rule_based

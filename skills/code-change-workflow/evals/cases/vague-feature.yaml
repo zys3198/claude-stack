@@ -1,0 +1,12 @@
+id: vague-feature
+title: 改前-反查真需求
+description: 用户给方案不给痛点时，先确认关键假设/反查需求，不直接开写。
+tag: behavior
+input:
+  prompt: |
+    用 code-change-workflow 处理：帮我实现一个站内消息推送功能
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["确认"]

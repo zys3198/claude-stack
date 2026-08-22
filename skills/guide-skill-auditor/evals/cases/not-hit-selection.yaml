@@ -1,0 +1,13 @@
+id: not-hit-selection
+title: 不命中-工具选型问题
+description: 选型/了解指南信号不是审查/优化/新建 guide → 不命中，转介 ai-coding-guide。
+tag: routing
+input:
+  prompt: |
+    请用 guide-skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。
+    请求：SP 和 Matt Pocock skills 哪个更适合我？
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["不命中", "转介"]

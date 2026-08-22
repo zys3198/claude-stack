@@ -1,0 +1,13 @@
+id: transfer-article
+title: 兄弟域转介-学习产出转文章
+description: 把学习产出变成文章是写作任务 → 转介 article-writing-guide，不并行。
+tag: routing
+input:
+  prompt: |
+    请用 learning-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：帮我把这篇学完的笔记改成公众号文章
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["article-writing-guide"]

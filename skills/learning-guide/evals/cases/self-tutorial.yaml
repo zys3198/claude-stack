@@ -1,0 +1,13 @@
+id: self-tutorial
+title: 教程裁决-给自己学会
+description: 给自己学会的教程 → 留在学习域做教程分类，主路径 tutorial-maker，不转介写作域。
+tag: routing
+input:
+  prompt: |
+    请用 learning-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：我想给自己做一套学习 Go 的教程，边做边学
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["tutorial-maker"]

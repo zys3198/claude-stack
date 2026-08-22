@@ -1,0 +1,35 @@
+id: bug-fix
+title: 调试-修根因检查调用方
+description: bug 修复先定位根因并检查所有调用方，不修症状。
+tag: behavior
+input:
+  prompt: |
+    用 code-change-workflow 处理：src/login.go 的 login 函数偶发 panic，登录接口 500，帮我修一下
+context:
+  files:
+    src/login.go: |
+      package main
+      func login(u *User) error {
+          if u.Token == "" {
+              return errInvalidToken
+          }
+          return checkSession(u)
+      }
+    src/other.go: |
+      package main
+      func startServer() {
+          _ = login(&User{})
+          _ = login(nil)
+      }
+    src/types.go: |
+      package main
+      type User struct {
+          Name  string
+          Token string
+      }
+      func checkSession(u *User) error { return nil }
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["根因"]

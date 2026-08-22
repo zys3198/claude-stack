@@ -1,0 +1,12 @@
+id: known-known
+title: 判级-已知的已知直接开工
+description: 需求验收都明确 → 已知的已知，写清提示词直接开工，不废话不采访。
+tag: behavior
+input:
+  prompt: |
+    用 expose-unknowns 的方法处理这个请求：先判级，再按级出牌。请求：把 user 表加个 age 字段，DDL 和 MyBatis 映射都更新，验收标准是字段能正常读写
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["已知的已知"]

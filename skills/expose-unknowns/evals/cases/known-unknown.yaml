@@ -1,0 +1,12 @@
+id: known-unknown
+title: 判级-已知的未知主动抛问
+description: 技术选型纠结 → 已知的未知，主动抛问给建议和推理思路，不直接替用户拍板。
+tag: behavior
+input:
+  prompt: |
+    用 expose-unknowns 的方法处理这个请求：先判级，再按级出牌。请求：订单模块要选缓存方案，Redis 还是 Caffeine，我纠结
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["已知的未知"]

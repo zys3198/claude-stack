@@ -1,0 +1,13 @@
+id: tutorial-series
+title: 系列教程-对外发布
+description: 对外发布的系统教程/系列课 → 路由 tutorial-maker，不误走 article-writer 单篇。
+tag: routing
+input:
+  prompt: |
+    请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。
+    请求：给我做一套从零学 Redis 的系列教程，每课要有练习和折叠答案
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["tutorial-maker"]

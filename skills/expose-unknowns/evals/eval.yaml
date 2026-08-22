@@ -1,0 +1,32 @@
+schema_version: v1alpha1
+
+environment:
+  type: none
+
+skills:
+  - source: local_path
+    path: .
+
+engine:
+  name: claude_code
+  model:
+    provider: anthropic
+    name: claude-sonnet-4-6
+
+cases:
+  files:
+    - evals/cases/unknown-unknown.yaml
+    - evals/cases/known-unknown.yaml
+    - evals/cases/known-known.yaml
+  defaults:
+    timeout_seconds: 240
+    max_turns: 10
+  parallelism: 2
+
+judge:
+  type: rule_based
+
+report:
+  formats: [json, html]
+  artifacts:
+    - transcript
