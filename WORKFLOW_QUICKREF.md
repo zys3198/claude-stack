@@ -1,32 +1,32 @@
 # Skill 路由速查
 
 > 日常一眼查。重决策 / 多步流程走 `ai-coding-guide` skill。
-> **头注 2026-08-11**：本文件为历史快照，部分引用已失效（codex-security 随 Codex 卸载、build-web-apps 等）。现行路由以 CLAUDE.md §0 场景路由 + 四域 guide（ai-coding-guide / article-writing-guide / learning-guide / frontend-guide）为准。
+> **头注 2026-08-19**：本文件只做速查，现行路由以 `ai-coding-guide` 与其 `references/routing.md` 为准；条件路径以当前会话可用清单和 `settings.json` 为准，不把历史插件当作已安装能力。
 
 ## 任务 → Skill
 
 | 你要做 | 用哪个 | 备注 |
 |--------|--------|------|
-| 需求模糊，要澄清 | Matt `grill-me` | 逐问逐答，比 brainstorming 轻 |
-| 大功能 / 架构设计 | SP `brainstorming` | HARD-GATE，没设计不让写码 |
-| 落地拆任务 | SP `writing-plans` | 已有需求时 |
-| 轻量拆任务 | agent-skills `planning-and-task-breakdown` | 不想进 SP 重流程 |
-| 写测试驱动 | SP `test-driven-development` | |
-| 调 bug | SP `systematic-debugging` | 4 阶段根因 |
-| 改完自验 | SP `verification-before-completion` | |
-| 审 PR / 代码 | SP `requesting-code-review` | 日常自检 |
-| 安全审查 | codex-security `security-diff-scan` | auth / DB / 架构 |
-| 快速小改 | ponytail（常驻 active） | YAGNI / stdlib first |
-| 学新代码库 | gitnexus-exploring / lean-ctx | 深 vs 浅 |
-| 前端开发 | build-web-apps `frontend-app-builder` | |
-| 循环 / 定时 | 内置 `/loop` `/goal` | |
+| 需求模糊，要澄清 | `mattpocock-skills:grilling` / `grill-me`（条件） | 单环澄清；`grill-me` 需用户手动调用 |
+| 大功能 / 跨会话 / 多 Agent | `ai-coding-guide` | 进入需求→设计→实现→审查→测试→总结状态机 |
+| 已有需求文档，要落地 | `ai-coding-guide` | 先核验需求、范围和验收，再按复杂度执行 |
+| 写测试驱动 | `mattpocock-skills:tdd`（条件）/ `code-change-workflow` | 红→绿→重构；不替代最终验证 |
+| 调 bug | `mattpocock-skills:diagnosing-bugs`（条件）/ `code-change-workflow` | 先复现，再查根因和所有调用方 |
+| 改完自验 | 内置 `run` 或项目 test/lint/build/check | 有运行时表面优先跑真实流程，并保存命令与结果 |
+| 审 PR / 代码 | 内置 `code-review` | AI 代码至少一次独立轻量复核；高风险再叠加 `security-review` |
+| 安全审查 | 内置 `security-review` | auth / 权限 / DB / 架构 / 外部 IO 等高风险场景 |
+| 快速小改 | 直接最小改动；`ponytail`（条件） | 跨模块或超过 3 文件重新分诊 |
+| 学新代码库 | `lean-ctx` / `gitnexus-exploring` | 先结构，后调用链和影响范围 |
+| 前端视觉 | `ai-coding-guide` 前端视觉子路径 | 先定方向，再实现和验证；不指向已归档 frontend-guide |
+| 路由/Skill 维护 | `guide-skill-auditor` | 行为变化再叠加对应审查/评估流程 |
+| 循环 / 定时 | 内置 `/loop` | 省略间隔时按任务变化自定步调 |
 
 ## 原则
 
-- **先澄清后设计**：需求模糊 → grill-me；清楚但大 → brainstorming；小改 → 直接 ponytail
-- **不并发触发**：SP 流程先行（设计 / 调试 / 验证），审查后置
-- **YAGNI**：ponytail 常驻，能删 / 能复用 / 能不写 → 不写
-- **跳过 ECC**：一人公司画像，60+ agent 太重（见 memory `skill-ecosystem-choice-2026-07`）
+- **先澄清后设计**：需求模糊先澄清；目标明确但任务大，进入 `ai-coding-guide` 状态机；小改不套重流程
+- **按复杂度加流程**：单环问题只用单环 Skill；跨会话、多 Agent、高风险才增加状态机、隔离和恢复检查
+- **验证不是结论**：审查负责找错，真实命令或运行时流程负责证明行为；AI 代码不因改动小而跳过独立轻量复核
+- **YAGNI**：能删 / 能复用 / 能不写 → 不写；没有观测落点的组织指标不写成硬门禁
 
 ## 何时不用 skill
 

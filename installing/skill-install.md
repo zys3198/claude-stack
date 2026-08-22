@@ -56,6 +56,14 @@
 - 测试基线：**20 passed / 2 failed**（2 失败 = Windows 路径分隔符断言，平台差异勿修）；`scripts/validate_config.py` OK（adapters=1）。注意：跑 pytest 先清 `PYTHONIOENCODING`/`PYTHONUTF8` 环境变量（harness 注入 utf-8 会致子进程输出被 GBK 解码假失败）
 - 维护归属：自有系统，日常维护见 custom-setup.md「ai-coding-guide（编码域总入口系统）」；本条目仅留来源与 fork 前史
 
+#### DTSF 项目 DevFlow Claude 适配器
+- 来源：本地 `~/.claude/skills/ai-coding-guide/` 的 Claude adapter（上游前史见本节 LoopForge 条目）
+- 安装日期：2026-08-20
+- 安装命令原文：`python3 /c/Users/zys31/.claude/skills/ai-coding-guide/scripts/install_adapter.py --adapter claude --project-root . --refresh-managed --copy-skills`
+- 装到哪：`C:\ZYS\Code\dtsf\.claude\`（2 个 DevFlow 执行器、portable `ai-coding-guide` 副本及托管清单）
+- 依赖：Python 3.8+、Claude Code `Agent` 工具
+- 备注：Windows 按项目约束使用复制，不尝试 symlink；只为 OA 考勤计划及后续隔离阶段服务。安装输出：`agents_installed=2`、`agents_preserved=0`、`ai-coding-guide=copied`。
+
 ### 思维/写作/学习类散件
 - 安装方法：clone/copy 进 `~/.claude/skills/`（`npx skills add <owner/repo>` 或手动 copy）
 - **口径更正 2026-08-11**：旧「2026-08-08 实测 105 个（94 真目录 + 11 junction/symlink）」作废——当日实测 0 symlink；全量复核后 skills/ 为 184 目录 = 31 自建（入 git，见 custom-setup.md）+ 约 150 非自建（仓库级来源多已锁定，见上方「散件来源反查登记」）。原分类示例段已删（把自建误列第三方，与 custom-setup.md 冲突）。

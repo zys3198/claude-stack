@@ -1,5 +1,10 @@
-# ----- runtime / session state -----
-projects/
+# ----- local runtime bundles / generated outputs -----
+/.claude.json
+/Python/
+/artifacts/
+/projects/
+hooks/edited_state.json.*.json
+
 sessions/
 session-data/
 session-env/

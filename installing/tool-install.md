@@ -172,3 +172,12 @@
 - 判决依据：能力补丁型随模型变强贬值——code-simplifier=subagent 简化代码（强模型原生能力，ponytail 纪律已覆盖）；claude-code-setup=一次性配置推荐（用完即弃）。references 零引用，已扫确认
 - 同日已卸 superpowers（见前条）；可议未砍：claude-md-management、better-harness
 - 备注：恢复 = settings.json 加回 enabledPlugins 行 + 跑同一 sync 脚本
+
+## Poppler PDF 工具 25.07.0-0（2026-08-21）
+- 来源：https://github.com/oschwartz10612/poppler-windows/releases/download/v25.07.0-0/Release-25.07.0-0.zip（WinGet 包 `oschwartz10612.Poppler`）
+- 安装日期：2026-08-21
+- 安装命令原文：`winget install --id oschwartz10612.Poppler --exact --accept-source-agreements --accept-package-agreements`
+- 装到哪：用户级 WinGet 安装目录；命令别名加入用户 PATH
+- 依赖：Windows Package Manager（winget）、Microsoft.VCRedist.2015+.x64
+- 用途：提供 `pdftoppm`、`pdfinfo`、`pdftotext` 等 PDF 读取工具
+- 备注：安装后需重启 shell 才能解析更新后的 PATH
