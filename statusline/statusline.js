@@ -2,14 +2,14 @@
 /**
  * ECC Statusline — statusLine command
  *
- * Displays: model | task | $cost Nt Nf Nm | dir | branch ██░░ N%
+ * Displays: model | task | $cost Nt Nf Nm | dir | branch Ctx N% | Hit N%
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
  *
- * Context bar: shows usage relative to the auto-compact window
- * (CLAUDE_CODE_AUTO_COMPACT_WINDOW), so 100% == compaction point,
- * matching /context. Not relative to the model's full context window.
+ * Context bar: uses runtime-reported context usage percentage when available;
+ * older runtimes fall back to CLAUDE_CODE_AUTO_COMPACT_WINDOW and token counts.
+ * This value reflects runtime context usage, not the model's full context window.
  */
 
 'use strict';
@@ -40,24 +40,26 @@ function formatDuration(isoTimestamp) {
 
 /**
  * Build context progress bar with ANSI colors.
- * Usage measured against the auto-compact window, so 100% == compaction
- * point (matches /context). Ignores the model's full context window.
- * @param {number} totalInputTokens - Input tokens currently in context window
- * @param {number} autoCompactWindow - Compaction trigger point in tokens
+ * Runtime percentage matches Claude Code context usage; legacy fallback uses
+ * CLAUDE_CODE_AUTO_COMPACT_WINDOW and token counts.
+ * @param {number} totalInputTokens - Legacy input token count
+ * @param {number} autoCompactWindow - Legacy compaction window in tokens
+ * @param {number} usedPercentage - Runtime-reported context usage percentage
  * @returns {string} Colored bar string
  */
-function buildContextBar(totalInputTokens, autoCompactWindow) {
-  if (totalInputTokens === null || totalInputTokens === undefined || !autoCompactWindow) return '';
+function buildContextBar(totalInputTokens, autoCompactWindow, usedPercentage) {
+  const used = usedPercentage !== null && usedPercentage !== undefined
+    ? Math.min(100, Math.max(0, Math.round(usedPercentage)))
+    : totalInputTokens === null || totalInputTokens === undefined || !autoCompactWindow
+      ? null
+      : Math.min(100, Math.round((totalInputTokens / autoCompactWindow) * 100));
 
-  const used = Math.min(100, Math.round((totalInputTokens / autoCompactWindow) * 100));
+  if (used === null) return '';
 
-  const filled = Math.floor(used / 10);
-  const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(10 - filled);
-
-  if (used < 50) return ` \x1b[32m${bar} ${used}%\x1b[0m`;
-  if (used < 65) return ` \x1b[33m${bar} ${used}%\x1b[0m`;
-  if (used < 80) return ` \x1b[38;5;208m${bar} ${used}%\x1b[0m`;
-  return ` \x1b[1;31m${bar} ${used}%\x1b[0m`;
+  if (used < 50) return ` \x1b[32m${used}%\x1b[0m`;
+  if (used < 65) return ` \x1b[33m${used}%\x1b[0m`;
+  if (used < 80) return ` \x1b[38;5;208m${used}%\x1b[0m`;
+  return ` \x1b[1;31m${used}%\x1b[0m`;
 }
 
 /**
@@ -166,6 +168,7 @@ function runStatusline() {
       const totalInputTokens = cw.total_input_tokens;
       // Compaction point = AUTO_COMPACT_WINDOW env; fall back to reported window size
       const autoCompactWindow = Number(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW) || cw.context_window_size || 0;
+      const usedPercentage = cw.used_percentage ?? (remaining === null || remaining === undefined ? null : 100 - remaining);
 
       const sessionId = sanitizeSessionId(session);
       const bridge = sessionId ? readBridge(sessionId) : null;
@@ -205,8 +208,22 @@ function runStatusline() {
         }
       }
 
-      // Context bar (usage vs auto-compact window, so 100% == compaction point)
-      const ctx = buildContextBar(totalInputTokens, autoCompactWindow);
+      // Context usage (text-only, colored by level) + cache hit, | separated
+      const ctx = buildContextBar(totalInputTokens, autoCompactWindow, usedPercentage);
+      let hitStr = '';
+      if (bridge) {
+        const cacheRead = bridge.cache_read_tokens || 0;
+        const cacheWrite = bridge.cache_write_tokens || 0;
+        const totalIn = bridge.total_input_tokens || 0;
+        if (cacheRead > 0) {
+          // input_tokens 已含 cache 部分(Anthropic 语义)时分母=in;
+          // 否则(proxy fresh-only 语义)分母=in+cr+cw,当前者成立时 in 已经盖住 cache,再加会双重计数
+          const denom = totalIn >= cacheRead + cacheWrite ? totalIn : totalIn + cacheRead + cacheWrite;
+          const hitPct = denom > 0 ? Math.round((cacheRead / denom) * 100) : 0;
+          hitStr = `\x1b[38;5;117mHit ${hitPct}%\x1b[0m`;
+        }
+      }
+      const usageStr = [ctx ? `Ctx${ctx}` : '', hitStr].filter(Boolean).join(' \x1b[2m\u2502\x1b[0m ');
 
       // Build output
       const dirname = path.basename(dir);
@@ -225,7 +242,7 @@ function runStatusline() {
         segments.push(`\x1b[33m${branch}\x1b[0m`);
       }
 
-      process.stdout.write(segments.join(' \x1b[2m\u2502\x1b[0m ') + ctx);
+      process.stdout.write(segments.join(' \x1b[2m\u2502\x1b[0m ') + (usageStr ? ` \x1b[2m\u2502\x1b[0m ${usageStr}` : ''));
     } catch {
       // Silent fail
     }
