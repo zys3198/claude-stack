@@ -16,12 +16,14 @@ import hashlib
 import json
 import os
 import sys
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
 SKILLS_DIR = Path.home() / ".claude" / "skills"
 WORKSPACE = SKILLS_DIR.parent / "skill-trimmer-workspace"
 ASSET_DIRS = ("scripts", "references", "assets")
+STALE_DAYS = 180  # 零使用 + 超此天数未改 → 保鲜候选
 
 
 def parse_frontmatter(skill_md: Path) -> dict:
@@ -74,6 +76,11 @@ def scan() -> list:
         if not has_md and not unresolved:
             continue  # 普通目录但没 SKILL.md，不是 skill
         meta = parse_frontmatter(skill_md) if has_md else {"name": "", "description": ""}
+        # 内容新鲜度取 SKILL.md，断链/无 md 回落目录，失败记 0
+        try:
+            mtime = skill_md.stat().st_mtime if has_md else entry.stat().st_mtime
+        except OSError:
+            mtime = 0.0
         rows.append({
             "dir": entry.name,
             "name": meta.get("name") or entry.name,
@@ -81,10 +88,31 @@ def scan() -> list:
             "is_symlink": is_link,
             "source": target if is_link else "direct",
             "has_assets": any((entry / d).is_dir() for d in ASSET_DIRS) if not unresolved else False,
+            "last_modified": datetime.fromtimestamp(mtime).strftime("%Y-%m-%d") if mtime else "",
             **({"unresolved": True} if unresolved else {}),
             **({"error": meta["error"]} if "error" in meta else {}),
         })
     return rows
+
+
+def load_usage() -> Counter:
+    """读 metrics/skill-usage.log 统计每 skill 使用次数（记账 hook 产出）。
+
+    调用名剥最末段归一（plugin:ponytail:ponytail→ponytail、superpowers:brainstorming
+    →brainstorming）与 frontmatter name 对齐；个别对不上归零可接受。缺失/坏行静默跳过。
+    """
+    usage = Counter()
+    log = Path.home() / ".claude" / "metrics" / "skill-usage.log"
+    if not log.is_file():
+        return usage
+    for line in log.read_text(encoding="utf-8").splitlines():
+        try:
+            name = json.loads(line).get("skill", "").rsplit(":", 1)[-1].strip()
+        except (ValueError, AttributeError):
+            continue
+        if name:
+            usage[name] += 1
+    return usage
 
 
 def to_contract(rows: list) -> dict:
@@ -130,8 +158,8 @@ def to_contract(rows: list) -> dict:
             "shellStartupTokens": 0,
             "postCallTokens": 0,
             "tokenMeasurement": "不可用",
-            "usageMeasurement": "不可用",
-            "lastUsedMeasurement": "不可用",
+            "usageMeasurement": str(row.get("usage_count", 0)),
+            "lastUsedMeasurement": row.get("last_modified") or "从未",
             "triggerTerms": [],
             "appliedProjects": [],
             "hostOverrideState": "unknown",
@@ -158,6 +186,17 @@ def to_contract(rows: list) -> dict:
 
 def main() -> int:
     rows = scan()
+    usage = load_usage()
+    today = datetime.now().date()
+    for r in rows:
+        r["usage_count"] = usage.get(r["name"], 0)
+        stale = False
+        try:
+            lm = datetime.strptime(r.get("last_modified") or "0001-01-01", "%Y-%m-%d").date()
+            stale = r["usage_count"] == 0 and (today - lm).days > STALE_DAYS
+        except ValueError:
+            pass
+        r["staleCandidate"] = stale
     WORKSPACE.mkdir(exist_ok=True)
     out = WORKSPACE / "inventory.json"
     out.write_text(
@@ -173,6 +212,9 @@ def main() -> int:
     print(f"total={len(rows)}  direct={direct}  symlink={links}  with_assets={with_assets}")
     print(f"-> {out}")
     print(f"-> {review_out}  (review_server contract)")
+    stale = [r["dir"] for r in rows if r.get("staleCandidate")]
+    if stale:
+        print(f"stale candidates (0 使用 + >{STALE_DAYS} 天未改): {', '.join(stale)}")
     return 0
 
 
