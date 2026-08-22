@@ -33,6 +33,6 @@ medium/large 默认使用 `isolated`：REQUIREMENT 由协调上下文完成；DE
 
 ## 上下文交接
 
-上游输入由 `agents/manifest.json` 的精确产物清单定义。提示生成器只抽取当前角色需要的章节作为精简交接，下游默认不再打开完整报告；SUMMARY 只接收最终交付、审查、测试和可选知识证据。只额外传当前阶段必需的代码、diff 或 helper 事实摘要，不传完整对话、完整工具日志和无关推理。
+`agents/manifest.json` 定义本地逻辑角色元数据、精确 artifact 输入清单和角色正文映射。提示生成器只抽取当前角色需要的章节作为精简交接，下游默认不再打开完整报告；SUMMARY 只接收最终交付、审查、测试和可选知识证据。只额外传当前阶段必需的代码、diff 或 helper 事实摘要，不传完整对话、完整工具日志和无关推理。
 
 `workflow-state.json` 中的 `executor_role`、`executor_type`、`executor_id`、`executor_topology` 和 `helpers` 是隔离审计证据。字段缺失、逻辑角色、宿主类型或拓扑不匹配、同一 executor ID 跨阶段复用时，isolated 状态不得开始或通过。

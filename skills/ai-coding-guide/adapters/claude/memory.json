@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "id": "claude",
+  "status": "operational",
+  "entry_storage": {
+    "kind": "markdown-files",
+    "path_binding": "~/.claude/projects/<project-slug>/memory",
+    "file_pattern": "*.md"
+  },
+  "index_storage": {
+    "kind": "markdown-file",
+    "path_binding": "MEMORY.md"
+  },
+  "session_storage": {
+    "kind": "host-managed",
+    "path_binding": "~/.claude/projects/<project-slug>"
+  }
+}

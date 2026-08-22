@@ -6,13 +6,14 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from template_registry import ARTIFACTS, required_artifacts
+from workflow_sources import load_workflow_contract
 
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
 CONTRACT: Dict[str, List[List[str]]] = {
     relative: spec["content_concepts"] for relative, spec in ARTIFACTS.items()
 }
-DEFAULTS = json.loads((SKILL_ROOT / "config/workflow.json").read_text(encoding="utf-8"))
+DEFAULTS = load_workflow_contract()
 PLACEHOLDER_PATTERN = re.compile(
     r"^(?:tbd|todo|fixme|placeholder|待补充|待完善|待定)(?:\s*[:：-].*)?$",
     re.IGNORECASE,

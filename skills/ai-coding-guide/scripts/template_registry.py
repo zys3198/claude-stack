@@ -10,18 +10,72 @@ TEMPLATE_ROOT = SKILL_ROOT / "templates"
 MANIFEST_PATH = TEMPLATE_ROOT / "manifest.json"
 
 
+def _merge_items(core_items, adapter_items, core_fields, adapter_fields, label, required=True):
+    if not isinstance(core_items, list) or (required and not core_items):
+        raise ValueError(f"逻辑{label}清单必须是非空数组")
+    if not isinstance(adapter_items, list) or (required and not adapter_items):
+        raise ValueError(f"模板 adapter {label}映射必须是非空数组")
+    core_by_id = {}
+    for item in core_items:
+        if not isinstance(item, dict) or not core_fields.issubset(item):
+            raise ValueError(f"逻辑{label}清单存在不完整定义")
+        item_id = item["id"]
+        if not isinstance(item_id, str) or not item_id:
+            raise ValueError(f"逻辑{label} ID 无效")
+        if item_id in core_by_id:
+            raise ValueError(f"逻辑{label} ID 重复: {item_id}")
+        core_by_id[item_id] = item
+    adapter_by_id = {}
+    for item in adapter_items:
+        if (
+            not isinstance(item, dict)
+            or not adapter_fields.issubset(item)
+            or set(item) - adapter_fields
+        ):
+            raise ValueError(f"模板 adapter {label}映射字段无效")
+        item_id = item["id"]
+        if not all(isinstance(item[field], str) and item[field] for field in adapter_fields):
+            raise ValueError(f"模板 adapter {label}映射值无效: {item_id}")
+        if item_id in adapter_by_id:
+            raise ValueError(f"模板 adapter {label} ID 重复: {item_id}")
+        adapter_by_id[item_id] = {field: item[field] for field in adapter_fields - {"id"}}
+    if set(core_by_id) != set(adapter_by_id):
+        raise ValueError(f"逻辑{label}与 adapter 映射不一致")
+    return [{**item, **adapter_by_id[item["id"]]} for item in core_items]
+
+
 def load_manifest() -> dict:
-    data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-    if not isinstance(data.get("version"), str) or not data["version"]:
-        raise ValueError("模板清单缺少 version")
-    artifacts = data.get("artifacts")
-    if not isinstance(artifacts, list) or not artifacts:
-        raise ValueError("模板清单 artifacts 必须是非空数组")
+    adapter = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    if adapter.get("version") != "1.0":
+        raise ValueError(f"不支持的模板 adapter 清单版本: {adapter.get('version')}")
+    core = adapter
+    if not isinstance(core.get("version"), str) or not core["version"]:
+        raise ValueError("逻辑产物清单缺少 version")
+    artifacts = _merge_items(
+        core.get("artifacts"),
+        adapter.get("artifact_adapters"),
+        {"id", "stage", "template_version", "content_concepts"},
+        {"id", "path", "template"},
+        "产物",
+    )
+    blueprints = _merge_items(
+        core.get("blueprints", []),
+        adapter.get("blueprint_adapters", []),
+        {"id", "template_version"},
+        {"id", "target_pattern", "template"},
+        "蓝图",
+        required=False,
+    )
+    system_templates = _merge_items(
+        core.get("system_templates", []),
+        adapter.get("system_template_adapters", []),
+        {"id", "template_version"},
+        {"id", "template"},
+        "系统模板",
+        required=False,
+    )
     seen = set()
     for item in artifacts:
-        required = {"path", "stage", "template", "template_version", "content_concepts"}
-        if not isinstance(item, dict) or not required.issubset(item):
-            raise ValueError("模板清单存在不完整的产物定义")
         relative = item["path"]
         if relative in seen or Path(relative).is_absolute() or ".." in Path(relative).parts:
             raise ValueError(f"模板清单包含不安全或重复路径: {relative}")
@@ -31,27 +85,18 @@ def load_manifest() -> dict:
             raise ValueError(f"模板文件不存在: {item['template']}")
         if item.get("condition") not in {None, "requires_design_artifacts"}:
             raise ValueError(f"模板清单包含不支持的条件: {item.get('condition')}")
-    blueprint_ids = set()
-    for blueprint in data.get("blueprints", []):
-        required = {"id", "target_pattern", "template", "template_version"}
-        if not isinstance(blueprint, dict) or not required.issubset(blueprint):
-            raise ValueError("模板清单存在不完整的蓝图定义")
-        if blueprint["id"] in blueprint_ids:
-            raise ValueError(f"蓝图 ID 重复: {blueprint['id']}")
-        blueprint_ids.add(blueprint["id"])
+    for blueprint in blueprints:
         if not (TEMPLATE_ROOT / blueprint["template"]).is_file():
             raise ValueError(f"蓝图模板不存在: {blueprint['template']}")
-    system_ids = set()
-    for template in data.get("system_templates", []):
-        required = {"id", "template", "template_version"}
-        if not isinstance(template, dict) or not required.issubset(template):
-            raise ValueError("模板清单存在不完整的系统模板定义")
-        if template["id"] in system_ids:
-            raise ValueError(f"系统模板 ID 重复: {template['id']}")
-        system_ids.add(template["id"])
+    for template in system_templates:
         if not (TEMPLATE_ROOT / template["template"]).is_file():
             raise ValueError(f"系统模板不存在: {template['template']}")
-    return data
+    return {
+        "version": core["version"],
+        "artifacts": [{key: value for key, value in item.items() if key != "id"} for item in artifacts],
+        "blueprints": blueprints,
+        "system_templates": system_templates,
+    }
 
 
 MANIFEST = load_manifest()

@@ -146,7 +146,7 @@ def install_skills(
             destination.symlink_to(relative, target_is_directory=True)
             results.append(f"{name}=linked")
             managed[name] = "linked"
-        except OSError:
+        except (OSError, ValueError):
             shutil.copytree(source, destination, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
             results.append(f"{name}=copied")
             managed[name] = "copied"

@@ -180,6 +180,7 @@ class ContextAndPromptTests(unittest.TestCase):
             (root / "node_modules/pkg").mkdir(parents=True)
             (root / "node_modules/pkg/package.json").write_text("{}", encoding="utf-8")
             self.assertEqual(["backend/go.mod"], discover(root, ("go.mod", "package.json")))
+            self.assertTrue(all("\\" not in path for path in discover(root, ("go.mod", "package.json"))))
             output = json.loads(run_script("inspect_context.py", root).stdout)
             self.assertEqual(["AGENTS.md"], output["instructions"])
 
@@ -586,6 +587,7 @@ class LifecycleTests(unittest.TestCase):
             self.assertEqual("approve", resume["action"])
             self.assertTrue(resume["requires_user_confirmation"])
             self.assertTrue(resume["artifact"].endswith("01-requirement/requirement-report.md"))
+            self.assertTrue("\\" not in resume["artifact"])
             self.assertIn("--user-confirmed", resume["command"])
 
             run_script(

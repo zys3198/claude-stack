@@ -21,10 +21,11 @@ from adapter_registry import (
     TEAM_NAME_PREFIXES, TOPOLOGIES,
 )
 from build_stage_prompt import build_prompt
+from workflow_sources import load_workflow_contract
 
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
-DEFAULTS = json.loads((SKILL_ROOT / "config/workflow.json").read_text(encoding="utf-8"))
+DEFAULTS = load_workflow_contract()
 TEMPLATE = system_template("workflow-state")
 ALL_STAGES = {"PHASE-0", "SOLO", "REQUIREMENT", "DESIGN", "IMPLEMENT", "REVIEW", "TEST", "KNOWLEDGE", "SUMMARY"}
 STATUSES = {"pending", "in_progress", "completed", "failed", "skipped"}
@@ -1016,7 +1017,7 @@ def command_resume(args: argparse.Namespace) -> int:
             stage=data["awaiting_approval"],
             requires_user_confirmation=required_user_confirmation,
             artifact=(
-                str(Path(data["artifacts_dir"]) / "01-requirement/requirement-report.md")
+                (Path(data["artifacts_dir"]) / "01-requirement/requirement-report.md").as_posix()
                 if data["awaiting_approval"] == "REQUIREMENT" else None
             ),
             command=(

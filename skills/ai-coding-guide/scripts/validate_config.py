@@ -5,11 +5,16 @@ from pathlib import Path
 
 from adapter_registry import ADAPTERS
 from agent_registry import MANIFEST as AGENT_MANIFEST, STAGE_ROLES
+from memory_registry import MEMORY_ADAPTERS, MEMORY_CONTRACT
+from rule_sources import ADAPTER_RULES_PATH, CORE_RULES_PATH
+from workflow_sources import load_workflow_contract
+from runtime_registry import RUNTIME_ADAPTERS
 from template_registry import MANIFEST as TEMPLATE_MANIFEST, required_artifacts
+from tool_registry import TOOL_ADAPTERS, TOOL_CONTRACT
 
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
-DEFAULTS = json.loads((SKILL_ROOT / "config/workflow.json").read_text(encoding="utf-8"))
+DEFAULTS = load_workflow_contract()
 
 
 def errors() -> list:
@@ -44,10 +49,20 @@ def errors() -> list:
     )
     if state_template.get("version") != DEFAULTS.get("version"):
         result.append("workflow 配置与状态模板版本不一致")
-    if not (SKILL_ROOT / "rules/core.md").is_file():
-        result.append("缺少 rules/core.md")
+    if not CORE_RULES_PATH.is_file():
+        result.append(f"缺少通用核心规则源: {CORE_RULES_PATH}")
+    if not ADAPTER_RULES_PATH.is_file():
+        result.append(f"缺少 adapter 规则源: {ADAPTER_RULES_PATH}")
     if not (SKILL_ROOT / "commands/ai-coding-guide.md").is_file():
         result.append("缺少 commands/ai-coding-guide.md")
+    if set(TOOL_ADAPTERS) != set(RUNTIME_ADAPTERS):
+        result.append("tool adapter 与 runtime adapter 清单不一致")
+    if not TOOL_CONTRACT["role_requirements"]:
+        result.append("tool contract 缺少 role_requirements")
+    if set(MEMORY_ADAPTERS) != set(RUNTIME_ADAPTERS):
+        result.append("memory adapter 与 runtime adapter 清单不一致")
+    if not MEMORY_CONTRACT["index"]["required"]:
+        result.append("memory contract 缺少必需 index")
     for adapter_id in ADAPTERS:
         if not (SKILL_ROOT / "adapters" / adapter_id / "adapter.md").is_file():
             result.append(f"适配器说明缺失: {adapter_id}")
@@ -70,7 +85,10 @@ def main() -> int:
         "OK: "
         f"adapters={len(ADAPTERS)} logical_roles={len(AGENT_MANIFEST['roles'])} "
         f"host_agents={sum(len(item.get('host_agents', [])) for item in ADAPTERS.values())} "
-        f"artifacts={len(TEMPLATE_MANIFEST['artifacts'])}"
+        f"artifacts={len(TEMPLATE_MANIFEST['artifacts'])} "
+        f"runtime_adapters={len(RUNTIME_ADAPTERS)} "
+        f"tool_adapters={len(TOOL_ADAPTERS)} "
+        f"memory_adapters={len(MEMORY_ADAPTERS)}"
     )
     return 0
 

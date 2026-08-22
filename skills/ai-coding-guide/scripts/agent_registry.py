@@ -10,17 +10,48 @@ MANIFEST_PATH = AGENT_ROOT / "manifest.json"
 
 
 def load_manifest() -> dict:
-    data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-    if not isinstance(data.get("version"), str) or not data["version"]:
-        raise ValueError("Agent 清单缺少 version")
-    roles = data.get("roles")
+    adapter = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    if adapter.get("version") != "1.0":
+        raise ValueError(f"不支持的 Agent adapter 清单版本: {adapter.get('version')}")
+    core = adapter
+    if not isinstance(core.get("version"), str) or not core["version"]:
+        raise ValueError("逻辑角色清单缺少 version")
+    roles = core.get("roles")
+    adapters = adapter.get("role_adapters")
     if not isinstance(roles, list) or not roles:
-        raise ValueError("Agent 清单 roles 必须是非空数组")
+        raise ValueError("逻辑角色清单 roles 必须是非空数组")
+    if not isinstance(adapters, list) or not adapters:
+        raise ValueError("Agent adapter 清单 role_adapters 必须是非空数组")
+    adapter_by_id = {}
+    allowed_adapter_fields = {"id", "file", "input_artifacts"}
+    for item in adapters:
+        if (
+            not isinstance(item, dict)
+            or not {"id", "file"}.issubset(item)
+            or set(item) - allowed_adapter_fields
+        ):
+            raise ValueError("Agent adapter 清单正文映射字段无效")
+        if item["id"] in adapter_by_id:
+            raise ValueError(f"Agent adapter ID 重复: {item['id']}")
+        if "input_artifacts" in item and not isinstance(item["input_artifacts"], list):
+            raise ValueError(f"Agent adapter 产物输入无效: {item['id']}")
+        adapter_by_id[item["id"]] = {
+            "id": item["id"],
+            "file": item["file"],
+            **({"input_artifacts": item["input_artifacts"]} if "input_artifacts" in item else {}),
+        }
+    role_ids = {role.get("id") for role in roles if isinstance(role, dict)}
+    if len(role_ids) != len(roles) or None in role_ids:
+        raise ValueError("逻辑角色 ID 缺失或重复")
+    if role_ids != set(adapter_by_id):
+        raise ValueError("逻辑角色与 adapter 正文映射不一致")
+    merged_roles = [{**role, **adapter_by_id[role["id"]]} for role in roles]
+
     ids = set()
     stages = set()
-    for role in roles:
+    for role in merged_roles:
         required = {"id", "kind", "file", "description", "access"}
-        if not isinstance(role, dict) or not required.issubset(role):
+        if not required.issubset(role):
             raise ValueError("Agent 清单存在不完整的角色定义")
         role_id = role["id"]
         if role_id in ids:
@@ -46,7 +77,7 @@ def load_manifest() -> dict:
         body = AGENT_ROOT / role["file"]
         if not body.is_file() or not body.read_text(encoding="utf-8").strip():
             raise ValueError(f"Agent 正文不存在或为空: {role['file']}")
-    return data
+    return {"version": core["version"], "roles": merged_roles}
 
 
 MANIFEST = load_manifest()

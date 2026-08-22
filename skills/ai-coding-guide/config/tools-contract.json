@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "tools": [
+    {"id": "read", "description": "读取项目证据", "binding_required": true},
+    {"id": "search", "description": "搜索项目证据", "binding_required": true},
+    {"id": "write", "description": "写入授权文件", "binding_required": true},
+    {"id": "execute", "description": "执行验证命令", "binding_required": true},
+    {"id": "dispatch", "description": "派发隔离职责", "binding_required": false}
+  ],
+  "role_requirements": [
+    {"role": "devflow-solo-developer", "required": ["read", "search", "write", "execute"], "optional": []},
+    {"role": "devflow-requirement-owner", "required": ["read", "search", "write", "execute"], "optional": ["dispatch"]},
+    {"role": "devflow-architect", "required": ["read", "search", "write", "execute"], "optional": []},
+    {"role": "devflow-developer", "required": ["read", "search", "write", "execute"], "optional": []},
+    {"role": "devflow-code-reviewer", "required": ["read", "search", "write", "execute"], "optional": []},
+    {"role": "devflow-test-engineer", "required": ["read", "search", "write", "execute"], "optional": []},
+    {"role": "devflow-knowledge-engineer", "required": ["read", "search", "write", "execute"], "optional": []},
+    {"role": "devflow-summarizer", "required": ["read", "search", "write", "execute"], "optional": []},
+    {"role": "devflow-code-explorer", "required": ["read", "search"], "optional": []},
+    {"role": "devflow-knowledge-retriever", "required": ["read", "search"], "optional": []}
+  ],
+  "unsupported_rules": [
+    {"id": "unsupported-dispatch", "when": "宿主不提供隔离派发", "action": "fallback"}
+  ],
+  "fallbacks": [
+    {"id": "isolated-to-single-context", "from_mode": "isolated", "to_mode": "single-context", "when": "宿主不提供隔离执行", "reason": "在单上下文中按职责顺序执行并保留阶段边界"}
+  ]
+}

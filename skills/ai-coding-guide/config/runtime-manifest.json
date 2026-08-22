@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "source": "runtime-contract.json",
+  "runtimes": [
+    {
+      "id": "claude",
+      "status": "operational",
+      "source": "../adapters/claude/manifest.json",
+      "verified_on": "2026-08-22",
+      "capabilities": {
+        "lifecycle_operations": ["spawn", "send", "wait", "close", "spawn_helper"],
+        "unsupported_operations": [],
+        "access_levels": ["read", "report", "write", "test-write"],
+        "execution_modes": ["isolated"],
+        "features": ["dispatch", "tool-binding", "memory"]
+      }
+    }
+  ]
+}

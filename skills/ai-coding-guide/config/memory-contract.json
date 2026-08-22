@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "entry": {
+    "frontmatter_required": ["name", "description", "metadata"],
+    "metadata_required": ["type"],
+    "metadata_types": ["user", "feedback", "project", "reference"],
+    "body_format": "markdown",
+    "link_syntax": "[[name]]"
+  },
+  "index": {
+    "required": true,
+    "pointer_format": "markdown-link",
+    "pointer_fields": ["title", "path", "hook"],
+    "max_lines": 200
+  },
+  "relations": {
+    "link_syntax": "[[name]]",
+    "target": "entry-name",
+    "unresolved_action": "report"
+  }
+}

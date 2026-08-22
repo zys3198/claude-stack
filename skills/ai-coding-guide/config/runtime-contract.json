@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "lifecycle": {
+    "required_operations": ["spawn", "send", "wait", "close"],
+    "optional_operations": ["spawn_helper"],
+    "executor_id": "host-issued"
+  },
+  "access_levels": ["read", "report", "write", "test-write"],
+  "execution_modes": ["isolated", "single-context"],
+  "capabilities": ["dispatch", "tool-binding", "memory"],
+  "adapter_rules": ["host-declared", "unsupported-explicit"]
+}

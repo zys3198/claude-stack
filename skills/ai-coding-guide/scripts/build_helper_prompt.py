@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from agent_registry import HELPER_ROLES, role_body
+from rule_sources import load_rule_blocks
 
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
@@ -15,12 +16,14 @@ def main() -> int:
     parser.add_argument("--scope", action="append", default=[])
     args = parser.parse_args()
     scopes = args.scope or ["仅限当前问题直接相关的项目文件或知识来源"]
-    rules = (SKILL_ROOT / "rules/core.md").read_text(encoding="utf-8").strip()
+    rule_blocks = load_rule_blocks()
     print(f"# DevFlow 检索任务\n\n- 角色：`{args.role}`\n- 问题：{args.purpose}")
     print("- 范围：")
     for scope in scopes:
         print(f"  - {scope}")
-    print(f"\n## 强制规则\n\n{rules}")
+    print("\n## 强制规则")
+    for title, body in rule_blocks:
+        print(f"\n## {title}\n\n{body}")
     print(f"\n## 角色边界\n\n{role_body(args.role)}")
     print(
         "\n## 返回要求\n\n"

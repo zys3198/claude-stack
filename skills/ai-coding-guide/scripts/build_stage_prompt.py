@@ -6,13 +6,13 @@ from pathlib import Path
 from typing import List
 
 from agent_registry import ROLES, STAGE_ROLES, role_body
+from rule_sources import load_rule_blocks
 from rule_registry import applicable_rules, stage_rule
 from template_registry import ARTIFACTS, required_artifacts
 from validate_artifacts import find_section, sections
 
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
-RULES_PATH = SKILL_ROOT / "rules/core.md"
 HANDOFF_HEADINGS = {
     "DESIGN": {
         "01-requirement/requirement-report.md": [
@@ -129,8 +129,10 @@ def build_prompt(
     # every prompt wastes context and can conflict with later confirmed decisions.
     if request.strip() and not upstream:
         lines.extend(["", "## 用户目标", "", request.strip()])
-    lines.extend(["", "## 强制规则", "", RULES_PATH.read_text(encoding="utf-8").strip()])
-    lines.extend(["", "## 当前阶段规则", "", stage_rule(stage)])
+    lines.extend(["", "## 强制规则", ""])
+    for title, body in load_rule_blocks():
+        lines.extend([f"## {title}", "", body, ""])
+    lines.extend(["## 当前阶段规则", "", stage_rule(stage)])
     profile_rules = applicable_rules(
         state, stage, request, upstream_paths, explicit_profiles or []
     )

@@ -54,8 +54,7 @@ artifacts/<task-slug>/
 
 每个阶段只接收 manifest 声明的精确产物。提示生成器从已验证产物中确定性提取当前角色所需章节作为精简交接；Agent 默认不再打开上游全文，只有交接缺失或矛盾时才读取源文件。
 
-[templates/manifest.json](../templates/manifest.json) 是固定产物和条件蓝图的唯一事实源；实际模板位于 `templates/`。`prepare` 只复制固定产物，不覆盖已有文件。HTTP API 有变动时，执行者按 manifest 中的 `api-docs-*` 蓝图生成固定路径的 `api-docs.md`。阶段执行者删除所有 `{{...}}`，新增产物必须登记 manifest。
-
+`templates/manifest.json` 定义固定产物语义和条件蓝图，并映射实际模板文件与路径，模板正文位于 `templates/`。`prepare` 只复制固定产物，不覆盖已有文件。HTTP API 有变动时，执行者按 manifest 中的 `api-docs-*` 蓝图生成固定路径的 `api-docs.md`。阶段执行者删除所有 `{{...}}`，新增产物必须登记本地 manifest。
 校验器阻断缺失的合同章节、未填写占位项、空内容、内容过少和关键语义错误；不为标题样式或排版偏好增加额外门禁。
 
 ## 阶段门禁

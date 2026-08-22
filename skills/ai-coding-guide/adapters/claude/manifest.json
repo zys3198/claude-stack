@@ -10,6 +10,16 @@
   "stage_executor": "devflow-stage-executor",
   "research_executor": "devflow-research-helper",
   "required_tools": ["Agent"],
+  "host_tool_names": ["Agent", "Read", "Write", "Edit", "Glob", "Grep", "Bash"],
+  "tool_bindings": {
+    "read": ["Read"],
+    "search": ["Glob", "Grep"],
+    "write": ["Edit", "Write"],
+    "execute": ["Bash"],
+    "dispatch": ["Agent"]
+  },
+  "unsupported_capabilities": [],
+  "fallbacks": [],
   "installation": {
     "project_dir": ".claude",
     "agents_dir": "agents",

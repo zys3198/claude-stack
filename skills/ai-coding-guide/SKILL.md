@@ -21,7 +21,7 @@ description: Use when the user asks which skill/tool/ecosystem to use in Claude 
 ## 必须执行
 
 1. 将用户当前目录设为 `PROJECT_ROOT`，不向父目录寻找或自动切换项目。先读取宿主项目指令，再运行 `python3 <SKILL_ROOT>/scripts/inspect_context.py .` 发现实际项目约定。
-2. 开始任何阶段前读取 [rules/core.md](rules/core.md)。`rules/` 不会被宿主自动加载；`build_stage_prompt.py` 按 [rules/manifest.json](rules/manifest.json) 确定性注入核心规则、当前阶段规则，以及由项目证据命中的专项规则。
+2. 开始任何阶段前读取 [通用核心原则](rules/principles.md) 和当前 adapter 补充规则 [rules/core.md](rules/core.md)。`rules/` 不会被宿主自动加载；`build_stage_prompt.py` 按 [rules/manifest.json](rules/manifest.json) 确定性注入通用原则、adapter 补充规则、当前阶段规则，以及由项目证据命中的专项规则。
 3. 完整流程读取 [references/workflow-contract.md](references/workflow-contract.md)。medium/large 额外读取 [references/agent-execution.md](references/agent-execution.md) 和 [references/runtime-core.md](references/runtime-core.md)，并且只加载一个匹配的 `adapters/` 实现。
 4. 每阶段优先用 `workflow_state.py prepare ... --emit-prompt` 一次完成模板准备和提示生成，再执行 `start → finish`；仅对已经 prepare 的恢复状态单独调用 `build_stage_prompt.py`。REQUIREMENT 和 SUMMARY 由协调者在当前上下文执行，不创建阶段 Agent；isolated 模式的其他 route 阶段在 prompt 后、start 前增加 `spawn → assign`。只有宿主真实返回 executor ID 后才能 `assign`，并登记 adapter 要求的 `executor_type`。
 5. REQUIREMENT 按 [references/clarify-requirements.md](references/clarify-requirements.md) 完成证据分析、用户交互和需求报告。报告通过内容校验后必须向用户展示摘要并等待明确确认；只有确认后才能执行 `approve --stage REQUIREMENT --user-confirmed` 并进入 DESIGN。DESIGN 及后续 isolated 阶段只读取清单允许的上游产物和当前必要证据，协调者不得代写。
@@ -38,7 +38,7 @@ description: Use when the user asks which skill/tool/ecosystem to use in Claude 
 
 ## 不可绕过
 
-- `agents/manifest.json` 是逻辑角色、职责和上游阶段的唯一事实源；`templates/manifest.json` 是产物的唯一事实源。adapter 只映射少量宿主执行器，不得复制逻辑角色清单。
+- `agents/manifest.json` 内联逻辑角色元数据、职责和上游阶段；`templates/manifest.json` 内联产物语义并映射模板文件和路径；`config/runtime-contract.json` 与 `config/runtime-manifest.json` 定义生命周期和 Claude 能力；`config/tools-contract.json` 定义中立工具契约。adapter 只映射少量宿主执行器，不复制逻辑角色清单。
 - `prepare` 只生成缺失模板并记录基线，不覆盖已有产物。阶段执行者填写模板并删除所有 `{{...}}`；不要为标题措辞或排版反复返工。
 - medium/large 的 REQUIREMENT 和 SUMMARY 由协调者执行；DESIGN、IMPLEMENT、REVIEW、TEST 分别使用独立 Agent。KNOWLEDGE 是条件阶段：有新增可复用知识才创建 Agent，否则用 `decide-knowledge --decision skip --reason ...` 留下依据并跳过；不得按 size 一刀切。宿主确实不支持时才允许带具体原因的 `single-context` 降级。
 - REQUIREMENT 的用户确认门禁在 `auto` 和 `manual` 模式下都不可跳过；没有用户明确确认时不得创建 DESIGN 执行者。
