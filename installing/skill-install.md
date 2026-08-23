@@ -135,3 +135,11 @@
 - `_weak-model-backup/`：2026-07-28 Carl 文章二轮精简移入 16 个（memory `skill-trim-carl-article-2026-07-28`）；判定原则见 skill-trimmer。**2026-08-13 随 cc-switch skills 域全清物理删除**，仅剩记录。
 - E 类 5 份移备份夹（memory `skill-slim-audit-2026-07`）。**2026-08-13 备份夹已随 cc-switch skills 域清除**。
 - **2026-08-13 插件同名冗余清理**：55 个裸技能（`~/.claude/skills/`）与已启用插件同名 → 判定冗余，移入 `_weak-model-backup/`（原备份夹 README 2026-08-13 追加一行，备份夹已随 cc-switch skills 域清除）。来源=5 插件：caveman 7（裸名同名，插件版 dmi=0 模型可调）、mattpocock 28（其中 15 个插件版 dmi=true 仅手动：ask-matt/grill-me/grill-with-docs/handoff/teach/implement/improve-codebase-architecture/setup-matt-pocock-skills/to-spec/to-tickets/triage/wayfinder/writing-beats/writing-fragments/writing-shape；删裸名后模型调不到仅手敲）、taste-skill 13（dmi=0）、superpowers 1（test-driven-development）、understand-anything 8（dmi=0）。**可逆**：该批唯一副本已随备份夹清除，恢复=重装对应插件（见上方套件记录），不再有裸名副本可移回。判定依据=「插件已有则 skills/ 副本冗余」（用户 2026-08-13 拍板「全部 55 个」）。
+
+### pi.dev 侧插件技能平移植入（2026-08-23，CC→pi 迁移批次）
+- 来源（5 插件 cache 源目录）：mattpocock/mattpocock-skills/1.2.3 + caveman（最新 sha aa7b94ae0fa8）+ ponytail/4.8.3 + open-code-review/1.0.0 + taste-skill/1.0.0
+- 原因：插件自带 52 个 skill 在 CC cache 里是完整仓库副本（frontmatter name+description 与 pi 加载协议同构），无需 transskill 转换 → 直接 `cp -r` 整个 skill 目录（**附随文件完整保留**：FORMAT.md/LOGIC.md/UI.md/tracker docs/agents/）
+- 安装日期：2026-08-23；安装命令：`cp -r <plugin>/skills/<name>/ ~/.pi/agent/skills/<name>/`（52 目录一轮完成，脚本在 `lab-area/exp/2026-08-23-plugin-migrate/convert-plugins.sh`）
+- 装到哪：`~/.pi/agent/skills/`（52 个：mattpocock 25 + caveman 7 + ponytail 6 + open-code-review 1 + taste-skill 13）
+- 依赖：无（pi 加载协议原生支持裸 SKILL.md + 附随相对引用；解析规则见 pi `dist/core/skills.js`：name=frontmatter.name||目录名，description 必填，冲突后到先占）
+- 备注：**注意 taste-skill 源目录名≠frontmatter name**（如 output-skill→full-output-enforcement、taste-skill→design-taste-frontend）——pi 按 frontmatter name 索引故无冲突，但 `/skill:输出名` 与 `/skill:目录名` 可能不一致，用 frontmatter name。caveman 在 cache 存 28 个内容重复的 sha，只取最新。含 `agents/` 子目录的（domain-modeling/teach/prototype/setup-matt-pocock-skills）是 CC subagent 定义，pi 端不加载，属携带保留。遗留：pi 端 `/reload` 后验证 52 个可见 + 抽查附随引用链。
