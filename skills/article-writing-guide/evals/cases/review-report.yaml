@@ -1,6 +1,6 @@
 id: review-report
 title: 审校-非后端文体走批量管线
-description: 非后端技术文章且只要报告 → 路由 multi-review-pipeline 停在报告阶段，不走 tech-article-review（偏后端）。
+description: 非后端技术文章且只要报告 → 手动审校（出报告不改），审校类 skill 已退役。
 tag: routing
 input:
   prompt: |
@@ -10,4 +10,4 @@ judge:
   type: rule_based
   success:
     - output_contains:
-        all: ["multi-review-pipeline"]
+        all: ["报告"]

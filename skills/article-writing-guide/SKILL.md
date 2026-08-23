@@ -39,7 +39,7 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 
 **系统内置 skill 提示**：`deep-research` 是系统/插件内置 skill（非本地 skills 目录），**本机未装**；命中调研需求时用 §1 表①已装项替代（`agent-reach`/`last30days`）。`ecc:deep-research` 为插件条件路径（当前会话可调用才走）。调用系统内置 skill 用 `Skill` 工具或 `/deep-research`，别在本地目录找 SKILL.md。
 
-**语言边界**：本路由默认**中文**写作。英文文章可走 `article-writer` / `edit-article`，但跳过中文专用 skill（`chinese-markdown-normalizer`、`human-writing`）。
+**语言边界**：本路由默认**中文**写作。英文文章可走 `article-writer` / `edit-article`，但跳过中文专用 skill（`human-writing`）。
 
 **不用于（兄弟域转介）**：
 - 含「页面/界面/UI/落地页/登录页」且要视觉产出 → `ai-coding-guide` 前端视觉子路径（即使同时提写代码）
@@ -48,7 +48,7 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 - **教程裁决**（两域都可能命中时）：「给自己学会/作为学习产物」→ `learning-guide`；「面向读者发布的教程文章」→ 本路由 §1 ③ 起草-系统教程/课程
 - AI 编码工具/skill/插件选型 → `ai-coding-guide`
 
-**规范源**：JavaGuide 风格基线见独立 skill `javaguide-style-guide`（终检判定用，**仅由 `publish-final-check` ③ 与终检流程内部引用，不作为用户第一跳**）；写作执行见 `article-writer` §6。
+**规范源**：JavaGuide 风格基线见独立 skill `javaguide-style-guide`（终检判定用，JavaGuide 模式终检时引用，不作为用户第一跳）；写作执行见 `article-writer` §6。
 
 ## 1. 一句话路由表
 
@@ -64,20 +64,18 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 | ③ 起草-素材成型/叙事节拍 | "我有一堆笔记/碎片，帮我拼成文章""按故事线/节拍一步步写" | `article-writer`🪨 **协作模式**（§7：开工问询 → 结构方案 → 全篇细骨架 → 明确冻结 → 逐节生成） |
 | ④ 结构改写 | "重新组织这篇""调整章节结构""逻辑不顺" | `edit-article`🪨 |
 | ⑤ 去 AI 味/润色/降 AI 检测率 | "AI 味太重""改得像人写的""优化文风""AI 率太高""过不了朱雀""降 AIGC 率" | `human-writing`🪨（改写模式：改写作模式 + 注入真实智力，非表面替换） |
-| ⑥ 排版规范化 | "统一 Markdown 格式""修中英文空格/标点""批量规范" | `chinese-markdown-normalizer`🪶 |
 | ⑦ 配图 | "要不要加图""画个流程图/架构图""配图" | `drawio-article-illustration`🪶(决策+校验) → `drawio-chart`🪨(画图) |
-| ⑧ 审校-逐段 | "逐段 review""标 VERSION 增量评审""快速过一遍" | `tech-article-review`🪨 |
-| ⑧ 审校-多维度并行 | "全面审稿""多角度并行审查+批量改""先出报告我看看" | `multi-review-pipeline`🔥（并行审 → 修订清单 → 按用户确认批量改；只出报告时停在报告阶段） |
-| ⑨ 查重/洗稿 | "这篇是不是抄了来源""查洗稿""只可参考不可抄袭" | `plagiarism-audit`🪨（需外部来源，**只比贴源**） |
-| ⑩ 发布前总检 | "文章写完了，发布前过一遍""能不能发了" | `publish-final-check`🔥（强制关卡，MUST/SHOULD 两级拦截） |
-| ⑪ 参考源管理 | "我参考了这几篇""这些是我的参考来源" | 收集参考源 URL/文件 → 喂给 ⑨ 查重 + ⑩ 终检①子项 |
+| ⑧ 审校 | "逐段 review""全面审稿""先出报告我看看" | 手动审校（逐段过一遍，标 VERSION；审校 skill 已退役，详见 §2 审校两选） |
+| ⑨ 查重/洗稿 | "这篇是不是抄了来源""查洗稿""只可参考不可抄袭" | 手动比对（**只比用户贴的参考源**，需外部来源，否则跳过） |
+| ⑩ 发布前总检 | "文章写完了，发布前过一遍""能不能发了" | 手动终检（发布前人工过一遍；JavaGuide 模式用 `javaguide-style-guide` 判定风格） |
+| ⑪ 参考源管理 | "我参考了这几篇""这些是我的参考来源" | 收集参考源 URL/文件 → 喂给 ⑨ 查重 + ⑩ 终检 |
 
 ## 2. 易混 skill 区分
 
 - **起草四选**：单篇文章/博客/方案 → `article-writer`；对外发布的系统教程/系列课 → `tutorial-maker`；已有碎片要拼 / 要边写边选支线 → `article-writer`（协作模式 §7）。
 - **边学边写路径**：用户要"从 0 了解某项目/工具并写成文章"、或明确说"边学习边写"时，不直接走纯起草。先用 `agent-reach` 抓权威资料，产出学习路径和关键心智模型；若已有文章，先在对话中给增量初稿，用户确认后再用 `edit-article` 按现有结构写入；若无现稿，先用学习记录生成对话初稿，确认后再交给 `article-writer` 起草/落盘。
-- **改写四选**：调结构/逻辑 → `edit-article`；去 AI 味/文风 → `human-writing`（先读 2-3 篇同作者/目标风格低 AI 率样本提炼正面特征，对照改而非凭空套规则，详见 `article-writer` §7.8 优化模式）；纯排版/标点/空格 → `chinese-markdown-normalizer`；**深度改写整篇**（骨架+措辞都要动）→ `article-writer`（深度改写模式）。前三者可串行：先 edit-article → 再 human-writing → 最后 normalizer。**AI 味根因治理**：若 AI 味源于"一次性生成没搭骨架"（非纯文风问题），先走 `article-writer` §7.10 搭骨架五步法：选方向后一次性展开并冻结全篇细骨架，再逐节扩写；随后才用 `human-writing` 处理表层文风。
-- **审校两选 + 发布闸**：逐段增量、单次快评 → `tech-article-review`；多维度并行 + 修订清单 + 按确认批量改（或先出报告）→ `multi-review-pipeline`；**发布前强制关卡**（只放行不改）→ `publish-final-check`。**裁决：要逐段标 VERSION/快评选 tech-article-review，要并行多角度选 multi-review-pipeline，二选一不叠加；发布闸是 pipeline 末环，两者之后才跑。**（`review-doc` 已按 2026-08-13 审计+用户拍板移出路由表：与 multi-review-pipeline 高度重叠，纯 D 类零资产。）
+- **改写四选**：调结构/逻辑 → `edit-article`；去 AI 味/文风 → `human-writing`（先读 2-3 篇同作者/目标风格低 AI 率样本提炼正面特征，对照改而非凭空套规则，详见 `article-writer` §7.8 优化模式）；**深度改写整篇**（骨架+措辞都要动）→ `article-writer`（深度改写模式）。前两者可串行：先 edit-article → 再 human-writing。**AI 味根因治理**：若 AI 味源于"一次性生成没搭骨架"（非纯文风问题），先走 `article-writer` §7.10 搭骨架五步法：选方向后一次性展开并冻结全篇细骨架，再逐节扩写；随后才用 `human-writing` 处理表层文风。
+- **审校**：审校类 skill（`tech-article-review` / `multi-review-pipeline`）已随 2026-08 审计退役，当前**手动审校**——逐段快评标 VERSION，或通读后给修订清单、按用户确认再改。**发布闸**：`publish-final-check` 已退役，发布前**手动终检**（JavaGuide 模式用 `javaguide-style-guide` 判定风格）。（`review-doc` 已按 2026-08-13 审计+用户拍板移出路由表。）
 - **调研七选**（按信息源，决策树见 REFERENCE §1）：
   - 本地仓库 .md → `lean-ctx`（ctx_search/ctx_glob）🪶
   - 全网某话题近 30 天热度/讨论 → `last30days`🪶（Reddit/X/HN/YouTube/TikTok 等）
@@ -87,14 +85,14 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
   - 产品/公司/技术深度研究 → `agent-reach`🪶 / `ecc:deep-research`（插件条件路径，当前会话可调用才走）
   裁决：先按信息源定位（本地 vs 全网 vs 多平台）；🔥 烧 token 慎用，轻量级 🪶 起步。
 - **配图两件套**：先 `drawio-article-illustration` 判断"哪里需要图、用什么图"，再 `drawio-chart` 实际画。不要跳过前者直接画。
-- **JavaGuide 风格三件套**：写作执行 → `article-writer` §6（含 §6.7 自检、§6.9 反例 11 条）；终检判定 → `javaguide-style-guide`（M1-M10 + 量化阈值，终检流程内部引用）；发布放行 → `publish-final-check` ③ 引用 style-guide。三者不重叠：§6 教写，style-guide 判定，publish 放行。
+- **JavaGuide 风格两件套**：写作执行 → `article-writer` §6（含 §6.7 自检、§6.9 反例 11 条）；终检判定 → `javaguide-style-guide`（M1-M10 + 量化阈值）。两者不重叠：§6 教写，style-guide 判定；发布放行手动终检时引用 style-guide。
 
 ## 3. 默认 pipeline（端到端）
 
 > 🔴 **CHECKPOINT**：跨多阶段 pipeline 前，先与用户确认范围（跑全链路 / 只跑某几步 / 单点）。
 
 ### 通用技术写作
-`lean-ctx/agent-reach`(选型) → 对话初稿/改稿预览 → 用户确认 → `article-writer`(起草) → `edit-article`(结构) → `human-writing`(去AI味) → `drawio-article-illustration`+`drawio-chart`(配图) → `multi-review-pipeline`(审校改) → `plagiarism-audit`(查重，**需外部来源，否则跳过**) → `chinese-markdown-normalizer`(排版) → **`publish-final-check`(发布闸)**
+`lean-ctx/agent-reach`(选型) → 对话初稿/改稿预览 → 用户确认 → `article-writer`(起草) → `edit-article`(结构) → `human-writing`(去AI味) → `drawio-article-illustration`+`drawio-chart`(配图) → 手动审校 → 手动查重（**需外部来源，否则跳过**）→ 手动排版 → **手动终检（发布前人工过一遍）**
 
 所有会写文件或改文件的步骤都受 §4 写入闸门约束：先预览，确认后落盘。
 
@@ -110,10 +108,10 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 6. **确认后落盘**：小节正文确认后再写入文件；长文按节落盘，避免一次性生成导致返工和断连丢失。
 7. **用户审查循环**：用户审查后给建议，先改结构性问题，再改论点/例子，最后改文风和排版；不要把审查建议直接吞成无边界重写。
 
-裁决：这是 `article-writer` 前置协作层，不替代下游 skill。需要调研先跑调研，需要去 AI 味再跑 `human-writing`，发布前仍跑 `publish-final-check`。
+裁决：这是 `article-writer` 前置协作层，不替代下游 skill。需要调研先跑调研，需要去 AI 味再跑 `human-writing`，发布前手动终检。
 
 ### 边学边写（项目/工具类文章）
-`agent-reach`(权威资料) → 学习路径/心智模型(轻量讲解) → 对话中给增量初稿(不落盘) → 用户确认 → `edit-article`(把确认后的学习记录按现有结构写入) → `tech-article-review`(事实核查) → `human-writing`(必要时去AI味) → `chinese-markdown-normalizer`(排版) → `publish-final-check`(发布闸)
+`agent-reach`(权威资料) → 学习路径/心智模型(轻量讲解) → 对话中给增量初稿(不落盘) → 用户确认 → `edit-article`(把确认后的学习记录按现有结构写入) → 手动事实核查 → `human-writing`(必要时去AI味) → 手动排版 → 手动终检
 
 **主路径归口**：本节是写作域执行流程；「先学后写」的串行规则由 [`learning-guide` 裁决规则第 2 条](../learning-guide/SKILL.md) 拥有，本 guide 不重复展开。命中「学了要写成文章」时先入 learning-guide 取主路径，本节作为写作域的下游执行承接。
 
@@ -124,7 +122,7 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 **平台渲染记账**：边学边写全程记账目标平台不渲染的元素（公众号：mermaid、数学公式、HTML 表格），发布前统一转 PNG，别堆到发布闸才兜。
 
 ### JavaGuide 模式
-同上，但第②步 `article-writer` **强制 JavaGuide 模式**（执行规范见其 §6）；查重对齐"只可参考不可抄袭"铁律；末环 `publish-final-check` 的风格子项对照 `javaguide-style-guide` §1 M1-M10。
+同上，但第②步 `article-writer` **强制 JavaGuide 模式**（执行规范见其 §6）；查重对齐"只可参考不可抄袭"铁律；手动终检的风格判定对照 `javaguide-style-guide` §1 M1-M10。
 
 > 详细串联顺序、边界 case、落盘规则见 [REFERENCE.md](REFERENCE.md) §8。
 
@@ -149,17 +147,17 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 | 起草/改写/边学边写要写文件 | 先给对话预览；用户明确确认后才落盘 |
 | 从零起草或深度改写尚未冻结全篇细骨架 | 停在结构阶段；一次性展示完整 H2/H3 细骨架，讨论并明确冻结后再写正文 |
 | 查重但无外部来源 | 先问 URL/文件/贴文；用户说无来源才跳过并标 `⚠️ 未查重` |
-| 英文文章命中中文专用 skill | 跳过 `human-writing`、`chinese-markdown-normalizer` |
+| 英文文章命中中文专用 skill | 跳过 `human-writing` |
 | "帮我改改这篇"无目标 | 先问改骨架/肉/皮；不擅自选 skill |
 
 ## 5. JavaGuide 模式开关
 
 用户提以下任一关键词 → 全 pipeline 切 JavaGuide 模式：JavaGuide、docs/ai、Snailclimb、Java 面试系列、`my-submission/`。
-切模式后：起草用 `article-writer` JavaGuide 模式（遵循其 §6）；查重对齐"只可参考不可抄袭"铁律（见 [REFERENCE.md](REFERENCE.md) §7）；终检 `publish-final-check` ③ 风格子项对照 `javaguide-style-guide` §1 M1-M10。
+切模式后：起草用 `article-writer` JavaGuide 模式（遵循其 §6）；查重对齐"只可参考不可抄袭"铁律（见 [REFERENCE.md](REFERENCE.md) §7）；手动终检的风格判定对照 `javaguide-style-guide` §1 M1-M10。
 
 ## 6. 演进
 
-改动本 skill / REFERENCE.md / 下游 skill（`publish-final-check`、`javaguide-style-guide` 等）→ 记 [CHANGELOG.md](CHANGELOG.md)。checklist 类 skill（`publish-final-check` §2、`javaguide-style-guide` §1）设计成可插拔数组，增删项不动流程。
+改动本 skill / REFERENCE.md / 下游 skill（`javaguide-style-guide` 等）→ 记 [CHANGELOG.md](CHANGELOG.md)。checklist 类 skill（`javaguide-style-guide` §1）设计成可插拔数组，增删项不动流程。
 
 ### v1.3.0（2026-07-22）
 
@@ -182,11 +180,11 @@ article-writing-guide 相关？ YES/NO —— <一句理由>
 | "这篇文章 AI 味太重" | `human-writing` | 点名去 AI 味，单点改文风（2026-08-08 拍板替代 ai-text-polisher） |
 | "把这几篇笔记拼成一篇文章" | `article-writer`（协作模式） | 素材未结构化，开工问询 → 结构方案 → 全篇细骨架 → 明确冻结 → 逐节生成 |
 | "帮我改改这篇" | 先问改哪层；或按骨架→肉→皮 串行 | 模糊，见 REFERENCE §4 易混裁决，不擅猜 |
-| "全面审下这篇并改好" | `multi-review-pipeline` | 要审 + 批量改 |
-| "先出审校报告我看看，别改" | `multi-review-pipeline`（停在报告阶段） | 要报告；按用户确认后再批量改 |
-| "这篇是不是抄了这几个来源" | `plagiarism-audit` | 查重，有贴源 |
-| "文章写完了，发布前过一遍" | `publish-final-check` | 发布闸，强制关卡 |
-| "写完并发布前检查" | `article-writer` → ... → `publish-final-check` | 跨阶段，先 CHECKPOINT 确认全链路 |
+| "全面审下这篇并改好" | 手动审校 → 按确认改 | 审校 skill 已退役，手动逐段审 + 修订清单 |
+| "先出审校报告我看看，别改" | 手动审校（停在报告阶段） | 要报告；按用户确认后再改 |
+| "这篇是不是抄了这几个来源" | 手动比对贴源 | 查重，有贴源 |
+| "文章写完了，发布前过一遍" | 手动终检 | 发布前人工过一遍（JavaGuide 用 javaguide-style-guide） |
+| "写完并发布前检查" | `article-writer` → ... → 手动终检 | 跨阶段，先 CHECKPOINT 确认全链路 |
 | "这个主题怎么写，有没有相关资料" | `lean-ctx` / `agent-reach` | 调研选型，仓库内 vs 全网/多平台 |
 | "我想先和你讨论文章结构，你给我几个选项，我补充想法，定完再逐节设计和生成" | `article-writer`（协作模式） | 命中默认协作写作流：结构方案 → 方向确认 → 一次性展开全篇细骨架 → 讨论并明确冻结 → 逐节初稿预览 → 确认后落盘 → 审查循环 |
 | "我想边学习边写这个开源项目" | `agent-reach` → 学习路径 → 对话初稿 → `edit-article`/`article-writer` | 先学出心智模型，再给用户看增量初稿；用户确认后才沉淀进现稿 |

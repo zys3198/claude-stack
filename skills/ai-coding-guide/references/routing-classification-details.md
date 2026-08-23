@@ -72,7 +72,7 @@ Fallback:
 
 - 默认先走 `article-writing-guide`（写作总路由）
 - 从零写且分类已明确 → `article-writer`
-- 规范格式/统一 Markdown → `chinese-markdown-normalizer`
+- 规范格式/统一 Markdown → 手动规范（原 `chinese-markdown-normalizer` 已退役）
 
 AskUserQuestion:
 - A: 从零写

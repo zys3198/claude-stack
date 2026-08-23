@@ -14,7 +14,7 @@
 
 - **方向未定**（新页面、没设计稿、要视觉方向）→ 决策点先问：给 2-3 个方向选项问用户（或问有无参考/品牌约束），**不让设计 skill 自行拍脑袋定方向**；用户选定后 → `hallmark`（新页面/redesign/URL 抽取，反 AI 大路货）
 - **已有页面提质**（页面太丑、去 AI 味）→ `impeccable`（先审现有 AI 味再改）/ `hallmark`（要 audit/redesign 时）
-- **实现**（方向已定、只写组件/代码）→ 按项目栈直接实现（可跑 `inspect_context.py` 拿 manifests 证据定栈）；**组件库原则：先检查项目现有依赖并复用**，Vue 项目已采用或点名才走 `shadcn-vue-guide`
+- **实现**（方向已定、只写组件/代码）→ 按项目栈直接实现（可跑 `inspect_context.py` 拿 manifests 证据定栈）；**组件库原则：先检查项目现有依赖并复用**（`shadcn-vue-guide` 已随 2026-08 审计退役，Vue 组件按现有依赖/手动实现）
 - **动画动效**（做/改/审动画、加动效、手感不对）→ `emil-design-eng`（综合/审）/ `improve-animations`（全库改）/ `find-animation-opportunities`（找该动哪）；专用严审由用户显式运行 `review-animations`（当前会话可见才可运行）
 - **风格叠加**（可选，点名才套）→ `apple-design`（Apple 风格参考）等；默认 1 个阶段主路径 + 可选 1 个风格叠加，不堆叠
 - **特殊产物** → claude.ai artifact 用内置 Artifact 工具；视频产物无会话已验证默认路径（手动实现）

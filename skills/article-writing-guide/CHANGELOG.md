@@ -1,8 +1,14 @@
 # Changelog
 
-本文件记录 article-writing-guide 路由 skill 及下游 skill（`publish-final-check`、`javaguide-style-guide`）的演进。
+本文件记录 article-writing-guide 路由 skill 及下游 skill（`javaguide-style-guide`）的演进。
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/)，日期 YYYY-MM-DD。
+
+## [v1.8.1] - 2026-08-23
+
+### Changed（清理退役 skill 死引用）
+- 6 个已退役 skill（`publish-final-check` / `chinese-markdown-normalizer` / `tech-article-review` / `multi-review-pipeline` / `plagiarism-audit`）从 SKILL.md §1 路由表、§2 区分、§3 pipeline、§5 开关、§7 示例、REFERENCE §4/5/7/8/9、test-prompts.json、evals 全部移除，环节改为「手动执行」：手动审校 / 手动查重（只比贴源）/ 手动排版 / 手动终检（JavaGuide 用 `javaguide-style-guide` 判定）。
+- 依据：claude-stack main `aa7b94a chore(skills): remove retired skill packages` 已删 6 skill，本次同步清理 guide 侧残留引用（死引用漏清，路由曾进虚空）。
 
 ## [v1.8.0] - 2026-08-16
 

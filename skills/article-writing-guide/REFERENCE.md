@@ -54,7 +54,7 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 8. 用户确认正文后才落盘或调用会改文件的下游 skill；长文按节落盘，不把未确认章节写死。
 9. 用户审查后先处理结构问题，再处理论点/例子，最后处理文风和排版。
 
-与下游 skill 分工：这是 `article-writer` 前置协作层；需要调研先跑 `lean-ctx`/`agent-reach`/`deep-research`，需要去 AI 味再跑 `human-writing`，发布前仍跑 `publish-final-check`。
+与下游 skill 分工：这是 `article-writer` 前置协作层；需要调研先跑 `lean-ctx`/`agent-reach`/`deep-research`，需要去 AI 味再跑 `human-writing`，发布前手动终检。
 
 ### 不要做
 
@@ -83,7 +83,7 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 3. 读现稿标题树，按现有结构找插入点。
 4. 先在对话中给增量初稿，重点补心智模型、命令路径、踩坑点、阶段验收，不大幅推翻原结构。
 5. 初稿展示前先做轻量事实自查；用户确认后再写入对应章节。
-6. 写入后用 `tech-article-review` 做正式事实审校，避免学习过程中的临时理解沉淀成错误结论。
+6. 写入后手动做正式事实审校（逐段核对官方来源），避免学习过程中的临时理解沉淀成错误结论。
 
 ### 路线 B：没有现稿
 
@@ -112,33 +112,20 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 |---------|---------|-------|
 | "结构乱""重新组织""逻辑不顺""章节调整" | 改**骨架** | `edit-article` 🪨 |
 | "AI 味重""不像人写的""文风生硬""改自然点" | 改**肉**（措辞/语气） | `human-writing` 🪨 |
-| "中英文空格""标点不对""标题层级乱""引号格式""批量规范" | 改**皮**（排版） | `chinese-markdown-normalizer` 🪶 |
+| "中英文空格""标点不对""标题层级乱""引号格式""批量规范" | 改**皮**（排版） | 手动规范（统一中英文空格/标点/标题层级） |
 | "深度改写整篇""重写这篇""骨架和措辞都要动" | 改**骨架+肉**（整体重写） | `article-writer` 🪨（深度改写模式） |
 | "帮我改改这篇"（模糊） | 不确定 | 先问改哪层；或按 骨架→肉→皮 顺序串行；若要整体重写走 `article-writer` |
 
-**串行顺序**（三层都要改时）：`edit-article` → `human-writing` → `chinese-markdown-normalizer`。先动骨架会牵动措辞；最后规范排版避免反复改格式。
+**串行顺序**（两层都要改时）：`edit-article` → `human-writing`。先动骨架会牵动措辞；排版最后手动规范避免反复改格式。
 
-## 5. 审校两 skill + 发布闸选择
+## 5. 审校与发布闸（skill 已退役，手动执行）
 
-| 维度 | tech-article-review 🪨 | multi-review-pipeline 🔥 | publish-final-check 🔥 |
-|---|---|---|---|
-| 模式 | 逐段增量、可标 VERSION | 4 评论者并行 | 发布前强制关卡（4 子项） |
-| 输出 | 评审意见 + 增量标注 | 修订清单 + 按确认批量改（可停在报告阶段） | PASS/FAIL + 必改清单（**不改**） |
-| 何时用 | 单次快评、贴合 JavaGuide 风格 | 要"审查+批量改"一步到位，或先出报告 | 发布前最后一闸，只放行 |
-| 文体偏向 | 后端/AI/分布式/高并发 | 通用文档 | 通用 |
+审校类 skill（`tech-article-review` / `multi-review-pipeline`）与发布闸（`publish-final-check`）已随 2026-08 审计退役，当前**手动执行**：
 
-**规则**：
-- 用户说"审完顺手改了" → `multi-review-pipeline`。
-- 用户说"先出报告我看看" → `multi-review-pipeline`（停在报告阶段，用户确认后再批量改）。
-- 用户说"快速过一遍 / 逐段标一下" → `tech-article-review`。
-- 用户说"发布前过一遍 / 能不能发了" → `publish-final-check`（强制关卡，末环）。
-- JavaGuide 模式下审校**首选** `tech-article-review`（风格贴合）。
-- **非后端文体**（前端/算法/数据结构/通用科普）→ `multi-review-pipeline`（通用）；`tech-article-review` 仅后端/AI/分布式/高并发强相关时首选。
-- （`review-doc` 已按 2026-08-13 审计+用户拍板移出路由表：与 multi-review-pipeline 高度重叠，纯 D 类零资产。）
-
-**叠加规则**：
-- `tech-article-review`（逐段深挖）与 `multi-review-pipeline`（并行全局）**不叠加**（功能重叠），按用户诉求二选一。
-- 两者均不改成稿骨架，发布前再跑 `publish-final-check` 放行。
+- 用户说"逐段 review / 快速过一遍" → 手动逐段审校，标 VERSION。
+- 用户说"全面审稿 / 审完顺手改 / 先出报告" → 手动通读 + 给修订清单，按用户确认再批量改（可停在报告阶段）。
+- 用户说"发布前过一遍 / 能不能发了" → 手动终检（死链/查重/风格硬伤）；JavaGuide 模式用 `javaguide-style-guide` 判定风格。
+- （`review-doc` 已按 2026-08-13 审计+用户拍板移出路由表。）
 
 ## 6. 配图两件套顺序
 
@@ -153,12 +140,12 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 
 ## 7. 查重前置条件（只比贴源模式）
 
-`plagiarism-audit` 🪨 **只比用户贴的参考源**，不主动搜全网。前置：
+**手动查重**（原 `plagiarism-audit` 已退役）**只比用户贴的参考源**，不主动搜全网。前置：
 
 - **必须**用户提供外部来源（URL / 文件路径 / 粘贴文本）。无来源 → 先问用户对齐哪些来源，或先用 `lean-ctx`/`agent-reach` 拉候选来源。
 - 用户明确声明"无参考源" → 跳过查重，但终检报告标 `⚠️ 未查重`。
 
-**判定边界**（plagiarism-audit 内核，两类文本区别对待）：
+**判定边界**（两类文本区别对待）：
 - **技术事实描述**（如"TCP 三次握手步骤""HTTP 状态码 200 含义"）→ **允许相似**，不必改。事实就是事实。
 - **原创措辞搬运**（比喻/结构/举例/表达方式直接搬）→ **必改**。即使观点参考，措辞必须原创。
 
@@ -181,12 +168,12 @@ SKILL.md 给一句话路由表；本文件覆盖**边界 case、决策树、多 
 2. `edit-article` 🪨 调结构
 3. `human-writing` 🪨 去 AI 味
 4. `drawio-article-illustration` 🪶 + `drawio-chart` 🪨 配图
-5. `multi-review-pipeline` 🔥 多维度审校 + 批量改
-6. `plagiarism-audit` 🪨 查重（只比贴源，**需外部来源，否则跳过**）
-7. `chinese-markdown-normalizer` 🪶 排版规范
-8. **`publish-final-check`** 🔥 发布闸（4 子项 MUST/SHOULD 终检，MUST 全 PASS 才放行）
+5. 手动审校 + 批量改
+6. 手动查重（只比贴源，**需外部来源，否则跳过**）
+7. 手动排版规范
+8. **手动终检**（发布前人工过一遍：死链/查重/风格）
 
-JavaGuide 模式：步骤1 切 JavaGuide 模式（执行规范见 `article-writer` §6）；步骤5 可换 `tech-article-review`；步骤6 对齐"只可参考不可抄袭"；步骤8 风格子项对照 `javaguide-style-guide` §1 M1-M10 + §2 量化阈值。
+JavaGuide 模式：步骤1 切 JavaGuide 模式（执行规范见 `article-writer` §6）；步骤6 对齐"只可参考不可抄袭"；步骤8 风格判定对照 `javaguide-style-guide` §1 M1-M10 + §2 量化阈值。
 
 > **路径稳定性**：`my-submission/`、`docs/ai/` 等 JavaGuide 关键词以**目标仓库实际目录为准**（仓库重构时可能改名/迁移）；命中 JavaGuide 模式前先确认目录存在，别凭关键词硬套。
 
@@ -202,10 +189,10 @@ JavaGuide 模式：步骤1 切 JavaGuide 模式（执行规范见 `article-write
 ├─ draft-v4-illustrated.md  # 步骤4 配图后
 ├─ draft-v5-reviewed.md     # 步骤5 审校改后
 ├─ draft-v6-final.md        # 步骤6-7 查重+排版后
-└─ publish-report.md        # 步骤8 publish-final-check 报告
+└─ publish-report.md        # 步骤8 手动终检报告
 ```
 
-规则：每步输出先给对话预览；用户确认后再写独立文件，不覆盖上版；回滚直接取上一版；最终发布物 = `draft-v6-final.md`（publish-final-check PASS 后）。
+规则：每步输出先给对话预览；用户确认后再写独立文件，不覆盖上版；回滚直接取上一版；最终发布物 = `draft-v6-final.md`（手动终检通过后）。
 
 ## 9. 反模式（不要这样做）
 
@@ -214,13 +201,12 @@ JavaGuide 模式：步骤1 切 JavaGuide 模式（执行规范见 `article-write
 - ❌ 从零起草或深度改写只列粗目录就开写 → 应先一次性展开全篇 H2/H3 细骨架，讨论并明确冻结。
 - ❌ 用户说"去 AI 味"用 `edit-article` → 应 `human-writing`（edit-article 改结构不改文风）。
 - ❌ 跳过 `drawio-article-illustration` 直接画图 → 易产装饰图。
-- ❌ 无外部来源就跑 `plagiarism-audit` → 会空转（用户声明无源才跳过）。
+- ❌ 无外部来源就手动查重 → 会空转（用户声明无源才跳过）。
 - ❌ 把本路由器当执行器（自己重写各 skill 能力） → 本 skill 只**定路由**，执行委派给具体 skill。
-- ❌ `multi-review-pipeline` 与 `tech-article-review` 同时调 → 功能重叠，按诉求二选一（要并行批量改选前者，要逐段标 VERSION 选后者）。
-- ❌ 把 `publish-final-check` 当审校用 → 它是**发布闸**（只放行不改），审校在前序步骤 5 完成。
-- ❌ 跳过 `publish-final-check` 直接发布 → 最后一闸缺失，死链/查重/风格硬伤可能漏网。
-- ❌ `plagiarism-audit` 主动搜全网 → 当前模式**只比贴源**，主动搜未启用（如需启用另议）。
-- ❌ 混淆 `javaguide-style-guide` 与 `article-writer` §6 → 前者**终检判定**（M1-M10 + 阈值），后者**写作执行**（含 §6.7 自检、§6.9 反例）；publish-final-check ③ 引用前者不引用后者。
+- ❌ 审校时把查重当审校 → 查重只比贴源，审校独立逐段过。
+- ❌ 跳过发布前终检直接发布 → 终检缺失，死链/查重/风格硬伤可能漏网。
+- ❌ 查重主动搜全网 → 手动查重**只比贴源**，主动搜未启用。
+- ❌ 混淆 `javaguide-style-guide` 与 `article-writer` §6 → 前者**终检判定**（M1-M10 + 阈值），后者**写作执行**（含 §6.7 自检、§6.9 反例）。
 
 ## 10. 路由失败兜底
 

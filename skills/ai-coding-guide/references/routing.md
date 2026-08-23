@@ -348,7 +348,7 @@ Fallback:
 | 学习型开发 | `ai-coding-coach` | 叠加代码改动时先定归属+persona；`ai-coding-coach` 不在→手动先给方案+纠偏+讲 why |
 | 判级/暴露未知 | `expose-unknowns` | 需采访→`/grill-me` 或 `/ask-matt`（user-invoked，提醒用户手动敲）；目标过大且路线不清→`/wayfinder`（user-invoked，提醒手动敲）；不在→`code-change-workflow` §1.1 判级一行 |
 | 有需求文档 | 手动拆 4-6 切片 + PLAN.md | 已达成共识→`/to-spec`（user-invoked，提醒手动敲）；跨会话/并行→`/to-tickets`（user-invoked，提醒手动敲）；已有 Spec/Ticket 要实现→`/implement`（user-invoked，提醒手动敲） |
-| 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→`chinese-markdown-normalizer` |
+| 文档写作 | `article-writing-guide` | 从零写→`article-writer`；规范格式→手动（原 `chinese-markdown-normalizer` 已退役） |
 | 路由指南维护 | `guide-skill-auditor` | 行为变化→`darwin-skill`；小修最小改+补 eval 用例；只评估→给结论不改文件 |
 | 提交/收尾 | 手动 git + `git diff --cached --stat` 展示待确认 | `ocr review` |
 | 知识收尾 | `neat-freak` | 只同步 memory / 只更新 docs 见 A/B/C；不在→手动枚举 docs/README/AGENTS/memory |

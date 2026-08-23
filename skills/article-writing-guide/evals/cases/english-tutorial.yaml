@@ -1,6 +1,6 @@
 id: english-tutorial
 title: 语言适配-英文文章
-description: 英文文章 → article-writer 可用，跳过中文专用工具（human-writing/chinese-markdown-normalizer）。
+description: 英文文章 → article-writer 可用，跳过中文专用工具（human-writing）。
 tag: routing
 input:
   prompt: |
