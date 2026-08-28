@@ -1,0 +1,24 @@
+{
+ "enabled": [
+  "caveman@caveman",
+  "context7@claude-plugins-official",
+  "last30days@last30days-skill",
+  "mattpocock-skills@mattpocock",
+  "open-code-review@open-code-review",
+  "playwright@claude-plugins-official",
+  "ponytail@ponytail"
+ ],
+ "disabled": [
+  "better-harness@better-harness",
+  "claude-md-management@claude-plugins-official",
+  "code-review@claude-plugins-official",
+  "frontend-design@claude-plugins-official",
+  "github@claude-plugins-official",
+  "gitnexus@gitnexus-marketplace",
+  "impeccable@impeccable",
+  "officecli@officecli",
+  "ppt-master@ppt-master",
+  "skill-creator@claude-plugins-official",
+  "taste-skill@taste-skill"
+ ]
+}

@@ -15,6 +15,24 @@
 - **验证**：`python -m py_compile git_guard.py` 通过（PY_COMPILE_OK）。
 - **回退**：还原该 elif 分支为 `deny("CLAUDE.md §1.1: 新建分支前确认 git status 干净...")` 一行。
 
+### git_guard.py 意图授权升级（2026-08-28，自 pi safety-net guards.js explicitApproval 移植）
+
+- **改动**：`user_confirmed()` 从「仅确认词表」升级为 pi 语义五层判定——**否定意图 → 确认词 → 疑问句/查询 → 操作意图**。指令含操作动词（提交/推送/建分支）且非疑问句即视为用户明确指令，无需确认词。同时修了两个 __main__ 结构 bug（hook 模式早退吞自检、SELF_TEST 标志缺失）。
+- **验证**：`--self-test` 8/8 断言过（确认词放行/操作指令放行/否定意图拦/疑问句拦/推送口语放行/推送动词放行/查询意图拦×2）；hook 模式实测未确认 commit 被 deny、非 git 命令静默放行。
+- **回退**：还原 user_confirmed 为确认词表版本即可（git 历史有 2026-08-14 版本）。
+
+---
+
+## 自建 hook 新增（2026-08-28）
+
+### plugin_drift_check.py（SessionStart 插件台账漂移检测，自 pi skill-sync-watch 移植）
+
+- **位置**：`~/.claude/hooks/plugin_drift_check.py`（Python，~100 行，纯 stdlib）
+- **注册**：`~/.claude/settings.json` SessionStart 新增第 4 块，python 解释器 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`
+- **行为**：对照 `settings.json` enabledPlugins 与 baseline 快照（`~/.claude/installing/plugin-drift-baseline.json`，首轮自动建）：新增 enabled → 报「台账新增」；baseline 内消失 → 报「移除/禁用」；enabled 但缓存缺失（`~/.claude/plugins/cache/<mp>/<pl>`，`@skills-dir` 除外）→ 报「破损 enable」。**只报告不自动修复**（pi 治理哲学：纳入须人确认），经 hookSpecificOutput.additionalContext 注入会话，无漂移静默。
+- **验证**：首轮建 baseline（18 插件）；伪造新增/移除各测一遍，报告方向正确；恢复后静默。
+- **回退**：删 settings.json 对应 SessionStart 块 + 删 hook 文件 + 删 baseline 即可。
+
 ---
 
 ## 自建 skill（~/.claude/skills/ 下，非 cc-switch 同步）
@@ -113,6 +131,18 @@
 - 内容：`/fy <英文>` 或 `/fy <粘贴的英文描述>` → 当前会话 Claude 直接翻成中文；只输出译文；输入已中文则原样返回并提示；空输入有提示。零依赖（走本会话 LLM，不配 API、无脚本）。
 - 验证：重启会话后 `/` 菜单出现 /fy；`/fy /permissions` 或 `/fy statusline` 应返回中文说明。
 
+### goal-run（目标自动续跑，2026-08-28，自 pi-goal 语义移植）
+- 出处：pi-goal（pi 13 扩展包之一）语义 → CC 原生 ScheduleWakeup 封装；用户方向「pi 侧实现过的想法在 CC 复刻」。CC 侧对应能力：ScheduleWakeup + Monitor + run_in_background + /loop，本 skill 只定义行为契约（入口 4 项固化 / 空闲边界自续 / 三终结 goal_complete|blocked|wait / 安全上限 25 轮·3 次无进展即停·token 预算），不新增任何脚本或依赖。
+- 构成：`~/.claude/skills/goal-run/SKILL.md` 单文件
+- 验证：可被 Skill 工具显式调用（description 已出现在可用列表）；触发方式「/goal <目标>」或「自动续跑直到 X」
+- 回退：删目录即回；未挂 settings.json，无全局副作用
+
+### cold-skills-index（冷技能索引，2026-08-28 扩版）
+- 出处：冷/深冻三阶技能治理移植（自 pi 三阶治理，2026-08-28）。原索引只有冷技能清单，本次扩为：分类（讲解/教学、浏览器/工具、办公/文档、设计/前端）+ 深冻层（当前空，含进入条件）+ 转热/转深冻方法。
+- 构成：`~/.claude/skills/cold-skills-index/SKILL.md` 单文件；对应已禁插件清单（officecli/ppt-master/taste-skill/frontend-design）由 `settings.json` enabledPlugins=false 承载
+- 验证：Skill 工具按 name=cold-skills-index 可显式调用
+- 回退：git 历史有原版；删目录即回
+
 ## hooks / statusline / 配置
 
 ### ~/.claude/hooks/
@@ -158,3 +188,39 @@
 ## memory
 - 位置：`~/.claude/projects/C--Users-zys31/memory/`
 - 迁移：整目录拷；MEMORY.md 是索引。
+
+
+## Codex CLI 迁移（2026-08-25 晚，任务源 exp/2026-08-25-codex-migration/codex-migration-taskbook.md）
+
+**背景**：把 Claude Code 配置生态（规则/skills/hooks/MCP）搬到 Codex CLI，过渡期并存，最终卸掉 Claude Code。claude 侧零改动（指纹对比：settings.json 一致；skills 目录 21:00 后 mtime 零变化；.claude.json 变化来自运行中的 claude.exe 自身写入）。
+
+**认证**：cc-switch GUI 切 codex app → OpenAI Official（领导手动）；`codex login` 浏览器授权一次（领导手动），~/.codex/auth.json 21:24 写入。doctor auth ✓。
+
+**AGENTS.md**：~/.codex/AGENTS.md 由 ~/.claude/CLAUDE.md 转换（删 claude 特有：/goal、slash commands、statusline、marketplace；保留决策分层/人工确认线/代码质量/验证交付；注明来源与日期）。验收：exec 输出含「人工确认线」「决策分层」；反向验证改名→FILE_NOT_FOUND，还原→恢复。
+
+**skills**：31 自建 skill 目录拷入 ~/.codex/skills/（源 ~/.claude/skills/，排除 -workspace、manifest.json、README.md、lean-ctx、learned）。SKILL.md frontmatter 全部校验通过。codex exec 问出可见 skills ≥31（见 PROGRESS.md 验收输出）。
+
+**hooks**（~/.codex/hooks.json + ~/.codex/hooks/）：
+- secret_guard.py / edited_tracker.py / verify_recorder.py 拷自 ~/.claude/hooks/，state path 改 ~/.codex/hooks/，python 用 C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe
+- 兼容性修两处：① codex 的 Bash tool_response 是**字符串**非 dict（.get("stdout") 会抛异常导致 PostToolUse hook Failed）→ secret_guard/verify_recorder 已加 isinstance(resp,str) 分支；② codex 编辑工具名是 **apply_patch** 非 Edit/Write → edited_tracker matcher 改 Edit|Write|apply_patch，并从 patch 文本（*** Add/Update/Rename File:）解析路径
+- edited_tracker 的 SessionStart 挂载须单独 matcher 组（与 lean-ctx 合并同组会被 codex 重写 hooks.json 时冲掉）
+- lean-ctx observe/codex-pretooluse/codex-session-start 按官方 codex onboard 装（保留在 hooks.json）
+- ecc-metrics-bridge 不迁（ecc 已卸载）
+- 验收：红→绿→还原全过（secret_guard 拦 sk- 输出模型引述警告原文 → 禁用后 NO HOOK WARNING → 还原后警告恢复；verify_recorder 记录 verify_cmds；edited_tracker 记录编辑路径）
+- 待领导：codex `/hooks` 批准 trust（当前 exec 需 --dangerously-bypass-hook-trust）
+
+**MCP**（config.toml [mcp_servers]）：gitnexus = npx -y gitnexus@latest mcp；chrome-devtools = cmd /c npx -y chrome-devtools-mcp@latest；lean-ctx = C:/Users/zys31/.cargo/bin/lean-ctx.exe + LEAN_CTX_DATA_DIR env。`codex mcp list` 3 个 enabled。config.toml 备份 config.toml.bak-20260825-mcp。
+
+**回退**：删 ~/.codex/ 下 AGENTS.md、skills/、hooks.json、hooks/、config.toml 的 mcp_servers 段即可；claude 侧无任何改动无需回退。
+
+## Codex CLI 卸载（2026-08-26，任务源 exp/2026-08-26-purge-codex/）
+
+**范围**：卸载 npm 全局包 @openai/codex@0.149.1 + 整个 ~/.codex/ 移回收站（可撤销，未彻底删）。**保留**：~/.cc-switch/ 全部（cc-switch.db、codex_oauth_auth.json、settings.json）——cc-switch 的 codex 账号/登录配置不动。
+
+**命令**：`npm uninstall -g @openai/codex`（removed 2 packages）；~/.codex 移回收站用 scripts/trash_codex.py（SHFileOperationW FOF_ALLOWUNDO，Python 标准库 ctypes）。
+
+**验证**：where codex 无结果；npm ls -g 无 @openai/codex；~/.codex 不存在；~/.cc-switch/ 三文件完好。PowerShell profile 无 codex 引用，无需清理。
+
+**残留复查（2026-08-26）**：① ~/.codex 实占 **约 2.8GB**（du 漏算 .tmp/marketplaces 2466MB，回收站确认 $R3O40KE.codex），回收站保留可恢复；② %TEMP% 下 11 个 codex-* 调试残留（迁移期遗留，127K）已删；③ 其他 codex 引用均为他软件自身文件非残留：npm-cache _npx/ 内 loopforge-cli/claude-mem 的 .codex 适配、~/plugins/*.codex-plugin 元数据、deeptutor(deeptutor_web) 的 codex provider 代码、herdr agent-detection codex.toml。
+
+**恢复路径**：如需重装，`npm i -g @openai/codex` + 从 cc-switch GUI 切 codex app 写回登录（~/.codex/ 整个被删，需重建配置）。
