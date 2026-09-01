@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[开工路由]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[开工路由])"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1,
+    "pass_rate": 1
+  }
+}

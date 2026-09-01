@@ -1,0 +1,626 @@
+{
+  "metadata": {
+    "skill_name": "ai-coding-guide",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\ai-coding-guide",
+    "timestamp": "2026-08-18T14:25:28Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "判级-暴露未知路由",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 71.203,
+        "tokens": 37951,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[expose-unknowns]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[expose-unknowns])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "前端视觉-落地页留本路由",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 71.987,
+        "tokens": 38433,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[hallmark]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[hallmark])"
+        },
+        {
+          "text": "output_contains{not:[design-an-interface]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "前端视觉-方向未定先问",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 35.589,
+        "tokens": 37932,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[方向]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[方向])"
+        },
+        {
+          "text": "output_contains{not:[design-an-interface]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "指南维护-审计 router guide",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 204.483,
+        "tokens": 40618,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[guide-skill-auditor]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[guide-skill-auditor])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "学习陪跑-你练模式",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 19.453,
+        "tokens": 28563,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "重构-不推荐已移除工具",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 41.52,
+        "tokens": 37057,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[重构]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[重构])"
+        },
+        {
+          "text": "output_contains{not:[simplify]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[simplify])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "域边界转介-文章审校",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 4.492,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "域边界转介-学习调研",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.086,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "带任务信号的对比型问题走开发新功能",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.736,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "纯抽象对比走了解指南",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 6.274,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "已有需求文档走有需求文档分类",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 6.87,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "高风险代码审查双审",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 6.119,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "系统化调试先复现定位",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.812,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "小范围最简改动不弹菜单",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.797,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "新装 skill 触发维护场景",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 7.015,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "循环任务走 /loop",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 7.551,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "理解代码组合路径不二选一",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 8.789,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "提交收尾展示 diff 待确认",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 9.732,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "横切验证后再进提交",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 12.522,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "构建错误按原文排查",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 11.138,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "外部实践迁移先过闸门",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 9.201,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "用户说直接处理就不弹菜单",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 9.102,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "审查不误触发 verify",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 6.73,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "轻量迁移最小改动",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 6.698,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "禁止破坏性清理",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 4.989,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "直接执行跳过询问",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 4.935,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "定位校准开工路由为主",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.447,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "路由输出契约六项",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.449,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "风险闸门矩阵高风险判定",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.155,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "最小信息清单只问缺口",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.017,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "点名插件可用则直走",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.032,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "三域外独立工具直接执行",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.034,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "教程归属裁决给自己学会",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.128,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "重任务跨会话进交付状态机",
+      "configuration": "with_skill",
+      "run_number": 7,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "time_seconds": 5.024,
+        "tokens": 0,
+        "errors": 0
+      },
+      "expectations": null
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.14705882352941177,
+        "stddev": 0.35416454643506734,
+        "min": 0,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 18.532617647058828,
+        "stddev": 36.42325359696879,
+        "min": 4.492,
+        "max": 204.483
+      },
+      "tokens": {
+        "mean": 6486.882352941177,
+        "stddev": 14105.058339151436,
+        "min": 0,
+        "max": 40618
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

@@ -1,6 +1,6 @@
 # Skill 安装台账（外部来源）
 
-记录从外部装入的 skill / skill 套件。权威源 = `~/.claude/skills/<name>/`（真目录本体，禁 symlink 指向外部）。**2026-08-13 起 cc-switch 不再管理 skills**（镜像/skill-backups/repos 已全清，见 memory `skill-mgmt-cc-switch-only`），装法统一为 clone/copy 进 skills/。不用 agent-skills CLI 跨工具同步。
+记录从外部装入的 skill / skill 套件。第三方优先记录 Claude Code 插件；无兼容插件时才记录 `~/.claude/skills/<name>/` 裸 skill。**2026-08-13 起 cc-switch 不再管理 skills**（镜像/skill-backups/repos 已全清，见 memory `skill-mgmt-cc-switch-only`）。不用 agent-skills CLI 跨工具同步。
 
 套装按**仓库级**记一条，内部保留/裁剪写备注，不逐个开条目。自建 skill 不在这里，见 [custom-setup.md](custom-setup.md)。
 
@@ -24,13 +24,6 @@
 - 安装方法：clone/copy 进 `~/.claude/skills/` + 插件版 `superpowers@claude-plugins-official` 启用
 - 装到哪：`~/.claude/skills/`（brainstorming、systematic-debugging、test-driven-development、writing-plans、worktrees 等）
 - 备注：定位=备用（流程类与 Matt 重叠时以 Matt 优先，画像匹配见选型 memory）。
-
-### ~~anthropic 官方 example-skills~~（2026-08-13 卸载）
-- 来源：https://github.com/anthropics/skills
-- 安装日期：待补
-- 安装方法：clone/copy 进 `~/.claude/skills/` + 插件版 `example-skills@anthropic-agent-skills`
-- 装到哪：`~/.claude/skills/`（docx / pptx / xlsx / pdf / canvas-design / theme-factory / web-artifacts-builder / skill-creator 等）
-- 卸载：`claude plugin uninstall example-skills@anthropic-agent-skills`；原因=17 个官方教学示例与 `claude-plugins-official` 重复（frontend-design/skill-creator），全局 skills 无同名备份；cc-switch `common_config_claude` 已同步去该条目。可逆：`claude plugin install example-skills@anthropic-agent-skills`
 
 ### 仓颉 cangjie-skill + first-principles pack
 - 来源：https://github.com/Yeadon8888/cangjie-skill（仓颉）+ https://github.com/kangarooking/first-principles-skill（第一性原理 pack；2026-08-11 公网反查锁定）
@@ -70,6 +63,14 @@
 
 ## 单件登记（含地址/装法/位置）
 
+### eli5
+- 来源：https://github.com/anthropics/claude-plugins-community/blob/main/eli5/skills/eli5/SKILL.md
+- 更新日期：2026-08-31
+- 覆盖方法：读取上游 `eli5/skills/eli5/SKILL.md` 内容，覆盖 `~/.claude/skills/eli5/SKILL.md`；获取命令：`gh api repos/anthropics/claude-plugins-community/contents/eli5/skills/eli5/SKILL.md --jq .content | base64 -d`
+- 装到哪：`~/.claude/skills/eli5/SKILL.md`
+- 依赖：HTML artifact 能力（源 skill 要求）
+- 备注：替换原 116 行本地版本；当前版本触发 `/eli5 <主题>`，输出大图少文字的 HTML artifact。
+
 ### last30days
 - 来源：https://github.com/mvanhorn/last30days-skill
 - 安装日期：待补（2026-08-07 去链接化时复制进 .claude）
@@ -88,9 +89,17 @@
 - 引擎：**openai 兼容 → 阿里云百炼 DashScope（qwen3-vl-plus）**，境内直连稳定，端到端验证通过（OCR 正确，~7.5s）。曾试 claude-cli（复用 Claude Code 登录）但 **Windows 上不稳**：claude.exe 派生后台 helper 进程泄漏不退出，导致 `spawn EINVAL` / 结果坏（"Unsupported Image"）/ temp 清理 EPERM 飘忽，4 次测试仅 1 次全对。定位为上游未覆盖的「原生 exe shim」+ 进程泄漏 bug。**SKILL.md 已打本地补丁**（「Run it」段 Windows claude-cli 说明：需 `-p claude-cli --provider-bin <claude.exe 绝对路径>`），重装会丢失需重打。也试过 gemini-api（key 已配）但 **403 被墙**（Gemini API 境内不可用），留作有代理时的备选。当前故障转移链：openai → gemini-api → claude-cli（后两者境内会失败，仅噪音）
 - 配置：`~/.modlens/config.json`（0600）。注意：环境变量 `ANTHROPIC_BASE_URL=http://127.0.0.1:15721`（本地网关），切 anthropic provider 会走到它
 
+### leader
+- 来源：https://github.com/KKKKhazix/khazix-skills/tree/main/leader
+- 安装日期：2026-08-31
+- 安装方法：读取 GitHub Contents API 固定提交 `7a5c4934be4106ac740ffdb95280bb81b3f4b83c` 后复制文件
+- 装到哪：`~/.claude/skills/leader/SKILL.md` + `references/anatomy.md` + `references/style.md`
+- 依赖：无额外依赖
+- 备注：上游目录仅含 SKILL.md 与两份 references；已审查，无 scripts、外部命令、远程安装、数据上传、密钥读取或配置修改指令。
+
 ## 散件来源反查登记（2026-08-11 公网反查确认）
 
-重装通用方法：`npx skills add <owner/repo>` 或 clone 后 copy 进 `~/.claude/skills/<name>`。以下均为第三方，不进 git。
+无 Claude Code plugin manifest 的裸 skill 重装方法：`npx skills add <owner/repo>` 或 clone 后 copy 进 `~/.claude/skills/<name>`。以下均为第三方，不进 git。
 
 | 来源仓库 | 本地 skill |
 |---|---|
@@ -108,7 +117,7 @@
 
 插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
 
-仍未锁定来源（公网搜不到且非用户自建）：human-writing、ppt-master、qiaomu-ai-prd、remotion、playwright（本地含 LICENSE/NOTICE）、ruthless-review、tech-learning-roadmap、writing-great-skills、doc-finder 之外的 review/slop-review/design/apikey-image-gen/grok-image-to-video/hyperframes/github-task/loop-engineering 等——以磁盘现状为用，重装时按名再查。
+仍未锁定来源（公网搜不到且非用户自建）：human-writing、qiaomu-ai-prd、remotion、ruthless-review、tech-learning-roadmap、writing-great-skills、doc-finder 之外的 review/slop-review/design/apikey-image-gen/grok-image-to-video/hyperframes/github-task/loop-engineering 等——以磁盘现状为用，重装时按名再查。`ppt-master`、`playwright`、`impeccable` 已转 Claude Code 插件；`hallmark`、`kimi-webbridge` 的第三方来源与兼容性见 2026-08-26 清理批次。
 
 ### ~~skill-slimming（LearnPrompt/carl-skills）~~（2026-08-14 已吸收后卸载）
 - 来源：https://github.com/LearnPrompt/carl-skills
@@ -136,6 +145,19 @@
 - E 类 5 份移备份夹（memory `skill-slim-audit-2026-07`）。**2026-08-13 备份夹已随 cc-switch skills 域清除**。
 - **2026-08-13 插件同名冗余清理**：55 个裸技能（`~/.claude/skills/`）与已启用插件同名 → 判定冗余，移入 `_weak-model-backup/`（原备份夹 README 2026-08-13 追加一行，备份夹已随 cc-switch skills 域清除）。来源=5 插件：caveman 7（裸名同名，插件版 dmi=0 模型可调）、mattpocock 28（其中 15 个插件版 dmi=true 仅手动：ask-matt/grill-me/grill-with-docs/handoff/teach/implement/improve-codebase-architecture/setup-matt-pocock-skills/to-spec/to-tickets/triage/wayfinder/writing-beats/writing-fragments/writing-shape；删裸名后模型调不到仅手敲）、taste-skill 13（dmi=0）、superpowers 1（test-driven-development）、understand-anything 8（dmi=0）。**可逆**：该批唯一副本已随备份夹清除，恢复=重装对应插件（见上方套件记录），不再有裸名副本可移回。判定依据=「插件已有则 skills/ 副本冗余」（用户 2026-08-13 拍板「全部 55 个」）。
 
+### 第三方插件化清理批次（2026-08-25）
+- **last30days**：来源 `https://github.com/mvanhorn/last30days-skill.git`；版本 `3.21.1`；插件 `last30days@last30days-skill`；安装命令：`claude plugin marketplace add --scope user https://github.com/mvanhorn/last30days-skill.git`，`claude plugin install --scope user --yes last30days@last30days-skill`；安装位置：`~/.claude/plugins/cache/last30days-skill/last30days/3.21.1`；依赖：Node/Python，运行时按上游配置可选数据源凭据；备注：官方版本替代本地 v3.18.4。
+- **officecli**：来源 `https://github.com/officecli/officecli.git`；版本 `0.1.0`；插件 `officecli@officecli`；安装命令：`claude plugin marketplace add --scope user https://github.com/officecli/officecli.git`，`claude plugin install --scope user --yes officecli@officecli`；安装位置：`~/.claude/plugins/cache/officecli/officecli/0.1.0`；依赖：officecli CLI 及其自身认证/运行时配置；备注：替代本地 `officecli`。
+- **gitnexus**：来源 `https://github.com/abhigyanpatwari/GitNexus.git`；版本 `1.6.9`；插件 `gitnexus@gitnexus-marketplace`；安装命令：`claude plugin marketplace add --scope user https://github.com/abhigyanpatwari/GitNexus.git`，`claude plugin install --scope user --yes gitnexus@gitnexus-marketplace`；安装位置：`~/.claude/plugins/cache/gitnexus-marketplace/gitnexus/1.6.9`；依赖：Node/GitNexus CLI；备注：替代本地 9 个旧 `gitnexus-*` skill，`gitnexus-pr-review` 对应官方 `gitnexus-review`。
+
+### 第三方插件/skill 清理批次（2026-08-26）
+- **impeccable**：来源 `https://github.com/pbakaus/impeccable`；版本 `4.1.1`；Claude Code 插件 `impeccable@impeccable`；安装命令原文：`claude plugin marketplace add pbakaus/impeccable --scope user`，`claude plugin install impeccable@impeccable --scope user --yes`；安装位置：`~/.claude/plugins/cache/impeccable/impeccable/4.1.1`；依赖：无；证据：上游 `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json`；已删除 `~/.claude/skills/impeccable` 裸副本。
+- **ppt-master**：来源 `https://github.com/hugohe3/ppt-master`；版本 `ebd74d1f1d61-32c1cf49`；Claude Code 插件 `ppt-master@ppt-master`；安装命令原文：`claude plugin marketplace add hugohe3/ppt-master --scope user`，`claude plugin install ppt-master@ppt-master --scope user --yes`；安装位置：`~/.claude/plugins/cache/ppt-master/ppt-master/ebd74d1f1d61-32c1cf49`；依赖：按上游 skill 配置；证据：上游 `skills/.claude-plugin/plugin.json`；已删除 `~/.claude/skills/ppt-master` 裸副本。
+- **playwright**：来源 `https://github.com/anthropics/claude-plugins-official`；版本 `b819188d2eea`；插件 `playwright@claude-plugins-official` 已存在并启用，本轮未重复安装；安装位置：`~/.claude/plugins/cache/claude-plugins-official/playwright/b819188d2eea`；证据：上游 `external_plugins/playwright/.claude-plugin/plugin.json`；已删除 `~/.claude/skills/playwright` 裸副本。
+- **hallmark**：来源 `https://github.com/Nutlope/hallmark`；上游仅提供 `skills/hallmark/SKILL.md`，未提供 Claude Code `.claude-plugin/plugin.json`；本轮不伪装为插件、不改装法，保留现有 `~/.claude/skills/hallmark` 作为第三方裸 skill；上游重装命令：`npx skills add nutlope/hallmark`；不进自建 skill 白名单。
+- **kimi-webbridge**：官方来源 `https://github.com/MoonshotAI/kimi-code`；上游文件 `plugins/official/kimi-webbridge/kimi.plugin.json`（v1.11.3）是 Kimi 原生插件格式，不是 Claude Code manifest；本轮不伪装为 Claude 插件，保留现有第三方 skill 与 daemon，详细安装记录见 `tool-install.md`；不进自建 skill 白名单。
+- **处置**：已按用户确认永久删除 `impeccable`、`playwright`、`ppt-master` 三个 `~/.claude/skills/` 裸副本；插件 cache 保留为唯一 Claude Code 来源。
+
 ### pi.dev 侧插件技能平移植入（2026-08-23，CC→pi 迁移批次）
 - 来源（5 插件 cache 源目录）：mattpocock/mattpocock-skills/1.2.3 + caveman（最新 sha aa7b94ae0fa8）+ ponytail/4.8.3 + open-code-review/1.0.0 + taste-skill/1.0.0
 - 原因：插件自带 52 个 skill 在 CC cache 里是完整仓库副本（frontmatter name+description 与 pi 加载协议同构），无需 transskill 转换 → 直接 `cp -r` 整个 skill 目录（**附随文件完整保留**：FORMAT.md/LOGIC.md/UI.md/tracker docs/agents/）
@@ -143,3 +165,12 @@
 - 装到哪：`~/.pi/agent/skills/`（52 个：mattpocock 25 + caveman 7 + ponytail 6 + open-code-review 1 + taste-skill 13）
 - 依赖：无（pi 加载协议原生支持裸 SKILL.md + 附随相对引用；解析规则见 pi `dist/core/skills.js`：name=frontmatter.name||目录名，description 必填，冲突后到先占）
 - 备注：**注意 taste-skill 源目录名≠frontmatter name**（如 output-skill→full-output-enforcement、taste-skill→design-taste-frontend）——pi 按 frontmatter name 索引故无冲突，但 `/skill:输出名` 与 `/skill:目录名` 可能不一致，用 frontmatter name。caveman 在 cache 存 28 个内容重复的 sha，只取最新。含 `agents/` 子目录的（domain-modeling/teach/prototype/setup-matt-pocock-skills）是 CC subagent 定义，pi 端不加载，属携带保留。遗留：pi 端 `/reload` 后验证 52 个可见 + 抽查附随引用链。
+
+### 项目级安装：rohitg00/ai-engineering-from-scratch
+- 来源：https://github.com/rohitg00/ai-engineering-from-scratch
+- 安装日期：2026-08-31
+- 安装命令原文：`npx skills add rohitg00/ai-engineering-from-scratch`
+- 装到哪：`C:\\ZYS\\Tutorial\\AI\\ai-engineering-from-scratch\\.agents\\skills\\` 下 8 个 skill；CLI 同时为 Claude Code 等宿主创建 symlink
+- 依赖：Node.js / npx；本次自动安装 `skills@1.5.23`
+- 内容：check-understanding、claude-certification、course-guide、find-your-level、learn、learn-agent-skills、learn-mcp、start-learning
+- 备注：CLI 安全评估标记 `claude-certification` 为 Critical Risk，`learn-agent-skills` 有 1 alert；使用前需人工审阅。项目新增 `skills-lock.json`。

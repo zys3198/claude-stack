@@ -1,8 +1,9 @@
 ---
 name: preflight-check
-description: 多步任务/命令序列开工前环境预检——验证 repo root、目标路径存在性、文件编码、容器路径、shell 引号易碎点。触发：多步任务、跨目录、涉及容器路径/编码/shell 引号假设时。只验证不执行，猜错即停。
+description: >-
+  多步任务/命令序列开工前环境预检——验证 repo root、目标路径存在性、文件编码、容器路径、shell
+  引号易碎点。触发：多步任务、跨目录、涉及容器路径/编码/shell 引号假设时。只验证不执行，猜错即停。
 ---
-
 # 环境预检
 
 多步任务开工先验证环境假设，不猜。来源：/insights 2026-08-14 friction #1（git add 错 repo root / JSON 引号断裂 / GBK 乱码）。

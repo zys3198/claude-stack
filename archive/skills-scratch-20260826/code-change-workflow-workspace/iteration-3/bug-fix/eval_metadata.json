@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "调试-修根因检查调用方",
+  "prompt": "用 code-change-workflow 处理：src/login.go 的 login 函数偶发 panic，登录接口 500，帮我修一下\n",
+  "assertions": [
+    "output_contains{all:[根因]}"
+  ]
+}

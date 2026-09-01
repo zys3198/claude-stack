@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[构建错误]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[构建错误])"
+    },
+    {
+      "text": "output_contains{not:[ecc]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (not:[ecc])"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

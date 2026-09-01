@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[guide-skill-auditor]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[guide-skill-auditor])"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1,
+    "pass_rate": 1
+  }
+}

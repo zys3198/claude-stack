@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[lean-ctx gitnexus]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[lean-ctx gitnexus])"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1,
+    "pass_rate": 1
+  }
+}

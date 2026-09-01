@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "skill_name": "ai-coding-guide",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\ai-coding-guide",
+    "timestamp": "2026-08-17T03:13:42Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "域边界转介-学习调研",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 29.293,
+        "tokens": 37256,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[learning-guide]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[learning-guide])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "域边界转介-文章审校",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 56.195,
+        "tokens": 39057,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[article-writing-guide]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[article-writing-guide])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "前端视觉-落地页留本路由",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 39.054,
+        "tokens": 38942,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[hallmark]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[hallmark])"
+        },
+        {
+          "text": "output_contains{not:[design-an-interface]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "前端视觉-方向未定先问",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 47.815,
+        "tokens": 39370,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[方向]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[方向])"
+        },
+        {
+          "text": "output_contains{not:[design-an-interface]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "指南维护-审计 router guide",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 59.335,
+        "tokens": 42182,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[guide-skill-auditor]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[guide-skill-auditor])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "学习陪跑-你练模式",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 38.975,
+        "tokens": 38087,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[ai-coding-coach]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[ai-coding-coach])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "判级-暴露未知路由",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 51.901,
+        "tokens": 41275,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[expose-unknowns]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[expose-unknowns])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "重构-不推荐已移除工具",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 29.28,
+        "tokens": 37414,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[重构]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[重构])"
+        },
+        {
+          "text": "output_contains{not:[simplify]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[simplify])"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 43.98100000000001,
+        "stddev": 10.860163315991155,
+        "min": 29.28,
+        "max": 59.335
+      },
+      "tokens": {
+        "mean": 39197.875,
+        "stddev": 1640.1801301610137,
+        "min": 37256,
+        "max": 42182
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

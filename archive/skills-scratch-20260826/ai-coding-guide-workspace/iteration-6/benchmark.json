@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "skill_name": "ai-coding-guide",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\ai-coding-guide",
+    "timestamp": "2026-08-18T14:20:01Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "新装 skill 触发维护场景",
+      "configuration": "with_skill",
+      "run_number": 6,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 48.97,
+        "tokens": 37283,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[路由指南维护]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[路由指南维护])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "路由输出契约六项",
+      "configuration": "with_skill",
+      "run_number": 6,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 32.011,
+        "tokens": 36781,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[分类 主路径 闸门 下一步]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[分类 主路径 闸门 下一步])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "重任务跨会话进交付状态机",
+      "configuration": "with_skill",
+      "run_number": 6,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 49.321,
+        "tokens": 38907,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[状态机 口令]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[状态机 口令])"
+        },
+        {
+          "text": "output_contains{not:[devflow]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[devflow])"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 43.434,
+        "stddev": 8.078551726640114,
+        "min": 32.011,
+        "max": 49.321
+      },
+      "tokens": {
+        "mean": 37657,
+        "stddev": 907.3316189060462,
+        "min": 36781,
+        "max": 38907
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

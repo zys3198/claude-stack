@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "不命中-工具选型问题",
+  "prompt": "请用 guide-skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。\n请求：SP 和 Matt Pocock skills 哪个更适合我？\n",
+  "assertions": [
+    "output_contains{all:[不命中 转介]}"
+  ]
+}

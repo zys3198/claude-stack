@@ -51,6 +51,8 @@ cases:
     - evals/cases/rt-standalone-tool.yaml
     - evals/cases/rt-tutorial-self.yaml
     - evals/cases/rt-heavy-multisession.yaml
+    - evals/cases/rt-parallel-delegation.yaml
+    - evals/cases/rt-parallel-delegation-no-trigger.yaml
   defaults:
     timeout_seconds: 240
     max_turns: 10

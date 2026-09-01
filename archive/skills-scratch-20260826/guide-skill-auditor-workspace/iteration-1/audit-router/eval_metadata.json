@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "命中-审查 router guide 路由质量",
+  "prompt": "请用 guide-skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。\n请求：帮我审查一下 ai-coding-guide 现在的路由质量\n",
+  "assertions": [
+    "output_contains{all:[十查]}"
+  ]
+}

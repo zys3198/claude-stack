@@ -1,8 +1,12 @@
 ---
 name: learning-personas
-description: 学习系统总纲 + 说话层角色库——对话中识别到学习时刻自动启用：探索（半懂/想弄明白）→peer 对练、求讲清（不理解/为什么）→teacher 引导讲解、要下结论（验证/判断对不对）→research 查证。触发词：怎么回事、帮我搞懂、为什么、我不懂、我这样理解对吗、帮我判断、验证一下。手动：/learning-personas 或用"用 peer/teacher/research 模式"。全系统学习模式唯一词汇源，源自 DeepTutor（eduhub.deeptutor.info）三 persona 提炼。
+description: >-
+  学习系统总纲 + 说话层角色库——对话中识别到学习时刻自动启用：探索（半懂/想弄明白）→peer 对练、求讲清（不理解/为什么）→teacher
+  引导讲解、要下结论（验证/判断对不对）→research
+  查证。触发词：怎么回事、帮我搞懂、为什么、我不懂、我这样理解对吗、帮我判断、验证一下。手动：/learning-personas 或用"用
+  peer/teacher/research 模式"。全系统学习模式唯一词汇源，源自 DeepTutor（eduhub.deeptutor.info）三
+  persona 提炼。
 ---
-
 # 学习系统（Learning System）
 
 全系统唯一权威。学习相关机制统一用这套词汇，只有一套模式词：**peer / teacher / research**。

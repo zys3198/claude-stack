@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[分类 主路径 闸门 下一步]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[分类 主路径 闸门 下一步])"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1,
+    "pass_rate": 1
+  }
+}

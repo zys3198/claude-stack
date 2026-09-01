@@ -1,8 +1,11 @@
 ---
 name: ai-coding-coach
-description: Use when the user wants to improve their own AI-assisted coding ability while building software, asks to pair on implementation decisions, says they do not want to depend on AI, or starts a coding task where learning, judgment, or explaining why matters.
+description: >-
+  Use when the user wants to improve their own AI-assisted coding ability while
+  building software, asks to pair on implementation decisions, says they do not
+  want to depend on AI, or starts a coding task where learning, judgment, or
+  explaining why matters.
 ---
-
 # AI Coding Coach
 
 ## Core principle

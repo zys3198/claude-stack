@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "路由输出契约六项",
+  "prompt": "请用 ai-coding-guide 做开工路由判断，只做路由判断，不要执行任务本身。\n请求：帮我判断这个需求该用什么 skill，直接给结论别长篇解释。\n",
+  "assertions": [
+    "output_contains.all: missing [分类 主路径 闸门 下一步]"
+  ]
+}

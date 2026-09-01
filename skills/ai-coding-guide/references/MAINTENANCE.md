@@ -9,7 +9,7 @@
 | 触发信号 | 必做动作 |
 |---|---|
 | 新装或卸载 skill / 插件 | 复核 `routing.md` 推荐路径、`references/ecosystems.md` 生态说明、`evals/` 用例 |
-| 当前会话 system reminder 新增或删除 skill / agent / 工具名 | 先对照当前会话，再对照 `~/.claude/skills/` 与 `settings.json` enabledPlugins |
+| 当前会话 system reminder 新增或删除 skill / agent / 工具名 | 先对照当前会话，再对照 `~/.pi/agent/skills/`（自建）+ `~/.pi/agent/skills-sync/`（sync 第三方）与 `settings.json` enabledPlugins |
 | 用户指出推荐过时、死引用、错归属、错默认路径 | 先查证据，再修正文案，再补 changelog |
 | 路由决策改了 A/B/C 选项或 fallback | 同步 `routing.md`、`ecosystems.md`、`evals/` |
 | 新增或删除「必须 / 默认 / 官方 / 已装」类断言 | 复核证据等级，并把不确定项降级或删除 |
@@ -18,7 +18,7 @@
 
 按以下顺序取证，不跳级：
 
-1. **本地已证实**：当前会话可用清单（`Available skills` / `Available tools` / `Available agent types`）、`~/.claude/skills/`、`settings.json` enabledPlugins、当前仓库文件。历史摘要、memory、prior-session 内容不算可用性证据。
+1. **本地已证实**：当前会话可用清单（`Available skills` / `Available tools` / `Available agent types`）、`~/.pi/agent/skills/`（自建）+ `~/.pi/agent/skills-sync/`（sync 第三方）、`settings.json` enabledPlugins、当前仓库文件。历史摘要、memory、prior-session 内容不算可用性证据。
 2. **官方可证实**：官方 README、官方 marketplace 元数据、官方插件说明。
 3. **经验判断**：维护者推荐、默认建议、经验排序；必须显式标成推荐，不得写成硬事实。
 4. **证据不足**：影响主推荐结论时停下来问用户；不影响时标「不确定」或直接删。
@@ -52,5 +52,11 @@
 - 看见死引用或错归属，当场修，不拖到下次
 - 分类观察期：定期复盘 Step 2 各分类实际触发次数，零触发或仅误触发的降级/删除，防分类膨胀
 - **路由表门禁**：删除任何分类/条目前必须引用真实误路由事故或官方变更证据，否则保持原样（防无证据漂移）
+
+## 变更记录
+
+| 日期 | 变更 | 依据 |
+|---|---|---|
+| 2026-08-31 | 接入 `parallel-delegation` 作为主分类之后的可组合并行执行层，补路由、生态边界和正/负触发回归用例 | 用户提供文章与实验目录 `exp/2026-08-31-model-agnostic-delegation/parallel-delegation/evals/evals.json` |
 
 <!-- 吸收精简自 ai-coding-guide v1.9.0 references/MAINTENANCE.md，2026-08-18：audit.ps1/TEST-RESULTS 引用删（未随迁），同步文件列表改新骨架 -->

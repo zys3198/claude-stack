@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "审校-非后端文体走批量管线",
+  "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：审校一篇前端 React 渲染优化的技术文章，只出报告不改\n",
+  "assertions": [
+    "output_contains{all:[multi-review-pipeline]}"
+  ]
+}

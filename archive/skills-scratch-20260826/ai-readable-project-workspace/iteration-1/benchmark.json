@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "skill_name": "ai-readable-project",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\ai-readable-project",
+    "timestamp": "2026-08-17T13:33:10Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "为迷你项目产出 AI 上下文",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 96.417,
+        "tokens": 45420,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "expect.files_exist",
+          "passed": true,
+          "evidence": "all checks passed"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 96.417,
+        "stddev": 0,
+        "min": 96.417,
+        "max": 96.417
+      },
+      "tokens": {
+        "mean": 45420,
+        "stddev": 0,
+        "min": 45420,
+        "max": 45420
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

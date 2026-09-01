@@ -1,8 +1,10 @@
 ---
 name: ai-readable-project
-description: 让项目能被 AI 看懂——产出 AI 上下文工程静态上下文（根 CLAUDE.md + AGENTS.md 知识索引 + 模块领域说明），并沉淀长期维护规则，使项目持续被 AI 维护。触发：让 AI 看懂这个项目、梳理项目给 AI 用、引入 AI 协作、建 CLAUDE.md/AGENTS.md、项目 AI 上下文、把项目梳理成 AI 可维护、让 AI 接手老项目。<!-- v0.2.0 -->
+description: >-
+  让项目能被 AI 看懂——产出 AI 上下文工程静态上下文（根 CLAUDE.md + AGENTS.md 知识索引 +
+  模块领域说明），并沉淀长期维护规则，使项目持续被 AI 维护。触发：让 AI 看懂这个项目、梳理项目给 AI 用、引入 AI 协作、建
+  CLAUDE.md/AGENTS.md、项目 AI 上下文、把项目梳理成 AI 可维护、让 AI 接手老项目。<!-- v0.2.0 -->
 ---
-
 # ai-readable-project
 
 让项目能被 AI 看懂。核心思想源自腾讯技术工程《从胡言乱语到精准改代码》：AI 在老项目里「胡言乱语」，根因是**上下文不够**。AI 与开发差别不在能力，在于上下文——缺的是四类（均为原文提炼）：

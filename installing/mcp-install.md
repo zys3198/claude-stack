@@ -20,13 +20,6 @@
 - **重装（2026-08-09）**：doctor 报 3 问题（data dir split 两处 stats.json / MCP pin 非标准 LEAN_CTX_DATA_DIR / stale ANTHROPIC_BASE_URL 致 401），根因=旧版 `.config` vs `.local/share` 路径坑延续。按官方 getting-started 重装：`lean-ctx uninstall --keep-binary --yes`（全清配置/数据/hooks/skill，保留 3.9.18 二进制）-> `lean-ctx init --global`（shell hook + 24 aliases）-> `lean-ctx init --agent claude`（MCP + hooks + SKILL.md + CLAUDE.md 托管块 v9）-> `lean-ctx doctor --fix`（补 Cursor/Copilot/Augment/Hermes/VS Code hooks+rules）。结果 37/37 通过。**3.9.18 布局统一**：env.sh + shell-hook.bash 都在 `~/.config/lean-ctx`，`.bashrc` source 路径正确；MCP 不再 pin `LEAN_CTX_DATA_DIR`（只 command + instructions）；`.bashenv` 留空（`init --global` 不写，`_lc` 由 `.bashrc` 的 shell-hook.bash 提供，`type _lc` = 函数，链路通）。旧 `_lc: command not found` 坑未复现。备份 `C:\Users\zys31\lean-ctx-backup-20260809\`（stats.json x2、config.toml、.bashrc、.bashenv、doctor-final.txt）。Codex 侧（`~/.codex/`）已不存在，重装未涉及。原样装回：`lean-ctx uninstall --keep-binary --yes && lean-ctx init --global && lean-ctx init --agent claude && lean-ctx doctor --fix`。详见 memory `lean-ctx-bashenv-fix`（已更新）。
 
 
-### gitnexus
-- 来源：https://github.com/abhigyanpatwari/GitNexus （2026-08-11 核实：其 skills 与本机 9 个 gitnexus-* 吻合）
-- 安装日期：待补
-- 安装方法：现为 `~/.claude.json` 里 command 直指 `C:\Users\zys31\AppData\Local\npm-cache\_npx\e46929201c1128dd\node_modules\.bin\gitnexus.cmd mcp`。**注意：指 npx 缓存目录不稳，缓存清了就没**。重装建议改为标准形式：`claude mcp add gitnexus -- cmd /c npx -y gitnexus mcp`（npm 包名 `gitnexus`；`npx gitnexus analyze` 会自动安装配套 skill）
-- 装到哪：`~/.claude.json` → `mcpServers["gitnexus"]`
-- 依赖：Node/npx
-- 备注：用途=代码库图谱/影响面分析（api_impact/trace/cypher 等）。配套 skill `gitnexus-exploring`。
 
 ## 已卸载
 

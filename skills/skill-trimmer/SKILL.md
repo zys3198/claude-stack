@@ -1,8 +1,10 @@
 ---
 name: skill-trimmer
-description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill 值得保留、哪些该移入备份；也评估是否该装新 skill。判定基准来自 JavaGuide《再见 Superpowers！很多 Skill 真的可以扔掉了》+《Skill 的选择与精简》的强模型时代保留观（个人偏好沉淀 / 专业判断脚本 / 防方向错误三类才留）+ 主流 Agent Skill 去留框架（知识增量三级 Expert/Activation/Redundant、工程与安全体检、任务适配性、生命周期/SLIM、数据驱动），叠加本机护栏（被引用 D 类=改路由、流程型留兜底、分类建议必须用户拍板）。触发词：精简 skill、skill 精简、哪些 skill 该删、盘点 skill、审计 skill 库、skill 太多、清理 skill、trim skills、skill audit、review my skills、生成复审页、我选好了、读取我的 Skill 设置、这个 skill 还值不值得留、去留标准、要不要装这个 skill、这个 skill 该不该装、装前评估。当用户想给 skill 库瘦身、评估是否装新 skill、或对某篇"skill 断舍离"文章想落地执行时使用；也适用于装了新套件后评估旧 skill 是否冗余。不用于：新建 skill（走 skill-creator）、审查 router 型 guide 质量（走 guide-skill-auditor）、优化单个 skill 内容（走 darwin-skill / skill-creator）。
+description: >-
+  盘点并精简 skill 库：判定哪些 skill 值得保留、哪些移入备份，评估是否装新 skill。触发词：精简 skill、skill 精简、哪些 skill 该删、盘点 skill、审计 skill
+  库、skill 太多、清理 skill、trim skills、skill audit、review my skills、这个 skill 还值不值得留、去留标准、要不要装/该不该装这个 skill、装前评估、
+  生成复审页、读取 Skill 设置。不用于：新建 skill（走 skill-creator）、审查 guide 质量（走 guide-skill-auditor）、优化单 skill 内容（走 darwin-skill）。判定基准细节见正文。
 ---
-
 # Skill Trimmer — Skill 库精简判定
 
 强模型时代，skill 的收益是「沉淀模型猜不到的东西」，成本是「路由噪声 + 描述上下文 + 互相抢活」。本 skill 把「哪些留、哪些删」变成可复用的判定流程，而不是每次凭感觉重想。
@@ -21,7 +23,7 @@ description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill
 3. **套件流程型要重审启用时机（文章主论点）——但 Superpowers 套件你已拍板不审（见决议 #3），本条只对「其他套件 / 散装流程型 skill」生效。** 流程完整性 ≠ 价值：brainstorm→plan→TDD→worktree→subagent→review 全套，对复杂/陌生/高风险改动有价值，对小改动是从保护变负担、白烧 token。判定**非 SP** 套件或散装流程 skill 时加问一句：**它的启用时机有没有写清？小任务会不会被它拖着走全流程？** 时机模糊 → 标「过度流程」候选。
 4. **同一地方反复翻车、且翻车代价不低，才值得单独留/写一个 skill。**（文章的兜底判据。）
 5. **装前反向测试（新增【文章】）：** 评估新 skill 时**先不用它跑一次**——能跑好就不装；同一个问题反复出现，才把那一小段流程留下来。装了之后装前四问仍适用（见流程第 1.5 步），过期能删。
-6. **维护量基线 <20（新增【文章】）：** 作者「经常使用、愿意长期维护的不到 20 个」。盘点时若 `~/.claude/skills/` 总量远超 20 且大量零使用，是「书签心态」信号——绝大多数应进移除候选，别让「装得多」自我合理化。
+6. **维护量基线 <20（新增【文章】）：** 作者「经常使用、愿意长期维护的不到 20 个」。盘点时若 `~/.pi/agent/skills/`（自建区）总量远超 20 且大量零使用，是「书签心态」信号——绝大多数应进移除候选，别让「装得多」自我合理化。（sync 第三方在 `~/.pi/agent/skills-sync/`，另区独立判断。）
 7. **描述列表预算 ~2% / 8000 字符（新增【文章】）：** 渐进式披露下 skill 名称+描述常驻上下文，有预算上限，超限先缩短描述、再移除 skill。判定时若描述列表逼近预算且含 Activation/Redundant 类长描述 → 优先「收窄描述」或「移除」，而非只在库里新增。
 8. **静态判据 ≠ 运行证据（新增【实践】，来自 SkillHub 内容治理复盘）：** SKILL.md 写得规范 ≠ 它真能被加载、真能跑。SkillHub 的教训：静态评测只能证明 Skill「写了什么」，不能证明「运行时做什么」——安装脚本无法执行/依赖不兼容、文档声称支持但 Agent 实际不会调用、能生成结果但没解决问题。映射到本 skill：**拿不准的 skill 判定前先试运行一次**，记录运行证据，不凭静态描述下「删」或「留」。证据三级：静态检查（写了什么）/ 运行验证（能跑什么）/ 使用信号（实际被用过吗）。三者有别，缺运行验证的「删前确认」不算闭合。
 
@@ -43,19 +45,19 @@ description: 盘点并精简 Claude Code skill 库——逐个判定哪些 skill
 
 ## 本机环境事实（判定前必读，别再探一遍）
 
-- **skill 两种形态（更正 2026-08-11：已全为真目录，0 软链；下述软链/直管区分作废，删除即真删，恢复走 installing 台账重装）**：`~/.claude/skills/` 下大部分是**软链**（指向 cc-switch 源 `~/.cc-switch/skills-*` 等），少量是**直管目录**（实体文件）。软链删的是链接，**源还在，可恢复**；直管目录删了就是真删。软链里又分两亚型——junction（目录联接，Python 可读目标）和真符号链接（msys `/c/...` 目标，Windows Python 读不出，inventory 里标 `unresolved`）；`scan_skills.py` 已统一处理，判定时把 `unresolved` 当软链看待即可。
-- **移动 = 断链/移目录，不是删除。** 候选移入 `~/.cc-switch/skills/_weak-model-backup/`（已有先例，夹内 README 记标准）或 lab-area exp 目录。恢复走 cc-switch 官方 `RESTORE_SYMLINKS.md` 机制（Python `os.symlink` + msys2 路径），**Windows 下不手搓 symlink、不 copy**——这是 §9 规则的既定例外。
+- **skill 两种形态（更正 2026-08-11：已全为真目录，0 软链；下述软链/直管区分作废，删除即真删，恢复走 installing 台账重装）**：pi 迁移后 `~/.pi/agent/skills/` 下全是**真目录**（复制本体），无软链，无 cc-switch 旁挂。
+- **移动 = 移目录，不是纯删除。** 候选移入 `~/.pi/archive/_weak-model-backup/`（pi-stack .gitignore 未忽略的归档位）或 lab-area exp 目录，走 §1.1 确认线。
 - **插件 skill（`ecc:*` 等整包）不在本 skill 判定范围**——插件是整包开关（`enabledPlugins`），用户已拍板全开，不逐个评。
-- **`~/.claude/skills/learned/` 是 ai-coding-coach 产出区**，属 A 类偏好沉淀，默认保留，不进候选。（该目录 2026-08-11 已清空删除；日后再出现仍适用本条。）
+- **`~/.pi/agent/skills/learned/` 是 ai-coding-coach 产出区**，属 A 类偏好沉淀，默认保留，不进候选。（车道同 CC 时代约定，pi 迁移后沿用。）
 
 ## 判定流程
 
 ### 1. 盘点
 
-跑清单脚本（只读，列出所有 skill + 来源 + 是否软链）：
+跑清单脚本（只读，列出所有 skill + 来源 + 是否软链；扫两区：agent/skills 自建 + agent/skills-sync 第三方）：
 
 ```bash
-python ~/.claude/skills/skill-trimmer/scripts/scan_skills.py
+python ~/.pi/agent/skills/skill-trimmer/scripts/scan_skills.py
 ```
 
 输出 → `skill-trimmer-workspace/inventory.json`（workspace 建在 skill 目录旁，避免污染）。拿到清单后按 description 分组：写作 / 编码 / 前端 / 学习 / 绘图 / 运营 / 元管理 等。
@@ -76,7 +78,7 @@ python ~/.claude/skills/skill-trimmer/scripts/scan_skills.py
 对**每个候选 skill 的名字**，grep 它被谁引用：
 
 ```bash
-grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/memory/ 2>/dev/null
+grep -rl "skill名" ~/.pi/agent/skills/ ~/.pi/agent/skills-sync/ ~/.pi/agent/projects-memory/ 2>/dev/null
 ```
 
 - 记录下来：**引用方清单**（哪个 router / 哪个 skill / CLAUDE.md 哪行）。这一步不再是「免删名单」，而是「改路由清单」——
@@ -131,19 +133,19 @@ grep -rl "skill名" ~/.claude/skills/ ~/.claude/CLAUDE.md ~/.claude/projects/*/m
 
 ```bash
 # 校验契约（serve 前先跑，确保 inventory-review.json 合法）
-python ~/.claude/skills/skill-trimmer/scripts/review_server.py validate \
-  --inventory ~/.claude/skill-trimmer-workspace/inventory-review.json
+python ~/.pi/agent/skills/skill-trimmer/scripts/review_server.py validate \
+  --inventory ~/.pi/agent/skill-trimmer-workspace/inventory-review.json
 
 # 启动本地网页（127.0.0.1 随机端口 + 随机 token + 自动开浏览器；Ctrl+C 停止，停止不丢决定）
-python ~/.claude/skills/skill-trimmer/scripts/review_server.py serve \
-  --inventory ~/.claude/skill-trimmer-workspace/inventory-review.json \
-  --profile "claude-code-win"
+python ~/.pi/agent/skills/skill-trimmer/scripts/review_server.py serve \
+  --inventory ~/.pi/agent/skill-trimmer-workspace/inventory-review.json \
+  --profile "pi-win"
 
 # 用户说完「我选好了」后读持久化决定
-python ~/.claude/skills/skill-trimmer/scripts/review_server.py read --require-complete
+python ~/.pi/agent/skills/skill-trimmer/scripts/review_server.py read --require-complete
 ```
 
-- 页面支持搜索 / 来源 / 宿主 / 决定筛选、批量设置、`RARE_CRITICAL` 二次确认；状态落 `~/.skill-trimmer/profiles/<profile>/current.json`（权限 0700/0600，原子写，保留近 50 版），关闭不丢，下次同 profile `serve` 恢复。新 inventory 只保留 `skillId + contentHash` 均未变化的决定，变化项回到待复审。
+- 页面支持搜索 / 来源 / 宿主 / 决定筛选、批量设置、`RARE_CRITICAL` 二次确认；状态落 `~/.pi/agent/skill-trimmer/profiles/<profile>/current.json`（权限 0700/0600，原子写，保留近 50 版），关闭不丢，下次同 profile `serve` 恢复。新 inventory 只保留 `skillId + contentHash` 均未变化的决定，变化项回到待复审。
 - 页面 decision 只有 `global / project / trigger` 三值，与判定十一档映射：
   - `保留` / `保留-Activation` / `保留-流程兜底` / `保留-SP套件` / `需工程修复` / `收窄描述` → **`global`**（常驻可发现）
   - `移入备份` / `移除+改路由` / `移除-被覆盖` / `移入 CLAUDE.md` → **`trigger`**（归档留触发空壳，见「触发空壳合同」；备份位置 / 改路由清单写进 notes）
@@ -162,16 +164,16 @@ python ~/.claude/skills/skill-trimmer/scripts/review_server.py read --require-co
 主流框架用「遥测计数 + 溯源标签 + A/B 评测」做留删决策（Curator 机制：active → stale → archived；skill-up 工具做因果对照）。**本机现状没有遥测基建，不假装有。** 用轻量信号近似，证据链列全：
 
 - **轻量信号**（替代遥测计数器）：
-  - 文件 mtime / git 历史：半年未动 + 零引用 + D 类 → stale 候选（对应 Curator 的 stale→archived）。**已自动化（2026-08-17）**：scan_skills.py 每 skill 输出 `last_modified`（SKILL.md mtime）+ `usage_count`（读 metrics/skill-usage.log，由 PostToolUse 记账 hook 产生）+ `staleCandidate`（0 使用 + >180 天未改，STALE_DAYS=180），保鲜判据从人工回忆变数据驱动；插件 skill 不在 `~/.claude/skills` 下不纳入本扫描。
+  - 文件 mtime / git 历史：半年未动 + 零引用 + D 类 → stale 候选（对应 Curator 的 stale→archived）。**已自动化（2026-08-17）**：scan_skills.py 每 skill 输出 `last_modified`（SKILL.md mtime）+ `usage_count`（读 metrics/skill-usage.log，由记账 hook 产生；**pi 侧记账 hook 未移植，pi 候选位 `~/.pi/agent/metrics/skill-usage.log` 缺失时 usage 归零**）+ `staleCandidate`（0 使用 + >180 天未改，STALE_DAYS=180），保鲜判据从人工回忆变数据驱动；插件 skill 不在 `~/.pi/agent/skills` 下不纳入本扫描。
   - 引用方活跃度：被 router 引用且 router 在迭代 → active；只有 memory 里历史提过 → 偏 stale。
   - `installing/` 台账日期：装后从未用过、台账无后续 → 可疑。
   - 用户实测：同任务「开/关该 skill」各跑一次对比 = 穷人版 A/B，不搭评测集。
   - **总量健康度（新增【文章】）**：库总量 vs 维护基线 <20——远超且大量零使用 = 书签心态信号，push 整体收敛，别因单个看似合理就放行。
   - **三维上下文成本（新增【工具】）**：`currentStartupTokens`（当前可发现入口启动成本）/ `shellStartupTokens`（触发空壳入口成本）/ `postCallTokens`（命中后完整内容成本）。`startup_delta = currentStartupTokens - shellStartupTokens`：正数写「入口缩短」、负数写「入口反增」、0 写「仅治理收益」。触发空壳只有当 `shellStartupTokens < currentStartupTokens` 才真的省启动 token，不把倒挂显示成节省。本机无遥测时三值标 `不可用`，不硬填 0（对应「描述列表预算 ~2%」的定量化）。
 **本机自动化三件套（2026-08-17，使用信号的实际来源，命令在此）**：
-- 记账（全自动）：settings.json PostToolUse `Skill` matcher → `hooks/skill_ledger.py` → `~/.claude/metrics/skill-usage.log`。Skill 调用自动追加，无需人工跑。
-- 保鲜（想审计时跑）：`python ~/.claude/skills/skill-trimmer/scripts/scan_skills.py` → inventory.json 每 skill 带 `usage_count`/`last_modified`/`staleCandidate`，stale 候选直接列在 stdout；去留拍板仍走本 skill 判定流程。
-- 复盘（周惯例）：`python ~/.claude/hooks/scripts/transcript_sweep.py 7` → `~/.claude/metrics/transcript-weekly-YYYYMMDD.md`，读高频主题挑 2-3 个缺口补 memory/skill（补盲闭环）。
+- 记账（全自动）：**pi 侧未移植**（CC 时代 settings.json PostToolUse → `hooks/skill_ledger.py` → `~/.claude/metrics/skill-usage.log`）。pi 侧录音缺失 → usage_count 归零，stale 判据退化为纯 mtime；pi 候选位 `~/.pi/agent/metrics/skill-usage.log`，待记账 hook 到 pi 后自动生效。
+- 保鲜（想审计时跑）：`python ~/.pi/agent/skills/skill-trimmer/scripts/scan_skills.py` → 扫两区（agent/skills 自建 + agent/skills-sync 第三方）→ inventory.json 每 skill 带 `usage_count`/`last_modified`/`staleCandidate`，stale 候选直接列在 stdout；去留拍板仍走本 skill 判定流程。
+- 复盘（周惯例）：**pi 侧未移植**（CC 时代 `~/.claude/hooks/scripts/transcript_sweep.py` → transcript-weekly）。pi 下暂无对应产物，读高频主题补缺口暂靠人工回顾。
 - **演进方向（当前不建）**：`github.com/alibaba/skill-up`（已验证存在的官方评测工具）做正式 A/B 需评测数据集，成本高；哪天想上再建。
 - **状态映射**：active（在用/有引用）→ stale（mtime 久 + 零引用）→ archived（移入 `_weak-model-backup/`）。审计报告里给每个候选标当前状态。
 
@@ -200,7 +202,7 @@ python ~/.claude/skills/skill-trimmer/scripts/review_server.py read --require-co
 
 ## 来源与核验（2026-08-13）
 
-【工具】层 = skill-slimming（LearnPrompt/carl-skills，2026-08-14 吸收）：复用其工具资产——`scripts/review_server.py`（1069 行，loopback 复审服务，仅绑 127.0.0.1、随机 token、无 subprocess/shell/网络、只写自己的状态目录、不读密钥；安全面 Gen Safe / Socket 0 alerts）+ `assets/review.html`（复审页）+ `references/audit-contract.md`（inventory 证据契约）+ 触发空壳合同 + 三维 token 模型 + 测量标签纪律。判定基准不吸收——slimming 的四层判据浅（只用使用频率分 global/project/trigger），替代不了本 skill 的十一档判定脑。品牌已归并（skill-slimming → skill-trimmer，状态目录 `~/.skill-trimmer/`）。
+【工具】层 = skill-slimming（LearnPrompt/carl-skills，2026-08-14 吸收）：复用其工具资产——`scripts/review_server.py`（1069 行，loopback 复审服务，仅绑 127.0.0.1、随机 token、无 subprocess/shell/网络、只写自己的状态目录、不读密钥；安全面 Gen Safe / Socket 0 alerts）+ `assets/review.html`（复审页）+ `references/audit-contract.md`（inventory 证据契约）+ 触发空壳合同 + 三维 token 模型 + 测量标签纪律。判定基准不吸收——slimming 的四层判据浅（只用使用频率分 global/project/trigger），替代不了本 skill 的十一档判定脑。品牌已归并（skill-slimming → skill-trimmer，状态目录 pi 侧 `~/.pi/agent/skill-trimmer/`）。
 
 【文章】层 = JavaGuide 两篇：《再见 Superpowers！很多 Skill 真的可以扔掉了》(2026-07-23，本 skill 原始基准) + 《Skill 的选择与精简》(2026-08-13，javaguide.cn/ai-coding/practices/skill-selection-and-pruning.html，同作者同立场演进版——补充装前四问、先不装裸跑、维护量 <20、描述列表预算 ~2%/8000 字符、规则分流框架、装前必看 SKILL.md 安全面)。两篇一致处按原判据；后篇新增判据已并入核心立场 #5-7、流程 1.5、十一档「移入 CLAUDE.md/规则文件」。
 

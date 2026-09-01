@@ -76,7 +76,9 @@ def changed_code_hashes(root):
                 path = parts[index].decode("utf-8", "replace")
                 index += 1
         if path.lower().endswith(CODE_EXT):
-            paths[path] = file_hash(os.path.join(root, path))
+            digest = file_hash(os.path.join(root, path))
+            if digest is not None:
+                paths[path] = digest
     return paths
 
 
@@ -87,9 +89,10 @@ def refresh_code_pending(st, data):
     if not root or not isinstance(verified, dict):
         return
     current = changed_code_hashes(root)
-    if not current:
-        return
     pending = st.setdefault("code_pending", [])
+    if not current:
+        st["code_pending"] = []
+        return
     discovered = False
     for path, digest in current.items():
         if path not in verified or verified[path] != digest:
@@ -131,7 +134,14 @@ if last_verify >= last_edit:
     sys.exit(0)
 
 blocks = int(st.get("stop_blocks", 0)) + 1
-st["stop_blocks"] = min(blocks, MAX_BLOCKS)
+if blocks > MAX_BLOCKS:
+    st["stop_blocks"] = MAX_BLOCKS
+    save(st)
+    reason = "verify_gate BLOCKED: 检测到代码改动但未跑成功验证，请先执行验证命令并确认退出成功。"
+    print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
+    sys.exit(2)
+
+st["stop_blocks"] = blocks
 save(st)
 
 verify_cmds = st.get("verify_cmds", [])

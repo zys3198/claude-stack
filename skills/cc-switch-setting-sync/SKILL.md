@@ -1,8 +1,14 @@
 ---
 name: cc-switch-setting-sync
-description: 把 Claude 的 ~/.claude/settings.json 公共配置同步进 ccswitch 数据库（~/.cc-switch/cc-switch.db 的 settings.common_config_claude），防止 ccswitch 切换/热切换 provider 时用旧值覆盖降级 settings.json。触发场景：用户提到 ccswitch 覆盖/重置/降级了 claude 配置、切换 provider 后 enabledPlugins/hooks/permissions 丢失、想把 claude 设置同步到 ccswitch、ccswitch 数据库、cc-switch.db、"同步 claude 配置"、"settings.json 被覆盖"、"防止降级"、"ccswitch 设置同步"。也适用于首次发现 ccswitch 热切换导致 enabledPlugins/hooks/statusLine 等字段丢失需要修复的情况。
+description: >-
+  把 Claude 的 ~/.claude/settings.json 公共配置同步进 ccswitch
+  数据库（~/.cc-switch/cc-switch.db 的 settings.common_config_claude），防止 ccswitch
+  切换/热切换 provider 时用旧值覆盖降级 settings.json。触发场景：用户提到 ccswitch 覆盖/重置/降级了 claude
+  配置、切换 provider 后 enabledPlugins/hooks/permissions 丢失、想把 claude 设置同步到
+  ccswitch、ccswitch 数据库、cc-switch.db、"同步 claude 配置"、"settings.json
+  被覆盖"、"防止降级"、"ccswitch 设置同步"。也适用于首次发现 ccswitch 热切换导致
+  enabledPlugins/hooks/statusLine 等字段丢失需要修复的情况。
 ---
-
 # cc-switch 设置同步（Claude）
 
 把 `~/.claude/settings.json` 中 **provider 无关的公共配置** 同步进 ccswitch DB 的

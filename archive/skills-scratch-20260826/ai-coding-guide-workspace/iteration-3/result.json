@@ -1,0 +1,266 @@
+{
+  "skill_name": "ai-coding-guide",
+  "schema_version": "v1alpha1",
+  "engine_name": "claude_code",
+  "model_name": "anthropic/claude-sonnet-4-6",
+  "start_time": "2026-08-17T21:29:44.1633553+08:00",
+  "end_time": "2026-08-17T21:31:33.929623+08:00",
+  "case_results": [
+    {
+      "case_id": "transfer-learning",
+      "title": "域边界转介-学习调研",
+      "status": "PASS",
+      "duration_ms": 44470,
+      "turns": 1,
+      "input_tokens": 36459,
+      "output_tokens": 3036,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[learning-guide]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[learning-guide])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想吃透 transformer 架构，两周后要给别人讲明白\n",
+      "response": "开工路由判断（只判断，不执行）。\n\n```\n域归属： 学习 —— 「吃透 transformer」+「两周后讲明白」，最终交付物是「自己的掌握 + 口头讲清」，属学习域\nai-coding-guide 在当前会话？ YES\n若域归属非编码 → 转介对应 router（learning-guide），不进 Step 1\n```\n\n## 路由契约\n\n- **分类**：学习域 · 概念吃透（非编码、非写作；命中教程裁决「给自己学会/作为学习产物」）\n- **主路径**：`learning-guide`（学习总路由，转介目标；当前会话可见，可直达）\n- **组合**：`learning-personas`（学习角色/说话层，按你当前认知状态取 teacher/peer/research）；讲解验收即费曼演练；资料侧用 WebSearch / 论文原文，不依赖单一博客\n- **闸门**：学习验收闸门 —— 两周后能脱离资料讲清 self-attention 计算、Q/K/V、位置编码、multi-head、残差+LayerNorm、整体前向流程，并经受听众提问；非代码任务，无 TDD/review/verify\n- **下一步**：转介 `learning-guide` 启动；进入前待问 1 个关键问题——**听众的技术背景 + 你当前的掌握程度**（决定路线深度与教学角色，也决定两周路线怎么切）\n\n**为什么不是另一条路**：交付物是「自己能讲明白」的掌握，不是面向读者发布的教程文章，故不转 `article-writing-guide`；若两周后的「讲」实际会落成文章发布，再切换。\n\n仅完成路由判断，未执行任何学习任务；要不要现在转介 `learning-guide`？"
+    },
+    {
+      "case_id": "transfer-article",
+      "title": "域边界转介-文章审校",
+      "status": "PASS",
+      "duration_ms": 27297,
+      "turns": 1,
+      "input_tokens": 36339,
+      "output_tokens": 1654,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[article-writing-guide]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[article-writing-guide])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我审下这篇技术文章有没有错\n",
+      "response": "按触发门禁先做域归属判断。\n\n**触发门禁**\n- 域归属：**写作** —— \"审这篇技术文章有没有错\"是技术文章审查，命中本指南域边界「中文技术文章的写/改/**审**/润色/发布」\n- ai-coding-guide 在当前会话：YES\n- 结论：域归属非编码 → **转介写作 router，不进本路由 Step 1**（本指南不认领该任务的主路径）\n\n**路由契约**\n\n```\n分类：文档写作（技术文章审查）\n主路径：article-writing-guide（写作总路由，走其「审」流程，不落在本编码路由）\n组合：tech-article-review（技术文章专项审稿；文章就位后再由 writing router 确认是否叠加）\n闸门：事实查证证据门槛（每个「错」需给依据：源码 \u003e 官方文档 \u003e 实测输出，禁止拍脑袋判错；不适用 TDD/review/verify）\n下一步：转介 article-writing-guide，需要你提供文章内容/位置后由该 router 定审稿细分路径；当前只做转介，不执行审查\n```\n\n**为什么不是编码路径**：`ai-coding-guide` 域边界显式将技术文章审稿划出，若按编码「审查代码」分类走是误路由。文章事实核查（技术结论对错）恰恰是本路由最忌讳的\"用编码思维审文档\"。\n\n下一步 2 分钟内可做：把文章贴出来或给文件路径，我转介 `article-writing-guide` 开始审。"
+    },
+    {
+      "case_id": "frontend-landing",
+      "title": "前端视觉-落地页留本路由",
+      "status": "PASS",
+      "duration_ms": 30893,
+      "turns": 2,
+      "input_tokens": 37684,
+      "output_tokens": 1134,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 2,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[hallmark]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[hallmark])"
+          },
+          {
+            "text": "output_contains{not:[design-an-interface]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我做个落地页，现代一点好看一点，做完顺便把代码写了\n",
+      "response": "开工路由判断完成（只做路由，不执行任务）。先给门禁，再给五项契约。\n\n---\n\n**门禁**\n\n```\n域归属： 编码（前端视觉）—— 请求含「落地页」且要视觉产出，属前端视觉子路径\nai-coding-guide 在当前会话？ YES（本次已调用）\n若域归属非编码 → 不适用，无需转介\n```\n\n---\n\n**五项路由契约**\n\n**分类：** 前端视觉 · 方向未定（新页面、无设计稿、无参考/品牌约束，\"现代好看\"未定义具体方向）\n\n**主路径：** 先做决策点问询 → 给 2-3 个视觉方向选项让你选；选定后走 `hallmark`（新页面，反 AI 大路货）。默认路径明确或你说\"直接做/你定\"则跳过问询，直接走 `hallmark`。\n\n**组合：** 定方向 → `hallmark` 出视觉方向 → 按项目栈实现（先查现有依赖复用，不新引入组件库）→ 验证串联 `browser-testing-with-devtools`（本机 chrome-devtools 已配置）。可选项：`taste-skill:*` / `apple-design` 作风格叠加（点名才套，不默认堆叠）。串行不并联。\n\n**闸门：** 方向确认（方向未定必须你点头，不让设计 skill 拍脑袋）→ 完成后浏览器运行验证（行为 + 视觉证据），不假完成。\n\n**下一步：** 问 1 个关键问题——你想要哪个方向的落地页？（例如：A. 深色科技感 / B. 浅色简约大气 / C. 渐变品牌色 + 插画，或你给参考链接/品牌约束）\n\n---\n\n一句裁决理由：这不是\"纯前端工程\"，因为\"好看一点\"是明确的视觉方向诉求，且混合意图「做页面 + 写代码」按前端视觉子路径设计先行，而非直接进编码通用分支。"
+    },
+    {
+      "case_id": "frontend-nodesign",
+      "title": "前端视觉-方向未定先问",
+      "status": "PASS",
+      "duration_ms": 31753,
+      "turns": 2,
+      "input_tokens": 37630,
+      "output_tokens": 1268,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 2,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[方向]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[方向])"
+          },
+          {
+            "text": "output_contains{not:[design-an-interface]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我做个登录页，没设计稿，想要视觉方向\n",
+      "response": "路由判断如下。\n\n---\n\n**分类**：前端视觉 → 方向未定分支\n- 「做登录页 + 要视觉方向 + 无设计稿」命中前端视觉分类（`references/frontend-visual.md` 方向未定）；纯视觉方向尚未定，不进「实现」或「提质」分支。\n\n**主路径**：`hallmark`（新页面方向定型）\n- 先过方向决策点（见下一步），用户选定方向后再启用 `hallmark`，走反 AI 大路货的新页面设计。\n- 当前会话可见 `hallmark`，可直接走。\n\n**组合**：方向定 → 实现 → （可选）提质，串行不并联\n- 实现阶段按项目现有技术栈/依赖直接实现，不复用无谓 UI 库；动画动效才叠加 `emil-design-eng` 系。\n- 收尾验证：`browser-testing-with-devtools`（本机已配置 chrome-devtools，可做浏览器行为/视觉证据）。\n\n**闸门**：方向先问 + 实现后浏览器 verify\n- 方向类决策先问用户，不让设计 skill 自行拍脑袋（低风险，verify 即可，无需 TDD/专项 review）。\n\n**下一步**：问 1 个关键问题\n- 视觉方向（决策点）：给 2-3 个方向选项让用户选，或提供参考/品牌约束。示例：A 极简 SaaS 风 / B 深色渐变科技风 / C 圆润温暖风（也可按你的产品气质定制）。选定后进 `hallmark` → 实现 → 浏览器验证。\n\n参与度补充一句：登录页属一次性样板交付 → 我动手（直接做，收尾 3 行复盘关键判断）。\n\n要我现在展开这 2-3 个方向的具体视觉描述，还是你先说产品背景（给谁用、什么调性、有无品牌色）？"
+    },
+    {
+      "case_id": "maintenance-audit",
+      "title": "指南维护-审计 router guide",
+      "status": "PASS",
+      "duration_ms": 37338,
+      "turns": 1,
+      "input_tokens": 36358,
+      "output_tokens": 2274,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[guide-skill-auditor]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[guide-skill-auditor])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我审查一下 learning-guide 这个路由 skill 有没有问题，顺便优化\n",
+      "response": "按 ai-coding-guide 开工路由，先跑触发门禁，再给五项路由契约（只路由，不执行）。\n\n**触发门禁**\n```\n域归属： 编码域（路由指南维护）—— 任务是审查/优化 learning-guide 这个 skill 文件本身，不是用它在学习域做学习任务\nai-coding-guide 在当前会话？ YES\n若域归属非编码 → 转介：不适用\n```\n\n**开工问询**（速判）：需求明确（审查+优化一个指定 skill）、有既定分类，跳过逐问；归属默认**我动手**——审查+优化是执行型，非学习陪跑。\n\n---\n\n**分类**：路由指南维护（Step 1 信号表「审查/优化 guide skill」精确命中；不因对象是 learning-guide 而误判为学习型开发——目标不是学东西，是改 skill 文件）\n\n**主路径**：`guide-skill-auditor`（其定位正是「guide 体检 / 误路由排查 / 审查路由 skill」，与本请求完全对口；learning-guide 属路由类 skill，交由它做审计先行）\n\n**组合**：\n- 若审查发现学习/教程域判定逻辑有行为变化 → 叠加 `darwin-skill` 判演化方向\n- 与 ai-coding-guide 的域边界存在交叉处 → 对照本指南 references 复核，防互斥/死引用\n- 小修则直接最小改动，不再叠加其他能力\n\n**闸门**：\n- 审计先行：先出审计结论（问题清单 + 证据），改动前确认范围——skill 文件改动触及多文件时触发 §1.3 人工确认线\n- 兜底：只评估时给结论不改文件\n- 收尾：无代码产物，不强制 verify；改完用 audit 复核一致性\n\n**下一步**：等你点头后进入 `guide-skill-auditor` 执行——先出审计结论，再谈优化；本轮只给了路由，未动任何文件。\n\n一句话解释为何不是另一路径：这不是转介给 learning-guide 的学习任务（域边界那条只管「学习/做教程」场景，不覆盖「审查这个 skill 本身」），所以留在编码域走审计路由。"
+    },
+    {
+      "case_id": "peer-learning",
+      "title": "学习陪跑-你练模式",
+      "status": "PASS",
+      "duration_ms": 25792,
+      "turns": 1,
+      "input_tokens": 36484,
+      "output_tokens": 1352,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[ai-coding-coach]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[ai-coding-coach])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想练 debug 判断力，我先说假设，你来纠偏，别直接修\n",
+      "response": "开工路由判断如下（只路由，不动手）。\n\n**触发门禁**\n```\n域归属：编码（学习型开发子域）——练 debug 判断力，目标不是交付代码\nai-coding-guide 在当前会话？YES\n```\n\n---\n\n**分类：学习型开发**（调试 bug 训练）\n\n信号：「我先说假设，你来纠偏，别直接修」→ 学习型 AI 编码，归属「你练/peer」。tie-breaker：最终交付物不是修复代码而是判断力 → 不走「调试 bug」分类（那是要修好时的路由）。\n\n**主路径：`ai-coding-coach`**（当前会话已装，直达）——按该 skill 的对练行为执行：你先给假设 → 我纠偏 + 对照标杆 + 复盘 why，不替你修。\n\n**组合：可选 `mattpocock-skills:diagnosing-bugs`**（条件路径）。⚠️ 此 skill 为插件版 user-invoked，模型无法自动调用，需你手动 `/mattpocock-skills:diagnosing-bugs` 启用，作为 debug 方法论参照。不启用也能练，只是少一份系统化定位模板。\n\n**闸门：无代码产出，不强制 review/verify。** 唯一硬闸门是纠偏的证据门槛：你每轮假设必须自带证据（错误原文 / 复现步骤 / 最近改动），我拒绝「凭感觉的假设」；若训练中真定位到根因、你要我修，才临时切到「调试 bug」的复现→修复→验证闸门。\n\n**下一步：等你抛第一个假设。** 提供最小输入：① 什么在报错/不符合预期 ② 期望 vs 实际 ③ 错误原文或复现步骤 ④ 最近改了什么。你先下判断，我只纠偏。\n\n---\n一句说明：没走「我动手」是因为你说「别直接修」——归属你练；若哪轮你想让我直接演示正确 debug 顺序，说一声切回 teacher 模式。"
+    },
+    {
+      "case_id": "expose-unknown",
+      "title": "判级-暴露未知路由",
+      "status": "PASS",
+      "duration_ms": 36867,
+      "turns": 1,
+      "input_tokens": 36372,
+      "output_tokens": 2642,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[expose-unknowns]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[expose-unknowns])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：接了个需求但我完全没思路，连该问什么都列不出来，开工前先把盲点摊出来\n",
+      "response": "触发门禁：**编码域**（接需求要做功能开发，此处是开工前判级，非写作/学习交付）。ai-coding-guide 在当前会话：YES。\n\n---\n\n**分类：判级/暴露未知**\n「完全没思路、连该问什么都列不出来、开工前先摊盲点」正是 Step 1 判级/暴露未知的典型触发（与信号表示例「这个需求我没思路」逐字对应）。不是「开发新功能」——你还没到实现阶段，盲点没清之前直接开工才是风险点；判级是它的前置环节。\n\n**主路径：`expose-unknowns`**\n当前会话可调用清单中已确认存在（直达路径，不需要 fallback）。它做的事正是你要的：把需求盲点全部摊开 → 逐项判级（已知/未知/该问）→ 排序 → 产出「该问的问题清单」。\n\n**组合：`superpowers:brainstorming`（条件路径，按需叠加）**\n当前会话已装，但只在 `expose-unknowns` 判完、发现需要**采访式澄清**（问题不是靠列、靠推出来的，需要一问一答逼出）时才叠加；不默认同时开。判级收敛后有思路了，再回落到「开发新功能」分类走正常实现链。\n\n**闸门：无**\n本轮是纯判级、零代码改动，不触发 TDD / review / verify（对应风险矩阵低档）。一旦盲点清完进入实现，闸门随「开发新功能」分类升级。\n\n**下一步：等你确认后加载 `expose-unknowns` 开工**\n你点名了只做路由、不执行，所以现在停在这里。确认后我会做的三件事：① 摊开盲点（需求缺什么背景、你卡在哪个环节）；② 逐项排序，标出必须先搞清的；③ 产出你「该问的问题清单」，然后你带着清单去问需求方，再回来说结果，我们继续。\n\n一句话说明为什么不是别的路：`ai-coding-coach` 是「你想练提问能力」时的去路，你现在要的是「把盲点摊出来能开工」，归判级；两个可以在判级完成后叠加，现在不急。"
+    },
+    {
+      "case_id": "refactor-simplify",
+      "title": "重构-不推荐已移除工具",
+      "status": "FAIL",
+      "duration_ms": 40958,
+      "turns": 1,
+      "input_tokens": 36356,
+      "output_tokens": 2937,
+      "grading": {
+        "status": "FAIL",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[重构]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[重构])"
+          },
+          {
+            "text": "output_contains.not: \"simplify\"",
+            "passed": false,
+            "evidence": "output contains forbidden keyword \"simplify\""
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 1,
+          "total": 2,
+          "pass_rate": 0.5
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这段代码太绕了，帮我简化下，别改行为\n",
+      "response": "## 触发门禁\n\n```\n域归属： 编码（重构/简化）——\"简化代码\"是编码域；非写作、非学习\nai-coding-guide 在当前会话？ YES\n```\n\n## 路由契约\n\n**分类**：重构/简化\n- 信号：「帮我简化」「代码太绕」→ Step 1 重构/简化。用户补了「别改行为」这一硬约束，已锁定路径 A（行为不变），排除「重构后自由发挥」。\n\n**主路径**：手动小步重构（行为等价）\n- 先快速过一遍行为（走 `lean-ctx` 低耗读，避免对行为理解错误），再逐个坏味道小步改，每步跑测试/对比输出\n- 规模升级线：涉及 ≥3 文件或跨模块 → 切 `code-change-workflow`（改前/改中/改后清单 + Verify 分级）\n- 简化执行参考：当前会话可用的 `simplify`（复用/简化/效率/高度清理），但它的定位偏向已改动代码，仅作辅助，不当作主流程\n\n**组合**：无必要叠加\n- 行为等价验证（现有 test / lint / build 全绿 + 改动前后输出对比）是重构标配，不算额外 skill\n- 独立复核（CLAUDE.md §2.5：AI 改动必审，优先独立子代理）\n- 参与度：我动手（明确交付、非学习信号）→ 收尾 3 行 why-review 复盘关键判断\n\n**闸门**：中风险（功能逻辑/重构档）\n- 失败测试或最小复现 → 小步实现 → 相关 test/lint/build → 独立 review → `git diff --stat` 核对改动范围等于任务范围（CLAUDE.md §4.2）\n- 若项目无测试：先确认是否补最小行为快照测试，否则只靠输出对比，风险偏高，需说明\n\n**下一步**：问 1 个关键问题（Step 0.7 缺口）——重构对象在哪：贴代码块 / 给文件路径？规模多大（单文件 vs 跨模块）？\n- 拿到后按规模定档：单文件小步改（拆单轻量）或 code-change-workflow（复杂/高风险）\n\n---\n\n一句话为什么不是另一路径：这是明确的「行为不变重构」，不是调试（无 bug 信号）、不是审查（要求改，不是只看）、不是开发新功能（无新行为），所以只挂重构/简化分类，等对象和规模两个输入即可开跑。"
+    }
+  ],
+  "total_tokens": 309979
+}

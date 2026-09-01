@@ -795,7 +795,7 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
 
 def resolve_state_root(value: str | None) -> Path:
-    return Path(value).expanduser() if value else Path.home() / ".skill-trimmer"
+    return Path(value).expanduser() if value else Path.home() / ".pi" / "agent" / "skill-trimmer"
 
 
 def read_saved_state(root: Path, profile: str | None) -> tuple[Path, dict[str, Any]]:
@@ -1030,7 +1030,7 @@ def build_parser() -> argparse.ArgumentParser:
     serve_parser = subparsers.add_parser("serve", help="启动 127.0.0.1 复审网页并持续保存状态。")
     serve_parser.add_argument("--inventory", required=True)
     serve_parser.add_argument("--profile", help="同一台机器上的状态空间名称。")
-    serve_parser.add_argument("--state-root", help="默认是 ~/.skill-trimmer。")
+    serve_parser.add_argument("--state-root", help="默认是 ~/.pi/agent/skill-trimmer。")
     serve_parser.add_argument("--port", type=int, default=0, help="默认自动选择空闲端口。")
     serve_parser.add_argument("--no-open", action="store_true", help="不自动打开浏览器。")
     serve_parser.add_argument("--ready-file", help="把启动信息写入指定 JSON，便于自动化验收。")
@@ -1046,7 +1046,7 @@ def build_parser() -> argparse.ArgumentParser:
     ):
         child = subparsers.add_parser(name, help=help_text)
         child.add_argument("--profile")
-        child.add_argument("--state-root", help="默认是 ~/.skill-trimmer。")
+        child.add_argument("--state-root", help="默认是 ~/.pi/agent/skill-trimmer。")
         if name == "read":
             child.add_argument("--require-complete", action="store_true")
             child.add_argument("--path-only", action="store_true")

@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{not:[article-writer]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (not:[article-writer])"
+    },
+    {
+      "text": "output_contains{not:[tutorial-maker]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (not:[tutorial-maker])"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

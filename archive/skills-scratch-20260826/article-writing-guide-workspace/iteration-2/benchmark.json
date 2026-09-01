@@ -1,0 +1,218 @@
+{
+  "metadata": {
+    "skill_name": "article-writing-guide",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\article-writing-guide",
+    "timestamp": "2026-08-17T13:34:32Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "审校-非后端文体走批量管线",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 17.251,
+        "tokens": 36072,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[multi-review-pipeline]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[multi-review-pipeline])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "语言适配-英文文章",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 34.807,
+        "tokens": 38186,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[article-writer]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[article-writer])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "存在性校验-已删 skill 重定向",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 20.651,
+        "tokens": 36564,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[article-writer]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[article-writer])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "系列教程-对外发布",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 38.273,
+        "tokens": 37801,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[tutorial-maker]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[tutorial-maker])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "教程裁决-给自己学会",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 31.051,
+        "tokens": 37528,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[learning-guide]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[learning-guide])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "去 AI 味-human-writing",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 22.546,
+        "tokens": 36616,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[human-writing]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[human-writing])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "兄弟域转介-前端视觉",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 29.614,
+        "tokens": 37793,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[ai-coding-guide]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[ai-coding-guide])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "三域外-直接执行独立工具",
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1,
+        "passed": 2,
+        "failed": 0,
+        "total": 2,
+        "time_seconds": 25.924,
+        "tokens": 37258,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{not:[article-writer]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[article-writer])"
+        },
+        {
+          "text": "output_contains{not:[tutorial-maker]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[tutorial-maker])"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 27.514625,
+        "stddev": 6.759283966099887,
+        "min": 17.251,
+        "max": 38.273
+      },
+      "tokens": {
+        "mean": 37227.25,
+        "stddev": 689.9265812389026,
+        "min": 36072,
+        "max": 38186
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "eval_id": 0,
+  "eval_name": "纯抽象对比走了解指南",
+  "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：superpowers 和 mattpocock-skills 有什么区别？\n",
+  "assertions": null
+}

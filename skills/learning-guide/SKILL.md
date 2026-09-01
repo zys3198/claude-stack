@@ -1,8 +1,15 @@
 ---
 name: learning-guide
-description: Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。是学习/知识输入域的开工路由器，路由到 deep-learn / cram-engine / tutorial-maker / tech-learning-roadmap / agent-reach / last30days / wiki-sediment / expose-unknowns。触发词：学 X、调研 X、入门 X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径。学习模式/说话层词汇统一走 learning-personas（peer/teacher/research）。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走 article-writing-guide）、前端视觉（走 ai-coding-guide 前端视觉子路径）、提升 AI 辅助编码能力/练 AI coding 判断力（走 ai-coding-guide → ai-coding-coach）。<!-- v1.6.0 -->
+description: >-
+  Use when 用户要学、调研、吃透、入门、速成、备考、做教程、记笔记、查资料，且没明确点名具体学习类 skill。已有本地课程、教材、章节、manifest、
+  README/ROADMAP、逐课学习、quiz、实验或恢复进度时，优先路由到 generic-course-tutor；是学习/知识输入域的开工路由器，路由到
+  deep-learn / tutorial-maker / tech-learning-roadmap /
+  agent-reach / last30days / wiki-sediment / expose-unknowns。触发词：学 X、调研 X、入门
+  X、吃透 X、速成、备考、做教程、记笔记、查资料、怎么学、学习路径、本地课程、教材、manifest、quiz、实验、恢复进度。学习模式/说话层词汇统一走
+  learning-personas（peer/teacher/research）。不用于：写代码任务（走 ai-coding-guide）、写技术文章（走
+  article-writing-guide）、前端视觉（走 ai-coding-guide 前端视觉子路径）、提升 AI 辅助编码能力/练 AI
+  coding 判断力（走 ai-coding-guide → ai-coding-coach）。<!-- v1.7.0 -->
 ---
-
 # 学习路由指南（Claude Code）
 
 ## 定位
@@ -43,16 +50,17 @@ learning-guide 相关？ YES/NO —— <一句理由>
 触发后按顺序复核可用性，**只在会话 `Available skills` 里出现的才算已证实**：
 
 1. 先看当前会话可用清单（唯一可信源）。
-2. 再看顶层独立 skill：`~/.claude/skills/`。
+2. 再看顶层独立 skill：`~/.claude/skills/`；插件能力按当前会话清单确认。
 3. **关键提醒**：reminder 没列出 ≠ 一定不存在；关键推荐前按磁盘再复核一次。
-4. 生态缺失 → 跳过该路径给已装替代，不硬推不存在的工具。下表是本机 cc-switch 盘点，会话里没列出的当不存在。
+4. 生态缺失 → 跳过该路径给已装替代，不硬推不存在的工具。路由表只列当前 Claude Code 侧已确认或有明确 fallback 的能力。
 
 ## 路由表
 
 | 用户信号 | 分类 | 主路径 | Fallback |
 |---|---|---|---|
+| 已有本地课程/教材/章节、manifest/README/ROADMAP，要逐课学习、逐题 quiz、实验或恢复进度 | 本地课程闭环 | `generic-course-tutor`（当前项目专用 tutor 优先） | 来源/顺序不清：由 generic tutor 列证据并询问，不猜测 |
 | 陌生领域、无教材、要系统吃透/调研到能聊 | 深度调研学习 | `deep-learn` | 手动：五视角→矛盾→考试→速查表 |
-| 有课程重点/考试范围、期末速成 | 速成备考 | `cram-engine` | 手动四阶段：拆→讲→考→补 |
+| 有课程重点/考试范围、期末速成 | 速成备考 | 手动四阶段：拆→讲→考→补 | `deep-learn`（无明确考试范围时） |
 | 把主题做成系列教程/学习路径（输出物） | 做教程 | `tutorial-maker`（**给自己学会/作为学习产物**） | 手动规划路径再逐课；对外发布的教程文章转介 `article-writing-guide` |
 | 学习者本人要一条可执行路线+作业（学习路线/学习计划/roadmap/帮我学/我想学/学习路径/制定学习计划） | 学习路线图 | `tech-learning-roadmap` | 手动分阶段列路线+作业 |
 | 委派后台查一手资料、存成 md | 查资料 | `agent-reach`（多平台检索） | 前台 WebSearch + 落盘 |
@@ -65,11 +73,11 @@ learning-guide 相关？ YES/NO —— <一句理由>
 
 ## 裁决规则
 
-1. **点名优先**：用户点名 skill 直接用它，不拦。
+1. **点名与当前项目优先**：用户点名 skill 直接用它，不拦；当前项目有明确专用 tutor 时优先于通用路由；否则已有本地课程/教材/章节、manifest/README/ROADMAP，或请求逐课、逐题 quiz、实验、恢复进度时，走 `generic-course-tutor`。来源或顺序不清由 generic tutor 列证据并询问，guide 不猜测。
 2. **少叠加**：默认 1 个主路径。学习与写作叠加（学了要写成文章）→ **本 guide 拥有这条串行规则**：先学习域 skill 学完，再交 `article-writing-guide` §3 边学边写路径（不并行、不在 article-writing-guide 重复展开）。
 3. **边界重叠**：
    - 「调研 X 然后做成教程」→ 先 `deep-learn`（输入）后 `tutorial-maker`（输出），串行不并行。
-   - 「速成」有范围 → `cram-engine`；无范围纯陌生 → `deep-learn`。
+   - 「速成」有范围 → 手动四阶段：拆→讲→考→补；无范围纯陌生 → `deep-learn`。
    - 「查资料」只为存证 → `agent-reach`；为学会 → `deep-learn`。
    - 「开工判级/扫盲」归属：判级/暴露未知不分域，统一 → `expose-unknowns`；本 guide 只负责在学习任务入口路由到它。编码任务同样由 `ai-coding-guide` 路由进 `expose-unknowns`（v1.2.1 组合审查新增；v1.4.1 删除域分半句，判级不切开）。
 4. **决策点先问 + 开工问询（默认问、可直接做）**：开工问询先定归属（你练/我讲）+ 场景（深学/概念/速成，按任务类型推荐）+ 背景；说话层 persona 按认知状态从 `learning-personas` 取（探索→peer / 求讲清→teacher / 要下结论→research）。分类不清或深浅/产出形态不明时，只问一个关键问题收口——「你是想自己学会，还是要产出教程/文章？深学吃透还是只要概念解释？」，不堆选项，也不让下游学习 skill 自行推断深浅；用户说"直接讲/你定"则跳过走默认。
@@ -78,6 +86,7 @@ learning-guide 相关？ YES/NO —— <一句理由>
 
 | 场景 | 正确动作 | 不要做 |
 |---|---|---|
+| 已有本地课程/教材/章节或 manifest/README/ROADMAP，要求逐课、quiz、实验或恢复进度 | 走 `generic-course-tutor`；当前项目专用 tutor 优先，来源/顺序不清时列证据并询问 | 在 guide 中猜课程根目录、manifest 或 lesson 顺序 |
 | 用户说"给我讲讲 X" | 问一句要深学还是只要概念解释；只要解释就直接答 | 一律拉进 deep-learn 十步 |
 | 只要概念解释 | 直接解释，不开流程 | 强拉进学习闭环 |
 | 学习 skill 缺失 | 给手动 fallback | 推荐不存在的 skill |

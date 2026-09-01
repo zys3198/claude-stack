@@ -28,10 +28,11 @@
 ### plugin_drift_check.py（SessionStart 插件台账漂移检测，自 pi skill-sync-watch 移植）
 
 - **位置**：`~/.claude/hooks/plugin_drift_check.py`（Python，~100 行，纯 stdlib）
-- **注册**：`~/.claude/settings.json` SessionStart 新增第 4 块，python 解释器 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`
+- **历史注册状态**：曾挂载于 `~/.claude/settings.json` 的 SessionStart 第 4 个分组；当前未挂载，文件保留为 dormant，不自动运行。
 - **行为**：对照 `settings.json` enabledPlugins 与 baseline 快照（`~/.claude/installing/plugin-drift-baseline.json`，首轮自动建）：新增 enabled → 报「台账新增」；baseline 内消失 → 报「移除/禁用」；enabled 但缓存缺失（`~/.claude/plugins/cache/<mp>/<pl>`，`@skills-dir` 除外）→ 报「破损 enable」。**只报告不自动修复**（pi 治理哲学：纳入须人确认），经 hookSpecificOutput.additionalContext 注入会话，无漂移静默。
-- **验证**：首轮建 baseline（18 插件）；伪造新增/移除各测一遍，报告方向正确；恢复后静默。
-- **回退**：删 settings.json 对应 SessionStart 块 + 删 hook 文件 + 删 baseline 即可。
+- **历史验证**：曾验证 baseline 建立及新增/移除检测方向正确；当前因未挂载不会执行。
+- **当前状态**：文件仍在磁盘，但 `settings.json` 当前未注册该 SessionStart hook；如需恢复，需重新评估 baseline 与启用状态后再挂载。
+- **回退**：恢复本段历史注册描述即可；不涉及 settings.json、hook 文件或 baseline。
 
 ---
 
@@ -148,7 +149,7 @@
 ### ~/.claude/hooks/
 - ecc 系 hooks（Fact-Forcing Gate / GateGuard 等）随 ecc 插件来；另有自建/调整个别脚本
 - 备份：`~/.claude/hooks/HOOKS_BACKUP.md`
-- **~~turn_counter.py~~ / ~~learning_nudge.py~~（2026-08-08 已删）**：曾为死代码（settings.json 未引用），2026-08-08 经用户确认物理删除；状态文件 `turn_state.json` / `learning_state.json` 同删。hooks/ 现仅留 settings.json 引用的 7 个 Python hook。
+- **~~turn_counter.py~~ / ~~learning_nudge.py~~（2026-08-08 已删）**：曾为死代码（settings.json 未引用），2026-08-08 经用户确认物理删除；状态文件 `turn_state.json` / `learning_state.json` 同删。hooks/ 现有 settings.json 引用的 8 个 Python hook，另有 2 个未挂载的 dormant Python hook：`plugin_drift_check.py`、`skill_ledger.py`。
 - **settings-degrade-guard.py（2026-08-13 新建）**：SessionStart 自动检测 cc-switch 切 provider 降级 settings.json（缺 statusLine/enabledPlugins/extraKnownMarketplaces/permissions.deny 或 >3 个 hook），从 cc-switch DB `common_config_claude` 快照并集合并恢复（保留 provider env），原子写+备份到 `~/.claude/backups/settings.bak-guard-<ts>.json`。静默运行，恢复时输出 JSON 提示。注册在 settings.json SessionStart `*` matcher。与 cc-switch-setting-sync skill 的 `--restore` 同源逻辑（见该 skill SKILL.md §4）。
 - **skill_ledger.py（2026-08-17 新建）**：PostToolUse 记账 hook，matcher `Skill`。记 Skill 调用 → `~/.claude/metrics/skill-usage.log`（JSONL，坏输入/非 Skill 静默 exit(0) 不阻塞）。配 skill-trimmer 的 scan_skills.py 做使用计数（`load_usage()` 读它，剥 `plugin:` 前缀归一）。Python312 调用。
 - **hooks/scripts/transcript_sweep.py（2026-08-17 新建）**：周复盘脚本，非 hook（不进 settings.json）。扫最近 N 天会话 user 消息 → 去重/CJK 高频主题 → `~/.claude/metrics/transcript-weekly-YYYYMMDD.md`。纯 stdlib。周惯例手动跑：`python ~/.claude/hooks/scripts/transcript_sweep.py 7`。
@@ -224,3 +225,31 @@
 **残留复查（2026-08-26）**：① ~/.codex 实占 **约 2.8GB**（du 漏算 .tmp/marketplaces 2466MB，回收站确认 $R3O40KE.codex），回收站保留可恢复；② %TEMP% 下 11 个 codex-* 调试残留（迁移期遗留，127K）已删；③ 其他 codex 引用均为他软件自身文件非残留：npm-cache _npx/ 内 loopforge-cli/claude-mem 的 .codex 适配、~/plugins/*.codex-plugin 元数据、deeptutor(deeptutor_web) 的 codex provider 代码、herdr agent-detection codex.toml。
 
 **恢复路径**：如需重装，`npm i -g @openai/codex` + 从 cc-switch GUI 切 codex app 写回登录（~/.codex/ 整个被删，需重建配置）。
+
+## bidirectional-steelman（2026-08-31，全局）
+
+- **出处**：从 `~/.claude/CLAUDE.md` 原“双向钢人论证”规则拆分；用户确认独立 skill 化，保留全局自动触发路由。
+- **位置**：`~/.claude/skills/bidirectional-steelman/SKILL.md`；`.gitignore` 已加入自建 skill 白名单。
+- **内容**：决策/判断/选型/取舍分析的四步方法、正反双方钢人化、关键变量、输出格式、纯执行跳过和“直接给/别折腾”绕过。
+- **依赖**：无；Markdown 单文件。
+- **验证**：检查 SKILL.md frontmatter、触发/跳过条件、全局路由引用和 Git 白名单。
+- **回退**：恢复 `CLAUDE.md` 原规则，删除 skill 目录、`.gitignore` 白名单行和本登记项。
+
+### parallel-delegation（2026-08-31，全局）
+
+- **出处**：用户提供文章 https://mp.weixin.qq.com/s?__biz=MzE5ODc3Njc0NQ==&mid=2247484429&idx=1&sn=1cb67d6c6baa4f7f12a11710e7b5e623&chksm=9701ac8f1625d8eb8116f3752109735f119d89b2badacb8f648938228efc300e57be9bc8e6f5&mpshare=1&scene=1&srcid=0831RMVutN6h4pVnxAhC0ON6&sharer_shareinfo=fb8307e673915c06c1ce7c6d2eb36718&sharer_shareinfo_first=fb8307e673915c06c1ce7c6d2eb36718#rd；抽取为不绑定模型、供应商、推理档位和固定并发的通用执行层。
+- **位置**：`~/.claude/skills/parallel-delegation/SKILL.md`；Windows 使用复制，不使用 symlink；`.gitignore` 已加入 `!skills/parallel-delegation/` 白名单。
+- **内容**：主代理拆解、隔离和最终验收；worker 按 handoff 契约执行；读操作可并行，写操作需隔离或不重叠；失败、冲突、阻塞和越界结果不算总完成。
+- **依赖**：宿主提供 agent/subagent 调度能力；模型覆盖、并发和 worktree/隔离能力按运行时实际支持处理；无脚本/API 依赖。
+- **接线**：`ai-coding-guide` 的 `references/routing.md` 和 `references/ecosystems.md`；不修改 `settings.json`，不替代 `/to-tickets` 或交付状态机。
+- **验证**：实验版 `evals/evals.json` 已覆盖独立任务拆解、读写隔离和单文件不触发；guide 新增 `rt-parallel-delegation.yaml` 与 `rt-parallel-delegation-no-trigger.yaml`。
+- **回退**：删除 `~/.claude/skills/parallel-delegation/`，并移除 guide 路由、生态、eval、CHANGELOG 和 MAINTENANCE 对应条目。
+
+### wiki-skill（2026-08-31，全局）
+- **出处**：依据 Google WikiSkill 论文设计的本地轻量实现；源文件来自 `C:\ZYS\Code\lab-area\.claude\skills\wiki-skill\SKILL.md` 与 `C:\ZYS\Code\lab-area\exp\2026-08-31-wikiskill\wikiskill.py`。
+- **位置**：`~/.claude/skills/wiki-skill/`，包含 `SKILL.md` 与 `wikiskill.py`；Windows 使用复制，不使用 symlink。
+- **内容**：手动驱动 Raw Trace、Wiki Pattern、候选 Skill 和轻量 gate；Raw Trace 不可覆盖，Wiki 追加保留，候选拒绝不回滚 Wiki，候选基线 hash 防止过期 Skill 覆盖当前 active。
+- **依赖**：Python 3.12 标准库；不依赖模型、API、Hook 或 `skill-up`。
+- **触发**：`/wiki-skill`；当前为手动流程，不修改 `settings.json`，不自动写入 `C:\ZYS\Wiki`。
+- **验证**：全局 `wikiskill.py` 编译通过；实验版 `test_wikiskill.py` 6 个测试通过；CLI `--help` 可用。
+- **回退**：删除 `~/.claude/skills/wiki-skill/` 即可；不涉及全局配置、Hook、官方 `alibaba/skill-up` 或 Wiki 数据。

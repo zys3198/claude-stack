@@ -19,7 +19,7 @@
 
 按以下顺序取证，不跳级：
 
-1. **本地已证实**：当前会话可用清单、`~/.claude/skills/`、`~/.cc-switch/skills/`、四域 guide 当前版本。
+1. **本地已证实**：当前会话可用清单、`~/.pi/agent/skills/`（自建）+ `~/.pi/agent/skills-sync/`（sync 第三方）、四域 guide 当前版本。
 2. **官方可证实**：Anthropic 官方文档、Superpowers release notes / issue。
 3. **实测输出**：RED/GREEN 子代理基线结果（落盘到 lab-area exp 目录）。
 4. **证据不足**：标"不确定"或删，不拍脑袋补。

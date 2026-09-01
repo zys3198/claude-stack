@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "skill_name": "guide-skill-auditor",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\guide-skill-auditor",
+    "timestamp": "2026-08-17T03:22:46Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "命中-审查 router guide 路由质量",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 67.805,
+        "tokens": 34701,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[十查]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[十查])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "命中-兄弟域抢单排查",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 39.845,
+        "tokens": 34023,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[基线]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[基线])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "不命中-执行型 skill 润色",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 1,
+        "total": 1,
+        "time_seconds": 70.98,
+        "tokens": 39313,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains.not: \"十查\"",
+          "passed": false,
+          "evidence": "output contains forbidden keyword \"十查\""
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "不命中-工具选型问题",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 1,
+        "total": 1,
+        "time_seconds": 66.763,
+        "tokens": 35157,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains.all: missing [ai-coding-guide]",
+          "passed": false,
+          "evidence": "output does not contain required keywords: [ai-coding-guide]"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "命中-description 范畴词检查",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 69.601,
+        "tokens": 36392,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[范畴词]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[范畴词])"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.6,
+        "stddev": 0.48989794855663565,
+        "min": 0,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 62.9988,
+        "stddev": 11.667525982829437,
+        "min": 39.845,
+        "max": 70.98
+      },
+      "tokens": {
+        "mean": 35917.2,
+        "stddev": 1865.579416696057,
+        "min": 34023,
+        "max": 39313
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

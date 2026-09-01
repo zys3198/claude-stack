@@ -125,6 +125,7 @@ skills/*
 !skills/content-to-note/
 !skills/deep-learn/
 !skills/manifest.json
+!skills/bidirectional-steelman/
 !skills/drawio-article-illustration/
 !skills/drawio-chart/
 !skills/expose-unknowns/
@@ -142,6 +143,7 @@ skills/*
 !skills/wiki-sediment/
 !skills/ai-readable-project/
 !skills/preflight-check/
+!skills/parallel-delegation/
 !skills/cold-skills-index/
 !skills/goal-run/
 # 释放被全局 plans/ 规则误伤的自建计划文档目录

@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[审查代码 security-review]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[审查代码 security-review])"
+    },
+    {
+      "text": "output_contains{not:[ecc verify]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (not:[ecc verify])"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

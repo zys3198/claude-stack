@@ -1,8 +1,12 @@
 ---
 name: deep-learn
-description: Use when 用户要系统调研并真正学会一个陌生领域/主题（无现成教材），想要深度学习闭环而非泛泛综述。触发词：调研 X 领域、系统学习 X、吃透 X、10倍速学习、STORM 调研、多视角分析、我要学 XX、快速入门新领域、学习闭环。也适用于用户说"帮我研究下这个行业/技术/话题，我要达到能跟专业人聊的水平"。不用于：有教材有考试范围（走 cram-engine）、要做成教程发布（走 tutorial-maker）、查近30天舆情（走 last30days）。
+description: >-
+  Use when 用户要系统调研并真正学会一个陌生领域/主题（无现成教材），想要深度学习闭环而非泛泛综述。触发词：调研 X 领域、系统学习 X、吃透
+  X、10倍速学习、STORM 调研、多视角分析、我要学
+  XX、快速入门新领域、学习闭环。也适用于用户说"帮我研究下这个行业/技术/话题，我要达到能跟专业人聊的水平"。检测到已有本地课程、manifest、README/ROADMAP 或逐课 quiz/lab/progress 请求时，转
+  `generic-course-tutor`。不用于：有教材有考试范围（走学习指南的手动速成四阶段）、要做成教程发布（走
+  tutorial-maker）、查近30天舆情（走 last30days）。
 ---
-
 # Deep Learn — 陌生领域深度学习闭环
 
 ## 定位
@@ -17,11 +21,12 @@ description: Use when 用户要系统调研并真正学会一个陌生领域/主
 
 | 场景 | 走哪 |
 |---|---|
+| 已有本地课程、manifest、README/ROADMAP，或请求逐课 quiz/lab/progress | `generic-course-tutor`（不启动本 skill 的 STORM/十步） |
 | 陌生领域、无教材、要系统吃透 | **本 skill** |
-| 有课程重点/考试范围、期末速成 | `cram-engine` |
+| 有课程重点/考试范围、期末速成 | `learning-guide` 的手动速成四阶段 |
 | 要把主题做成可发布系列教程 | `tutorial-maker` |
 | 查近 30 天社区/舆情声音 | `last30days` |
-| 委派后台 agent 查一手资料存 md | `research` |
+| 委派后台 agent 查一手资料存 md | `agent-reach` |
 | 开工前判级扫盲（不知道自己不知道什么） | `expose-unknowns` |
 
 ## 四段十步总览
@@ -48,6 +53,11 @@ description: Use when 用户要系统调研并真正学会一个陌生领域/主
 3. **第 1-4 步是分水岭**：浅调研和深调研的区别就在"让观点互相打架"这步，不许跳。
 4. **第 8 步一次只问一题**，等用户答。不一次甩 10 题答案。这是测试效应（retrieval practice），往外掏比往里塞记得牢。
 5. **全程用 [references/prompts.md](references/prompts.md) 里对应步的提示词**，把【主题】替换掉。提示词是方法的核心资产，别自由发挥改写。
+6. **本地来源优先**：对仍属于无现成教材的陌生主题，用户已提供本地材料时先使用它建立问题和证据；不把外部来源或固定远程仓库当自动回退。检测到已有课程、manifest、README/ROADMAP 或逐课 quiz/lab/progress 请求时，立即转 `generic-course-tutor`，不在本 skill 中实现课程执行器。
+7. **阶段 checkpoint 可核验**：每段或每步记录可观察的 checkpoint；直接得到的结果标为 `observed`，由材料或推理得到的结论标为 `conceptual`，尚未核验的项标为 `pending`。
+8. **答案隔离**：需要检查理解时一次只问一题，等待回答后才展示答案、解释或评分信息；不提前暴露答案键、索引或答案分布。
+9. **未验证不宣称完成**：没有实际观察或用户明确回答支持的内容，不写成执行、通过或已学会；未完成项保持 `pending` 并说明缺口。
+10. **状态隔离**：本 skill 的十步产物继续写入 `deep-learn-<主题>/`；已有本地课程的路线、quiz、lab 和进度由 `generic-course-tutor` 管理，不并入十步研究产物。
 
 ## 各段要点
 

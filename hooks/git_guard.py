@@ -169,7 +169,7 @@ def user_confirmed(data, operation):
         return False
     if _NEGATIVE_OPERATION_RE[operation].search(text):
         return False
-    if _CONFIRM_RE.search(text):
+    if _CONFIRM_RE.search(text) and _OPERATION_RE[operation].search(text):
         return True
     if _QUESTION_RE.search(text):
         return False

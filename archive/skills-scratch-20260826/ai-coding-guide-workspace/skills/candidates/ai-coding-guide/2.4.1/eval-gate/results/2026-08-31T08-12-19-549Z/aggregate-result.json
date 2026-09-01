@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.251",
+  "startedAt": "2026-08-31T08:12:19.549Z",
+  "durationSeconds": 415,
+  "costUsd": 1.1397672,
+  "partial": false,
+  "suite": {
+    "root": "C:\\Users\\zys31\\.claude\\archive\\skills-scratch-20260826\\ai-coding-guide-workspace\\skills\\candidates\\ai-coding-guide\\2.4.1",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-4-6",
+    "threshold": 1,
+    "plugins": [
+      {
+        "name": "2.4.1",
+        "path": "C:\\Users\\zys31\\.claude\\archive\\skills-scratch-20260826\\ai-coding-guide-workspace\\skills\\candidates\\ai-coding-guide\\2.4.1"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "guardrail-frontend-nodesign",
+      "dir": "eval-gate\\guardrail-frontend-nodesign",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我做个登录页，没设计稿，想要视觉方向",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答识别为前端视觉方向未定，明确先询问或提供视觉方向选择，并且不路由到 `design-an-interface` 时才通过。只做路由判断。",
+          "config": {
+            "criteria": "只有当最后回答识别为前端视觉方向未定，明确先询问或提供视觉方向选择，并且不路由到 `design-an-interface` 时才通过。只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.15913599999999997,
+            "judgeCostUsd": 0.002875,
+            "durationSeconds": 61,
+            "startedAt": "2026-08-31T08:12:19.653Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-aA0P1w\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：前端视觉\n\n主路径：前端视觉子路径，先走 `hallmark` 设计方向流程；当前会话未证实该 skill 可用，Fallback 为手动提出 2–3 个视觉方向\n\n组合：无；暂不进入实现、动画或代码验证\n\n闸门：先确认视觉方向，再进入页面实现；实现完成后再做真实浏览器验证\n\n下一步：等待你从候选视觉方向中选择或确认一个方向；本轮不执行任务本身"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "guardrail-named-plugin",
+      "dir": "eval-gate\\guardrail-named-plugin",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我用 ponytail:ponytail 把这个函数改成最小实现。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答处理用户点名的 `ponytail:ponytail`，并根据当前会话可用性给出直达或明确 fallback 时才通过。只做路由判断。",
+          "config": {
+            "criteria": "只有当最后回答处理用户点名的 `ponytail:ponytail`，并根据当前会话可用性给出直达或明确 fallback 时才通过。只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0964504,
+            "judgeCostUsd": 0.0016690000000000003,
+            "durationSeconds": 36,
+            "startedAt": "2026-08-31T08:13:20.831Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-yQLBM2\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：快速改动  \n主路径：直接最小改动；`ponytail:ponytail` 不在当前会话可用清单中，不能调用  \n组合：无  \n闸门：最小检查 + 一次独立轻量复核；若涉及行为变化，再补相关测试  \n下一步：提供该函数的文件路径或代码片段后，按降级路径执行；本轮不修改代码"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "guardrail-refactor",
+      "dir": "eval-gate\\guardrail-refactor",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这段代码太绕了，帮我简化下，别改行为",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答归类为重构，并且不推荐已移除的 `simplify` 工具时才通过。只做路由判断。",
+          "config": {
+            "criteria": "只有当最后回答归类为重构，并且不推荐已移除的 `simplify` 工具时才通过。只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.1137578,
+            "judgeCostUsd": 0.0014209999999999995,
+            "durationSeconds": 40,
+            "startedAt": "2026-08-31T08:13:57.061Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-YBaY9t\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：重构/简化\n\n主路径：先理解代码；确认非机械重构后手动调用 `/grill-with-docs`，再小步重构\n\n组合：`lean-ctx`（理解结构）→ 逐步修改 → 相关测试；必要时 `/code-review`\n\n闸门：先建立行为基线或最小复现；每步跑测试，完成后跑相关 test/lint/build 并复核行为未变\n\n下一步：等用户手动调用 `/grill-with-docs`；若实际只是单文件 1–2 步机械改动，则降级为快速改动路径"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "guardrail-review-no-run",
+      "dir": "eval-gate\\guardrail-review-no-run",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：请 review 当前 diff 的 auth 变更，不要运行程序。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答归类为审查代码，包含 `security-review`，并尊重“不要运行程序”而不把 verify 作为下一步时才通过。只做路由判断。",
+          "config": {
+            "criteria": "只有当最后回答归类为审查代码，包含 `security-review`，并尊重“不要运行程序”而不把 verify 作为下一步时才通过。只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0963024,
+            "judgeCostUsd": 0.0007019999999999995,
+            "durationSeconds": 33,
+            "startedAt": "2026-08-31T08:14:37.032Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-J1QwwQ\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：审查代码\n\n主路径：`code-review`（当前 diff 的轻量审查）\n\n组合：`security-review` + 通用 Code Reviewer agent（auth 属于高风险变更，采用独立双审）\n\n闸门：静态审查；保留 auth 专项安全检查、独立复核与证据验证；不运行程序\n\n下一步：暂不执行；后续按上述顺序审查当前 diff"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "holdout-prd-ready",
+      "dir": "eval-gate\\holdout-prd-ready",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：PRD 已经写好了，下一步怎么落地？",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答识别为“有需求文档”，并要求按切片和 `PLAN.md` 等计划产物推进实现时才通过。只做路由判断。",
+          "config": {
+            "criteria": "只有当最后回答识别为“有需求文档”，并要求按切片和 `PLAN.md` 等计划产物推进实现时才通过。只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.1383864,
+            "judgeCostUsd": 0.0009450000000000005,
+            "durationSeconds": 49,
+            "startedAt": "2026-08-31T08:15:10.148Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-RnU6Vj\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：有需求文档\n\n主路径：将 PRD 手动拆成 4–6 个可验收实现切片并形成 `PLAN.md`；共识明确后手动调用 `/to-spec` 固化为 Spec，再手动调用 `/implement` 落地。\n\n组合：跨会话、多人并行或存在显式阻塞关系时，追加手动调用 `/to-tickets`；否则跳过。\n\n闸门：先确认范围、验收标准、约束、排除项和未决问题；实现后保留测试、代码审查、运行验证，提交前展示范围与 diff 并等待确认。\n\n下一步：先整理切片和 `PLAN.md`；若 PRD 仍有未决需求，先手动调用 `/grill-with-docs` 并等待，不直接写代码。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "target-heavy-multisession",
+      "dir": "eval-gate\\target-heavy-multisession",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这个改造任务比较大，估计要跨几个会话，怎么管？",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答明确进入交付状态机，并在下一步或规模判定中明确给出 `small`、`medium`、`large` 至少一个口令选项或说明默认自判 `small` 时才通过。不得把请求路由成已移除的 `devflow`。只做路由判断。",
+          "config": {
+            "criteria": "只有当最后回答明确进入交付状态机，并在下一步或规模判定中明确给出 `small`、`medium`、`large` 至少一个口令选项或说明默认自判 `small` 时才通过。不得把请求路由成已移除的 `devflow`。只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.1306068,
+            "judgeCostUsd": 0.0012720000000000014,
+            "durationSeconds": 54,
+            "startedAt": "2026-08-31T08:15:59.442Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-OyIXlx\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：开发新功能（重任务 / 跨会话交付）\n\n主路径：按 `large` 档进入交付状态机：`REQUIREMENT → DESIGN → IMPLEMENT → REVIEW → TEST → SUMMARY`；用 `workflow-state.json` 持久化阶段、产物、阻塞项和断点，每次会话从状态恢复，不依赖聊天记忆。\n\n组合：需求讨论后手动调用 `/grill-with-docs`；共识固化用 `/to-spec`；跨会话拆分范围、依赖和阻塞用 `/to-tickets`；已有 Spec/Ticket 后用 `/implement`。这些 user-invoked skill 需由用户逐个手动调用，不静默串行执行。\n\n闸门：REQUIREMENT 报告必须先展示并获得用户明确确认；各阶段执行 `start → finish`；DESIGN、IMPLEMENT、REVIEW、TEST 分离；实现后必须测试、review 和证据化验证；commit/push 另行展示范围并确认。\n\n下一步：下一次会话先明确采用 `large` 档，然后手动调用 `/grill-with-docs`；本轮不执行任务本身。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "target-maintenance-audit",
+      "dir": "eval-gate\\target-maintenance-audit",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我审查一下 learning-guide 这个路由 skill 有没有问题，顺便优化",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答同时满足以下条件才通过：明确把请求归为“路由指南维护”；主路径明确包含 `guide-skill-auditor`；说明行为变化或正文修改前要补可验证的 `eval`。只做路由判断，不执行审查或修改。",
+          "config": {
+            "criteria": "只有当最后回答同时满足以下条件才通过：明确把请求归为“路由指南维护”；主路径明确包含 `guide-skill-auditor`；说明行为变化或正文修改前要补可验证的 `eval`。只做路由判断，不执行审查或修改。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.10282739999999999,
+            "judgeCostUsd": 0.0009659999999999981,
+            "durationSeconds": 45,
+            "startedAt": "2026-08-31T08:16:53.084Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-q01WXT\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：路由指南维护\n\n主路径：`guide-skill-auditor`（条件路径；当前会话清单未显示，需先核实可用性）\n\n组合：审计 `learning-guide` → 补充可验证 `eval` → 若确认行为变化，再用 `darwin-skill` 修改正文；不可将 `learning-guide` 本身作为主路径\n\n闸门：先以证据确认误路由或行为缺陷；行为变化必须先补 `eval` 再改正文；本轮只路由，不读取、修改或执行任务\n\n下一步：若进入执行，先核实 `guide-skill-auditor` / `darwin-skill` 可用性，再开始审查；当前等待你的执行许可"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "target-output-contract",
+      "dir": "eval-gate\\target-output-contract",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断，只做路由判断，不要执行任务本身。\n请求：改个按钮文案，把「提交」改成「保存」。帮我判断该用什么 skill，直接给结论别长篇解释。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答明确输出“分类”“主路径”“组合”“闸门”“下一步”五项字段，并说明这是小型直接代码变更且不执行任务本身时才通过。",
+          "config": {
+            "criteria": "只有当最后回答明确输出“分类”“主路径”“组合”“闸门”“下一步”五项字段，并说明这是小型直接代码变更且不执行任务本身时才通过。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.10929680000000001,
+            "judgeCostUsd": 0.004322000000000001,
+            "durationSeconds": 37,
+            "startedAt": "2026-08-31T08:17:37.807Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-go0OUR\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL PASS FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  true,
+                  false
+                ],
+                "evidence": "分类：快速改动  \n主路径：直接最小改动  \n组合：无  \n参与度：我动手——单文件机械文案修改  \n闸门：最小检查  \nMatt提示：无  \n下一步：直接修改；本次不执行"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "target-understand-combo",
+      "dir": "eval-gate\\target-understand-combo",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这项目 auth 模块怎么工作的？谁调用了 login？",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "只有当最后回答同时包含 `lean-ctx` 和 `gitnexus`，并明确先用 lean-ctx 查结构、再用 gitnexus 查调用链或影响范围时才通过。只做路由判断，不执行代码理解任务。",
+          "config": {
+            "criteria": "只有当最后回答同时包含 `lean-ctx` 和 `gitnexus`，并明确先用 lean-ctx 查结构、再用 gitnexus 查调用链或影响范围时才通过。只做路由判断，不执行代码理解任务。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.1113258,
+            "judgeCostUsd": 0.0007500000000000007,
+            "durationSeconds": 34,
+            "startedAt": "2026-08-31T08:18:14.573Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-PgtfMZ\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：理解代码  \n主路径：`lean-ctx` → `gitnexus-exploring`  \n组合：先梳理 auth 模块结构，再追踪 `login` 的调用链；工具不可用时回退为原生搜索 + 精读文件  \n闸门：无（纯理解，不修改代码，不需要 TDD / review / verify）  \n下一步：按上述顺序进入代码理解路径；本次仅完成路由判断，不执行分析"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "target-understand-structure",
+      "dir": "eval-gate\\target-understand-structure",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：只输出「分类 / 主路径 / 组合 / 闸门 / 下一步」，不要执行任务本身。\n请求：我只想快速看一个类内部的实现结构，不查引用、不查调用链，也不修改代码。应该先用什么？",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "仅当最后回答将请求归类为「理解代码」，明确把 `lean-ctx` 作为日常结构查询的第一路径，并且没有把 `gitnexus` 或 `gitnexus-exploring` 作为主路径时才通过；只做路由判断。",
+          "config": {
+            "criteria": "仅当最后回答将请求归类为「理解代码」，明确把 `lean-ctx` 作为日常结构查询的第一路径，并且没有把 `gitnexus` 或 `gitnexus-exploring` 作为主路径时才通过；只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0816774,
+            "judgeCostUsd": 0.0006179999999999988,
+            "durationSeconds": 26,
+            "startedAt": "2026-08-31T08:18:48.799Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-hrhFlt\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：理解代码  \n主路径：`lean-ctx`  \n组合：无  \n闸门：无  \n下一步：使用 `lean-ctx` 聚焦查看该类内部实现，不查引用、不查调用链、不修改代码"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 10,
+    "casesPassed": 9,
+    "overallScore": 0.9,
+    "overallPassRate": 0.9
+  }
+}

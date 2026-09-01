@@ -1,8 +1,10 @@
 ---
 name: tutorial-maker
-description: Use when 用户要制作 Markdown 系列教程、课程计划、从零系统学习路径，或把主题/笔记变成循序渐进教程；触发词包括 教程制作、从零开始系统学习、生成系列教程、把笔记变成教程、系统性入门某主题、tutorial maker、make a tutorial series、从0学XX。
+description: >-
+  Use when 用户要制作 Markdown 系列教程、课程计划、从零系统学习路径，或把主题/笔记变成循序渐进教程；触发词包括
+  教程制作、从零开始系统学习、生成系列教程、把笔记变成教程、系统性入门某主题、tutorial maker、make a tutorial
+  series、从0学XX。若用户要学习已有课程、lesson、quiz 或 lab，转 `generic-course-tutor`；本 skill 仍负责作者侧教程生成。
 ---
-
 # Tutorial Maker
 
 把一个主题（+可选本地材料）变成**面向 from-zero 学习者的、可发布的 Markdown 系列教程**。不是单课生成器，是系统课程生成器：先规划整条学习路径，审批后再逐课生成，每课过自审门。
@@ -63,9 +65,11 @@ start
 - **gaps 防臆造（§13）**：每条事实溯到本地材料，否则进 `sources.md` 的 gaps 清单明示缺失。v1 **不联网**，缺就标缺，不编。
 - **objective 可观测**：禁"理解了"，必须"能说出/能做到 X"。
 - **顽固点不死磕**：regen 2 次仍 MUST 不过 → 标顽固点建议作者手介入。
-- **借思想不调 skill**：与 teach/cram-engine/ruthless-review/grill 是模式借鉴，运行时零依赖。v1 不调 article-writer/JavaGuide/drawio，不联网。
-
-## 失败模式处理
+- **已有课程学习不由本 skill 接管**：已有课程、lesson、quiz 或 lab 的学习请求转 `generic-course-tutor`；本 skill 仍是作者侧 intake → 大纲审批 → 逐课生成 → 自审门流水线，不接管 tutor 状态或实验。
+- **本地来源优先**：manifest 优先决定课程身份、lesson 顺序和引用；每条事实在 `sources.md` 记录来源路径和用途。来源不明、manifest 无效或候选冲突时列证据并询问，不猜顺序，默认不联网补齐。
+- **状态和证据分离**：checkpoint 只接受可观察证据；实际结果标 `verified`，材料/推理标 `conceptual`，未完成标 `pending`，被门禁阻断标 `blocked`。已有记录冲突、格式损坏或并发修订时停止，不覆盖，并从已确认断点恢复。
+- **状态文件不合并**：generic tutor 使用课程根目录 `.course-tutor/progress.json`；本 skill 继续使用 `.tutorial-maker/progress.md`，两者不合并、不互相覆盖。
+- **quiz 答案隔离**：一题一问，等待回答后才给答案、解释或评分；回答前不暴露答案键、索引或答案分布。
 
 | 触发 | 一线修复 | 仍失败兜底 |
 |------|---------|-----------|

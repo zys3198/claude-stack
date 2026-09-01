@@ -28,6 +28,81 @@ class VerificationHookTests(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
+    def test_git_guard_binds_confirmation_to_operation(self):
+        cases = [
+            ("git commit -m change", "确认第一批修改", False),
+            ("git commit -m change", "确认推送", False),
+            ("git commit -m change", "确认不要提交", False),
+            ("git commit -m change", "确认不提交", False),
+            ("git commit -m change", "确认别提交", False),
+            ("git commit -m change", "确认勿提交", False),
+            ("git commit -m change", "confirm no commit", False),
+            ("git commit -m change", "confirm avoid commit", False),
+            ("git commit -m change", "确认提交", True),
+            ("git commit -m \"mention git push\"", "确认提交", True),
+            ("git commit -m change && git push origin main", "确认提交并推送", False),
+            ("git commit -m change && git commit -m again", "确认提交", False),
+            ("git push origin main", "确认提交", False),
+            ("git push origin main", "确认推送", True),
+            ("git push origin main", "确认不推送", False),
+            ("git push origin main", "确认不要推送", False),
+            ("git push origin main", "确认别推送", False),
+            ("git push origin main", "确认勿推送", False),
+            ("git push origin main", "confirm no push", False),
+            ("git push origin main", "confirm avoid push", False),
+            ("git push origin main && git push origin backup", "确认推送", False),
+            ("git push origin main", "确认不要提交，但确认推送", True),
+            ("git switch -c feature", "确认创建分支", True),
+            ("git switch -c feature", "确认不创建分支", False),
+            ("git switch -c feature", "确认不要创建分支", False),
+            ("git switch -c feature", "确认别创建分支", False),
+            ("git switch -c feature", "确认勿创建分支", False),
+            ("git switch -c feature", "confirm no branch", False),
+            ("git switch -c feature", "confirm avoid branch", False),
+            ("git checkout -b feature && git checkout -b feature2", "确认创建分支", False),
+        ]
+        for command, prompt, allowed in cases:
+            result = self.run_git_guard(command, prompt)
+            self.assertEqual(result.returncode, 0)
+            if allowed:
+                self.assertEqual(result.stdout, "")
+            else:
+                payload = json.loads(result.stdout)
+                output = payload["hookSpecificOutput"]
+                self.assertEqual(output["permissionDecision"], "deny")
+
+    def test_git_guard_log_redacts_command(self):
+        command = 'git commit -m "token-value-123"'
+        result = self.run_git_guard(command, "确认提交")
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, "")
+        log = (Path(self.temp_dir.name) / "git_guard.log").read_text(encoding="utf-8")
+        self.assertNotIn(command, log)
+        self.assertNotIn("token-value-123", log)
+        self.assertIn("cmd_sha256=", log)
+        self.assertIn("cmd_len=", log)
+
+    def test_git_guard_parse_error_log_redacts_input(self):
+        raw = '{"tool_input": {"command": "token-value-123"}'
+        log_path = Path(self.temp_dir.name) / "git_guard.log"
+        env = os.environ.copy()
+        env["CLAUDE_GIT_GUARD_LOG"] = str(log_path)
+        result = subprocess.run(
+            [sys.executable, str(HOOKS / "git_guard.py")],
+            input=raw,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            env=env,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0)
+        log = log_path.read_text(encoding="utf-8")
+        self.assertNotIn(raw, log)
+        self.assertNotIn("token-value-123", log)
+        self.assertIn("raw_sha256=", log)
+        self.assertIn("raw_len=", log)
+
     def test_successful_verification_accepts_current_bash_response(self):
         success = self.run_hook("verify_recorder.py", self.recorder_event({
             "stdout": "1 passed",
@@ -53,6 +128,31 @@ class VerificationHookTests(unittest.TestCase):
         env["CLAUDE_HOOK_STATE"] = str(self.state_path)
         return subprocess.run(
             [sys.executable, str(HOOKS / script)],
+            input=json.dumps(event),
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            env=env,
+            check=False,
+        )
+
+    def run_git_guard(self, command, prompt):
+        transcript = Path(self.temp_dir.name) / "transcript.jsonl"
+        transcript.write_text(
+            json.dumps({"type": "user", "message": {"content": prompt}}) + "\n",
+            encoding="utf-8",
+        )
+        event = {
+            "hook_event_name": "PreToolUse",
+            "session_id": "session-1",
+            "tool_name": "Bash",
+            "tool_input": {"command": command},
+            "transcript_path": str(transcript),
+        }
+        env = os.environ.copy()
+        env["CLAUDE_GIT_GUARD_LOG"] = str(Path(self.temp_dir.name) / "git_guard.log")
+        return subprocess.run(
+            [sys.executable, str(HOOKS / "git_guard.py")],
             input=json.dumps(event),
             text=True,
             encoding="utf-8",
@@ -154,7 +254,33 @@ class VerificationHookTests(unittest.TestCase):
         results = [self.run_hook("verify_gate.py", self.gate_event()) for _ in range(3)]
         self.assertTrue(all(result.returncode == 0 for result in results))
         self.assertTrue(all("verify_gate WARNING" in result.stderr for result in results))
+        self.assertTrue(all(result.stdout == "" for result in results))
         self.assertEqual(self.read_state()["code_pending"], ["feature.py"])
+
+    def test_gate_blocks_after_max_unverified_stops(self):
+        for _ in range(3):
+            warning = self.run_hook("verify_gate.py", self.gate_event())
+            self.assertEqual(warning.returncode, 0)
+            self.assertIn("verify_gate WARNING", warning.stderr)
+
+        blocked = self.run_hook("verify_gate.py", self.gate_event())
+        self.assertEqual(blocked.returncode, 2)
+        payload = json.loads(blocked.stdout)
+        self.assertEqual(payload["decision"], "block")
+        self.assertIn("未跑成功验证", payload["reason"])
+        self.assertEqual(self.read_state()["stop_blocks"], 3)
+
+        success = self.run_hook("verify_recorder.py", self.recorder_event({
+            "stdout": "1 passed",
+            "stderr": "",
+            "is_error": False,
+            "interrupted": False,
+        }))
+        self.assertEqual(success.returncode, 0)
+
+        released = self.run_hook("verify_gate.py", self.gate_event())
+        self.assertEqual(released.returncode, 0)
+        self.assertEqual(self.read_state()["code_pending"], [])
 
     def test_unknown_or_failed_response_does_not_record_verification(self):
         responses = [

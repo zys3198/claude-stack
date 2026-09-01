@@ -2,6 +2,44 @@
 
 本文件记录 ai-coding-guide 路由层和 DevFlow 入口的可审计变更。日期采用 YYYY-MM-DD。
 
+## [Unreleased] - 2026-08-31
+
+### Added
+
+- 接入已审计的模型无关 `parallel-delegation` 全局 skill，作为编码主分类之后的可组合执行层：仅在独立且可验收子任务存在时并行，并保留隔离、主代理验收和失败降级。
+- 在 `routing.md` / `ecosystems.md` 登记与 `/to-tickets`、交付状态机的边界，新增触发与不触发路由回归用例。
+
+### Rationale
+
+- 来源：用户提供的文章 https://mp.weixin.qq.com/s?__biz=MzE5ODc3Njc0NQ==&mid=2247484429&idx=1&sn=1cb67d6c6baa4f7f12a11710e7b5e623&chksm=9701ac8f1625d8eb8116f3752109735f119d89b2badacb8f648938228efc300e57be9bc8e6f5&mpshare=1&scene=1&srcid=0831RMVutN6h4pVnxAhC0ON6&sharer_shareinfo=fb8307e673915c06c1ce7c6d2eb36718&sharer_shareinfo_first=fb8307e673915c06c1ce7c6d2eb36718#rd；实验评测已将固定模型提示词抽象为运行时无关契约。
+
+### Unchanged
+
+- 未修改 `ai-coding-guide/SKILL.md` description、交付状态机或 `settings.json`；该能力属于组合执行层，不新增主分类或触发前门。
+
+## [v2.4.0] - 2026-08-31
+
+### Added
+
+- 增加最小可审计路由契约：`分类`、`主路径`、`组合`、`闸门`、`下一步`；按条件追加 `参与度` 与 `Matt提示`。
+- 强调标准分类名、`guide-skill-auditor` 维护路径、可验证 `eval` 和 `small/medium/large` 交付档位。
+
+### Fixed
+
+- 对齐 `SKILL.md` 与 `references/routing.md` 的代码理解顺序：日常结构先用 `lean-ctx`，调用链或影响范围使用 `gitnexus-exploring`，组合请求按 `lean-ctx` → `gitnexus-exploring`。
+
+### Evidence
+
+- WikiSkill 登记 iteration-1 至 iteration-10，并从 `route-contract-drift` Pattern 提取重复回归。
+- 9-case gate 套件：target 由 `0.50` 提升至 `0.75`，完整套件由 `7/9` 提升至 `8/9`；guardrail `4/4`、holdout `1/1` 保持通过。
+- 评测执行错误单独归入 `benchmark-runtime-noise`，未与模型输出失败混算。
+
+### Unchanged
+
+- 保留原始 34 个 YAML 用例与 Raw Trace；当前 runner 验证使用隔离的 9-case 转换套件。
+- 未修改 `settings.json`、`skill-up`、`C:\ZYS\Wiki`，未覆盖 Raw Trace、自动 commit 或 push。
+
+
 ## [v2.3.0] - 2026-08-20
 
 ### Fixed

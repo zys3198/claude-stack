@@ -2,7 +2,7 @@
 /**
  * ECC Statusline — statusLine command
  *
- * Displays: model | task | $cost Nt Nf Nm | dir | branch Ctx N% | Hit N%
+ * Displays: model[plan] | task | $cost Nt Nf Nm | dir | branch Ctx N% | Hit N% | 5h/7d limit
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
@@ -59,7 +59,40 @@ function buildContextBar(totalInputTokens, autoCompactWindow, usedPercentage) {
   if (used < 50) return ` \x1b[32m${used}%\x1b[0m`;
   if (used < 65) return ` \x1b[33m${used}%\x1b[0m`;
   if (used < 80) return ` \x1b[38;5;208m${used}%\x1b[0m`;
-  return ` \x1b[1;31m${used}%\x1b[0m`;
+  return ` \x1b[1;31m${used}%\x1b[0m \x1b[33m/compact\x1b[0m`;
+}
+
+/**
+ * Color a percentage where high = bad (ctx usage, rate limits).
+ * Mirrors buildContextBar thresholds.
+ * @param {number} n
+ * @returns {string} Colored "N%" or empty
+ */
+function colorPct(n) {
+  if (n === null || n === undefined || Number.isNaN(Number(n))) return '';
+  const v = Math.min(100, Math.max(0, Math.round(Number(n))));
+  if (v < 50) return `\x1b[32m${v}%\x1b[0m`;
+  if (v < 65) return `\x1b[33m${v}%\x1b[0m`;
+  if (v < 80) return `\x1b[38;5;208m${v}%\x1b[0m`;
+  return `\x1b[1;31m${v}%\x1b[0m`;
+}
+
+/**
+ * Format rate-limit reset timestamp (unix seconds) as "→HH:MM" or "→Wed HH:MM".
+ * @param {number|string} ts
+ * @param {boolean} withDay
+ * @returns {string} Dim arrow + time, or empty
+ */
+function fmtReset(ts, withDay) {
+  if (ts === undefined || ts === null || ts === '') return '';
+  const d = new Date(Number(ts) * 1000);
+  if (Number.isNaN(d.getTime())) return '';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const t = withDay
+    ? `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]} ${hh}:${mm}`
+    : `${hh}:${mm}`;
+  return `\x1b[2m→${t}\x1b[0m`;
 }
 
 /**
@@ -147,6 +180,63 @@ function resolveModelName(modelInfo) {
   return displayName;
 }
 
+
+const MODE_STATUS = [
+  {
+    file: '.caveman-active',
+    label: 'CAVEMAN',
+    color: 172,
+    valid: new Set(['', 'off', 'lite', 'full', 'ultra', 'wenyan-lite', 'wenyan', 'wenyan-full', 'wenyan-ultra', 'commit', 'review', 'compress'])
+  },
+  {
+    file: '.ponytail-active',
+    label: 'PONYTAIL',
+    color: 108,
+    valid: new Set(['', 'lite', 'full', 'ultra'])
+  }
+];
+
+function readSmallStatusFile(filePath) {
+  try {
+    const stat = fs.lstatSync(filePath);
+    if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 64) return null;
+    return fs.readFileSync(filePath, 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+function readModeStatus() {
+  const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+  const segments = [];
+
+  for (const config of MODE_STATUS) {
+    try {
+      const raw = readSmallStatusFile(path.join(claudeDir, config.file));
+      if (raw === null) continue;
+      const firstLine = raw.split(/\r?\n/, 1)[0].trim().toLowerCase();
+      const mode = firstLine.replace(/[^a-z0-9-]/g, '');
+      if (mode !== firstLine || !config.valid.has(mode)) continue;
+
+      const suffix = !mode || mode === 'full' ? '' : `:${mode.toUpperCase()}`;
+      let rendered = `\x1b[38;5;${config.color}m[${config.label}${suffix}]\x1b[0m`;
+
+      if (config.label === 'CAVEMAN' && process.env.CAVEMAN_STATUSLINE_SAVINGS !== '0') {
+        const savings = readSmallStatusFile(path.join(claudeDir, '.caveman-statusline-suffix'))
+          ?.replace(/[\x00-\x1F\x7F]/g, '')
+          .trimEnd();
+        if (savings) rendered += ` \x1b[38;5;${config.color}m${savings}\x1b[0m`;
+      }
+
+      segments.push(rendered);
+    } catch {
+      // Optional plugin status.
+    }
+  }
+
+  return segments.join(' ');
+}
+
 function runStatusline() {
   let input = '';
   const stdinTimeout = setTimeout(() => process.exit(0), 3000);
@@ -168,10 +258,27 @@ function runStatusline() {
       const totalInputTokens = cw.total_input_tokens;
       // Compaction point = AUTO_COMPACT_WINDOW env; fall back to reported window size
       const autoCompactWindow = Number(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW) || cw.context_window_size || 0;
-      const usedPercentage = cw.used_percentage ?? (remaining === null || remaining === undefined ? null : 100 - remaining);
+      const usedPercentage = remaining === null || remaining === undefined
+        ? cw.used_percentage
+        : 100 - Number(remaining);
 
       const sessionId = sanitizeSessionId(session);
       const bridge = sessionId ? readBridge(sessionId) : null;
+
+      // Write harness cost to per-session cache for cost-tracker (Stop hook).
+      // cost-tracker prefers this authoritative value over its RATE_TABLE
+      // estimate, which cannot price proxy-routed models (deepseek etc).
+      const harnessCost = data.cost?.total_cost_usd;
+      if (sessionId && harnessCost > 0) {
+        try {
+          fs.writeFileSync(
+            path.join(os.tmpdir(), `harness-cost-${sessionId}.json`),
+            JSON.stringify({ ts: Math.floor(Date.now() / 1000), cost_usd: harnessCost })
+          );
+        } catch {
+          /* best effort */
+        }
+      }
 
       // Write context % back to bridge for context-monitor
       if (sessionId && bridge && remaining !== null && remaining !== undefined) {
@@ -186,22 +293,26 @@ function runStatusline() {
       // Current task
       const task = sessionId ? readCurrentTask(sessionId) : '';
 
-      // Metrics from bridge
+      // Metrics from bridge; cost from live harness report, bridge as fallback
+      // (gateway doesn't relay usage, so metrics-bridge cost can be 0)
       let metricsStr = '';
-      if (bridge) {
+      const costUsd = data.cost?.total_cost_usd > 0 ? data.cost.total_cost_usd : (bridge?.total_cost_usd || 0);
+      if (bridge || costUsd > 0) {
         const parts = [];
-        if (bridge.total_cost_usd > 0) {
-          parts.push(`$${bridge.total_cost_usd.toFixed(2)}`);
+        if (costUsd > 0) {
+          parts.push(`$${costUsd.toFixed(2)}`);
         }
-        if (bridge.tool_count > 0) {
-          parts.push(`${bridge.tool_count}t`);
-        }
-        if (bridge.files_modified_count > 0) {
-          parts.push(`${bridge.files_modified_count}f`);
-        }
-        const dur = formatDuration(bridge.first_timestamp);
-        if (dur !== '?') {
-          parts.push(dur);
+        if (bridge) {
+          if (bridge.tool_count > 0) {
+            parts.push(`${bridge.tool_count}t`);
+          }
+          if (bridge.files_modified_count > 0) {
+            parts.push(`${bridge.files_modified_count}f`);
+          }
+          const dur = formatDuration(bridge.first_timestamp);
+          if (dur !== '?') {
+            parts.push(dur);
+          }
         }
         if (parts.length > 0) {
           metricsStr = `\x1b[38;5;117m${parts.join(' ')}\x1b[0m`;
@@ -211,23 +322,41 @@ function runStatusline() {
       // Context usage (text-only, colored by level) + cache hit, | separated
       const ctx = buildContextBar(totalInputTokens, autoCompactWindow, usedPercentage);
       let hitStr = '';
-      if (bridge) {
-        const cacheRead = bridge.cache_read_tokens || 0;
-        const cacheWrite = bridge.cache_write_tokens || 0;
+      const currentUsage = cw.current_usage;
+      const cacheRead = Number(currentUsage?.cache_read_input_tokens) || 0;
+      const freshInput = Number(currentUsage?.input_tokens) || 0;
+      const liveDenom = freshInput + cacheRead;
+      if (liveDenom > 0) {
+        const hitPct = Math.round((cacheRead / liveDenom) * 100);
+        hitStr = `\x1b[38;5;117mHit ${hitPct}%\x1b[0m`;
+      } else if (bridge) {
+        const bridgeCacheRead = bridge.cache_read_tokens || 0;
         const totalIn = bridge.total_input_tokens || 0;
-        if (cacheRead > 0) {
-          // input_tokens 已含 cache 部分(Anthropic 语义)时分母=in;
-          // 否则(proxy fresh-only 语义)分母=in+cr+cw,当前者成立时 in 已经盖住 cache,再加会双重计数
-          const denom = totalIn >= cacheRead + cacheWrite ? totalIn : totalIn + cacheRead + cacheWrite;
-          const hitPct = denom > 0 ? Math.round((cacheRead / denom) * 100) : 0;
+        if (bridgeCacheRead > 0) {
+          const denom = totalIn + bridgeCacheRead;
+          const hitPct = denom > 0 ? Math.round((bridgeCacheRead / denom) * 100) : 0;
           hitStr = `\x1b[38;5;117mHit ${hitPct}%\x1b[0m`;
         }
       }
-      const usageStr = [ctx ? `Ctx${ctx}` : '', hitStr].filter(Boolean).join(' \x1b[2m\u2502\x1b[0m ');
+      // Rate-limit usage (5h / 7d) with reset times
+      const rl = data.rate_limits || {};
+      const rateParts = [];
+      if (rl.five_hour && rl.five_hour.used_percentage !== undefined && rl.five_hour.used_percentage !== null) {
+        rateParts.push(`5h ${colorPct(rl.five_hour.used_percentage)}${fmtReset(rl.five_hour.resets_at, false)}`);
+      }
+      if (rl.seven_day && rl.seven_day.used_percentage !== undefined && rl.seven_day.used_percentage !== null) {
+        rateParts.push(`7d ${colorPct(rl.seven_day.used_percentage)}${fmtReset(rl.seven_day.resets_at, true)}`);
+      }
+      const rateStr = rateParts.join(' ');
+
+      const modeStr = readModeStatus();
+
+      const usageStr = [ctx ? `Ctx${ctx}` : '', hitStr].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
 
       // Build output
       const dirname = path.basename(dir);
-      const segments = [`\x1b[2m${model}\x1b[0m`];
+      const effort = data.effort?.level;
+      const segments = [`\x1b[2m${model}${effort ? ` [${effort}]` : ''}\x1b[0m`];
 
       if (task) {
         segments.push(`\x1b[1;97m${task}\x1b[0m`);
@@ -242,7 +371,12 @@ function runStatusline() {
         segments.push(`\x1b[33m${branch}\x1b[0m`);
       }
 
-      process.stdout.write(segments.join(' \x1b[2m\u2502\x1b[0m ') + (usageStr ? ` \x1b[2m\u2502\x1b[0m ${usageStr}` : ''));
+      process.stdout.write(
+        segments.join(' \x1b[2m│\x1b[0m ') +
+        (usageStr ? ` \x1b[2m│\x1b[0m ${usageStr}` : '') +
+        (rateStr ? ` \x1b[2m│\x1b[0m ${rateStr}` : '') +
+        (modeStr ? ` ${modeStr}` : '')
+      );
     } catch {
       // Silent fail
     }

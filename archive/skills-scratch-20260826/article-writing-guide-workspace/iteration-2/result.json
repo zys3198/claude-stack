@@ -1,0 +1,256 @@
+{
+  "skill_name": "article-writing-guide",
+  "schema_version": "v1alpha1",
+  "engine_name": "claude_code",
+  "model_name": "anthropic/claude-sonnet-4-6",
+  "start_time": "2026-08-17T21:33:10.6586212+08:00",
+  "end_time": "2026-08-17T21:34:32.1786083+08:00",
+  "case_results": [
+    {
+      "case_id": "review-report",
+      "title": "审校-非后端文体走批量管线",
+      "status": "PASS",
+      "duration_ms": 17251,
+      "turns": 1,
+      "input_tokens": 35428,
+      "output_tokens": 644,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[multi-review-pipeline]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[multi-review-pipeline])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：审校一篇前端 React 渲染优化的技术文章，只出报告不改\n",
+      "response": "**触发门禁**：article-writing-guide 相关？YES —— 写作域「审校」请求，命中 §1 阶段⑧。目标 skill 存在性：`multi-review-pipeline` 在本会话 available skills 列表 ✓。\n\n---\n\n**① 分类**\n审校（阶段⑧）· 多维度并行审稿 · **报告型**（只出报告不改）\n\n**② 主路径**\n`multi-review-pipeline` —— 命中 §7 示例「先出审校报告我看看，别改」→ **停在报告阶段**，不进入批量改稿环\n\n**③ 组合**\n无下游执行步骤（本次只出报告）。报告交付后若你要求按修订清单改稿，才串 `edit-article`（结构）→ `human-writing`（文风）→ 可选 `chinese-markdown-normalizer`（排版）；本次不预执行\n\n**④ 闸门**\n- **只读不改**：审稿报告不改稿、不落盘、不动原文件\n- **CHECKPOINT 已确认**：你已明确「只出报告不改」→ 范围=单点报告，不跑全链路\n- 报告内的确定性论断（React 渲染机制、API 行为）受证据门槛约束：源码/官方文档优先，标的 `needs evidence` 处不得装成事实\n\n**⑤ 下一步**\n执行 `multi-review-pipeline` 审校这篇 React 渲染优化文章，产出多维度并行审稿报告（并行审 → 修订清单，停在此处），等你确认后再决定是否批量改。需要你提供文章路径或内容。"
+    },
+    {
+      "case_id": "english-tutorial",
+      "title": "语言适配-英文文章",
+      "status": "PASS",
+      "duration_ms": 34807,
+      "turns": 1,
+      "input_tokens": 35475,
+      "output_tokens": 2711,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[article-writer]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[article-writer])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：write an English tutorial on Docker networking, then edit it\n",
+      "response": "按 article-writing-guide 完成开工路由判断，仅输出契约，不执行任务。\n\n## 路由契约\n\n**1. 分类**\n- 跨阶段组合请求：英文单篇技术教程「起草」+「编辑」两阶段。\n- 起草 = 从零单篇教程 → §1 ③（`article-writer` 默认通用模式，**非** `tutorial-maker`）。\n- 编辑 = 结构调整/一般编辑 → §1 ④（`edit-article`）。\n- 语言边界：英文文章 → 跳过 `human-writing` 与 `chinese-markdown-normalizer`（§0）。\n\n**2. 主路径**\n- `article-writer`（英文，默认模式）起草 Docker networking 教程。\n- 然后 `edit-article` 做编辑。\n- 教程裁决：「an English tutorial」是**单篇**非系列课，不转 `tutorial-maker`（那是对外系列/课程）；也未命中「自学边学边写」→ 不进 `learning-guide`。\n\n**3. 组合（默认 pipeline 裁剪后）**\n- 起草 `article-writer` → 编辑 `edit-article` →（可选）审校 `tech-article-review` 或 `multi-review-pipeline` →（若对外发布）`publish-final-check`。\n- 可选配图：Docker networking 含网络拓扑图，`drawio-article-illustration` → `drawio-chart`。\n- 查重 `plagiarism-audit`：需外部来源，无来源则跳过并标 `⚠️ 未查重`。\n\n**4. 闸门（待确认项）**\n- 触发门禁：article-writing-guide 相关 **YES**；`article-writer` / `edit-article` 均在本会话 ✓，可直接委派。\n- 🔴 **CHECKPOINT**（§4 规则3）：跨阶段「写+编」→ 先确认跑**全链路** / 只起草 / 只编辑某层，不擅自定范围。\n- 决策点先问（§4.5）：读者、目的、篇幅三要素未明确。\n- 写作闸门（§0）：起草交付必须附**依据表 + basis map**（Docker networking 以官方文档为 evidence basis）。\n- 写入闸门（§4 规则4）：先在对话给初稿预览，确认后才落盘。\n- 「then edit it」未指明编辑层次（骨架/肉/皮）→ 按失败模式表先问。\n\n**5. 下一步（等你确认后才动）**\n- 请确认三点：① 范围（全链路 / 单点起草 / 单点编辑）；② 读者 + 目的 + 目标篇幅；③ 「edit it」指哪一层（结构调整 / 内容质量 / 纯文风）。\n- 确认后：开工问询定归属（写作域默认我讲/协作流；你说「直接写」则降级我动手）→ `article-writer` 起草并给对话预览 → 确认落盘 → `edit-article`。\n\n确认后我再开工。"
+    },
+    {
+      "case_id": "deleted-skill",
+      "title": "存在性校验-已删 skill 重定向",
+      "status": "PASS",
+      "duration_ms": 20651,
+      "turns": 2,
+      "input_tokens": 35417,
+      "output_tokens": 1147,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 2,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[article-writer]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[article-writer])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：用 javaguide-writer 给我写篇 Java 并发面试文章\n",
+      "response": "按 article-writing-guide 做路由判断，仅输出契约，不执行任务。\n\n---\n\n## 开工路由判断\n\n### 触发门禁（§0）\n```\narticle-writing-guide 相关？ YES —— 写作需求未点名有效 skill\n目标 skill 在当前会话？ javaguide-writer：NO（已删除）\n若 NO → 最接近替代： article-writer（JavaGuide 模式）\n```\n\n### ① 分类\n**起草-从零 + JavaGuide 模式**。你点名 `javaguide-writer` 属废弃 skill（功能已并入 `article-writer`），按 §0 废弃重定向切 JavaGuide 模式，不路由进虚空。\n\n### ② 主路径\n`article-writer`（**JavaGuide 模式**，执行规范见其 §6，含 §6.7 自检、§6.9 反例 11 条）。\n\n### ③ 组合\nJavaGuide 模式 pipeline（§3）：`article-writer`(JavaGuide 模式) → `multi-review-pipeline`(审校) → `plagiarism-audit`(查重，需贴源否则跳过) → `chinese-markdown-normalizer`(排版) → **`publish-final-check`**(发布闸，其 ③ 风格子项对照 `javaguide-style-guide` §1 M1-M10)。\n\n### ④ 闸门（按顺序触发）\n1. **触发门禁**：已过，javaguide-writer → article-writer JavaGuide 模式。\n2. **开工问询**（§0）：先问「归属」——想练写作核心→你练 / 协作流（AI 给结构你定，写作域默认）→我讲 / 一次性文案→我动手；再问背景（给谁看/目的/篇幅/参考文章）。\n3. **决策点先问**（§4.5）：文体（面试题解？专题讲解？）、读者（求职者/工作经验）、目的三要素，当前不全，须先问清。\n4. **协作流默认**（§3）：写作域默认我讲（协作流）——结构方案 → 方向确认 → 全篇细骨架冻结 → 逐节初稿预览 → 确认后落盘。你说「直接写」才降级我动手。\n5. **写作纪律**（强制）：正文预览须随附**依据表 + basis map**，依据缺失标 `needs evidence`。\n6. **写入闸门**（§4）：初稿先对话预览，你明确确认后才落盘。\n7. **跨阶段 CHECKPOINT**（§3 🔴）：若一次跑全链路（写+审+发），先确认范围。\n\n### ⑤ 下一步\n等你三件事后我才开工：\n1. **归属**选哪个（推荐：我讲/协作流，面试文章适合先定结构再写）；\n2. **背景**：读者水平、目的（面试冲刺/系统复习）、篇幅、有无参考；\n3. **范围**：只起草，还是写+审+发布前检查全链路。\n\n确认后我会用 `article-writer` JavaGuide 模式先出结构方案，不直接写正文。"
+    },
+    {
+      "case_id": "tutorial-series",
+      "title": "系列教程-对外发布",
+      "status": "PASS",
+      "duration_ms": 38273,
+      "turns": 1,
+      "input_tokens": 35469,
+      "output_tokens": 2332,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[tutorial-maker]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[tutorial-maker])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：给我做一套从零学 Redis 的系列教程，每课要有练习和折叠答案\n",
+      "response": "**触发门禁**：article-writing-guide 相关？YES（你点名本 skill 定路由）。目标 skill 存在性：`tutorial-maker`、`learning-guide`、`article-writer`、`publish-final-check` 等均在本会话可用列表。YES。\n\n---\n\n**① 分类**\n命中 §1 表「③ 起草-系统教程/课程」——\"从零学 Redis + 系列教程 + 每课练习\"。注意教程裁决：**面向读者发布** → `tutorial-maker`；**给自己学会/学习产物** → 转介 `learning-guide`。当前形态（系列课+练习+折叠答案）指向对外发布。\n\n**② 主路径**\n`tutorial-maker`（对外发布的系列教程/课程）。\n\n**③ 组合**\n- 前置：Redis 官方文档/权威资料收集（定版本基线、命令最新语义）→ `agent-reach` 或直取官方文档（轻量）\n- 起草：`tutorial-maker` 落每课「讲解+练习+折叠答案」结构\n- 审校：`tech-article-review`（逐课）或 `multi-review-pipeline`（全系列并行审）→ **`publish-final-check`**（发布闸，末环必跑）\n- 排版/平台适配：`chinese-markdown-normalizer`；配图可选 `drawio-article-illustration`+`drawio-chart`\n\n**④ 闸门**\n1. **归属确认（首闸）**：对外发布 → tutorial-maker；自己学 → learning-guide。这是 §0 教程裁决的硬分流点\n2. **骨架冻结**：先一次性出全系列 H2/H3 细骨架，冻结后才逐课生成正文\n3. **写入闸门**：每课正文对话预览 → 用户确认 → 落盘\n4. **平台渲染记账**：折叠答案若用 HTML `\u003cdetails\u003e/\u003csummary\u003e`，公众号不渲染 → 需先定目标平台\n5. **版本锚定**：Redis 命令/配置随版本演进，大纲需锚定版本，避免教程写成过时事实\n\n**⑤ 下一步**\n先确认归属（面向读者发布 or 自己学）+ 目标平台 → 若对外发布，进 `tutorial-maker` 开工，第一产出为课程大纲方案（分几课、覆盖范围、每课练习设计原则）。\n\n---\n\n要我继续第 ⑤ 步——先确认归属和目标平台，还是直接进 `tutorial-maker` 出大纲？"
+    },
+    {
+      "case_id": "self-tutorial",
+      "title": "教程裁决-给自己学会",
+      "status": "PASS",
+      "duration_ms": 31051,
+      "turns": 2,
+      "input_tokens": 35562,
+      "output_tokens": 1966,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 2,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[learning-guide]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[learning-guide])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想给自己做一套学习 Java 的教程，边做边学\n",
+      "response": "开工路由判断如下（仅路由，不执行）。\n\n## 路由契约\n\n**触发门禁**\n- article-writing-guide 相关？**YES（次级）** —— 请求含「教程/沉淀成文章」的写作产出成分，但主诉求是「给自己学会 + 边做边学」，属学习域\n- 主域 skill：`learning-guide`（本会话 available，可委派）\n\n---\n\n### ① 分类\n- **主域：学习域（learning-guide）**，非写作域主任务\n- **教程裁决**：「给自己学会/作为学习产物」→ 明确命中 `learning-guide`；「面向读者发布的教程文章」才是 `tutorial-maker`\n- 写作成分：仅当学习后要**沉淀成可读文章**时，才作为下游承接走写作域「边学边写」\n\n### ② 主路径\n- `learning-guide`（先学：产出学习路径 + 关键心智模型）→ **学习完成后**，若要把成果写成文章/教程：article-writing-guide §3 边学边写 pipeline（`agent-reach` 收集权威材料 → 轻量学习路径 → 对话增量初稿 → 用户确认 → `edit-article` 落盘）\n- **不走** `tutorial-maker`（那是对外发布系列课的路径）；**不走** `article-writer` 直接起草（尚无学习记录可作现稿）\n\n### ③ 组合\n- 主：`learning-guide`（学习路径规划）\n- 可选下游（按产出形态叠加）：边学边写写作流 → `tech-article-review`（事实核查，产出文章时）→ `chinese-markdown-normalizer`（排版）→ `publish-final-check`（仅对外发布时）\n- **不组合**：`tutorial-maker`（除非你改口说「要对外发布」）、JavaGuide 模式（见闸门）\n\n### ④ 闸门\n| 闸门 | 状态 |\n|------|------|\n| 教程裁决门 | 已过：明确「给自己」→ learning-guide |\n| **JavaGuide 模式门** | 你说了「Java 教程」但**未含「JavaGuide」关键词**，不触发 JavaGuide 模式——提醒防误判 |\n| 写入闸门 | 边学边写落盘前，先在对话给增量初稿，你确认后才写文件 |\n| 交付物形态分叉 | 需你定：纯学习路径（自用） vs 学习 + 沉淀成对外教程（后者才接写作域全链） |\n| 学习角色门（CLAUDE.md） | 学习时刻先问学习角色：peer 对练 / teacher 苏格拉底 / research 查证，带推荐 |\n\n### ⑤ 下一步\n只做一件事：**确认交付物形态 + 学习者背景**——① 你是零基础还是已有编程经验？② Java 学习目标（找工作/看懂项目/写业务）？③ 学完是否要沉淀成对外教程？\n你答完这三点，我据此开 `learning-guide` 的开工问询，不再继续往下。\n\n---"
+    },
+    {
+      "case_id": "de-ai",
+      "title": "去 AI 味-human-writing",
+      "status": "PASS",
+      "duration_ms": 22546,
+      "turns": 1,
+      "input_tokens": 35424,
+      "output_tokens": 1192,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[human-writing]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[human-writing])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这篇文章 AI 味太重了，帮我改得像人写的\n",
+      "response": "**分类**：⑤ 去 AI 味 / 润色（改写·文风层），非结构重构，非排版。\n\n**主路径**：`human-writing`（改写模式）——2026-08-08 拍板完全替代 `ai-text-polisher`，改写四选中的文风向唯一入口。\n\n**组合**：\n- 纯文风问题 → 单点 `human-writing`，无其他 skill 叠加。\n- AI 味根因治理分支：若 AI 味源于\"一次性生成没搭骨架\"（结构臃肿、逐段无重心）而非纯措辞问题 → 先走 `article-writer` §7.10 搭骨架五步法（冻结细骨架再逐节扩），再回 `human-writing` 处理表层文风。**这条需在执行时判根因，路由阶段不预判。**\n- 可选串行（视需求）：`edit-article`(结构) → `human-writing`(文风) → `chinese-markdown-normalizer`(排版)。\n- 若最终发布 → 末环 `publish-final-check`；本次请求未提发布，不进 pipeline。\n\n**闸门**：\n- 写入闸门：改稿先在对话预览，用户确认后才落盘文件。\n- 决策点先问：文体 / 读者 / 目的三要素不全则先问清（无明确标杆时）。\n- 依据表 + basis map：改写产出正文时随预览交付，basis 以现稿原文为主；新增句子禁止无依据。\n- 特征来源门：先读 2-3 篇同作者/目标风格的低 AI 率样本提炼正面特征，**对照改而非凭空套规则**（`human-writing` 强制）。\n\n**下一步**：开工问询（只做路由，不执行）——只需用户先给两项输入：① 文章文本或路径；② 有没有目标风格标杆/样本。拿到后即可进入 `human-writing` 改写模式，先出「AI 味诊断 + 改稿预览」，确认后再动文件。\n\n路由结论：单点改写，命中 `human-writing`，无跨阶段 CHECKPOINT；是否叠加骨架重建取决于执行时的根因判断。"
+    },
+    {
+      "case_id": "frontend-transfer",
+      "title": "兄弟域转介-前端视觉",
+      "status": "PASS",
+      "duration_ms": 29614,
+      "turns": 1,
+      "input_tokens": 35548,
+      "output_tokens": 2245,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[ai-coding-guide]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[ai-coding-guide])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我写一个登录页的文案，页面设计也一起做\n",
+      "response": "收到，只做路由判断。先跑 skill §0 触发门禁，再输出五项契约。\n\n## 触发门禁\n\n```\narticle-writing-guide 相关？ NO —— 请求含「登录页」且明确要「页面设计」视觉产出，\n   命中 §0 兄弟域转介：「含『页面/界面/UI/落地页/登录页』且要视觉产出 → ai-coding-guide 前端视觉子路径（即使同时提写代码）」\n目标 skill 在当前会话？ YES —— ai-coding-guide 在可用列表\n```\n\n---\n\n## 五项路由契约\n\n**1. 分类**\n跨出文章写作域 → **前端/UI 域**。「登录页文案」是 UI 文案（主标题/副标题、CTA、表单 label、校验错误、辅助链接），不是文章正文；「页面设计」明确要视觉产出。写作域不接管，`article-writer` 系不适用。\n\n**2. 主路径**\n`ai-coding-guide` 前端视觉子路径（默认协作流），首跳即此。文案与设计作为同一交付物承载，不拆线。\n\n**3. 组合**\n单主路径承载「文案 + 设计」，文案是 UI 交付物的组成部分，**不独立成文、不叠加 article-writer**。若用户只要视觉概念而非代码，可视需要组合 `taste-skill:imagegen-frontend-web` / `frontend-design:frontend-design` 作子环节，但首跳仍按 §0 落在 ai-coding-guide。\n\n**4. 闸门**\n- **开工问询**：登录页文案+设计默认「我动手」，但需先补背景——产品/网站是什么、目标用户、品牌调性——否则下游无法定位文案语气与视觉风格（对应写作域 §4.5 决策点先问）。\n- **输出形态确认**：静态设计稿/视觉概念 vs 可运行页面代码 → 涉技术选型，属 §1.2 询问确认。\n- **人工确认线**：若实现为代码且涉及 ≥3 文件/跨目录，先说明「改哪些文件 + 目标」再动手。\n\n**5. 下一步**\n先答 3 问：① 什么产品/网站（登录什么系统）② 目标用户与品牌调性 ③ 输出形态：设计稿 or 可运行代码。确认后委派 `ai-coding-guide` 前端视觉子路径开工。任务本身不执行。\n\n---\n\n路由已定，等你补背景（①②③）即可开工。"
+    },
+    {
+      "case_id": "out-of-domain",
+      "title": "三域外-直接执行独立工具",
+      "status": "PASS",
+      "duration_ms": 25924,
+      "turns": 1,
+      "input_tokens": 35568,
+      "output_tokens": 1690,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{not:[article-writer]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (not:[article-writer])"
+          },
+          {
+            "text": "output_contains{not:[tutorial-maker]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (not:[tutorial-maker])"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我把这个视频文件转成 MP3\n",
+      "response": "触发门禁：**article-writing-guide 相关？ NO** —— 视频转 MP3 是媒体转码/工具执行任务，无任何写作产出（文章/教程/文案），§1 路由表 ①-⑪ 阶段均不命中。**目标 skill：不适用**（未命中任何写作 skill；本会话 skills 列表中亦无媒体转码专用 skill）。\n\n---\n\n**开工路由契约**\n\n**① 分类**\n工具执行型任务（媒体转码），非写作任务。article-writing-guide 管辖域之外，走跨域兜底第一问定主域 → 归「执行型任务」。\n\n**② 主路径**\n不进入写作 pipeline。直接工具执行路径：定位视频文件 → 检查转码工具（ffmpeg 可用性）→ 转码为 MP3 → 验证输出文件。本会话无媒体转码 skill，用命令行（PowerShell + ffmpeg）。\n\n**③ 组合**\n无写作 skill 组合。仅一项可选后置：若转码目的是\"提取音频再做内容处理\"（转文字/摘要/笔记），转码完成后可进内容域（如 `bili-note`、`douyin-video-summary` 之类）——但这是后置需求，需你确认目标后另行路由。\n\n**④ 闸门**\n- 写作纪律（依据表/basis map）：不适用（无正文产出）。\n- 人工确认线：单文件转换属低风险可自主，但输入路径、输出目录、是否覆盖同名文件需先确认；不删除原视频文件（除非你明确要求）。\n- 工具前置条件：需确认 ffmpeg 本机可用（或改走其他可用方案），这是当前最大不确定项。\n\n**⑤ 下一步**\n请提供视频文件路径（或告诉我文件所在目录），并确认输出位置；我随即检查 ffmpeg 是否可用并执行转码。此任务 1-2 步单文件，无需 TaskCreate。\n\n---\n\n按你的要求只做了路由判断，未执行任务。给出文件路径即可继续。"
+    }
+  ],
+  "total_tokens": 297818
+}

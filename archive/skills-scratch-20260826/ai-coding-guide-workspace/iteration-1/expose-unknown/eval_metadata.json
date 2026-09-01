@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "判级-暴露未知路由",
+  "prompt": "接了个需求但我完全没思路，连该问什么都列不出来，开工前先把盲点摊出来",
+  "assertions": [
+    "output_contains.all: missing [expose-unknowns]"
+  ]
+}

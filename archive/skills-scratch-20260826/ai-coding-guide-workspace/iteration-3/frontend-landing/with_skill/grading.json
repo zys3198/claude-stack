@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[hallmark]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[hallmark])"
+    },
+    {
+      "text": "output_contains{not:[design-an-interface]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 0,
+    "total": 2,
+    "pass_rate": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[循环任务 /loop]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[循环任务 /loop])"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1,
+    "pass_rate": 1
+  }
+}

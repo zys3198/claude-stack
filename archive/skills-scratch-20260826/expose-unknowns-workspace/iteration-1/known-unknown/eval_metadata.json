@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "判级-已知的未知主动抛问",
+  "prompt": "用 expose-unknowns 的方法处理这个请求：先判级，再按级出牌。请求：订单模块要选缓存方案，Redis 还是 Caffeine，我纠结\n",
+  "assertions": [
+    "output_contains{all:[已知的未知]}"
+  ]
+}

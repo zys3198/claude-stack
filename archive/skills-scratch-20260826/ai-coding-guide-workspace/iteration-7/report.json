@@ -1,0 +1,553 @@
+{
+  "skill_name": "ai-coding-guide",
+  "schema_version": "v1alpha1",
+  "engine_name": "claude_code",
+  "model_name": "anthropic/claude-sonnet-4-6",
+  "start_time": "2026-08-18T22:21:28.391277+08:00",
+  "end_time": "2026-08-18T22:25:28.6089113+08:00",
+  "case_results": [
+    {
+      "case_id": "expose-unknown",
+      "title": "判级-暴露未知路由",
+      "status": "PASS",
+      "duration_ms": 71203,
+      "turns": 1,
+      "input_tokens": 36412,
+      "output_tokens": 1539,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[expose-unknowns]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[expose-unknowns])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：接了个需求但我完全没思路，连该问什么都列不出来，开工前先把盲点摊出来\n",
+      "response": "域归属： 编码 —— 需求模糊、未给出实现指令，属于开工前判级与暴露未知。  \nai-coding-guide 在当前会话？ YES  \n\n**五项路由契约：**\n\n- **分类**：判级 / 暴露未知（`references/routing.md:180`）\n- **主路径**：`expose-unknowns`\n- **组合**：必要时条件叠加 `superpowers:brainstorming`（当前会话可用）；判级完成后若进入代码交付，切回本路由对应分类的交付路径\n- **闸门**：必须先输出需求盲区/缺口清单并经你确认，方可进入设计或实现；本轮不直接写代码\n- **下一步**：启动 `expose-unknowns`，由 AI 采访你并列出盲点清单；清单确认后返回本路由，再按真实分类与规模进入具体交付流程\n\n（只做路由判断，未执行任何 skill。）"
+    },
+    {
+      "case_id": "frontend-landing",
+      "title": "前端视觉-落地页留本路由",
+      "status": "PASS",
+      "duration_ms": 71987,
+      "turns": 1,
+      "input_tokens": 37433,
+      "output_tokens": 1000,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[hallmark]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[hallmark])"
+          },
+          {
+            "text": "output_contains{not:[design-an-interface]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我做个落地页，现代一点好看一点，做完顺便把代码写了\n",
+      "response": "域归属：编码（前端视觉交付）/ ai-coding-guide 已加载\n\n| 项 | 路由契约 |\n|---|---|\n| 分类 | 前端视觉 — 方向未定的新落地页 |\n| 主路径 | `hallmark`（新页面视觉方向 + 反 AI 大路货） |\n| 组合 | 方向确认后 → 按项目栈直接实现 → `browser-testing-with-devtools` 视觉/可访问性验证 |\n| 闸门 | 实现后必须浏览器截图/可访问性取证；涉及 ≥3 文件或跨目录改前先确认范围 |\n| 下一步 | 先给一个关键问题：你倾向哪种「现代好看」方向？\u003cbr\u003eA. 极简留白 + 大字体 + 微动效\u003cbr\u003eB. 深色玻璃态 + 渐变光效\u003cbr\u003eC. 活泼几何 + 高饱和插画感\u003cbr\u003e（或已有参考图/品牌约束请直接贴） |"
+    },
+    {
+      "case_id": "frontend-nodesign",
+      "title": "前端视觉-方向未定先问",
+      "status": "PASS",
+      "duration_ms": 35589,
+      "turns": 1,
+      "input_tokens": 37361,
+      "output_tokens": 571,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[方向]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[方向])"
+          },
+          {
+            "text": "output_contains{not:[design-an-interface]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (not:[design-an-interface])"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我做个登录页，没设计稿，想要视觉方向\n",
+      "response": "域归属： 编码（含前端视觉）/ 登录页且要视觉产出  \nai-coding-guide 在当前会话？ YES\n\n| 项 | 路由契约 |\n|---|---|\n| 分类 | 前端视觉 / 方向未定（新页面、无设计稿、要视觉方向） |\n| 主路径 | `hallmark`（新页面反 AI 大路货视觉方向） |\n| 组合 | `browser-testing-with-devtools`（视觉/可访问性验证）+ `playwright`（登录表单流程自动化） |\n| 闸门 | 方向确认门禁：必须先给 2-3 个视觉方向选项并取得用户明确选择，才能进入实现阶段 |\n| 下一步 | 问 1 个关键问题：提供 2-3 个登录页视觉方向选项（含明暗、风格关键词、情绪板参考），等用户选定 |"
+    },
+    {
+      "case_id": "maintenance-audit",
+      "title": "指南维护-审计 router guide",
+      "status": "PASS",
+      "duration_ms": 204483,
+      "turns": 1,
+      "input_tokens": 36626,
+      "output_tokens": 3992,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[guide-skill-auditor]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[guide-skill-auditor])"
+          }
+        ],
+        "summary": {
+          "passed": 1,
+          "failed": 0,
+          "total": 1,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我审查一下 learning-guide 这个路由 skill 有没有问题，顺便优化\n",
+      "response": "按 `ai-coding-guide` 分诊结果如下：\n\n- **分类**：路由指南维护（审查/优化 guide skill）\n- **主路径**：`guide-skill-auditor`\n- **组合**：视优化范围叠加 `skill-trimmer`（文案/结构精简）或 `darwin-skill`（触发词/分类/行为变更 + 补 eval 用例）\n- **闸门**：若修改触发词/分类/路由行为，必须补充并跑通 eval 用例；审查结论须引用 skill 原文作为证据\n- **下一步**：先确认 1 个关键问题——“优化是否允许改动触发词/分类等路由行为，还是只做文案/结构精简？” 确认后启动 `guide-skill-auditor`"
+    },
+    {
+      "case_id": "peer-learning",
+      "title": "学习陪跑-你练模式",
+      "status": "ERROR",
+      "duration_ms": 19453,
+      "turns": 0,
+      "input_tokens": 28411,
+      "output_tokens": 152,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想练 debug 判断力，我先说假设，你来纠偏，别直接修\n"
+    },
+    {
+      "case_id": "refactor-simplify",
+      "title": "重构-不推荐已移除工具",
+      "status": "PASS",
+      "duration_ms": 41520,
+      "turns": 1,
+      "input_tokens": 36284,
+      "output_tokens": 773,
+      "grading": {
+        "status": "PASS",
+        "turns_executed": 1,
+        "turns_total": 1,
+        "assertion_results": [
+          {
+            "text": "output_contains{all:[重构]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (all:[重构])"
+          },
+          {
+            "text": "output_contains{not:[simplify]}",
+            "passed": true,
+            "evidence": "output satisfies all contains checks (not:[simplify])"
+          }
+        ],
+        "summary": {
+          "passed": 2,
+          "failed": 0,
+          "total": 2,
+          "pass_rate": 1
+        }
+      },
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这段代码太绕了，帮我简化下，别改行为\n",
+      "response": "按 `ai-coding-guide` 分诊结果如下：\n\n**域归属：** 编码域 —— “简化代码、保持行为不变”属于代码重构。  \n**ai-coding-guide 已加载：** YES。\n\n---\n\n### 路由契约\n\n| 项 | 判断 |\n|---|---|\n| **分类** | 重构/简化 |\n| **主路径** | 手动小步重构（行为不变，逐处简化，每步跑现有测试） |\n| **组合** | `lean-ctx` 理解代码结构（若行为未完全理解时先走）+ 测试/验证 |\n| **闸门** | 行为不变审查 + 相关 test/lint/build 必须通过 |\n| **下一步** | 用户提供具体代码块或文件路径后，再决定是否直接小步改；若跨模块/高风险则升档到 `code-change-workflow` |\n\n---\n\n**当前缺口：** 你还没贴要简化的代码或文件路径。请提供后我就能给出具体简化方案或直接动手。"
+    },
+    {
+      "case_id": "transfer-article",
+      "title": "域边界转介-文章审校",
+      "status": "ERROR",
+      "duration_ms": 4492,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我审下这篇技术文章有没有错\n"
+    },
+    {
+      "case_id": "transfer-learning",
+      "title": "域边界转介-学习调研",
+      "status": "ERROR",
+      "duration_ms": 5086,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想吃透 transformer 架构，两周后要给别人讲明白\n"
+    },
+    {
+      "case_id": "rt-compare-task-signal",
+      "title": "带任务信号的对比型问题走开发新功能",
+      "status": "ERROR",
+      "duration_ms": 5736,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：想写个登录功能，用 SP 还是 ponytail？\n"
+    },
+    {
+      "case_id": "rt-eco-pure-compare",
+      "title": "纯抽象对比走了解指南",
+      "status": "ERROR",
+      "duration_ms": 6274,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：superpowers 和 mattpocock-skills 有什么区别？\n"
+    },
+    {
+      "case_id": "rt-prd-ready",
+      "title": "已有需求文档走有需求文档分类",
+      "status": "ERROR",
+      "duration_ms": 6870,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：PRD 已经写好了，下一步怎么落地？\n"
+    },
+    {
+      "case_id": "rt-review-auth-highrisk",
+      "title": "高风险代码审查双审",
+      "status": "ERROR",
+      "duration_ms": 6119,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我 review 这个 auth 中间件，里面有 token 校验和权限判断。\n"
+    },
+    {
+      "case_id": "rt-debug-intermittent",
+      "title": "系统化调试先复现定位",
+      "status": "ERROR",
+      "duration_ms": 5812,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这个 bug 复现不稳定，先别改代码，帮我定位。\n"
+    },
+    {
+      "case_id": "rt-quick-text-change",
+      "title": "小范围最简改动不弹菜单",
+      "status": "ERROR",
+      "duration_ms": 5797,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：把这个按钮文案从『提交』改成『保存』，别走复杂流程。\n"
+    },
+    {
+      "case_id": "rt-maint-new-skill",
+      "title": "新装 skill 触发维护场景",
+      "status": "ERROR",
+      "duration_ms": 7015,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：刚装了个新 skill，这个 ai-coding-guide 也要改吗？\n"
+    },
+    {
+      "case_id": "rt-loop-interval",
+      "title": "循环任务走 /loop",
+      "status": "ERROR",
+      "duration_ms": 7551,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：每 5 分钟帮我检查一次这个任务状态。\n"
+    },
+    {
+      "case_id": "rt-understand-combo",
+      "title": "理解代码组合路径不二选一",
+      "status": "ERROR",
+      "duration_ms": 8789,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这项目 auth 模块怎么工作的？谁调用了 login？\n"
+    },
+    {
+      "case_id": "rt-commit-pr",
+      "title": "提交收尾展示 diff 待确认",
+      "status": "ERROR",
+      "duration_ms": 9732,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：改完了，帮我提交发个 PR。\n"
+    },
+    {
+      "case_id": "rt-verify-then-commit",
+      "title": "横切验证后再进提交",
+      "status": "ERROR",
+      "duration_ms": 12522,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：bug 修完了，帮我确认下真好了再提交。\n"
+    },
+    {
+      "case_id": "rt-build-react",
+      "title": "构建错误按原文排查",
+      "status": "ERROR",
+      "duration_ms": 11138,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：React 项目 build 报错了，帮我看看。\n"
+    },
+    {
+      "case_id": "rt-transfer-gate",
+      "title": "外部实践迁移先过闸门",
+      "status": "ERROR",
+      "duration_ms": 9201,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我看了篇用 project_wiki / TECH_SPEC / 红线机制跑 AI 需求开发的文章，看看能不能优化进我的 ai-coding-guide。\n"
+    },
+    {
+      "case_id": "rt-named-direct-build",
+      "title": "用户说直接处理就不弹菜单",
+      "status": "ERROR",
+      "duration_ms": 9102,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：React 项目 build 报错，直接处理，不要让我选 skill。\n"
+    },
+    {
+      "case_id": "rt-review-no-run",
+      "title": "审查不误触发 verify",
+      "status": "ERROR",
+      "duration_ms": 6730,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：请 review 当前 diff 的 auth 变更，不要运行程序。\n"
+    },
+    {
+      "case_id": "rt-maint-minimal",
+      "title": "轻量迁移最小改动",
+      "status": "ERROR",
+      "duration_ms": 6698,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：只把这篇文章里的一个触发词补进 ai-coding-guide，保持最小改动。\n"
+    },
+    {
+      "case_id": "rt-build-untracked",
+      "title": "禁止破坏性清理",
+      "status": "ERROR",
+      "duration_ms": 4989,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：构建仍然失败，但工作区有未跟踪文件，请继续排查。\n"
+    },
+    {
+      "case_id": "rt-quick-direct",
+      "title": "直接执行跳过询问",
+      "status": "ERROR",
+      "duration_ms": 4935,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：直接把这个按钮文案改掉，别让我选 skill，也别走复杂流程。\n"
+    },
+    {
+      "case_id": "rt-identity",
+      "title": "定位校准开工路由为主",
+      "status": "ERROR",
+      "duration_ms": 5447,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想让 ai-coding-guide 同时承担开工路由、生态地图、质量闸门、学习陪跑，怎么定位才不乱？\n"
+    },
+    {
+      "case_id": "rt-output-contract",
+      "title": "路由输出契约六项",
+      "status": "ERROR",
+      "duration_ms": 5449,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断，只做路由判断，不要执行任务本身。\n请求：改个按钮文案，把「提交」改成「保存」。帮我判断该用什么 skill，直接给结论别长篇解释。\n"
+    },
+    {
+      "case_id": "rt-risk-gate",
+      "title": "风险闸门矩阵高风险判定",
+      "status": "ERROR",
+      "duration_ms": 5155,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我要改 auth 权限判断，还涉及数据库迁移，能不能直接让 agent 改？\n"
+    },
+    {
+      "case_id": "rt-build-info-gap",
+      "title": "最小信息清单只问缺口",
+      "status": "ERROR",
+      "duration_ms": 5017,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：build 报错了。你还需要我给什么？\n"
+    },
+    {
+      "case_id": "rt-named-plugin-priority",
+      "title": "点名插件可用则直走",
+      "status": "ERROR",
+      "duration_ms": 5032,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我用 superpowers:brainstorming 澄清下这个需求。\n"
+    },
+    {
+      "case_id": "rt-standalone-tool",
+      "title": "三域外独立工具直接执行",
+      "status": "ERROR",
+      "duration_ms": 5034,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我把这个视频文件转成 MP3。\n"
+    },
+    {
+      "case_id": "rt-tutorial-self",
+      "title": "教程归属裁决给自己学会",
+      "status": "ERROR",
+      "duration_ms": 5128,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想给自己做一套学习 React 的教程，边做边学。\n"
+    },
+    {
+      "case_id": "rt-heavy-multisession",
+      "title": "重任务跨会话进交付状态机",
+      "status": "ERROR",
+      "duration_ms": 5024,
+      "turns": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "agent execution failed: claude-code run failed (exit 1): ",
+      "grading": null,
+      "configuration": "with_skill",
+      "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这个改造任务比较大，估计要跨几个会话，怎么管？\n"
+    }
+  ],
+  "total_tokens": 220554
+}

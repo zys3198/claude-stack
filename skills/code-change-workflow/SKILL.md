@@ -1,8 +1,10 @@
 ---
 name: code-change-workflow
-description: 代码改动全流程细则——改前/改中/改后清单、AI 代码审查方法论、SDD 规范驱动流水线、调试工作流、Agent 调度与 Verify 分级、止血回退。当 ai-coding-guide 分类为「执行代码改动」、或用户直接要求改代码/修 bug/重构/审查 AI 代码/回退改动时加载。不用于：纯问答、文章写作、学习调研。
+description: >-
+  代码改动全流程细则——改前/改中/改后清单、AI 代码审查方法论、SDD 规范驱动流水线、调试工作流、Agent 调度与 Verify 分级、止血回退。当
+  ai-coding-guide 分类为「执行代码改动」、或用户直接要求改代码/修 bug/重构/审查 AI
+  代码/回退改动时加载。不用于：纯问答、文章写作、学习调研。
 ---
-
 # 代码改动全流程细则
 
 CLAUDE.md §1 只留路由与高代价确认线，本文件是完整流程。来源：CLAUDE.md 2026-07-29 瘦身迁出（§1.1-1.4 / §2 / §3 / §4 原文）。
@@ -19,7 +21,7 @@ CLAUDE.md §1 只留路由与高代价确认线，本文件是完整流程。来
 - **反查真需求**：用户给的多是方案不是问题。信号=「实现 X」「加个 Y 字段」「做成 Z」而无痛点描述。动手前先问「为什么这么做？要解决什么场景？谁触发？」。常挖出更简解：能删/能复用/能不写。机械改动/明确 bug/已指名标杆文件不触发——别事事反问。
 - **动手前先判级**：任务按「信息在不在手里 × 有没意识到」判四级——已知的已知（直接干）/ 已知的未知（主动抛问，结尾要「给出推理思路」）/ 未知的已知（团队约定、历史包袱——先让 AI 采访挖出来，事故主源）/ 未知的未知（先采访扫盲再进方案设计）。判了级按级出牌；判未知的未知却直接让 AI 出方案 = 没判。完整流程与反考见 `expose-unknowns` skill。
 - **数据结构先于逻辑**：改功能/加字段先定数据结构、Schema、类型，再写逻辑。数据结构烂=代码全乱返工。AI 常先堆 if/else 后才凑结构，顺序反。
-- **安装位置先问**：装任何东西（pip/npm 包、skill、plugin、agent、CLI 工具、hook）前，强制先问「装全局还是项目本地？装哪个目录？」，确认再装。默认不装全局（污染共享 namespace、影响所有项目），除非用户明说"装全局"。全局 = `~/.claude/`（plugins/agents/skills）、`pip --user`、`npm -g`、系统级；项目本地 = venv/node_modules/项目 `.claude/`。用户说"装一下 X"≠ 装全局——先问位置。
+- **安装位置先问**：装任何东西（pip/npm 包、skill、plugin、agent、CLI 工具、hook）前，强制先问「装全局还是项目本地？装哪个目录？」，确认再装。默认不装全局（污染共享 namespace、影响所有项目），除非用户明说“装全局”。全局 = 当前 AI 栈配置目录（自定义 skill 进对应 skills 目录，扩展按当前栈约定放置：Claude Code = `~/.claude/`、pi = `~/.pi/agent/`）；项目本地 = venv/node_modules/项目 `.claude/`。用户说“装一下 X”≠ 装全局——先问位置。
 
 ## 1.2 改中
 
@@ -98,7 +100,7 @@ Agent 报「改完/修好」后逐项勾，再合入。三查/审查三维见 §
   - 高（auth/DB schema/架构/安全敏感）→ 三 agent adversarial（找问题/求证/反驳），2/3 通过。
 - 全部完成后集成测试。
 - **Agent 使用**：subagent 跑自己模型+工具、更耗 token、继承当前 sandbox——审批请求看清是哪个 agent 发起。小改动（改 DTO 字段）别开多 agent，沟通成本 > 修改本身。只读探索用 `Explore`，通用多步用 `general-purpose`。
-- **护栏靠 hooks 不靠自觉**：危险命令拦截（rm -rf / DROP TABLE / 密钥外泄）已由 ~/.claude/hooks 的 PreToolUse hooks 负责（见 ~/.claude/hooks/HOOKS_BACKUP.md），不靠"按场景授权"的人肉自觉。长链编排（>3 agent）用 `02-design/execution-plan.md` 协调并设步数上限，超限即停，防 agent 无限烧。
+- **护栏靠 hooks 不靠自觉**：危险命令拦截（rm -rf / DROP TABLE / 密钥外泄）已由当前栈 hooks 目录的 PreToolUse hooks 负责（Claude Code = `~/.claude/hooks`、pi = `~/.pi/hooks`，以 `settings.json` 挂载为准），不靠“按场景授权”的人肉自觉。长链编排（>3 agent）用 `02-design/execution-plan.md` 协调并设步数上限，超限即停，防 agent 无限烧。
 
 ## 4. 止血与回退
 

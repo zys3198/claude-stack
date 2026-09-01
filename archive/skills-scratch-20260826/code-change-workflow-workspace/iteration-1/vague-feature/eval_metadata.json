@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "改前-反查真需求",
+  "prompt": "用 code-change-workflow 处理：帮我实现一个站内消息推送功能\n",
+  "assertions": [
+    "output_contains.all: missing [为什么]"
+  ]
+}

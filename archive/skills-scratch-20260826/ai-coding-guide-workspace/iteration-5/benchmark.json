@@ -1,0 +1,240 @@
+{
+  "metadata": {
+    "skill_name": "ai-coding-guide",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\ai-coding-guide",
+    "timestamp": "2026-08-18T14:10:26Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "带任务信号的对比型问题走开发新功能",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 81.49,
+        "tokens": 38646,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[开发新功能]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[开发新功能])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "新装 skill 触发维护场景",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 1,
+        "total": 1,
+        "time_seconds": 106.656,
+        "tokens": 38459,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains.all: missing [触发]",
+          "passed": false,
+          "evidence": "output does not contain required keywords: [触发]"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "提交收尾展示 diff 待确认",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 47.289,
+        "tokens": 37316,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[提交 diff --cached --stat]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[提交 diff --cached --stat])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "外部实践迁移先过闸门",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 65.265,
+        "tokens": 37843,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[路由指南维护]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[路由指南维护])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "审查不误触发 verify",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 69.95,
+        "tokens": 37310,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[审查代码 security-review]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[审查代码 security-review])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "轻量迁移最小改动",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 56.328,
+        "tokens": 37412,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[最小 eval]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[最小 eval])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "路由输出契约六项",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 0,
+        "passed": 0,
+        "failed": 1,
+        "total": 1,
+        "time_seconds": 25.745,
+        "tokens": 28810,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains.all: missing [分类 主路径 闸门 下一步]",
+          "passed": false,
+          "evidence": "output does not contain required keywords: [分类 主路径 闸门 下一步]"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "最小信息清单只问缺口",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 35.519,
+        "tokens": 36797,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[完整错误 改动]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[完整错误 改动])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "重任务跨会话进交付状态机",
+      "configuration": "with_skill",
+      "run_number": 5,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 1,
+        "failed": 1,
+        "total": 2,
+        "time_seconds": 65.439,
+        "tokens": 37330,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains.all: missing [small/medium/large]",
+          "passed": false,
+          "evidence": "output does not contain required keywords: [small/medium/large]"
+        },
+        {
+          "text": "output_contains{not:[devflow]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (not:[devflow])"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.7222222222222222,
+        "stddev": 0.41573970964154905,
+        "min": 0,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 61.520111111111106,
+        "stddev": 22.905333519822868,
+        "min": 25.745,
+        "max": 106.656
+      },
+      "tokens": {
+        "mean": 36658.11111111111,
+        "stddev": 2830.166129573961,
+        "min": 28810,
+        "max": 38646
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

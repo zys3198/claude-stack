@@ -1,0 +1,292 @@
+{
+  "trace_id": "iteration-5",
+  "recorded_at": "2026-08-31T06:36:06Z",
+  "source": "benchmark",
+  "redactions": 0,
+  "payload": {
+    "skill_name": "ai-coding-guide",
+    "schema_version": "v1alpha1",
+    "engine_name": "claude_code",
+    "model_name": "anthropic/claude-sonnet-4-6",
+    "start_time": "2026-08-18T22:06:49.3893948+08:00",
+    "end_time": "2026-08-18T22:10:26.4821403+08:00",
+    "case_results": [
+      {
+        "case_id": "rt-compare-task-signal",
+        "title": "带任务信号的对比型问题走开发新功能",
+        "status": "PASS",
+        "duration_ms": 81490,
+        "turns": 2,
+        "input_tokens": 36501,
+        "output_tokens": 2145,
+        "grading": {
+          "status": "PASS",
+          "turns_executed": 2,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains{all:[开发新功能]}",
+              "passed": true,
+              "evidence": "output satisfies all contains checks (all:[开发新功能])"
+            }
+          ],
+          "summary": {
+            "passed": 1,
+            "failed": 0,
+            "total": 1,
+            "pass_rate": 1
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：想写个登录功能，用 SP 还是 ponytail？\n",
+        "response": "域归属：编码（开发新功能 + 工具选型）/ ai-coding-guide 在当前会话：YES\n\n按 routing.md Step 1，命中「开发新功能」信号；附带「用 SP 还是 ponytail」属于工具选型，按规则先给 A/B/C 而非泛泛介绍。\n\n---\n\n**分类：** 开发新功能（登录 / auth / 高风险域）  \n**主路径：** `superpowers:writing-plans` → 先出登录实现计划（范围、栈、安全边界、接口/状态/错误处理）  \n**组合：** `ponytail:ponytail`（计划确认后做最小实现）+ `security-review`（auth 必须专项审查）+ `verification-before-completion`（条件路径，会话可见）  \n**闸门：** 设计确认 → 失败测试/TDD → 安全审查 → verify（登录属于 auth，按 Step 0.6 走高风险闸门）  \n**下一步：** 先确认两个问题再推进——①「SP」是否指 `superpowers`？② 登录范围是「前端登录页」「后端认证 API」还是「完整前后端认证流」？确认后可直接进 `superpowers:writing-plans`。"
+      },
+      {
+        "case_id": "rt-maint-new-skill",
+        "title": "新装 skill 触发维护场景",
+        "status": "FAIL",
+        "duration_ms": 106656,
+        "turns": 1,
+        "input_tokens": 36472,
+        "output_tokens": 1987,
+        "grading": {
+          "status": "FAIL",
+          "turns_executed": 1,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains.all: missing [触发]",
+              "passed": false,
+              "evidence": "output does not contain required keywords: [触发]"
+            }
+          ],
+          "summary": {
+            "passed": 0,
+            "failed": 1,
+            "total": 1,
+            "pass_rate": 0
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：刚装了个新 skill，这个 ai-coding-guide 也要改吗？\n",
+        "response": "域归属： 编码 / 路由指南维护 —— 评估 ai-coding-guide 是否需因新 skill 安装而调整。  \nai-coding-guide 在当前会话？ YES\n\n| 项 | 路由契约 |\n|---|---|\n| 分类 | 路由指南维护（评估型：只给结论，不改文件） |\n| 主路径 | `guide-skill-auditor` |\n| 组合 | 无 |\n| 闸门 | 无 |\n| 下一步 | 问 1 个关键问题：新 skill 叫什么、覆盖哪类任务/用户请求？确认后再判断是否需要回写 `routing.md` 或 `rules/manifest.json`。 |"
+      },
+      {
+        "case_id": "rt-commit-pr",
+        "title": "提交收尾展示 diff 待确认",
+        "status": "PASS",
+        "duration_ms": 47289,
+        "turns": 1,
+        "input_tokens": 36301,
+        "output_tokens": 1015,
+        "grading": {
+          "status": "PASS",
+          "turns_executed": 1,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains{all:[提交 diff --cached --stat]}",
+              "passed": true,
+              "evidence": "output satisfies all contains checks (all:[提交 diff --cached --stat])"
+            }
+          ],
+          "summary": {
+            "passed": 1,
+            "failed": 0,
+            "total": 1,
+            "pass_rate": 1
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：改完了，帮我提交发个 PR。\n",
+        "response": "域归属：编码（提交/收尾）  \nai-coding-guide 在当前会话：YES\n\n| 项 | 路由契约 |\n|---|---|\n| **分类** | 提交/收尾 |\n| **主路径** | 手动 git 提交流程：`git status --short` → `git diff --cached --stat` → 用户确认 → `commit` → `push` → 创建 PR |\n| **组合** | 无（条件路径 `ocr review` 不在当前会话可用清单中） |\n| **闸门** | 提交确认：涉及 commit / push / PR 等不可逆外发操作，必须先展示改动范围、目标分支与 diff 统计，得到用户明确确认后才执行 |\n| **下一步** | 等用户确认提交范围、commit message 与目标分支后再动手；不擅自 commit 或 push |\n\n理由：请求明确为代码改动后的提交与 PR，命中 routing.md Step 1「提交/收尾」分类；按 Step 0.6 风险矩阵属不可逆/外发操作，必须保留人工确认闸门。"
+      },
+      {
+        "case_id": "rt-transfer-gate",
+        "title": "外部实践迁移先过闸门",
+        "status": "PASS",
+        "duration_ms": 65265,
+        "turns": 2,
+        "input_tokens": 36535,
+        "output_tokens": 1308,
+        "grading": {
+          "status": "PASS",
+          "turns_executed": 2,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains{all:[路由指南维护]}",
+              "passed": true,
+              "evidence": "output satisfies all contains checks (all:[路由指南维护])"
+            }
+          ],
+          "summary": {
+            "passed": 1,
+            "failed": 0,
+            "total": 1,
+            "pass_rate": 1
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我看了篇用 project_wiki / TECH_SPEC / 红线机制跑 AI 需求开发的文章，看看能不能优化进我的 ai-coding-guide。\n",
+        "response": "域归属：编码域 / ai-coding-guide 自身维护（外部 AI 编码实践吸收）。\n\n**分类**：路由指南维护（外部 AI 编码实践吸收）  \n**主路径**：`guide-skill-auditor`  \n**组合**：`references/ecosystems.md` §轻量迁移闸门 / §重机制黑名单 作为吸收判定标准；若确认要改 skill 行为，再叠加 `darwin-skill`  \n**闸门**：迁移闸门——只吸收路由规则，不承接项目流水线；`project_wiki` / `TECH_SPEC` / 红线机制等属于重机制，不内置  \n**下一步**：问 1 个关键问题——你希望「只评估给结论（不改文件）」，还是「实际改 ai-coding-guide」？若改，请贴文章链接或原文。"
+      },
+      {
+        "case_id": "rt-review-no-run",
+        "title": "审查不误触发 verify",
+        "status": "PASS",
+        "duration_ms": 69950,
+        "turns": 1,
+        "input_tokens": 36333,
+        "output_tokens": 977,
+        "grading": {
+          "status": "PASS",
+          "turns_executed": 1,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains{all:[审查代码 security-review]}",
+              "passed": true,
+              "evidence": "output satisfies all contains checks (all:[审查代码 security-review])"
+            }
+          ],
+          "summary": {
+            "passed": 1,
+            "failed": 0,
+            "total": 1,
+            "pass_rate": 1
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：请 review 当前 diff 的 auth 变更，不要运行程序。\n",
+        "response": "按 `ai-coding-guide` 分诊结果：\n\n**分类：** 审查代码（当前 diff）  \n**主路径：** `code-review`（内置命令，审当前 diff）  \n**组合：** `security-review`（auth 高风险）+ Code Reviewer agent 双审  \n**闸门：** review + security-review；不运行程序（已按用户要求排除 verify/run）  \n**下一步：** 直接执行（auth 变更优先启 `security-review`，再叠 `code-review` / Code Reviewer agent）"
+      },
+      {
+        "case_id": "rt-maint-minimal",
+        "title": "轻量迁移最小改动",
+        "status": "PASS",
+        "duration_ms": 56328,
+        "turns": 1,
+        "input_tokens": 36428,
+        "output_tokens": 984,
+        "grading": {
+          "status": "PASS",
+          "turns_executed": 1,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains{all:[最小 eval]}",
+              "passed": true,
+              "evidence": "output satisfies all contains checks (all:[最小 eval])"
+            }
+          ],
+          "summary": {
+            "passed": 1,
+            "failed": 0,
+            "total": 1,
+            "pass_rate": 1
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：只把这篇文章里的一个触发词补进 ai-coding-guide，保持最小改动。\n",
+        "response": "## 开工路由判断\n\n| 项 | 路由契约 |\n|---|---|\n| **分类** | 路由指南维护（Step 1 信号：「补个触发词进 ai-coding-guide」） |\n| **主路径** | `guide-skill-auditor` |\n| **组合** | 定位触发词来源文章 → 在 `ai-coding-guide` description 或 `references/routing.md` Step 1 信号表补 1 处 → 必要时补 1 个 eval 用例 |\n| **闸门** | 改前展示目标文件与具体插入行；确认触发词来源与插入位置；最小改动 diff 自检 |\n| **下一步** | 先确认「这篇文章」是哪篇（请给路径/链接/原文）以及要补的触发词原文，再执行 |\n\n**为什么不是其他路径：** 这是 guide skill 自身的小修，不是用户项目代码交付，不走交付状态机；命中「改 guide 触发词/描述/路由文本」分类，所以主路径用 `guide-skill-auditor` 而不是 `darwin-skill`（后者用于行为变化/较大改造）。"
+      },
+      {
+        "case_id": "rt-output-contract",
+        "title": "路由输出契约六项",
+        "status": "FAIL",
+        "duration_ms": 25745,
+        "turns": 1,
+        "input_tokens": 28506,
+        "output_tokens": 304,
+        "grading": {
+          "status": "FAIL",
+          "turns_executed": 1,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains.all: missing [分类 主路径 闸门 下一步]",
+              "passed": false,
+              "evidence": "output does not contain required keywords: [分类 主路径 闸门 下一步]"
+            }
+          ],
+          "summary": {
+            "passed": 0,
+            "failed": 1,
+            "total": 1,
+            "pass_rate": 0
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断，只做路由判断，不要执行任务本身。\n请求：改个按钮文案，把「提交」改成「保存」。帮我判断该用什么 skill，直接给结论别长篇解释。\n",
+        "response": "**路由结论：用 `caveman:cavecrew-builder` 直接执行。**\n\n理由：单按钮文案替换，范围明确、1-2 文件、无架构/权限/数据风险，走 small 精简路径，不进完整状态机。"
+      },
+      {
+        "case_id": "rt-build-info-gap",
+        "title": "最小信息清单只问缺口",
+        "status": "PASS",
+        "duration_ms": 35519,
+        "turns": 1,
+        "input_tokens": 36255,
+        "output_tokens": 542,
+        "grading": {
+          "status": "PASS",
+          "turns_executed": 1,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains{all:[完整错误 改动]}",
+              "passed": true,
+              "evidence": "output satisfies all contains checks (all:[完整错误 改动])"
+            }
+          ],
+          "summary": {
+            "passed": 1,
+            "failed": 0,
+            "total": 1,
+            "pass_rate": 1
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：build 报错了。你还需要我给什么？\n",
+        "response": "域归属：编码 / 构建错误 —— 用户明说 \"build 报错了\"。  \nai-coding-guide 在当前会话？YES\n\n- **分类**：构建错误\n- **主路径**：运行项目已有构建命令并按错误原文排查；先跑 `python3 <SKILL_ROOT>/scripts/inspect_context.py .` 拿技术栈/构建脚本证据，免问框架\n- **组合**：无\n- **闸门**：横切收尾 —— 修复后必须重跑同一构建命令，确认错误消失；涉及删除/清理未跟踪文件需单独确认\n- **下一步**：需要你提供以下缺口信息（按优先级）：\n  1. 你执行的构建命令（如 `npm run build`、`cargo build`、`pnpm build` 等）\n  2. 完整错误日志 / 终端输出\n  3. 最近改动（改了哪些文件、是否新增依赖、是否切换分支）\n  4. 期望结果（例如应该构建成功、还是只想消除某条特定报错）\n\n如果错误日志很长，可直接粘贴最后 50 行；我先定位根因，不盲试。"
+      },
+      {
+        "case_id": "rt-heavy-multisession",
+        "title": "重任务跨会话进交付状态机",
+        "status": "FAIL",
+        "duration_ms": 65439,
+        "turns": 1,
+        "input_tokens": 36355,
+        "output_tokens": 975,
+        "grading": {
+          "status": "FAIL",
+          "turns_executed": 1,
+          "turns_total": 1,
+          "assertion_results": [
+            {
+              "text": "output_contains.all: missing [small/medium/large]",
+              "passed": false,
+              "evidence": "output does not contain required keywords: [small/medium/large]"
+            },
+            {
+              "text": "output_contains{not:[devflow]}",
+              "passed": true,
+              "evidence": "output satisfies all contains checks (not:[devflow])"
+            }
+          ],
+          "summary": {
+            "passed": 1,
+            "failed": 1,
+            "total": 2,
+            "pass_rate": 0.5
+          }
+        },
+        "configuration": "with_skill",
+        "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这个改造任务比较大，估计要跨几个会话，怎么管？\n",
+        "response": "按 `ai-coding-guide` 分诊：\n\n- **域归属：** 编码（改造任务涉及代码交付）\n- **`ai-coding-guide` 在当前会话：** YES\n\n**路由契约（只做判断，不执行）：**\n\n| 项 | 内容 |\n|---|---|\n| **分类** | 开发新功能 — 重任务 / 跨会话交付（命中 Step 1「大任务/跨会话/断点续跑」信号） |\n| **主路径** | `ai-coding-guide` 交付状态机：澄清 REQUIREMENT → 设计 DESIGN → 实现 IMPLEMENT → 审查 REVIEW → 测试 TEST → 总结 SUMMARY，脚本写 `workflow-state.json` 断点续跑 |\n| **组合** | `superpowers:writing-plans`（拆阶段计划）+ `code-change-workflow`（改前/改中/改后清单与 Verify 分级） |\n| **闸门** | REQUIREMENT 用户确认门禁不可跳过；DESIGN 方案确认；每阶段产物校验；横切收尾验证（build/test/真实流程）；提交/删除/外部写操作单独确认 |\n| **下一步** | 确认两件事后启动 REQUIREMENT：1）是否现在就开始；2）规模口令选 `medium` 还是 `large`（用户未明说时默认自判 `small`，但「跨会话改造」建议显式定档） |\n\n未启动前，不读取项目文件，不跑 `inspect_context.py`。"
+      }
+    ],
+    "total_tokens": 329923
+  }
+}

@@ -11,7 +11,7 @@
 | 触发信号 | 必做动作 |
 |---|---|
 | 新装或卸载写作类 skill / 插件 | 复核 `SKILL.md` §1 路由表 + `REFERENCE.md` 决策树 + `test-prompts.json` 样例 |
-| 当前会话 system reminder 新增或删除 skill / agent / 工具名 | 先对照当前会话，再对照 `~/.claude/skills/` 与 `~/.claude/plugins/cache/` |
+| 当前会话 system reminder 新增或删除 skill / agent / 工具名 | 先对照当前会话，再对照 `~/.pi/agent/skills/`（自建）+ `~/.pi/agent/skills-sync/`（sync 第三方） |
 | 用户指出推荐过时、死引用、错归属、错默认路径 | 先查证据，再修正文案，再补 changelog |
 | 路由决策改了阶段分类、主路径或 pipeline | 同步 `SKILL.md`、`REFERENCE.md`、`test-prompts.json` |
 | 兄弟路由器（ai-coding-guide / learning-guide / frontend-guide）边界改动 | 复核 description 触发词与跨界交接条款 |
@@ -20,7 +20,7 @@
 
 按以下顺序取证，不跳级：
 
-1. **本地已证实**：当前会话可用清单（`Available skills` / `Available tools` / `Available agent types`）、`~/.claude/skills/`、`~/.claude/plugins/cache/`、当前仓库文件。历史摘要、memory、prior-session 内容不算可用性证据。
+1. **本地已证实**：当前会话可用清单（`Available skills` / `Available tools` / `Available agent types`）、`~/.pi/agent/skills/`（自建）+ `~/.pi/agent/skills-sync/`（sync 第三方）、当前仓库文件。历史摘要、memory、prior-session 内容不算可用性证据。
 2. **官方可证实**：官方 README、官方 marketplace 元数据、官方插件说明。
 3. **经验判断**：维护者推荐、默认建议、经验排序；必须显式标成推荐，不得写成硬事实。
 4. **证据不足**：影响主推荐结论时停下来问用户；不影响时标"不确定"或直接删。

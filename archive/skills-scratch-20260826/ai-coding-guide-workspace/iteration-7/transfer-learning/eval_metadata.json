@@ -1,0 +1,6 @@
+{
+  "eval_id": 0,
+  "eval_name": "域边界转介-学习调研",
+  "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：我想吃透 transformer 架构，两周后要给别人讲明白\n",
+  "assertions": null
+}

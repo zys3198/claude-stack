@@ -1,12 +1,13 @@
 ---
 name: javaguide-style-guide
 description: >
-  JavaGuide docs/ai 系列风格**判定源**——给 publish-final-check 终检用的 MUST/SHOULD 二值 checklist + 量化阈值（含可执行 grep 正则）。
-  本 skill 是规范判定层，不是写作执行层：怎么写见 article-writer §6（含 §6.7 写作自检清单、§6.9 反例 11 条）。
-  **不主动响应写作请求**——用户说"写 JavaGuide 文章"走 article-writer JavaGuide 模式；本 skill 在终检时被 publish-final-check 引用，或用户问"这篇够不够 JavaGuide 味"时取 checklist。
-  触发：publish-final-check 风格子项引用、用户问"风格达标吗/像不像 JavaGuide 出的/够不够 docs/ai 味"、终检要判定阈值。
+  JavaGuide docs/ai 系列风格**判定源**——给 publish-final-check 终检用的 MUST/SHOULD 二值
+  checklist + 量化阈值（含可执行 grep 正则）。 本 skill 是规范判定层，不是写作执行层：怎么写见 article-writer
+  §6（含 §6.7 写作自检清单、§6.9 反例 11 条）。 **不主动响应写作请求**——用户说"写 JavaGuide 文章"走
+  article-writer JavaGuide 模式；本 skill 在终检时被 publish-final-check 引用，或用户问"这篇够不够
+  JavaGuide 味"时取 checklist。 触发：publish-final-check 风格子项引用、用户问"风格达标吗/像不像
+  JavaGuide 出的/够不够 docs/ai 味"、终检要判定阈值。
 ---
-
 # JavaGuide docs/ai 风格判定源
 
 ## 0. 定位（先读这节）

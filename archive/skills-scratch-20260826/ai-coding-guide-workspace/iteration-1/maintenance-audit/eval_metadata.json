@@ -1,0 +1,6 @@
+{
+  "eval_id": 0,
+  "eval_name": "指南维护-审计 router guide",
+  "prompt": "帮我审查一下 learning-guide 这个路由 skill 有没有问题，顺便优化",
+  "assertions": null
+}

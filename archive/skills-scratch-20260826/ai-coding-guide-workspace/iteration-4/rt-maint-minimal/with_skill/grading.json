@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains.all: missing [eval]",
+      "passed": false,
+      "evidence": "output does not contain required keywords: [eval]"
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "total": 1,
+    "pass_rate": 0
+  }
+}

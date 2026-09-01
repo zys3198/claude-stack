@@ -1,0 +1,15 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[multi-review-pipeline]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[multi-review-pipeline])"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "total": 1,
+    "pass_rate": 1
+  }
+}

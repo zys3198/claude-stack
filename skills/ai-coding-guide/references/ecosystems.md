@@ -74,6 +74,12 @@
 
 - 压缩句型与 cavecrew 小编辑 agent；coding 相关件（cavecrew/caveman-commit/caveman-review）随套件存活
 
+### parallel-delegation：并行执行层（自建，全局）
+
+- 主代理负责分类、拆解、整合和最终验收；`parallel-delegation` 只处理边界清楚、互不依赖且可单独验收的 worker handoff。
+- 读操作可在不重叠范围内并行；写操作需宿主隔离或明确不重叠；失败、冲突、阻塞或越界结果不得计入总完成。
+- 模型、供应商、推理档位、并发和隔离能力按当前运行时确认，不在 skill 或路由中写死。
+
 ### 官方/内置层
 
 - `code-review`（轻量审查）、`security-review`（高风险双审）、`run`（横切收尾验证）、`/loop`（循环任务）、`claude-api`（Claude API 参考）、`skill-creator`（造 skill）
@@ -103,6 +109,7 @@
 | `lean-ctx` vs `gitnexus-*` | 日常查代码先 `lean-ctx`（成本最低），调用链/影响范围再上 `gitnexus-*` | 成本更低 |
 | Superpowers 全套（条件） vs mattpocock 拆单（user-invoked） vs 精简路径 | 复杂/陌生/高风险 → 状态机或 SP 单环；任务需要某一环 → 拆单用 matt；单点/机械 → 精简路径 | 流程深度由任务复杂度定，判断导向不设硬门槛（`routing.md` Step 0.4） |
 | 交付状态机（本系统） vs Superpowers 全套（条件） | 重任务 / 跨会话 / 要脚本强制 → 本系统状态机；只需单环手法 → SP 单环 | 状态机管骨架门禁，SP 管手法，不双套流程 |
+| `parallel-delegation` vs `/to-tickets` | 同会话内独立且可验收的执行 → 主路径后叠加 `parallel-delegation`；跨会话、多人或需显式阻塞 → `/to-tickets`；两者可组合但不互相替代 | 前者是执行层，后者是跨会话交接与任务拆票入口 |
 
 ---
 
@@ -116,6 +123,7 @@
 | `gitnexus-*` 不可用 | 继续用 `lean-ctx` 聚焦读取；`lean-ctx` 也不可用才退原生搜索 + 精读文件 |
 | `/loop` 不可用 | 明示不可用，改手动执行 |
 | `hallmark` / `impeccable` 不可用 | 手动给方向选项 + 按项目栈直接实现，收尾自查 AI 味 |
+| `parallel-delegation` 不可用 | 保留同一 handoff 和验收契约，改为主代理顺序执行；不得伪造并行结果 |
 | `mattpocock-skills:*` 不可用 / 用户不启用 | grilling → 开工问询 + `expose-unknowns` 判级；diagnosing-bugs → `code-change-workflow` §2；tdd → 手动红绿小步改；code-review → 内置 `code-review` |
 
 ---
@@ -150,7 +158,7 @@
 ## 维护时要核的点
 
 - 当前会话 reminder 里有没有该 skill
-- `~/.claude/skills/` 是否存在独立 skill
+- `~/.pi/agent/skills/`（自建）/ `~/.pi/agent/skills-sync/`（sync 第三方）是否存在独立 skill
 - 插件是否启用以 `settings.json` 的 `enabledPlugins` 为准
 - 推荐语气是否越界成「硬事实」
 - 路由文件是否又长回百科全书

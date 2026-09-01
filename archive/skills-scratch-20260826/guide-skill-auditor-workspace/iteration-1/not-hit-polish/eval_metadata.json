@@ -1,0 +1,8 @@
+{
+  "eval_id": 0,
+  "eval_name": "不命中-执行型 skill 润色",
+  "prompt": "请用 guide-skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。\n请求：帮我润色 human-writing 这个 skill 的改写规则\n",
+  "assertions": [
+    "output_contains.not: \"十查\""
+  ]
+}

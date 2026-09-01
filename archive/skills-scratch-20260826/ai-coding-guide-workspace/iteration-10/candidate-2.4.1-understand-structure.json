@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.251",
+  "startedAt": "2026-08-31T08:07:34.288Z",
+  "durationSeconds": 20,
+  "costUsd": 0.0639752,
+  "partial": false,
+  "suite": {
+    "root": "C:\\Users\\zys31\\.claude\\archive\\skills-scratch-20260826\\ai-coding-guide-workspace\\skills\\candidates\\ai-coding-guide\\2.4.1",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-4-6",
+    "caseFilter": "target-understand-structure",
+    "threshold": 1,
+    "plugins": [
+      {
+        "name": "2.4.1",
+        "path": "C:\\Users\\zys31\\.claude\\archive\\skills-scratch-20260826\\ai-coding-guide-workspace\\skills\\candidates\\ai-coding-guide\\2.4.1"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "target-understand-structure",
+      "dir": "eval-gate\\target-understand-structure",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断：只输出「分类 / 主路径 / 组合 / 闸门 / 下一步」，不要执行任务本身。\n请求：我只想快速看一个类内部的实现结构，不查引用、不查调用链，也不修改代码。应该先用什么？",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "仅当最后回答将请求归类为「理解代码」，明确把 `lean-ctx` 作为日常结构查询的第一路径，并且没有把 `gitnexus` 或 `gitnexus-exploring` 作为主路径时才通过；只做路由判断。",
+          "config": {
+            "criteria": "仅当最后回答将请求归类为「理解代码」，明确把 `lean-ctx` 作为日常结构查询的第一路径，并且没有把 `gitnexus` 或 `gitnexus-exploring` 作为主路径时才通过；只做路由判断。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.0639752,
+            "judgeCostUsd": 0.00155,
+            "durationSeconds": 20,
+            "startedAt": "2026-08-31T08:07:34.348Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-UolICF\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：代码理解  \n主路径：先用 `lean-ctx`  \n组合：不需要 `gitnexus-exploring`  \n闸门：仅查看类内部结构，不查引用、调用链，也不修改代码  \n下一步：用 `lean-ctx` 阅读目标类的实现】【。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

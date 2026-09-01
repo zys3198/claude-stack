@@ -1,13 +1,15 @@
 ---
 name: wiki-sediment
-description: 把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki）。触发：用户说「沉淀」「入库 wiki」「存进 wiki」「记成笔记」，或调用 /wiki-save。四条路径：书籍/教程（knowledge-note）、对话收获（learning-record）、AI 纠偏（memory feedback）、仪表盘刷新。不用于：公众号/B站/抖音链接（走 content-to-note）、新建非笔记类治理文档、改存量笔记内容。
+description: >-
+  把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki）。触发：用户说「沉淀」「入库 wiki」「存进 wiki」「记成笔记」，或调用
+  /wiki-save。四条路径：书籍/教程（knowledge-note）、对话收获（learning-record）、AI 纠偏（memory
+  feedback）、仪表盘刷新。不用于：公众号/B站/抖音链接（走 content-to-note）、新建非笔记类治理文档、改存量笔记内容。
 ---
-
 # wiki-sediment — 自动化沉淀进 wiki
 
-把「学完 → 落库」固定成一条命令。结构规约的唯一权威是 `wiki-structure` skill（`.claude/skills/wiki-structure/SKILL.md`）——**动手前先读它**，本 skill 不重复 schema，只规定流程。
+把「学完 → 落库」固定成一条命令。结构规约的唯一权威是 `wiki-structure` skill（`C:\ZYS\Wiki\.claude\skills\wiki-structure\SKILL.md`——Wiki 仓库自带，不在全局 `~/.claude` 也不在 pi skills）——**动手前先读它**，本 skill 不重复 schema，只规定流程。
 
-设计依据：`docs/superpowers/specs/2026-08-11-wiki-sediment-design.md`。
+设计依据：`C:\ZYS\Wiki\docs\superpowers\specs\2026-08-11-wiki-sediment-design.md`（Wiki 仓库内，非本 skill 目录）。
 
 ## 入口与路径分发
 
@@ -40,9 +42,9 @@ description: 把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki）。触发
 ## 路径三：AI 纠偏
 
 1. 抽本轮 AI 犯的新错误 + 用户纠正原文。
-2. 写 memory feedback：`~/.claude/projects/<project-slug>/memory/<kebab-name>.md`，frontmatter `type: feedback`，正文带 **Why:** / **How to apply:**。
-3. 在 `MEMORY.md` 加一行指针（`- [Title](file.md) — hook`）。
-4. 已在 memory 里的同类错误 → 更新旧文件，不新建。
+2. 写 memory feedback：pi 记忆是**单文件**（无 CC 式 memory 子目录/单条文件）——落 `~/.pi/agent/projects-memory/<project-slug>/MEMORY.md` 追加一段（`§` 分隔），尾部 `<!-- created=YYYY-MM-DD, last=YYYY-MM-DD -->`，段内带 **Why:** / **How to apply:**。
+3. 同文件其他段引用同错误 → 一并更新时间戳，不重复建段；索引指针格式按 pi 现状适配（`- [Title](file.md) — hook` 是 CC 格式，pi 单文件无此索引行）。
+4. 已在 memory 里的同类错误 → 更新旧段，不新增。
 
 ## 路径四：仪表盘
 

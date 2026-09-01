@@ -66,13 +66,17 @@
 - 依赖：Node.js / npm
 - 备注：Windows 核心已清理；同时删除未注册的 VS Code Codex 扩展内容、4 条定向 npm 缓存及 `C:\Users\zys31\AGENTS.md`。按用户选择保留 CC Switch 内 Codex 数据、不扫描 WSL；VS Code 占用的 0 文件扩展空目录保留。
 
-### Kimi WebBridge（浏览器控制桥）
-- 来源：https://cdn.kimi.com/webbridge（skill 文档指向官方帮助页 kimi.com/zh-cn/features/webbridge）
+### Kimi WebBridge（浏览器控制桥，已卸载 2026-08-31）
+- 来源：官方安装器 `https://cdn.kimi.com/webbridge`（skill 文档指向官方帮助页 `https://www.kimi.com/features/webbridge`）；官方上游仓库另见 `https://github.com/MoonshotAI/kimi-code`
 - 安装日期：2026-08-11
+- 卸载日期：2026-08-31
+- 卸载命令原文：`kimi-webbridge uninstall --yes`；官方命令停止 daemon 后因 Windows 禁止进程删除自身 exe 退出，随后手动清理残留目录与 Claude skill，并移除用户 PATH。
+- 清理范围：`C:\Users\zys31\.kimi-webbridge`、`C:\Users\zys31\.claude\skills\kimi-webbridge`、用户 PATH 中对应 bin；Chrome 扩展保留。
 - 安装命令原文：`irm https://cdn.kimi.com/webbridge/install.ps1 | iex`
 - 装到哪：守护进程 `C:\Users\zys31\.kimi-webbridge\bin\kimi-webbridge.exe`（日志 `...\.kimi-webbridge\logs\daemon.log`）；skill 注入 `~/.claude/skills/kimi-webbridge` 和 `~/.hermes/skills/kimi-webbridge`（均 v1.11.5）
 - 依赖：需配浏览器扩展（两段式：守护进程 HTTP `127.0.0.1:10086` ↔ 浏览器扩展）；无扩展则 `extension_connected:false` 驱动不了浏览器
-- 备注：二进制未签名、无版本元数据，来源非官方渠道可核实——用户知情后仍装。状态查询 `kimi-webbridge status`；启停 `kimi-webbridge start/stop`（skill 禁自动 stop/restart/uninstall）。
+- 兼容性核验（2026-08-26）：`MoonshotAI/kimi-code/plugins/official/kimi-webbridge/kimi.plugin.json` 为 Kimi 原生插件格式（v1.11.3），不是 Claude Code `.claude-plugin/plugin.json`；当前未安装 `kimi-webbridge@<marketplace>`，避免伪造兼容关系。
+- 备注：官方安装器来源为 `cdn.kimi.com`；二进制未签名、无版本元数据，仍需保留来源与权限风险记录。状态查询 `kimi-webbridge status`；启停 `kimi-webbridge start/stop`（skill 禁自动 stop/restart/uninstall）。
 - 风险提示：守护进程常驻 + 用用户真实登录态控浏览器 + 往 AI runtime 写 skill，权限面大。
 
 ## 运行环境基线
@@ -181,3 +185,29 @@
 - 依赖：Windows Package Manager（winget）、Microsoft.VCRedist.2015+.x64
 - 用途：提供 `pdftoppm`、`pdfinfo`、`pdftotext` 等 PDF 读取工具
 - 备注：安装后需重启 shell 才能解析更新后的 PATH
+
+### Claude Code 原生版 2.1.251（2026-08-29）
+- 来源：https://claude.ai/install.ps1（Anthropic 官方 Windows 原生安装器）
+- 安装日期：2026-08-29
+- 安装命令原文：`powershell.exe -NoProfile -Command "Invoke-RestMethod 'https://claude.ai/install.ps1' | Invoke-Expression"`
+- 替换动作原文：验证原生二进制版本与 Authenticode 签名后执行 `npm uninstall -g @anthropic-ai/claude-code`
+- 装到哪：`C:\Users\zys31\.local\bin\claude.exe`；版本文件 `C:\Users\zys31\.local\share\claude\versions\2.1.251`
+- 依赖：Windows 10 1809+、x64/ARM64；本机为 win32-x64
+- 备注：替换 npm 全局版 2.1.251；原 npm 平台 optional dependency 缺失，`bin\claude.exe` 仅为 500 字节占位脚本。原生二进制签名有效，签名者 `Anthropic, PBC`；`claude doctor` 报 `No installation issues found`，自动更新已启用。用户配置 `~/.claude/`、`~/.claude.json` 与项目配置未删除。
+
+### OpenAI Codex CLI 0.151.0（重新安装，2026-08-29）
+- 来源：https://www.npmjs.com/package/@openai/codex（npm 包 `@openai/codex`）
+- 安装日期：2026-08-29
+- 安装命令原文：`npm uninstall -g @openai/codex && npm cache verify && npm install -g @openai/codex@latest --include=optional`
+- 装到哪：启动器 `C:\Users\zys31\AppData\Roaming\npm\codex.cmd`；主包 `...\node_modules\@openai\codex`；Windows x64 原生包位于主包的 `node_modules\@openai\codex-win32-x64`
+- 依赖：Node.js / npm；运行时原生包 `@openai/codex@0.151.0-win32-x64`
+- 备注：修复主包存在但 optional dependency 缺失导致的启动失败。已验证 `codex-cli 0.151.0`；`codex.exe` 为 Windows x86-64 PE32+，Authenticode 签名有效，签名者 `OpenAI OpCo, LLC`。
+
+### browser-use 0.13.8 + browser-harness 0.1.9（2026-08-31）
+- 来源：PyPI（`browser-use`）；连接故障时参考：https://github.com/browser-use/browser-harness/blob/main/install.md
+- 安装日期：2026-08-31
+- 安装命令原文：`uv tool install --python 3.12 --upgrade --force browser-use`
+- skill 注册命令原文：`browser-use skill install --no-install --target claude`
+- 装到哪：uv 工具环境 `C:\Users\zys31\AppData\Roaming\uv\tools\browser-use`；Claude skill `C:\Users\zys31\.claude\skills\browser-use\SKILL.md`
+- 依赖：Python 3.12.10、uv 0.12.7、Chrome CDP；内嵌 `browser-harness 0.1.9`、`browser-use-sdk 3.4.2`
+- 备注：已验证 `browser-use --doctor`：Chrome、daemon、活动连接均正常（1 个）；Cloud auth 为可选项且未配置。`browser-act-cli 0.1.27` 命令独立，无直接命令覆盖；两者不要同时控制同一页面/会话。`browser-use --update -y` 因当前 harness 非独立 uv tool 失败，未另装第二套 harness。

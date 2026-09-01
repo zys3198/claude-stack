@@ -1,0 +1,30 @@
+{
+  "candidate": "ai-coding-guide/2.4.1",
+  "skill_id": "ai-coding-guide",
+  "version": "2.4.1",
+  "pattern_ids": [
+    "route-contract-drift"
+  ],
+  "created_at": "2026-08-31T08:01:39Z",
+  "status": "rejected",
+  "base_skill_hash": "319199e3943449a43a173a0696efbfe8d02b979122212b3a45fe820815ffe7ca",
+  "skill_hash": "ca8fc9fb3f6e84c5150c373735a4a148291b08d3942961f19de822b97a90afd7",
+  "gates": [
+    {
+      "at": "2026-08-31T08:34:44Z",
+      "verdict": "reject",
+      "applied": false,
+      "baseline": 0.8,
+      "candidate": 0.8,
+      "checks": {
+        "score_improved": false,
+        "target": true,
+        "guardrail": true,
+        "holdout": true,
+        "content": true,
+        "base_match": true
+      },
+      "passed": false
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "skill_name": "expose-unknowns",
+    "skill_path": "C:\\Users\\zys31\\.claude\\skills\\expose-unknowns",
+    "timestamp": "2026-08-21T03:20:16Z",
+    "evals_run": [
+      0
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "判级-未知的未知先扫盲",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 65.09,
+        "tokens": 24812,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[未知的未知]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[未知的未知])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "判级-已知的未知主动抛问",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 52.484,
+        "tokens": 24128,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[已知的未知]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[已知的未知])"
+        }
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "判级-已知的已知直接开工",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 1,
+        "failed": 0,
+        "total": 1,
+        "time_seconds": 113.739,
+        "tokens": 36565,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "output_contains{all:[已知的已知]}",
+          "passed": true,
+          "evidence": "output satisfies all contains checks (all:[已知的已知])"
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1,
+        "stddev": 0,
+        "min": 1,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": 77.10433333333334,
+        "stddev": 26.410880464098295,
+        "min": 52.484,
+        "max": 113.739
+      },
+      "tokens": {
+        "mean": 28501.666666666668,
+        "stddev": 5708.471618762961,
+        "min": 24128,
+        "max": 36565
+      }
+    },
+    "without_skill": null,
+    "delta": null
+  }
+}

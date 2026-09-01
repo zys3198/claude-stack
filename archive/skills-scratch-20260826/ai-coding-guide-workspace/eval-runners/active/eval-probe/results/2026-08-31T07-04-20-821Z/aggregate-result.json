@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.251",
+  "startedAt": "2026-08-31T07:04:20.821Z",
+  "durationSeconds": 24,
+  "costUsd": 0.131121,
+  "partial": false,
+  "suite": {
+    "root": "C:\\Users\\zys31\\.claude\\archive\\skills-scratch-20260826\\ai-coding-guide-workspace\\skills\\candidates\\ai-coding-guide\\2.4.0",
+    "ablation": "none",
+    "caseFilter": "rt-output-contract",
+    "threshold": 1,
+    "plugins": [
+      {
+        "name": "2.4.0",
+        "path": "C:\\Users\\zys31\\.claude\\archive\\skills-scratch-20260826\\ai-coding-guide-workspace\\skills\\candidates\\ai-coding-guide\\2.4.0"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "rt-output-contract",
+      "dir": "eval-probe\\rt-output-contract",
+      "source": "prose",
+      "promptMarkdown": "请用 ai-coding-guide 做开工路由判断，只做路由判断，不要执行任务本身。\n请求：改个按钮文案，把「提交」改成「保存」。帮我判断该用什么 skill，直接给结论别长篇解释。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 10,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "判定 agent 的路由回答是否完整遵守以下要求：\n- 必须明确输出“分类”“主路径”“组合”“闸门”“下一步”五项字段。\n- 必须将请求识别为小型直接代码变更，并给出可执行的主路径或说明无需额外 skill。\n- 只做路由判断，不应执行任务本身或声称已修改代码。\n回答满足全部要求时判定为通过，否则判定为失败。",
+          "config": {
+            "criteria": "判定 agent 的路由回答是否完整遵守以下要求：\n- 必须明确输出“分类”“主路径”“组合”“闸门”“下一步”五项字段。\n- 必须将请求识别为小型直接代码变更，并给出可执行的主路径或说明无需额外 skill。\n- 只做路由判断，不应执行任务本身或声称已修改代码。\n回答满足全部要求时判定为通过，否则判定为失败。",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.131121,
+            "judgeCostUsd": 0.001962,
+            "durationSeconds": 24,
+            "startedAt": "2026-08-31T07:04:20.834Z",
+            "error": null,
+            "tracePath": "C:\\Users\\zys31\\AppData\\Local\\Temp\\claude-eval-4n5SEA\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "分类：快速改动  \n主路径：直接最小改动  \n组合：无  \n参与度：我动手 — 单文件文案机械改动  \n闸门：最小检查  \nMatt提示：无  \n下一步：直接执行（无需额外 skill）"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

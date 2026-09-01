@@ -1,0 +1,20 @@
+{
+  "expectations": [
+    {
+      "text": "output_contains{all:[根因]}",
+      "passed": true,
+      "evidence": "output satisfies all contains checks (all:[根因])"
+    },
+    {
+      "text": "output_contains.all: missing [调用方]",
+      "passed": false,
+      "evidence": "output does not contain required keywords: [调用方]"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 1,
+    "total": 2,
+    "pass_rate": 0.5
+  }
+}

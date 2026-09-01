@@ -1,0 +1,59 @@
+{
+  "skill_name": "ai-coding-guide",
+  "schema_version": "v1alpha1",
+  "engine_name": "claude_code",
+  "model_name": "anthropic/claude-sonnet-4-6",
+  "configuration": "with_skill",
+  "command": "claude -p --no-session-persistence --model claude-sonnet-4-6 --tools Skill --max-budget-usd 0.4",
+  "skill_invocation": "/ai-coding-guide",
+  "purpose": "验证全局 active Skill 的真实路由行为",
+  "case_results": [
+    {
+      "case_id": "active-understand-structure",
+      "title": "日常结构路由",
+      "prompt": "我只想快速看一个类内部的实现结构，不查引用、不查调用链，也不修改代码。",
+      "status": "PASS",
+      "assertions": [
+        "分类=理解代码",
+        "主路径包含 lean-ctx",
+        "组合明确不走 gitnexus-exploring",
+        "输出包含 闸门 和 下一步"
+      ],
+      "response": "分类：理解代码；主路径：lean-ctx；组合：无；闸门：不进交付状态机；下一步：提供类名或文件路径。"
+    },
+    {
+      "case_id": "active-trace-callers",
+      "title": "调用链路由",
+      "prompt": "这个 auth 模块怎么工作的？谁调用了 login？",
+      "status": "PASS",
+      "assertions": [
+        "分类=理解代码",
+        "主路径顺序为 lean-ctx → gitnexus-exploring",
+        "组合分别说明模块结构和 login 调用链",
+        "输出包含 fallback、成功标准和 下一步"
+      ],
+      "response": "分类：理解代码；主路径：lean-ctx → gitnexus-exploring；组合：lean-ctx 理解 auth 结构，gitnexus-exploring 查询 login 调用链；下一步：按顺序调用 lean-ctx，再调用 gitnexus-exploring。"
+    },
+    {
+      "case_id": "active-structure-and-callers",
+      "title": "结构与调用链组合路由",
+      "prompt": "先看 auth 模块结构，再追踪 login 的调用链。",
+      "status": "PASS",
+      "assertions": [
+        "分类=理解代码",
+        "主路径顺序为 lean-ctx → gitnexus-exploring",
+        "组合明确先结构后调用链",
+        "输出包含参与度、闸门和 下一步"
+      ],
+      "response": "分类：理解代码；主路径：lean-ctx → gitnexus-exploring；组合：先查 auth 模块结构，再追踪 login 调用链；参与度：我动手；闸门：本轮无；下一步：等授权后执行仓库探索。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0,
+    "active_behavior_verified": true,
+    "previous_bare_entry_excluded": true
+  }
+}
