@@ -1,9 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "调试-修根因检查调用方",
-  "prompt": "用 code-change-workflow 处理：登录接口偶发 500，帮我修一下\n",
-  "assertions": [
-    "output_contains{all:[根因]}",
-    "output_contains.all: missing [调用方]"
-  ]
-}

@@ -1,9 +1,0 @@
-{
-  "id": "route-contract-drift",
-  "kind": "regression",
-  "title": "多任务路由契约标签回退",
-  "summary": "历史 Trace 曾出现分类、组合工具或固定字段不稳定；本次真实全局 active smoke test 覆盖日常结构、调用链、结构加调用链三种请求，3/3 通过，确认 v2.4.0 当前路由契约行为稳定。",
-  "root_cause": "关键路由约束曾主要埋在 references/routing.md，入口 Skill 缺少最小强制集；v2.4.0 已将标准分类、固定输出字段和 lean-ctx → gitnexus-exploring 顺序提升到入口约束。",
-  "recommendation": "继续保留固定路由契约和代码理解工具顺序；后续路由行为变化先补可验证 eval，再进入 propose/gate。将真实 active smoke test 作为回归证据，不把 --bare 未加载 Skill 的结果计入模型失败。",
-  "trace_ids": ["iteration-11"]
-}

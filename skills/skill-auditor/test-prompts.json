@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "prompt": "帮我审查一下 ai-coding-guide 现在的路由质量",
+    "expected": "命中 skill-auditor。识别为 router 型 skill，执行通用十查、router 追加检查和动态边界场景；输出静态结果、动态验证、P0-P2。",
+    "scenario": "正向触发：既有 router 审计"
+  },
+  {
+    "id": 2,
+    "prompt": "article-writing-guide 老是被 ai-coding-guide 抢单，帮我排查",
+    "expected": "命中 skill-auditor。识别为兄弟域误路由，必须跑撞词场景；第一跳错误记 P0，不能只改 description 不验证。",
+    "scenario": "正向触发：路由边界排查"
+  },
+  {
+    "id": 3,
+    "prompt": "帮我给翻译域新建一个 skill",
+    "expected": "命中 skill-auditor 设计模式。先做不用 skill 的反向测试，再写设计卡、触发边界、输入输出、风险门和最小测试场景。",
+    "scenario": "正向触发：新建 skill 设计"
+  },
+  {
+    "id": 4,
+    "prompt": "这个课程 skill 里直接写死当前项目路线和已完成章节，帮我改",
+    "expected": "命中 skill-auditor。指出宿主事实不应硬编码进通用 skill，要求从宿主权威文件读取路线、状态和完成证据。",
+    "scenario": "正向触发：宿主解耦"
+  },
+  {
+    "id": 5,
+    "prompt": "把这个 skill 改成只适配 Claude Sonnet 4.6，其他模型不用管",
+    "expected": "命中 skill-auditor。核心规则保持模型和供应商无关；具体适配放 adapter，不能把模型 ID 写进核心。",
+    "scenario": "正向触发：模型解耦"
+  },
+  {
+    "id": 6,
+    "prompt": "Claude 和 Pi 里都有一个同名 skill，直接删掉本地这个吧",
+    "expected": "命中来源审计模式。先查当前可用清单、本地源、安装台账、插件 payload 和同步源；不能只按同名删除，并区分 exact duplicate、同源替代和独立第三方。",
+    "scenario": "正向触发：来源与重复审计"
+  },
+  {
+    "id": 7,
+    "prompt": "settings.json 已经接上这个 skill 的 hook，帮我确认生效",
+    "expected": "命中动态验证。dump 运行时配置、喂真实 payload、重启或重新加载后跑真实触发；不能只看 settings 字段。",
+    "scenario": "正向触发：配置运行验证"
+  },
+  {
+    "id": 8,
+    "prompt": "帮我判断这 5 个 skill 组合是否合理",
+    "expected": "命中组合审查。检查域覆盖、共享触发词、交接对称性、产物边、内部驱动边、下游角色分层和循环。",
+    "scenario": "正向触发：组合审查"
+  },
+  {
+    "id": 9,
+    "prompt": "盘点整个 skill 库，哪些该删、哪些该冷冻？",
+    "expected": "不由 skill-auditor 承接库级留删；转交 skill-trimmer。",
+    "scenario": "负向触发：skill 库生命周期治理"
+  },
+  {
+    "id": 10,
+    "prompt": "做个登录页，顺便告诉我该用哪个编码 skill",
+    "expected": "主目标是页面视觉和编码路由，转交 ai-coding-guide；skill-auditor 不抢具体开发任务。",
+    "scenario": "负向触发：编码任务开工路由"
+  },
+  {
+    "id": 11,
+    "prompt": "skill 文件存在，说明它已经安装并且会被调用吧？",
+    "expected": "命中验证原则。拒绝从文件存在推断运行时生效，要求检查当前清单、加载结果和真实行为。",
+    "scenario": "边界回归：静态存在不等于运行生效"
+  },
+  {
+    "id": 12,
+    "prompt": "Pi 迁移里这个功能我们自己写一个扩展，先不用看现成包",
+    "expected": "命中设计模式。先查 pi.dev/packages 和真实源码，确认没有可复用原生包后再设计自建方案。",
+    "scenario": "边界回归：先查原生能力"
+  }
+]

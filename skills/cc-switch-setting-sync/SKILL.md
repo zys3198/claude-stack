@@ -1,15 +1,18 @@
 ---
 name: cc-switch-setting-sync
 description: >-
-  把 Claude 的 ~/.claude/settings.json 公共配置同步进 ccswitch
-  数据库（~/.cc-switch/cc-switch.db 的 settings.common_config_claude），防止 ccswitch
-  切换/热切换 provider 时用旧值覆盖降级 settings.json。触发场景：用户提到 ccswitch 覆盖/重置/降级了 claude
-  配置、切换 provider 后 enabledPlugins/hooks/permissions 丢失、想把 claude 设置同步到
-  ccswitch、ccswitch 数据库、cc-switch.db、"同步 claude 配置"、"settings.json
-  被覆盖"、"防止降级"、"ccswitch 设置同步"。也适用于首次发现 ccswitch 热切换导致
-  enabledPlugins/hooks/statusLine 等字段丢失需要修复的情况。
+  ccswitch 配置降级/同步的排查与修复。自动化已内置：settings.json 每次 Edit/Write
+  由 hooks/settings-sync-auto.py 自动同步进 cc-switch DB（幂等 NO-OP），日常无需手动跑。
+  本 skill 只在以下场景加载：切换 provider 后 enabledPlugins/hooks/statusLine 丢失、
+  需要手动同步（命令行跑 scripts/sync_claude_common.py）、--restore 修复已降级配置、
+  切换后验证（marker 检查）、回滚。触发词：ccswitch 覆盖/重置/降级、settings.json
+  被覆盖、配置丢失、cc-switch.db、防降级、恢复 claude 配置。
 ---
 # cc-switch 设置同步（Claude）
+
+> **自动化（2026-09-04 起）**：`hooks/settings-sync-auto.py` 已注册 PostToolUse（Edit|Write），
+> settings.json 每次被编辑即自动同步 cc-switch DB（脚本自带 NO-OP 幂等，非命中路径毫秒级退出）。
+> 本 skill 的 dry-run/写入步骤通常由 hook 代劳；以下手动流程仅用于排查、修复和验证。
 
 把 `~/.claude/settings.json` 中 **provider 无关的公共配置** 同步进 ccswitch DB 的
 `settings.common_config_claude`，使 ccswitch 下次切换 provider 时不再降级 settings.json。

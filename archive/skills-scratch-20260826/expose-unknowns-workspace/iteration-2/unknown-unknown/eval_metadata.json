@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "判级-未知的未知先扫盲",
-  "prompt": "用 expose-unknowns 的方法处理这个请求：先判级，再按级出牌。请求：接了个需求要做一个「智能客服」，但甲方自己也没想清楚，连该问什么都列不出来，你看着办\n",
-  "assertions": [
-    "output_contains{all:[未知的未知]}"
-  ]
-}

@@ -24,17 +24,78 @@ def load(sid):
         return None, "missing"
     except Exception:
         return None, "invalid"
+    if not isinstance(st, dict):
+        return None, "invalid"
     if st.get("session_id") != sid:
         return None, "session_mismatch"
     return st, None
 
 
 def save(st):
+    path = state_path(st.get("session_id", "unknown"))
+    lock_path = f"{path}.lock"
+    deadline = time.monotonic() + 1.0
+    locked = False
+    temp_path = f"{path}.{os.getpid()}.{time.time_ns()}.tmp"
     try:
-        with open(state_path(st.get("session_id", "unknown")), "w", encoding="utf-8") as f:
-            json.dump(st, f)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        while time.monotonic() < deadline:
+            try:
+                fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.close(fd)
+                locked = True
+                break
+            except FileExistsError:
+                try:
+                    if time.time() - os.path.getmtime(lock_path) > 10:
+                        os.unlink(lock_path)
+                        continue
+                except OSError:
+                    continue
+                time.sleep(0.02)
+        if not locked:
+            return
+
+        disk = {}
+        try:
+            with open(path, encoding="utf-8") as f:
+                candidate = json.load(f)
+            if isinstance(candidate, dict) and candidate.get("session_id") == st.get("session_id"):
+                disk = candidate
+        except Exception:
+            pass
+        merged = {**disk, **st}
+        for key in ("paths", "code_pending", "verify_cmds"):
+            values = list(disk.get(key, [])) if isinstance(disk.get(key), list) else []
+            for value in st.get(key, []):
+                if value not in values:
+                    values.append(value)
+            merged[key] = values[-20:] if key == "verify_cmds" else values
+        for key in ("last_edit_ts", "last_verify_ts"):
+            merged[key] = max(float(disk.get(key, 0)), float(st.get(key, 0)))
+        verified = dict(disk.get("verified_code_hashes", {})) if isinstance(disk.get("verified_code_hashes"), dict) else {}
+        if isinstance(st.get("verified_code_hashes"), dict):
+            verified.update(st["verified_code_hashes"])
+        merged["verified_code_hashes"] = verified
+        edits = dict(disk.get("edits_per_path", {})) if isinstance(disk.get("edits_per_path"), dict) else {}
+        if isinstance(st.get("edits_per_path"), dict):
+            for key, value in st["edits_per_path"].items():
+                edits[key] = max(int(edits.get(key, 0)), int(value))
+        merged["edits_per_path"] = edits
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(merged, f)
+        os.replace(temp_path, path)
     except Exception:
-        pass
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+    finally:
+        if locked:
+            try:
+                os.unlink(lock_path)
+            except OSError:
+                pass
 
 
 def file_hash(path):
@@ -47,7 +108,7 @@ def file_hash(path):
 
 def changed_code_hashes(root):
     if not root:
-        return {}
+        return None
     try:
         result = subprocess.run(
             ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
@@ -58,9 +119,9 @@ def changed_code_hashes(root):
             check=False,
         )
     except (OSError, subprocess.TimeoutExpired):
-        return {}
+        return None
     if result.returncode != 0:
-        return {}
+        return None
     paths = {}
     parts = result.stdout.split(b"\0")
     index = 0
@@ -87,12 +148,13 @@ def refresh_code_pending(st, data):
     root = st.get("project_root") or data.get("cwd") or tool_input.get("cwd")
     verified = st.get("verified_code_hashes")
     if not root or not isinstance(verified, dict):
-        return
+        return False
     current = changed_code_hashes(root)
+    if current is None:
+        return False
     pending = st.setdefault("code_pending", [])
     if not current:
-        st["code_pending"] = []
-        return
+        return True
     discovered = False
     for path, digest in current.items():
         if path not in verified or verified[path] != digest:
@@ -101,17 +163,28 @@ def refresh_code_pending(st, data):
                 discovered = True
     if discovered:
         st["last_edit_ts"] = time.time()
+    return True
 
 
 try:
     _raw = sys.stdin.buffer.read().decode("utf-8", "replace")
     _i = _raw.find("{")
-    data = json.loads(_raw[_i:]) if _i >= 0 else {}
+    if _i < 0:
+        raise ValueError("hook input has no JSON object")
+    data = json.loads(_raw[_i:])
+    if not isinstance(data, dict):
+        raise ValueError("hook input is not an object")
 except Exception:
-    sys.exit(0)
+    reason = "verify_gate BLOCKED: Hook 输入无效，无法确认 session 或工作区状态，拒绝 fail-open。"
+    print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
+    sys.exit(2)
 
 sid = data.get("session_id", "unknown")
 st, state_error = load(sid)
+if state_error == "invalid":
+    reason = "verify_gate BLOCKED: 状态文件损坏，拒绝 fail-open；请重新启动当前 session 以建立隔离状态。"
+    print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
+    sys.exit(2)
 if state_error == "session_mismatch":
     reason = "verify_gate BLOCKED: 状态文件属于其他 session，拒绝 fail-open；请重新启动当前 session 以建立隔离状态。"
     print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
@@ -119,7 +192,10 @@ if state_error == "session_mismatch":
 if st is None:
     sys.exit(0)
 
-refresh_code_pending(st, data)
+if not refresh_code_pending(st, data):
+    reason = "verify_gate BLOCKED: 无法确认 Git 工作区状态，拒绝 fail-open；请检查项目路径、Git 可用性或超时设置后重试。"
+    print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
+    sys.exit(2)
 code_paths = st.get("code_pending", [])
 if not code_paths:
     save(st)

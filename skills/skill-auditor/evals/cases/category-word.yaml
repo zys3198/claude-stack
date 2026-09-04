@@ -1,0 +1,13 @@
+id: category-word
+title: 命中-description 范畴词检查
+description: description 路由目标列表含「…等」范畴词 → 命中，直接指出范畴词并将十查第 3 项判 FAIL。
+tag: routing
+input:
+  prompt: |
+    请用 skill-auditor 审计下面这个 skill description 的路由边界，并指出具体失败检查项。只审计给出的 description，不读取其他文件。
+    description：路由到 deep-learn、cram-engine 等
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["等", "失败"]

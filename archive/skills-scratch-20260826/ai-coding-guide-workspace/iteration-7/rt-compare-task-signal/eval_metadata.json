@@ -1,6 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "带任务信号的对比型问题走开发新功能",
-  "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：想写个登录功能，用 SP 还是 ponytail？\n",
-  "assertions": null
-}

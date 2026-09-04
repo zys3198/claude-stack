@@ -1,9 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "重构-不推荐已移除工具",
-  "prompt": "这段代码太绕了，帮我简化下，别改行为",
-  "assertions": [
-    "output_contains.all: missing [重构]",
-    "output_contains{not:[simplify]}"
-  ]
-}

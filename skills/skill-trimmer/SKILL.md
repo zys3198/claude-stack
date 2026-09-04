@@ -3,7 +3,7 @@ name: skill-trimmer
 description: >-
   盘点并精简 skill 库：判定哪些 skill 值得保留、哪些移入备份，评估是否装新 skill。触发词：精简 skill、skill 精简、哪些 skill 该删、盘点 skill、审计 skill
   库、skill 太多、清理 skill、trim skills、skill audit、review my skills、这个 skill 还值不值得留、去留标准、要不要装/该不该装这个 skill、装前评估、
-  生成复审页、读取 Skill 设置。不用于：新建 skill（走 skill-creator）、审查 guide 质量（走 guide-skill-auditor）、优化单 skill 内容（走 darwin-skill）。判定基准细节见正文。
+  生成复审页、读取 Skill 设置。不用于：单个 skill 审计、设计、优化与路由边界审查（走 skill-auditor）。判定基准细节见正文。
 ---
 # Skill Trimmer — Skill 库精简判定
 
@@ -28,7 +28,7 @@ description: >-
 8. **静态判据 ≠ 运行证据（新增【实践】，来自 SkillHub 内容治理复盘）：** SKILL.md 写得规范 ≠ 它真能被加载、真能跑。SkillHub 的教训：静态评测只能证明 Skill「写了什么」，不能证明「运行时做什么」——安装脚本无法执行/依赖不兼容、文档声称支持但 Agent 实际不会调用、能生成结果但没解决问题。映射到本 skill：**拿不准的 skill 判定前先试运行一次**，记录运行证据，不凭静态描述下「删」或「留」。证据三级：静态检查（写了什么）/ 运行验证（能跑什么）/ 使用信号（实际被用过吗）。三者有别，缺运行验证的「删前确认」不算闭合。
 
 **本机叠加规则（用户已拍板，2026-07-25）：**
-9. **被 router 引用的 D 类 → 删 skill + 顺手改路由。** 理由：skill 真没用，引用它的路由那行也该改。判定动作：标「移除+改路由」，移动后必须同步修掉 router/CLAUDE.md 里对应引用（交 guide-skill-auditor 或手动），不留死引用。不再是免死牌。
+9. **被 router 引用的 D 类 → 删 skill + 顺手改路由。** 理由：skill 真没用，引用它的路由那行也该改。判定动作：标「移除+改路由」，移动后必须同步修掉 router/CLAUDE.md 里对应引用（交 skill-auditor 或手动），不留死引用。不再是免死牌。
 10. **E 类（流程型）留兜底。** 你按任务分级用模型：弱模型 + 复杂任务时流程型是兜底。流程型**不一刀切删**，只有「D 类 AND 零引用 AND 无资产」才进移除候选。
 11. **Superpowers 套件不审。** 整个 SP 套件豁免启用时机审查，不进「过度流程候选」，默认全留。（你已定：不审。**2026-08-19 更新：SP 插件已卸载、手法层转 matt+ask-matt，本决议失效存档，下文 SP 相关条目随决议一并失效。**）
 12. **分类建议必须用户拍板，AI 不自动执行移除。**（2026-07-23 先例。）
@@ -98,7 +98,7 @@ grep -rl "skill名" ~/.pi/agent/skills/ ~/.pi/agent/skills-sync/ ~/.pi/agent/pro
 | 套件时机 | 属**非 SP** 套件/散装流程型吗？启用时机写清了吗？小任务会被拖全流程吗？（SP 套件按决议 #3 跳过本行） | 时机模糊+拖全流程 → 「保留-流程兜底」，仅标注不删 |
 | 工程体检【框架】 | frontmatter/description 有效吗？内容完整（任务步骤 / 输入输出 / 前置条件 / 错误处理）？含危险命令或过宽权限吗？移除会断别的 skill 依赖吗？ | 残缺 → 「需工程修复」；危险 → 「删前确认/隔离」；依赖脆弱 → 「需工程修复」 |
 | 生命周期/被覆盖【框架】 | 模型升级后已能覆盖它吗？别的 skill 已覆盖同能力吗？反复翻车的场景另有兜底吗？ | 被覆盖 → 「移除-被覆盖」候选 |
-| 触发面 | description 写得宽不宽？会不会和普通改动抢路由？ | 太宽 → 不删也应收窄描述（转 guide-skill-auditor / darwin-skill） |
+| 触发面 | description 写得宽不宽？会不会和普通改动抢路由？ | 太宽 → 不删也应收窄描述（转 skill-auditor / darwin-skill） |
 | 运行验证【实践】 | 拿不准的候选（疑似冗余/被覆盖/重复能力），**实际加载 SKILL.md 试跑一次**：加载成功吗？关键步骤按说明可执行吗？产出达标吗？ | 跑不动/假运行 → 疑「删前确认」；跑得动且达标 → 运行证据支持留 |
 
 判定结果（十一档）：
@@ -107,7 +107,7 @@ grep -rl "skill名" ~/.pi/agent/skills/ ~/.pi/agent/skills-sync/ ~/.pi/agent/pro
 - **保留-流程兜底**：流程型/E 类——按决议 #2 留兜底，不审。
 - **保留-SP套件**：Superpowers 套件成员——按决议 #3 豁免，不审。
 - **需工程修复**【框架】：能力该留但 frontmatter/内容残缺或依赖脆弱——修不删；修完复查是否降级为冗余。
-- **移除+改路由**：D 类且没用，但被 router/CLAUDE.md/其他 skill 引用——按决议 #1 删 skill，同时列出引用方清单，移动后逐一修掉引用（交 guide-skill-auditor 或手动），不留死引用。
+- **移除+改路由**：D 类且没用，但被 router/CLAUDE.md/其他 skill 引用——按决议 #1 删 skill，同时列出引用方清单，移动后逐一修掉引用（交 skill-auditor 或手动），不留死引用。
 - **移除-被覆盖**【框架】：模型能力提升或他 skill 已覆盖同能力，Expert 已降级 Redundant——移入备份，不留死引用（引用方清单同「移除+改路由」）。
 - **收窄描述**：能力该留但触发面太宽抢路由——问题在 description 不在能力，改描述而非删。
 - **移入 CLAUDE.md/规则文件**：D 类里只有 1-2 条真正项目特有/每轮要遵守的 → 把那几条挪进 CLAUDE.md/AGENTS.md，然后删 skill；机械约束（漏一次就出事）挪进 hook/CI/linter/测试，不靠自然语言提醒（【文章】规则分流框架）。
@@ -194,9 +194,8 @@ python ~/.pi/agent/skills/skill-trimmer/scripts/review_server.py read --require-
 
 ## 与其他 skill 的分工
 
-- **guide-skill-auditor**：审 router 型 guide 的质量/误路由/抢单——它管「router 健不健康」，本 skill 管「库里哪些该留」。精简后若发现 router 引用了被移 skill，用 guide-skill-auditor 修 router。
-- **darwin-skill / skill-creator**：优化单个 skill 的内容与描述。本 skill 判定「收窄描述」「需工程修复（内容深度部分）」的，交给它们改（darwin-skill 已集成 SkillLens 9 维内容评分）。
-- **skill-creator**：判定结果是「这个坑没有 skill 兜、值得新建一个」（SLIM 的失败场景→新建触发）时，走它。
+- **skill-auditor**：审 router、executor、reference、maintenance 的单 skill 质量、触发边界、设计和运行验证；本 skill 管「库里哪些该留」。精简后若发现 router 引用了被移 skill，交由 skill-auditor 修 router。
+- **skill-auditor**：判定「这个坑没有 skill 兜、值得新建一个」时负责设计触发契约和最小正文；本 skill 只提供库级留删证据，不重复设计内容。
 - **skill-up（演进）**：将来要做正式 A/B 评测（开/关 skill 对比任务完成率）时，用 `github.com/alibaba/skill-up`，本 skill 当前只做轻量信号判定。
 - **skill-slimming（已吸收 2026-08-14）**：原 LearnPrompt/carl-skills 的全局治理 skill，其复用资产（review_server 复审页 / audit-contract / 触发空壳合同 / 三维 token 模型 / 测量标签纪律）已并入本 skill（见 4.5 与「触发空壳合同」）。未吸收部分：多宿主/插件/MCP 审计（本机 Claude Code 单宿主）、apply/delete 执行阶段与 verification_receipt、recheck 漂移复查、Codex agents 清单——当前判定流程不需要，不做。
 

@@ -23,8 +23,8 @@ ADD_PATTERNS = [
     (re.compile(r"\bapk\s+add\b|\bapt(?:-get)?\s+install\b|\byum\s+install\b|\bdnf\s+install\b|\bpacman\s+-S\b|\bbrew\s+install\b"), "系统包管理器 install"),
 ]
 
-def deny(msg):
-    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": msg}}, ensure_ascii=False))
+def ask(msg):
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "ask", "permissionDecisionReason": msg}}, ensure_ascii=False))
     sys.exit(0)
 
 try:
@@ -42,5 +42,5 @@ hits = [name for rx, name in ADD_PATTERNS if rx.search(cmd)]
 if not hits:
     sys.exit(0)
 
-deny(f"dep_gate: 命令疑似新增依赖 -> {', '.join(hits[:3])}.\n  命令: {cmd[:100]}\n  CLAUDE.md §1.1 / §6: 新增依赖=技术栈/攻击面变更,属「须确认」级.\n  -> 动手前向用户确认: 包名+版本+来源可信度.\n  -> 本地 -e ./path 开发装、lock 重建等不新增外部攻击面的可放过.")
+ask(f"dep_gate: 命令疑似新增依赖 -> {', '.join(hits[:3])}.\n  命令: {cmd[:100]}\n  CLAUDE.md §1.1 / §6: 新增依赖=技术栈/攻击面变更,属「须确认」级.\n  -> 动手前向用户确认: 包名+版本+来源可信度.\n  -> 本地 -e ./path 开发装、lock 重建等不新增外部攻击面的可放过.")
 sys.exit(0)

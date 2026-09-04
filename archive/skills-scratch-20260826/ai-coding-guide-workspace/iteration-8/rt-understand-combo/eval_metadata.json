@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "理解代码组合路径不二选一",
-  "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这项目 auth 模块怎么工作的？谁调用了 login？\n",
-  "assertions": [
-    "output_contains.all: missing [gitnexus]"
-  ]
-}

@@ -83,8 +83,38 @@ def changed_code_hashes(root):
     return paths
 
 
+def strip_shell_comment(segment):
+    quote = ""
+    index = 0
+    while index < len(segment):
+        char = segment[index]
+        if quote == "'":
+            if char == "'":
+                quote = ""
+            index += 1
+            continue
+        if quote == '"':
+            if char == "\\":
+                index += 2
+                continue
+            if char == '"':
+                quote = ""
+            index += 1
+            continue
+        if char in "'\"":
+            quote = char
+        elif char in "\\`":
+            index += 2
+            continue
+        elif char == "#":
+            return segment[:index]
+        index += 1
+    return segment
+
+
 def find_match(command):
     for segment in SEGMENT_SPLIT.split(command):
+        segment = strip_shell_comment(segment)
         stripped = segment.strip()
         if not stripped or OUTPUT_PREFIX.match(stripped) or SEARCH_PREFIX.match(stripped):
             continue
@@ -112,11 +142,66 @@ def load(sid):
     return st
 
 def save(st):
+    path = state_path(st.get("session_id", "unknown"))
+    lock_path = f"{path}.lock"
+    deadline = time.monotonic() + 1.0
+    locked = False
+    temp_path = f"{path}.{os.getpid()}.{time.time_ns()}.tmp"
     try:
-        with open(state_path(st.get("session_id", "unknown")), "w", encoding="utf-8") as f:
-            json.dump(st, f)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        while time.monotonic() < deadline:
+            try:
+                fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.close(fd)
+                locked = True
+                break
+            except FileExistsError:
+                try:
+                    if time.time() - os.path.getmtime(lock_path) > 10:
+                        os.unlink(lock_path)
+                        continue
+                except OSError:
+                    continue
+                time.sleep(0.02)
+        if not locked:
+            return
+
+        disk = {}
+        try:
+            with open(path, encoding="utf-8") as f:
+                candidate = json.load(f)
+            if isinstance(candidate, dict) and candidate.get("session_id") == st.get("session_id"):
+                disk = candidate
+        except Exception:
+            pass
+        merged = {**disk, **st}
+        for key in ("paths", "code_pending", "verify_cmds"):
+            values = list(disk.get(key, [])) if isinstance(disk.get(key), list) else []
+            for value in st.get(key, []):
+                if value not in values:
+                    values.append(value)
+            merged[key] = values[-20:] if key == "verify_cmds" else values
+        for key in ("last_edit_ts", "last_verify_ts"):
+            merged[key] = max(float(disk.get(key, 0)), float(st.get(key, 0)))
+        edits = dict(disk.get("edits_per_path", {})) if isinstance(disk.get("edits_per_path"), dict) else {}
+        if isinstance(st.get("edits_per_path"), dict):
+            for key, value in st["edits_per_path"].items():
+                edits[key] = max(int(edits.get(key, 0)), int(value))
+        merged["edits_per_path"] = edits
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(merged, f)
+        os.replace(temp_path, path)
     except Exception:
-        pass
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+    finally:
+        if locked:
+            try:
+                os.unlink(lock_path)
+            except OSError:
+                pass
 
 def succeeded(data):
     response = data.get("tool_response")

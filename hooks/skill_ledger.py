@@ -9,8 +9,19 @@ plugin:/namespace: 前缀原样记录，归一交给 scan_skills.py 单点处理
 import sys, json
 from datetime import datetime
 from pathlib import Path
+import re
 
 LOG = Path.home() / ".claude" / "metrics" / "skill-usage.log"
+SECRET_ARG = re.compile(
+    r"(?i)(--?(?:token|password|passwd|secret|api[-_]?key|access[-_]?token|private[-_]?key))"
+    r"(?:=|\s+)(?:\"[^\"]*\"|'[^']*'|[^\s]+)"
+)
+
+
+def redact_args(value):
+    if not isinstance(value, str):
+        return "[non-text args]"
+    return SECRET_ARG.sub(r"\1=<redacted>", value)[:2000]
 
 def main() -> int:
     try:
@@ -29,10 +40,10 @@ def main() -> int:
         "ts": datetime.now().astimezone().isoformat(timespec="seconds"),
         "session_id": data.get("session_id", ""),
         "skill": skill,
-        "args": ti.get("args", ""),
+        "args": redact_args(ti.get("args", "")),
     }, ensure_ascii=False)
     try:
-        LOG.parent.mkdir(exist_ok=True)
+        LOG.parent.mkdir(parents=True, exist_ok=True)
         with open(LOG, "a", encoding="utf-8") as f:
             f.write(line + "\n")
     except OSError:

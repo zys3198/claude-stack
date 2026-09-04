@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "为迷你项目产出 AI 上下文",
-  "prompt": "用 ai-readable-project 把这个项目梳理成 AI 可读的。\n产出 docs/ai-context/ 目录，包含根 CLAUDE.md 知识索引和 AGENTS.md 模块说明。\n项目很小，直接读 src/ 和 README.md 即可。\n",
-  "assertions": [
-    "expect.files_exist"
-  ]
-}

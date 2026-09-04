@@ -1,9 +1,7 @@
 ---
 name: drawio-chart
 description: >-
-  Draw.io 配图专家：根据需求生成专业的 draw.io 图表，支持流程图、架构图、时序图、ER图等，可导出为 PNG/SVG/PDF 格式。视觉风格与
-  floracat-architecture-diagram
-  保持一致。触发词：画图、流程图、架构图、时序图、drawio、配图、做个图、draw.io、状态机图、ER图、思维导图。
+  Draw.io 图表生成与导出 skill：仅在用户要实际生成或导出 draw.io 图表时触发，支持流程图、架构图、时序图、ER 图等，可导出为 PNG/SVG/PDF。文章/文档配图的必要性判断、图表类型选择和图文一致性校验不触发本 skill，走 drawio-article-illustration。视觉风格与 floracat-architecture-diagram 保持一致。
 ---
 # Draw.io 配图协议
 

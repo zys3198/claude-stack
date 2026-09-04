@@ -1,10 +1,10 @@
 ---
 name: content-to-note
 description: >-
-  把公众号/B站/抖音链接提取整理成结构化 Markdown 笔记,自动识别来源路由。用户分享 mp.weixin.qq.com / bilibili.com
-  / b23.tv / v.douyin.com / douyin.com 链接,或说"提取/整理/做笔记/存一下这篇/记成笔记"时使用。统一落盘到
-  wiki(公众号进 71-公众号文章、视频进 70-视频笔记),frontmatter 统一。各来源底层提取由专用 skill、脚本或现有检索工具负责,本 skill
-  只做路由 + 协调 + 统一笔记规范。触发:提取公众号、整理B站视频、这个链接做笔记、存一下这篇、帮我记成笔记。
+  把公众号/抖音链接提取整理成结构化 Markdown 笔记，统一落盘 wiki（公众号进
+  71-公众号文章、视频进 70-视频笔记），frontmatter 统一。用户分享 mp.weixin.qq.com
+  / v.douyin.com / douyin.com 链接，或说"提取/整理/做笔记/存一下这篇/记成笔记"时触发。
+  纯 B站 内容直达 bili-note 不触发本 skill。底层提取调专用脚本/工具，本 skill 负责协调与统一笔记规范。
 ---
 # content-to-note
 

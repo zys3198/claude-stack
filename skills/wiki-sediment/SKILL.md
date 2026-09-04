@@ -1,9 +1,11 @@
 ---
 name: wiki-sediment
 description: >-
-  把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki）。触发：用户说「沉淀」「入库 wiki」「存进 wiki」「记成笔记」，或调用
-  /wiki-save。四条路径：书籍/教程（knowledge-note）、对话收获（learning-record）、AI 纠偏（memory
-  feedback）、仪表盘刷新。不用于：公众号/B站/抖音链接（走 content-to-note）、新建非笔记类治理文档、改存量笔记内容。
+  把学完的内容合规沉淀进本 wiki（C:\ZYS\Wiki），是落盘位置与流程的唯一规范：书籍/教程→
+  knowledge-note、对话收获→learning-record（80-学习记录/NNNN-slug.md）、AI 纠偏→memory
+  feedback、仪表盘刷新。触发：用户说「沉淀」「入库 wiki」「存进 wiki」「记成笔记」，或调用
+  /wiki-save。不用于：公众号/抖音链接（走 content-to-note，纯 B站走 bili-note）、
+  新建非笔记类治理文档、改存量笔记内容。
 ---
 # wiki-sediment — 自动化沉淀进 wiki
 

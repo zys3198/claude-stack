@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "兄弟域转介-写代码",
-  "prompt": "请用 learning-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：帮我写个 Python 脚本处理 CSV\n",
-  "assertions": [
-    "output_contains{all:[ai-coding-guide]}"
-  ]
-}

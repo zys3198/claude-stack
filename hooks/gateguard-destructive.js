@@ -48,7 +48,7 @@ const ECC_ENABLE_VALUES = new Set(['1', 'true', 'on', 'enabled', 'enable', 'yes'
 // phrases without shell-flag ordering concerns. Quoted strings are
 // stripped before this regex runs so a commit message mentioning
 // "drop table" no longer triggers a false positive.
-const DESTRUCTIVE_SQL_DD = /\b(drop\s+table|delete\s+from|truncate|dd\s+if=)\b/i;
+const DESTRUCTIVE_SQL_DD = /\b(?:drop\s+table|delete\s+from|truncate(?:\s+table)?|dd\s+if\s*=)/i;
 
 // Operator-supplied additional destructive patterns. Lazily compiled from
 // `GATEGUARD_BASH_EXTRA_DESTRUCTIVE` (regex source) on first use, then
@@ -292,22 +292,64 @@ function quoteAwareSegments(input) {
 }
 
 const SHELL_WRAPPERS = new Set(['sh', 'bash', 'zsh', 'dash', 'ksh']);
+const COMMAND_WRAPPERS = new Set(['env', 'sudo', 'command', 'eval']);
+
+function wrapperCommandTokens(tokens) {
+  if (!tokens.length) return null;
+  const base = commandBasename(tokens[0]);
+  if (!COMMAND_WRAPPERS.has(base)) return null;
+
+  let index = 1;
+  if (base === 'eval') {
+    return index < tokens.length ? tokenize(tokens.slice(index).join(' ')) : null;
+  }
+
+  const valueOptions = base === 'sudo'
+    ? new Set(['-u', '--user', '-g', '--group', '-h', '--host', '-p', '--prompt', '-C', '--chdir'])
+    : new Set();
+  while (index < tokens.length) {
+    const token = tokens[index];
+    if (token === '--') {
+      index += 1;
+      break;
+    }
+    if (base === 'env' && /^[A-Za-z_][A-Za-z0-9_]*=/.test(token)) {
+      index += 1;
+      continue;
+    }
+    if (token.startsWith('-')) {
+      index += valueOptions.has(token) ? 2 : 1;
+      continue;
+    }
+    break;
+  }
+  return index < tokens.length ? tokens.slice(index) : null;
+}
+
+function isDestructiveCommandTokens(tokens, depth = 0) {
+  if (depth > 4 || !tokens.length) return false;
+  if (isDestructiveRm(tokens) || isDestructiveGit(tokens)) return true;
+  if (tokens[0] === '!' || commandBasename(tokens[0]) === 'then') {
+    return isDestructiveCommandTokens(tokens.slice(1), depth + 1);
+  }
+  const nested = wrapperCommandTokens(tokens);
+  return nested ? isDestructiveCommandTokens(nested, depth + 1) : false;
+}
 
 /**
  * Quote-aware destructive check: catches quoted command words, newline
- * separators, quoted `find -exec`, and `sh -c`/`bash -c` wrappers that evade
- * the quote-stripping path (GHSA-4v57-ph3x-gf55).
+ * separators, quoted `find -exec`, and shell/wrapper commands that evade
+ * the quote-stripping path.
  *
  * @param {string} raw
- * @param {number} [depth] recursion guard for shell -c wrappers
+ * @param {number} [depth] recursion guard for wrappers
  * @returns {boolean}
  */
 function isDestructiveQuoteAware(raw, depth = 0) {
   if (depth > 4) return false;
   for (const tokens of quoteAwareSegments(raw)) {
     if (tokens.length === 0) continue;
-    if (isDestructiveRm(tokens)) return true;
-    if (isDestructiveGit(tokens)) return true;
+    if (isDestructiveCommandTokens(tokens, depth)) return true;
     if (isDestructiveFindExec(tokens.join(' '))) return true;
     const base = commandBasename(tokens[0]);
     if (SHELL_WRAPPERS.has(base)) {
@@ -584,7 +626,7 @@ function isDestructiveFindExec(command) {
   }
 
   // Find the `-exec` token
-  const execIndex = tokens.indexOf('-exec');
+  const execIndex = tokens.findIndex(token => token === '-exec' || token === '-execdir');
   if (execIndex === -1) {
     return false;
   }
@@ -626,18 +668,44 @@ function isDestructiveFindExec(command) {
   return false;
 }
 
+const NON_EXECUTING_COMMANDS = new Set([
+  'echo', 'printf', 'print', 'write-output', 'write-host',
+  'grep', 'rg', 'ripgrep', 'findstr', 'select-string'
+]);
+
+function isDestructiveSqlOrDd(raw) {
+  for (const body of collectExecutableBodies(raw)) {
+    for (const tokens of quoteAwareSegments(body)) {
+      if (!tokens.length) continue;
+      const nested = wrapperCommandTokens(tokens);
+      const effective = nested || tokens;
+      const base = commandBasename(effective[0]);
+      if (NON_EXECUTING_COMMANDS.has(base) || base === 'git') continue;
+      if (SHELL_WRAPPERS.has(base)) {
+        const ci = effective.indexOf('-c');
+        if (ci !== -1 && effective[ci + 1] && isDestructiveSqlOrDd(effective[ci + 1])) {
+          return true;
+        }
+        continue;
+      }
+      if (DESTRUCTIVE_SQL_DD.test(effective.join(' '))) return true;
+    }
+  }
+  return false;
+}
+
 function isDestructiveBash(command) {
   // The SQL/dd phrases live in command bodies, not as flag-bearing
   // arguments, so we still match them by regex — but on the input
   // after quoting AND subshell delimiters are normalized so phrases
   // inside `$(...)` or backticks are also caught.
   const raw = String(command || '');
-  const flattened = explodeSubshells(stripQuotedStrings(raw));
-  if (DESTRUCTIVE_SQL_DD.test(flattened)) return true;
+  if (isDestructiveSqlOrDd(raw)) return true;
 
   // Operator-supplied additional destructive patterns. Same scope as the
   // built-in SQL/dd regex: matched against the quote-stripped, subshell-
   // exploded command so a phrase inside `$(...)` or backticks is caught.
+  const flattened = explodeSubshells(stripQuotedStrings(raw));
   const extra = getExtraDestructiveRegex();
   if (extra && extra.test(flattened)) return true;
 
@@ -660,7 +728,6 @@ function isDestructiveBash(command) {
   const segments = bodies.flatMap(splitCommandSegments);
   for (const segment of segments) {
     const stripped = stripQuotedStrings(segment);
-    if (DESTRUCTIVE_SQL_DD.test(stripped)) return true;
     if (extra && extra.test(stripped)) return true;
     const tokens = tokenize(segment);
     if (isDestructiveRm(tokens)) return true;
@@ -723,8 +790,7 @@ function resolveSessionKey(data) {
     return hashSessionKey('tx', path.resolve(String(transcriptPath).trim()));
   }
 
-  const projectFingerprint = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-  return hashSessionKey('proj', path.resolve(projectFingerprint));
+  return '';
 }
 
 function getStateFile(data) {
@@ -740,6 +806,9 @@ function loadState() {
   try {
     if (fs.existsSync(stateFile)) {
       const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+      if (!state || typeof state !== 'object' || Array.isArray(state) || !Array.isArray(state.checked)) {
+        return { checked: [], last_active: Date.now(), __invalid: true };
+      }
       const lastActive = state.last_active || 0;
       if (Date.now() - lastActive > SESSION_TIMEOUT_MS) {
         try {
@@ -751,8 +820,11 @@ function loadState() {
       }
       return state;
     }
-  } catch (_) {
-    /* ignore */
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      return { checked: [], last_active: Date.now() };
+    }
+    return { checked: [], last_active: Date.now(), __invalid: true };
   }
   return { checked: [], last_active: Date.now() };
 }
@@ -836,6 +908,7 @@ function saveState(state) {
 
 function markChecked(key) {
   const state = loadState();
+  if (state.__invalid) return false;
   if (!state.checked.includes(key)) {
     state.checked.push(key);
     return saveState(state);
@@ -877,6 +950,7 @@ function getDenialCount(state) {
  */
 function markCheckedAndCountDenial(key) {
   const state = loadState();
+  if (state.__invalid) return { ok: false, denials: 0 };
   if (!state.checked.includes(key)) {
     state.checked.push(key);
   }
@@ -887,6 +961,7 @@ function markCheckedAndCountDenial(key) {
 
 function isChecked(key) {
   const state = loadState();
+  if (state.__invalid) return false;
   const found = state.checked.includes(key);
   if (found && Date.now() - (state.last_active || 0) > READ_HEARTBEAT_MS) {
     saveState(state);
@@ -935,11 +1010,6 @@ function normalizeForMatch(value) {
   return String(value || '')
     .replace(/\\/g, '/')
     .toLowerCase();
-}
-
-function isClaudeSettingsPath(filePath) {
-  const normalized = normalizeForMatch(filePath);
-  return /(^|\/)\.claude\/settings(?:\.[^/]+)?\.json$/.test(normalized);
 }
 
 function isReadOnlyGitIntrospection(command) {
@@ -1091,16 +1161,6 @@ function withRecoveryHint(message, hookIds = [EDIT_WRITE_HOOK_ID]) {
   return [message, '', `Recovery: if GateGuard is blocking setup or repair work, run this session with \`ECC_GATEGUARD=off\` or add ${disableTargets} to \`ECC_DISABLED_HOOKS\`.`].join('\n');
 }
 
-function isSubagentInvocation(data) {
-  if (!data || typeof data !== 'object') {
-    return false;
-  }
-
-  const candidates = [data.agent_id, data.agentId, data.parent_tool_use_id, data.parentToolUseId];
-
-  return candidates.some(candidate => typeof candidate === 'string' && candidate.trim());
-}
-
 // --- Deny helper ---
 
 function denyResult(reason, options = {}) {
@@ -1118,11 +1178,11 @@ function denyResult(reason, options = {}) {
   };
 }
 
-function allowWithStateWarning() {
-  return {
-    stderr: '[Fact-Forcing Gate] GateGuard state could not be persisted; allowing this operation to avoid a permanent retry loop. Check GATEGUARD_STATE_DIR or filesystem permissions.',
-    exitCode: 0
-  };
+function denyStateFailure() {
+  return denyResult(
+    '[Fact-Forcing Gate] GateGuard 状态无法读取或持久化，拒绝执行此操作；请检查 GATEGUARD_STATE_DIR 或文件系统权限后重试。',
+    { includeRecoveryHint: false }
+  );
 }
 
 // --- Core logic (exported for run-with-flags.js) ---
@@ -1132,37 +1192,44 @@ function run(rawInput) {
   try {
     data = typeof rawInput === 'string' ? JSON.parse(rawInput) : rawInput;
   } catch (_) {
-    return rawInput; // allow on parse error
+    return denyResult('[Fact-Forcing Gate] Hook 输入不是有效 JSON，拒绝执行未审查操作。', { includeRecoveryHint: false });
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return denyResult('[Fact-Forcing Gate] Hook 输入结构无效，拒绝执行未审查操作。', { includeRecoveryHint: false });
   }
 
   if (isGateGuardDisabled()) {
     return rawInput;
   }
 
-  activeStateFile = null;
-  getStateFile(data);
-
   const rawToolName = data.tool_name || '';
   const toolInput = data.tool_input || {};
   // Normalize: case-insensitive matching via lookup map
   const TOOL_MAP = { edit: 'Edit', write: 'Write', multiedit: 'MultiEdit', bash: 'Bash' };
   const toolName = TOOL_MAP[rawToolName.toLowerCase()] || rawToolName;
-  const inSubagent = isSubagentInvocation(data);
+  if (toolName === 'Bash' && isReadOnlyGitIntrospection(toolInput.command || '')) {
+    return rawInput;
+  }
+  if (!['Edit', 'Write', 'MultiEdit', 'Bash'].includes(toolName)) {
+    return rawInput;
+  }
+  if (!resolveSessionKey(data)) {
+    return denyResult('[Fact-Forcing Gate] 缺少 session_id 或 transcript_path，无法隔离 GateGuard 状态，拒绝执行此操作。', { includeRecoveryHint: false });
+  }
+
+  activeStateFile = null;
+  getStateFile(data);
 
   if (toolName === 'Edit' || toolName === 'Write') {
     const filePath = toolInput.file_path || '';
-    if (!filePath || isClaudeSettingsPath(filePath)) {
+    if (!filePath) {
       return rawInput; // allow
-    }
-
-    if (inSubagent) {
-      return rawInput; // parent session already passed the first-touch file gate
     }
 
     if (!isChecked(filePath)) {
       const { ok, denials } = markCheckedAndCountDenial(filePath);
       if (!ok) {
-        return allowWithStateWarning();
+        return denyStateFailure();
       }
       if (denials > getFullDenialBudget()) {
         const action = toolName === 'Edit' ? 'edit' : 'creation';
@@ -1175,17 +1242,13 @@ function run(rawInput) {
   }
 
   if (toolName === 'MultiEdit') {
-    if (inSubagent) {
-      return rawInput; // parent session already passed the first-touch file gate
-    }
-
     const edits = toolInput.edits || [];
     for (const edit of edits) {
       const filePath = edit.file_path || '';
-      if (filePath && !isClaudeSettingsPath(filePath) && !isChecked(filePath)) {
+      if (filePath && !isChecked(filePath)) {
         const { ok, denials } = markCheckedAndCountDenial(filePath);
         if (!ok) {
-          return allowWithStateWarning();
+          return denyStateFailure();
         }
         if (denials > getFullDenialBudget()) {
           return denyResult(condensedGateMsg('edit', filePath, denials), { includeRecoveryHint: false });
@@ -1207,7 +1270,7 @@ function run(rawInput) {
       const key = '__destructive__' + crypto.createHash('sha256').update(command).digest('hex').slice(0, 16);
       if (!isChecked(key)) {
         if (!markChecked(key)) {
-          return allowWithStateWarning();
+          return denyStateFailure();
         }
         return denyResult(destructiveBashMsg(), { includeRecoveryHint: false });
       }
@@ -1224,7 +1287,7 @@ function run(rawInput) {
 
     if (!isChecked(ROUTINE_BASH_SESSION_KEY)) {
       if (!markChecked(ROUTINE_BASH_SESSION_KEY)) {
-        return allowWithStateWarning();
+        return denyStateFailure();
       }
       return denyResult(routineBashMsg(), { hookIds: [BASH_HOOK_ID] });
     }

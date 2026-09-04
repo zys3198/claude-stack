@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "去 AI 味-human-writing",
-  "prompt": "请用 article-writing-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这篇文章 AI 味太重了，帮我改得像人写的\n",
-  "assertions": [
-    "output_contains{all:[human-writing]}"
-  ]
-}

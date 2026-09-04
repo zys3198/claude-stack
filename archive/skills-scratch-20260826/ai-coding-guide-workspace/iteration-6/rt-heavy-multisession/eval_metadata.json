@@ -1,9 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "重任务跨会话进交付状态机",
-  "prompt": "请用 ai-coding-guide 做开工路由判断：输出「分类 / 主路径 / 组合 / 闸门 / 下一步」五项路由契约，只做路由判断，不要执行任务本身。\n请求：这个改造任务比较大，估计要跨几个会话，怎么管？\n",
-  "assertions": [
-    "output_contains{all:[状态机 口令]}",
-    "output_contains{not:[devflow]}"
-  ]
-}

@@ -18,12 +18,13 @@
 - 依赖：无
 - 备注：**双形态并存**（memory `matt-skills-dual-form`）：裸名 model-invoked 可调；插件版 14 个 user-invoked 模型调不到需手动敲（含 ask-matt，见 `ask-matt-key-flow-decision`）。选型拍板：Matt 主力 + Superpowers 备用 + ECC 跳过（memory `skill-ecosystem-choice-2026-07`）。
 
-### Superpowers（备用套件）
+### ~~Superpowers（备用套件）~~（已卸载 2026-08-19）
 - 来源：https://github.com/obra/superpowers
 - 安装日期：2026-06/07（待补）
-- 安装方法：clone/copy 进 `~/.claude/skills/` + 插件版 `superpowers@claude-plugins-official` 启用
-- 装到哪：`~/.claude/skills/`（brainstorming、systematic-debugging、test-driven-development、writing-plans、worktrees 等）
-- 备注：定位=备用（流程类与 Matt 重叠时以 Matt 优先，画像匹配见选型 memory）。
+- 安装方法：曾 clone/copy 进 `~/.claude/skills/`，并启用插件 `superpowers@claude-plugins-official`
+- 装到哪：曾在 `~/.claude/skills/`（brainstorming、systematic-debugging、test-driven-development、writing-plans、worktrees 等）
+- 当前状态：插件已卸载，缓存目录按历史记录保留；当前不加载。
+- 备注：历史定位=备用（流程类与 Matt 重叠时以 Matt 优先）；恢复方式见本文件下方卸载记录。
 
 ### 仓颉 cangjie-skill + first-principles pack
 - 来源：https://github.com/Yeadon8888/cangjie-skill（仓颉）+ https://github.com/kangarooking/first-principles-skill（第一性原理 pack；2026-08-11 公网反查锁定）
@@ -32,17 +33,18 @@
 - 装到哪：`~/.claude/skills/cangjie-skill` + first-principles pack 7 个在案（axiomatic-thinking / contrarian-decision / implicit-assumption / logic-triple-check / multi-mental-models / organizational-refresh / reductionism-deconstruction）
 - 备注：RIA++ 质量扎实；20+ pack 可用性分级见该 memory。更正 2026-08-11：critical-thinking 经用户人工复核认定为自建，已入 git 白名单；zoom-out 实为 mattpocock/skills 成员，不属此 pack；founder-cognitive-boundary 磁盘已不在。
 
-### ECC（重型套件）
+### ~~ECC（重型套件）~~（已卸载 2026-08-13）
 - 来源：https://github.com/affaan-m/ECC
-- 安装日期：待补
-- 安装方法：插件 marketplace（`/plugin marketplace add affaan-m/ECC`）+ 全插件启用；部分资产（statusline）已剥离（memory `statusline-independent-of-ecc`）
-- 装到哪：插件 `ecc@ecc`；hooks（Fact-Forcing Gate / GateGuard 等）；cc-switch 侧裸名 skill 已随 skills 域清除（2026-08-13）
-- 备注：用户拍板插件全开不关（memory `ecc-plugin-evaluation`）。升级会重置 settings 路径需留意。
+- 安装日期：待补；卸载日期：2026-08-13
+- 安装方法：曾通过插件 marketplace（`/plugin marketplace add affaan-m/ECC`）安装并启用
+- 曾装到哪：插件 `ecc@ecc`；hooks（Fact-Forcing Gate / GateGuard 等）；部分 hook 与 chrome-devtools MCP 已按用户决策剥离保留
+- 当前状态：插件与 marketplace 已移除；缓存可能作为历史回退对照保留，不代表当前可用。
+- 备注：插件卸载与剥离细节见 `custom-setup.md`「ecc 剥离/卸载」章节；恢复需重新安装并重新评估 hook 冲突。
 
 ### ~~LoopForge devflow~~ → 已 fork 脱轨为自有系统 ai-coding-guide（2026-08-18）
 - 来源：https://github.com/Tencent/LoopForge（上游 clone 在 `C:\ZYS\Code\loopforge`，HEAD 09c7652，仅作「看官方更新」参考窗口，**不再 pull 升级**，好更新人工挑拣吸收）
 - 安装日期：2026-08（fork 脱轨定案 2026-08-18，用户拍板）
-- 现状：`~/.claude/skills/ai-coding-guide/` = devflow 官方骨架彻底 fork + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入，CLAUDE.md §2.1 入口行不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留，Phase 2 路由吸收源料）。已入 git 白名单（`!skills/ai-coding-guide/` + `!skills/manifest.json`）
+- 历史状态：`~/.claude/skills/ai-coding-guide/` 曾是 DevFlow 官方骨架 fork；现已退出全局 skill，旧 guide 归档于 `~/.claude/archive/ai-coding-guide-v1.9.0/`，后续 fork 版已删除并备份于 `~/.claude/backups/ai-coding-guide-delete-20260902/`。本条仅保留来源与 fork 前史。
 - 装到哪/构成：状态机骨架（scripts/templates/rules/agents/adapters=仅 claude+shared）+ `references/clarify-requirements.md`（2026-08-18 起顶层 `devflow-clarify-requirements/` skill 吸收入本体，原目录已删）+ 根级 `manifest.json`（adapter_registry.py 依赖，load-bearing）
 - 定制点：SKILL.md 名前/描述/标题 + 编码路由 stopgap 段、`commands/ai-coding-guide.md`（claude 化重写）、`references/routing-stopgap.md`（新建）、`references/runtime-core.md` 适配器段改 claude、`rules/stages/summary.md` 第 4 条（82-能力沉淀证据草稿）；删 `adapters/{codebuddy,codex,cursor}` + `agents/openai.yaml`；tests 删 7 个 codebuddy 专项、4 个适配 claude
 - 依赖：Python 3.8+ 标准库
@@ -59,7 +61,7 @@
 
 ### 思维/写作/学习类散件
 - 安装方法：clone/copy 进 `~/.claude/skills/`（`npx skills add <owner/repo>` 或手动 copy）
-- **口径更正 2026-08-11**：旧「2026-08-08 实测 105 个（94 真目录 + 11 junction/symlink）」作废——当日实测 0 symlink；全量复核后 skills/ 为 184 目录 = 31 自建（入 git，见 custom-setup.md）+ 约 150 非自建（仓库级来源多已锁定，见上方「散件来源反查登记」）。原分类示例段已删（把自建误列第三方，与 custom-setup.md 冲突）。
+- **历史盘点口径（2026-08-11，已过期）**：旧记录曾统计 skills/ 为 184 目录 = 31 自建 + 约 150 非自建；当前归属与可用状态以 `custom-setup.md` 的当前清单、实际 `skills/` 目录和本文件后续条目为准。原分类示例段已删，避免把自建误列第三方。
 
 ## 单件登记（含地址/装法/位置）
 
@@ -113,11 +115,11 @@
 | alvinunreal/oh-my-opencode-slim | worktrees, codemap, clonedeps, deepwork, simplify, reflect |
 | mattpocock/skills（插件外裸名） | to-prd, to-issues, request-refactor-plan, qa, design-an-interface, zoom-out |
 | abhigyanpatwari/GitNexus（`npx gitnexus analyze` 自动装） | gitnexus-cli, gitnexus-debugging, gitnexus-exploring, gitnexus-guide, gitnexus-impact-analysis, gitnexus-pdg-query, gitnexus-pr-review, gitnexus-refactoring, gitnexus-taint-analysis |
-| 单件 | agent-reach=Panniantong/Agent-Reach, douyin-video-summary=liu-wei-ai, shuorenhua=MrGeDiao/shuorenhua, find-skills=vercel-labs/skills, lean-ctx=yvgude/lean-ctx, hatch-pet=openai/skills, officecli=officecli/officecli, markdown-viewer=markdown-viewer/skills, bili-note=BiliNote 系（精确上游未锁定） |
+| 单件 | agent-reach=Panniantong/Agent-Reach（外部，非自建，https://github.com/Panniantong/Agent-Reach/tree/main）, douyin-video-summary=liu-wei-ai, shuorenhua=MrGeDiao/shuorenhua, find-skills=vercel-labs/skills, lean-ctx=yvgude/lean-ctx, hatch-pet=openai/skills, officecli=officecli/officecli, markdown-viewer=markdown-viewer/skills, ~~bili-note~~（用户确认自建，移至 custom-setup.md） |
 
 插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
 
-仍未锁定来源（公网搜不到且非用户自建）：human-writing、qiaomu-ai-prd、remotion、ruthless-review、tech-learning-roadmap、writing-great-skills、doc-finder 之外的 review/slop-review/design/apikey-image-gen/grok-image-to-video/hyperframes/github-task/loop-engineering 等——以磁盘现状为用，重装时按名再查。`ppt-master`、`playwright`、`impeccable` 已转 Claude Code 插件；`hallmark`、`kimi-webbridge` 的第三方来源与兼容性见 2026-08-26 清理批次。
+仍未锁定来源（公网搜不到且非用户自建）：human-writing、qiaomu-ai-prd、remotion、ruthless-review、writing-great-skills、doc-finder 之外的 review/slop-review/design/apikey-image-gen/grok-image-to-video/hyperframes/github-task/loop-engineering 等——以磁盘现状为用，重装时按名再查。`ppt-master`、`playwright`、`impeccable` 已转 Claude Code 插件；`hallmark`、`kimi-webbridge` 的第三方来源与兼容性见 2026-08-26 清理批次。
 
 ### ~~skill-slimming（LearnPrompt/carl-skills）~~（2026-08-14 已吸收后卸载）
 - 来源：https://github.com/LearnPrompt/carl-skills
@@ -174,3 +176,16 @@
 - 依赖：Node.js / npx；本次自动安装 `skills@1.5.23`
 - 内容：check-understanding、claude-certification、course-guide、find-your-level、learn、learn-agent-skills、learn-mcp、start-learning
 - 备注：CLI 安全评估标记 `claude-certification` 为 Critical Risk，`learn-agent-skills` 有 1 alert；使用前需人工审阅。项目新增 `skills-lock.json`。
+
+### Skill 库精简（2026-09-03，skill-trimmer 流程 + 用户逐项拍板）
+- **卸载（移入备份，非真删）**：learning-guide、article-writing-guide（纯域路由器砍除，下游直达）、lean-ctx、learning-personas、deep-learn、tech-learning-roadmap、expose-unknowns、preflight-check（预检清单并入 code-change-workflow §1.1）、tutorial-maker、ai-coding-coach（学习域收敛用户拍板）、hallmark（与插件 impeccable 重叠，归档 60 天观察至 2026-11-02）、generic-course-tutor-workspace（产物目录挪出）、wiki-skill（lab-area 项目级，与全局 improver-skill 重复）
+- **备份位置**：`~/.claude/backups/skill-trim-20260903/`（含 README.md 判定理由+恢复方式，恢复 = `mv` 回 `~/.claude/skills/`）
+- **改写**：generic-course-tutor / article-writer / bili-note / content-to-note / wiki-sediment 描述去路由转介自包含；parallel-delegation / bidirectional-steelman / leader 触发面收窄；code-change-workflow 并入 5 项环境预检清单
+- **插件**：`enabledPlugins.open-code-review → false`（review 三重撞车，留 official code-review + matt code-review + ponytail-review），已同步 cc-switch DB common_config_claude（backup: sync-backup-20260903_235738.json），providers commonConfigEnabled 均 True
+- **库规模**：32 目录 → 20 skill
+- **pi 侧退役（2026-09-04）**：用户拍板弃用 pi。`~/.pi/agent/skills/` + `skills-sync/`（185M，27+20 目录）移入 `~/.claude/backups/skill-trim-20260903/pi-side/`。~/.pi 其余（auth.json/memory/sessions/settings/台账/github-sync 脚本）保留未动，pi-stack git 仓库完好。恢复 = mv 回原位。
+- **插件卸载（2026-09-04）**：彻底卸载 ppt-master（缓存 102M）、officecli、taste-skill、frontend-design（均为长期禁用态）——settings.json enabledPlugins/extraKnownMarketplaces、installed_plugins.json、known_marketplaces.json、plugins/cache/ 四处同步清理。open-code-review 维持禁用未卸。playwright 禁用（浏览器自动化二选一，留 chrome-devtools MCP）。同步 cc-switch DB 完成。
+- **历史会话清理（2026-09-04）**：~/.claude/projects 清 3 天前 transcript（uuid 条目，memory 保留），释放 1.4G（2.2G→419M）。
+- **cc-switch-setting-sync 自动化（2026-09-04）**：新增 hooks/settings-sync-auto.py（PostToolUse Edit|Write，命中 settings.json 即自动同步 cc-switch DB，幂等 NO-OP），skill 降级为排查/修复/验证文档。同轮：skill_ledger.py 接线 PostToolUse matcher=Skill（skill-usage.log 记账恢复）；chrome-devtools-mcp 固定 1.8.0；hooks/ 清残留（HOOKS_BACKUP.md/debug.log/__pycache__）。
+- **存储自动化+清理（2026-09-04）**：settings.json 加 cleanupPeriodDays=7（transcript 自动滚动清理，替代手动清）；better-harness 8 个 2026-08-05 旧 run 目录（24M）与 archive/ 旧归档（30M）清空。
+- **install-ledger 自动化（2026-09-04）**：新增 hooks/install-ledger-reminder.py（PostToolUse Bash，匹配 claude plugin/mcp、npm -g、pip/pipx/uv/cargo/winget/scoop、npx skills add 等 10 类安装/卸载命令 → 追加 installing/auto-log.jsonl 兜底 + additionalContext 提醒模型按 §7 正式登记）。自检 tests/test_install_ledger_reminder.py（10 hit + 5 quiet 全过）。skill_ledger（Skill 调用记账）+ 本 hook（安装动作记账）+ ccswitch 自动同步三件齐。

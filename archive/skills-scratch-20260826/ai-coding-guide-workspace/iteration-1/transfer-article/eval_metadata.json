@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "域边界转介-文章审校",
-  "prompt": "帮我审下这篇技术文章有没有错",
-  "assertions": [
-    "output_contains.all: missing [article-writing-guide]"
-  ]
-}

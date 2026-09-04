@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "判级-已知的已知直接开工",
-  "prompt": "用 expose-unknowns 的方法处理这个请求：先判级，再按级出牌。请求：把 user 表加个 age 字段，DDL 和 MyBatis 映射都更新，验收标准是字段能正常读写\n",
-  "assertions": [
-    "output_contains{all:[已知的已知]}"
-  ]
-}

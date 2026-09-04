@@ -1,7 +1,0 @@
-{
-  "baseline": 0.5,
-  "candidate": 0.75,
-  "target": true,
-  "guardrail": true,
-  "holdout": true
-}

@@ -1,8 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "学习陪跑-你练模式",
-  "prompt": "我想练 debug 判断力，我先说假设，你来纠偏，别直接修",
-  "assertions": [
-    "output_contains.all: missing [ai-coding-coach]"
-  ]
-}

@@ -17,9 +17,17 @@
 - 依赖：Rust 工具链（或官方预编译二进制）
 - 备注：用途=context 压缩（ctx_read/ctx_shell/ctx_search 替代原生工具）。Windows+Git Bash 下曾踩 `_lc: command not found`，已修（见 memory `lean-ctx-bashenv-fix`）。shell 命令受 allowlist 限制，新命令被拦用 `lean-ctx allow <cmd>` 加白。
 - **Codex 侧集成（2026-08-08）**：`lean-ctx onboard` + `lean-ctx init --agent codex` 把 lean-ctx 注册到 Codex（`~/.codex/config.toml` 的 `[mcp_servers.lean-ctx]`）。onboard 同时装了 `~/.codex/hooks.json`（SessionStart/PreToolUse/PostToolUse/SessionEnd）、`~/.codex/AGENTS.md`、`~/.codex/LEAN-CTX.md`。**关键限制**：Codex 注册 MCP server（5 个只读 resources 可读）但不注入 function tools（ctx_read/ctx_shell 不在工具集），压缩走 CLI 回退。**CLI 不受 PathJail 限制**（2026-08-08 预验：`lean-ctx read ~/.codex/MIGRATION_HANDOFF.md` 成功，ctx_shell 的 allow_paths 只管 MCP 工具不管 CLI）。原样装回：`lean-ctx onboard` 选 Codex + `lean-ctx init --agent codex`。详见 [[codex-migration-phase1-done]]。
-- **重装（2026-08-09）**：doctor 报 3 问题（data dir split 两处 stats.json / MCP pin 非标准 LEAN_CTX_DATA_DIR / stale ANTHROPIC_BASE_URL 致 401），根因=旧版 `.config` vs `.local/share` 路径坑延续。按官方 getting-started 重装：`lean-ctx uninstall --keep-binary --yes`（全清配置/数据/hooks/skill，保留 3.9.18 二进制）-> `lean-ctx init --global`（shell hook + 24 aliases）-> `lean-ctx init --agent claude`（MCP + hooks + SKILL.md + CLAUDE.md 托管块 v9）-> `lean-ctx doctor --fix`（补 Cursor/Copilot/Augment/Hermes/VS Code hooks+rules）。结果 37/37 通过。**3.9.18 布局统一**：env.sh + shell-hook.bash 都在 `~/.config/lean-ctx`，`.bashrc` source 路径正确；MCP 不再 pin `LEAN_CTX_DATA_DIR`（只 command + instructions）；`.bashenv` 留空（`init --global` 不写，`_lc` 由 `.bashrc` 的 shell-hook.bash 提供，`type _lc` = 函数，链路通）。旧 `_lc: command not found` 坑未复现。备份 `C:\Users\zys31\lean-ctx-backup-20260809\`（stats.json x2、config.toml、.bashrc、.bashenv、doctor-final.txt）。Codex 侧（`~/.codex/`）已不存在，重装未涉及。原样装回：`lean-ctx uninstall --keep-binary --yes && lean-ctx init --global && lean-ctx init --agent claude && lean-ctx doctor --fix`。详见 memory `lean-ctx-bashenv-fix`（已更新）。
+- **重装（2026-08-09）**：doctor 报 3 问题（data dir split 两处 stats.json / MCP pin 非标准 LEAN_CTX_DATA_DIR / stale ANTHROPIC_BASE_URL 致 401），根因=旧版 `.config` vs `.local/share` 路径坑延续。按官方 getting-started 重装：`lean-ctx uninstall --keep-binary --yes`（全清配置/数据/hooks/skill，保留 3.9.18 二进制）-> `lean-ctx init --global`（shell hook + 24 aliases）-> `lean-ctx init --agent claude`（MCP + hooks + SKILL.md + CLAUDE.md 托管块 v9）-> `lean-ctx doctor --fix`（补 Cursor/Copilot/Augment/Hermes/VS Code hooks+rules）。结果 37/37 通过。**3.9.18 布局统一**：env.sh + shell-hook.bash 都在 `~/.config/lean-ctx`，`.bashrc` source 路径正确；MCP 当前仍固定 `LEAN_CTX_DATA_DIR=C:\Users\zys31\.config\lean-ctx`（以 `.claude.json` 运行态为准，2026-09-01 核验）；`.bashenv` 留空（`init --global` 不写，`_lc` 由 `.bashrc` 的 shell-hook.bash 提供，`type _lc` = 函数，链路通）。旧 `_lc: command not found` 坑未复现。备份 `C:\Users\zys31\lean-ctx-backup-20260809\`（stats.json x2、config.toml、.bashrc、.bashenv、doctor-final.txt）。Codex 侧（`~/.codex/`）已不存在，重装未涉及。原样装回：`lean-ctx uninstall --keep-binary --yes && lean-ctx init --global && lean-ctx init --agent claude && lean-ctx doctor --fix`。详见 memory `lean-ctx-bashenv-fix`（已更新）。
 
 
+
+### chrome-devtools
+- 来源：npm 包 `chrome-devtools-mcp`
+- 安装日期：未留存；当前配置于 2026-09-01 核验
+- 安装方法：`claude mcp add --scope user chrome-devtools -- cmd /c npx -y chrome-devtools-mcp@latest --isolated=true`
+- 装到哪：`~/.claude.json` → `mcpServers["chrome-devtools"]`；运行时通过 `cmd /c npx` 启动
+- 依赖：Node.js / npm / Chrome
+- 备注：stdio MCP，启用 `--isolated=true`；npx 首次运行自动解析 `chrome-devtools-mcp@latest`。
 
 ## 已卸载
 

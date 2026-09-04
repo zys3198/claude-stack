@@ -2,7 +2,7 @@
 
 记录自建 skill / hook / statusline / 全局配置的出处与迁移要点。外部装的见 skill-install.md / mcp-install.md / tool-install.md。
 
-自建资产迁移原则：**git 仓库已追踪全部自建**（26 个 skill + CLAUDE.md + hooks + statusline + installing/ 本目录，见 `.gitignore` skills/ 白名单；2026-08-11 用户人工复核定稿：勾选确认的进 Git，未认领的移出），`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
+自建资产迁移原则：**git 仓库应追踪全部自建 skill**（新增自建 skill 必须在 `.gitignore` 的 skills/ 白名单登记）；`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
 
 ---
 
@@ -36,18 +36,26 @@
 
 ---
 
-## 自建 skill（~/.claude/skills/ 下，非 cc-switch 同步）
+## 自建 skill（当前目录 + 历史记录，非 cc-switch 同步）
 
-### ai-coding-guide（编码域总入口系统，2026-08-18 fork 自 LoopForge devflow）
-- 出处：devflow 官方骨架彻底 fork 脱轨 + 旧 ai-coding-guide v1.9.0（散文路由器）退役并入；用户拍板「基于 devflow 为骨架做成一个系统，包含路由分类功能，面向 AI 不是人类」。上游仓库 `C:\ZYS\Code\loopforge` 仅作参考窗口，人工挑拣吸收，不 pull 升级
-- 构成：状态机骨架（scripts/templates/rules/agents/adapters=claude+shared）+ 编码分诊路由（`references/routing.md` 等 5 文件，2026-08-18 完成归档分类树吸收，stopgap 已删）+ `evals/`（34 用例）
-- 路由入口：CLAUDE.md §2.1「编码任务自动找 ai-coding-guide」不变；旧 guide 归档 `~/.claude/archive/ai-coding-guide-v1.9.0/`（git 保留历史）
-- 依赖：`references/clarify-requirements.md`（REQUIREMENT 阶段；2026-08-18 起顶层 `devflow-clarify-requirements/` skill 吸收入本体，原目录已删）+ 根级 `manifest.json`；Python 3.8+ stdlib
-- 测试：`python -m pytest tests/` 基线 20/2（2 = Windows 路径断言平台差异勿修；跑前清 PYTHONIOENCODING/PYTHONUTF8 防 GBK 假失败）；`scripts/validate_config.py` OK
-- Phase 2 待开：归档分类树并入（stage-0 脚本化 vs 前门散文，待设计）、stopgap 重写、内部 `devflow-*` 代号与散文残留清理、系统内重复审计合并（~~`devflow-clarify-requirements` 去留~~ 已定 2026-08-18：吸收入本体）
+当前可用（2026-09-02，以 `skills/` 实际目录为准）：
+`ai-coding-coach`、`ai-readable-project`、`article-writer`、`article-writing-guide`、`bidirectional-steelman`、`bili-note`、`cc-switch-setting-sync`、`code-change-workflow`、`content-to-note`、`deep-learn`、`drawio-article-illustration`、`drawio-chart`、`expose-unknowns`、`generic-course-tutor`、`goal-run`、`improver-skill`、`install-ledger`、`learning-guide`、`learning-personas`、`parallel-delegation`、`preflight-check`、`skill-auditor`、`skill-trimmer`、`tech-learning-roadmap`、`tutorial-maker`、`wiki-sediment`。
 
-### 四域开工路由器（v1.4.x，持续演进）
-- ~~`ai-coding-guide`（编码域，v1.4.9）~~ **更正 2026-08-18**：编码域散文路由器终版 v1.9.0 已退役归档（`~/.claude/archive/ai-coding-guide-v1.9.0/`），职责由上方 fork 新系统接替 / `article-writing-guide`（写作域）/ `learning-guide`（学习域，v1.4.6）/ `frontend-guide`（前端域，v1.5.3）
+`generic-course-tutor-workspace` 是配套工作区，不计入 skill。
+
+### generic-course-tutor（2026-09-01，全局）
+- 出处：本地自建；用户于 2026-09-01 台账审计确认归属。
+- 关键文件：`~/.claude/skills/generic-course-tutor/SKILL.md`
+- 迁移：复制整个 `generic-course-tutor/` 目录，并在 `.gitignore` 加入 `!skills/generic-course-tutor/`。
+- 依赖：无外部运行时依赖；课程内容由调用方提供。
+
+### ~~lesson-svg-diagram~~（2026-09-02 已删除，原误归自建）
+- 归属更正：用户确认按 Matt 历史版本/派生版归为第三方；当前 Matt 插件缓存未找到同名文件，精确来源未锁定。
+- 处置：已物理删除 `~/.claude/skills/lesson-svg-diagram/`；不计入当前可用自建列表。
+- 恢复：需重新查证原始来源后再安装；本条不构成可直接重装命令。
+
+### 四域开工路由器（历史记录，部分已退役）
+- ~~`ai-coding-guide`（编码域，v1.4.9）~~ **更正 2026-09-02**：编码域散文路由器终版 v1.9.0 已退役归档（`~/.claude/archive/ai-coding-guide-v1.9.0/`）；后续 fork 版已删除并备份（`~/.claude/backups/ai-coding-guide-delete-20260902/`） / `article-writing-guide`（写作域）/ `learning-guide`（学习域，v1.4.6）/ `frontend-guide`（前端域，v1.5.3）
 - 出处：2026-07 多轮会话沉淀；质量标准见 memory `router-guide-skill-quality-bar`；审查工具 `guide-skill-auditor`
 - 迁移要点：四个一起拷；各有 CHANGELOG.md 记演进；互相有跨域转介引用，别只拷一个。
 
@@ -58,7 +66,17 @@
 ### expose-unknowns
 - 出处：暴露 unknown 方法论沉淀（memory `expose-unknowns-method`）
 
-### guide-skill-auditor（v1.3.0）
+### bidirectional-steelman（2026-09-02）
+- 出处：用户审计确认自建；用于方案取舍、选型和决策双向论证。
+- 位置：`~/.claude/skills/bidirectional-steelman/SKILL.md`
+- 依赖：无外部运行时依赖。
+
+### parallel-delegation（2026-09-02）
+- 出处：用户审计确认自建；用于独立、可验收任务的并行委派与统一验收。
+- 位置：`~/.claude/skills/parallel-delegation/SKILL.md`
+- 依赖：依赖当前会话提供的 Agent/subagent 能力，无额外运行时依赖。
+
+### ~~guide-skill-auditor~~（历史名称，当前 skill 为 skill-auditor）
 - 出处：router 型 guide 质量审查方法论固化（memory `router-guide-skill-quality-bar`）
 
 ### skill-trimmer
@@ -70,11 +88,13 @@
 ### learning-personas
 - 出处：2026-08-16 从 DeepTutor（eduhub.deeptutor.info，本地装于 `C:\ZYS\Code\deep-tutor`）三 persona（peer/teacher/research-assistant）提炼，用户拍板独立 skill + CLAUDE.md 引用式
 - 内容：**学习系统总纲 + 说话层角色库**。三个正交决定：判级查（expose-unknowns）/ 归属问（这技能归你吗→你练/我讲/存起来）/ 说话层（peer/teacher/research）。全系统学习模式唯一词汇源
-- 接线：CLAUDE.md 尾部「## 学习角色（引用式）」被动触发规则（学习时刻先主动问角色+归属，再套用；执行型任务不启用）；四 guide（learning-guide / ai-coding-guide / article-writing-guide / ai-coding-coach）开工问询词汇统一换为归属+persona 并引用本 skill（渐进式披露，不散落展开）；learning-first memory 四分支并进归属一问
+- 接线：CLAUDE.md 尾部「## 学习角色（引用式）」被动触发规则（学习时刻先主动问角色+归属，再套用；执行型任务不启用）；三 guide（learning-guide / article-writing-guide / ai-coding-coach）开工问询词汇统一换为归属+persona 并引用本 skill（渐进式披露，不散落展开）；learning-first memory 四分支并进归属一问
 - 迁移要点：SKILL.md 单文件；无脚本无依赖；与 cram-engine/deep-learn/expose-unknowns 互补（流水线 vs 说话方式）；换词涉及 guide 时同步改 CHANGELOG + references + test-prompts；**已入 git 白名单**（`.gitignore` skills/ 白名单新增 `!skills/learning-personas/`，2026-08-16）
 
-### 写作 skill（自建 10 个）
-- article-writer / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / tech-article-review / content-to-note
+### 写作 skill（历史自建清单，当前状态以本节上方清单为准）
+- 历史清单：article-writer / chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / drawio-article-illustration / drawio-chart / publish-final-check / plagiarism-audit / tech-article-review / content-to-note
+- 当前仍在磁盘：article-writer / article-writing-guide / drawio-article-illustration / drawio-chart / content-to-note
+- 当前目录已无或已退役：chinese-markdown-normalizer / javaguide-style-guide / multi-review-pipeline / publish-final-check / plagiarism-audit / tech-article-review
 - 出处：2026-06/07 写作流程沉淀；publish-final-check 演进耦合在 article-writing-guide/CHANGELOG.md；plagiarism-audit 针对实战漏网（Codex-book 整源漏审）设计；tech-article-review 与 review-doc 划边界（单 agent 逐段增量 vs 4 agent 并行）
 - ~~edit-article~~：2026-08-11 复核用户未认领为自建，移出 Git 白名单（归 skill-install.md 待补来源）
 
@@ -102,11 +122,11 @@
 - 触发：多步任务/跨目录/容器路径/编码/shell 引号假设；code-change-workflow §1.1 已接线
 - 依赖：无
 
-### 前端 skill（自建 1 个）
+### 前端 skill（历史自建，当前目录无对应 skill）
 - shadcn-vue-guide（中文手写 + 本机 .bak 编辑痕）
 
 ### ai-coding-coach
-- 学习陪跑模式（partner-coach/coach/engineer），ai-coding-guide 路由出口的协作行为定义
+- 学习陪跑模式（partner-coach/coach/engineer）；曾作为旧编码路由的协作行为定义
 
 ### ~~handoff / teach~~（更正 2026-08-07）
 - **非自建**——磁盘上是 Matt 插件 symlink（指 plugins/cache），归 Matt 插件管，见 skill-install.md Matt Pocock 条目。之前误标自建。
@@ -138,11 +158,11 @@
 - 验证：可被 Skill 工具显式调用（description 已出现在可用列表）；触发方式「/goal <目标>」或「自动续跑直到 X」
 - 回退：删目录即回；未挂 settings.json，无全局副作用
 
-### cold-skills-index（冷技能索引，2026-08-28 扩版）
-- 出处：冷/深冻三阶技能治理移植（自 pi 三阶治理，2026-08-28）。原索引只有冷技能清单，本次扩为：分类（讲解/教学、浏览器/工具、办公/文档、设计/前端）+ 深冻层（当前空，含进入条件）+ 转热/转深冻方法。
-- 构成：`~/.claude/skills/cold-skills-index/SKILL.md` 单文件；对应已禁插件清单（officecli/ppt-master/taste-skill/frontend-design）由 `settings.json` enabledPlugins=false 承载
-- 验证：Skill 工具按 name=cold-skills-index 可显式调用
-- 回退：git 历史有原版；删目录即回
+### ~~cold-skills-index~~（2026-09-02 已删除）
+- 出处：冷/深冻三阶技能治理移植（自 pi 三阶治理，2026-08-28）。
+- 构成：曾为 `~/.claude/skills/cold-skills-index/SKILL.md` 单文件；冷技能为空，仅索引一个禁用插件。
+- 处置：已物理删除 `~/.claude/skills/cold-skills-index/`，并移除 `.gitignore` 白名单；禁用插件状态继续由 `tool-install.md` 记录。
+- 恢复：需重新确认冷/深冻索引仍有必要后，再从 Git 历史或备份内容恢复。
 
 ## hooks / statusline / 配置
 
@@ -186,12 +206,14 @@
 - 2026-07-29 瘦身至 ~8.3KB，备份 `CLAUDE.md.bak-20260729`
 - 常驻硬约束在 §1；装后登记规则见 §1 最后一行（installing/ 本台账）
 
-## memory
-- 位置：`~/.claude/projects/C--Users-zys31/memory/`
-- 迁移：整目录拷；MEMORY.md 是索引。
+### wiki-course-tutor（2026-09-02，Wiki 项目级）
+- 出处：基于本地 OpenMAIC `C:\ZYS\Code\lab-area\OpenMAIC\skills\openmaic\SKILL.md` 与 `references/generate-flow.md` 提炼；吸收课程场景、互动、PBL、分阶段推进和状态处理，改为 Wiki 纯文字教学流程。
+- 位置：`C:\ZYS\Wiki\.claude\skills\wiki-course-tutor\SKILL.md`
+- 内容：规划、课堂、验收、沉淀四种模式；源教程事实边界；单轮互动；最小实操；失败/边界测试；换场景迁移；learning-record 草稿规则。
+- 依赖：Wiki `AGENTS.md`、`wiki-structure` 规约和源教程原文；无 OpenMAIC 运行时、API Key 或外部服务依赖。
+- 验证：检查 SKILL.md frontmatter、源依据和 Wiki 状态/证据约束；`git diff --check` 通过。
+- 回退：删除 `C:\ZYS\Wiki\.claude\skills\wiki-course-tutor\`，并移除本登记项；不涉及 OpenMAIC、Wiki 知识正文或全局配置。
 
-
-## Codex CLI 迁移（2026-08-25 晚，任务源 exp/2026-08-25-codex-migration/codex-migration-taskbook.md）
 
 **背景**：把 Claude Code 配置生态（规则/skills/hooks/MCP）搬到 Codex CLI，过渡期并存，最终卸掉 Claude Code。claude 侧零改动（指纹对比：settings.json 一致；skills 目录 21:00 后 mtime 零变化；.claude.json 变化来自运行中的 claude.exe 自身写入）。
 
@@ -241,15 +263,25 @@
 - **位置**：`~/.claude/skills/parallel-delegation/SKILL.md`；Windows 使用复制，不使用 symlink；`.gitignore` 已加入 `!skills/parallel-delegation/` 白名单。
 - **内容**：主代理拆解、隔离和最终验收；worker 按 handoff 契约执行；读操作可并行，写操作需隔离或不重叠；失败、冲突、阻塞和越界结果不算总完成。
 - **依赖**：宿主提供 agent/subagent 调度能力；模型覆盖、并发和 worktree/隔离能力按运行时实际支持处理；无脚本/API 依赖。
-- **接线**：`ai-coding-guide` 的 `references/routing.md` 和 `references/ecosystems.md`；不修改 `settings.json`，不替代 `/to-tickets` 或交付状态机。
-- **验证**：实验版 `evals/evals.json` 已覆盖独立任务拆解、读写隔离和单文件不触发；guide 新增 `rt-parallel-delegation.yaml` 与 `rt-parallel-delegation-no-trigger.yaml`。
-- **回退**：删除 `~/.claude/skills/parallel-delegation/`，并移除 guide 路由、生态、eval、CHANGELOG 和 MAINTENANCE 对应条目。
+- **接线**：当前不依赖编码域总入口；不修改 `settings.json`，不替代 `/to-tickets` 或交付状态机。
+- **验证**：实验版 `evals/evals.json` 已覆盖独立任务拆解、读写隔离和单文件不触发；历史路由评估用例已随旧编码总入口删除。
+- **回退**：删除 `~/.claude/skills/parallel-delegation/` 即可；不涉及其他 skill、全局配置或实验数据。
 
-### wiki-skill（2026-08-31，全局）
+### improver-skill（由 wiki-skill 改名，2026-08-31，全局）
 - **出处**：依据 Google WikiSkill 论文设计的本地轻量实现；源文件来自 `C:\ZYS\Code\lab-area\.claude\skills\wiki-skill\SKILL.md` 与 `C:\ZYS\Code\lab-area\exp\2026-08-31-wikiskill\wikiskill.py`。
-- **位置**：`~/.claude/skills/wiki-skill/`，包含 `SKILL.md` 与 `wikiskill.py`；Windows 使用复制，不使用 symlink。
+- **位置**：`~/.claude/skills/improver-skill/`，包含 `SKILL.md` 与 `wikiskill.py`；Windows 使用复制，不使用 symlink。
 - **内容**：手动驱动 Raw Trace、Wiki Pattern、候选 Skill 和轻量 gate；Raw Trace 不可覆盖，Wiki 追加保留，候选拒绝不回滚 Wiki，候选基线 hash 防止过期 Skill 覆盖当前 active。
 - **依赖**：Python 3.12 标准库；不依赖模型、API、Hook 或 `skill-up`。
-- **触发**：`/wiki-skill`；当前为手动流程，不修改 `settings.json`，不自动写入 `C:\ZYS\Wiki`。
+- **触发**：手动调用 `improver-skill`；当前为手动流程，不修改 `settings.json`，不自动写入 `C:\ZYS\Wiki`。
 - **验证**：全局 `wikiskill.py` 编译通过；实验版 `test_wikiskill.py` 6 个测试通过；CLI `--help` 可用。
-- **回退**：删除 `~/.claude/skills/wiki-skill/` 即可；不涉及全局配置、Hook、官方 `alibaba/skill-up` 或 Wiki 数据。
+- **回退**：删除 `~/.claude/skills/improver-skill/` 即可；不涉及全局配置、Hook、官方 `alibaba/skill-up` 或 Wiki 数据。
+
+### install-ledger（2026-09-02，全局）
+
+- **出处**：针对安装台账分散、当前状态与历史记录混写、自然语言触发不稳定的问题新建；用户确认作为自建 skill。
+- **位置**：`~/.claude/skills/install-ledger/SKILL.md`；`.gitignore` 已加入 `!skills/install-ledger/` 白名单。
+- **内容**：统一四类台账职责、来源与当前状态取证、用户归属确认、历史保留、最小差异修改和验收输出。
+- **依赖**：无额外运行时依赖；使用宿主提供的文件读取、状态核验和 Git 工具。
+- **触发**：显式 `/install-ledger`，或明确提出整理、登记、核对安装台账；不接管普通安装/卸载任务。
+- **验证**：已检查 frontmatter、触发边界、台账分工和最小验收场景；实际运行验证待本次台账整理完成后执行。
+- **回退**：删除 `~/.claude/skills/install-ledger/` 与 `.gitignore` 白名单行，并移除本登记项；不涉及其他 skill 或配置。

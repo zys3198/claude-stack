@@ -6,20 +6,27 @@
 
 ## Claude Code 插件 marketplace（/plugin marketplace add）
 
-| marketplace | 来源 | 状态 |
+当前集合来自 `plugins/known_marketplaces.json`；插件启用状态来自 `settings.json`。
+
+| marketplace | 来源 | 当前状态 |
 |---|---|---|
-| claude-plugins-official | https://github.com/anthropics/claude-plugins-official | 启用中 |
-| anthropic-agent-skills | https://github.com/anthropics/skills | 启用中 |
-| mattpocock | https://github.com/mattpocock/skills | 启用中 |
-| ecc | https://github.com/affaan-m/ECC | 启用中 |
-| karpathy-skills | https://github.com/forrestchang/andrej-karpathy-skills | 启用中 |
-| caveman | https://github.com/JuliusBrussee/caveman | 启用中 |
-| ponytail | https://github.com/DietrichGebert/ponytail | 启用中 |
-| open-code-review | https://github.com/alibaba/open-code-review | 启用中 |
+| claude-plugins-official | https://github.com/anthropics/claude-plugins-official | marketplace 存在；插件部分启用 |
+| mattpocock | https://github.com/mattpocock/skills | marketplace 存在；插件启用 |
+| caveman | https://github.com/JuliusBrussee/caveman | marketplace 存在；插件启用 |
+| ponytail | https://github.com/DietrichGebert/ponytail | marketplace 存在；插件启用 |
+| open-code-review | https://github.com/alibaba/open-code-review | marketplace 存在；插件启用 |
+| better-harness | https://github.com/QoderAI/better-harness | marketplace 存在；插件启用 |
+| taste-skill | https://github.com/Leonxlnx/taste-skill | marketplace 存在；插件启用 |
+| last30days-skill | https://github.com/mvanhorn/last30days-skill | marketplace 存在；插件启用 |
+| officecli | https://github.com/officecli/officecli | marketplace 存在；插件禁用 |
+| impeccable | https://github.com/pbakaus/impeccable | marketplace 存在；插件启用 |
+| ppt-master | https://github.com/hugohe3/ppt-master | marketplace 存在；插件禁用 |
+| anthropic-agent-skills | https://github.com/anthropics/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
+| ecc | https://github.com/affaan-m/ECC | 已移除；当前 `known_marketplaces.json` 无记录 |
+| karpathy-skills | https://github.com/forrestchang/andrej-karpathy-skills | 已移除；当前 `known_marketplaces.json` 无记录 |
 | understand-anything | https://github.com/Egonex-AI/Understand-Anything | **已删 2026-08-18（二次）**：08-17 首删后插件文件+settings 注册被某机制回拉复活（原因未查明，疑插件同步），今日按 wayfinder ticket 02 拍板再删——settings.json 去 enabledPlugins+marketplace 注册、删 plugins/{marketplaces,cache,data}/understand-anything*、WORKFLOW_QUICKREF.md 引用改 gitnexus/lean-ctx。恢复=`claude plugin install understand-anything@understand-anything` 后重加 marketplace |
-| i-have-adhd | https://github.com/ayghri/i-have-adhd | marketplace 在，无启用插件 |
-| better-harness | https://github.com/QoderAI/better-harness | 启用中 |
-| minimalist-entrepreneur | https://github.com/slavingia/skills | 已加 marketplace，无启用插件 |
+| i-have-adhd | https://github.com/ayghri/i-have-adhd | 已移除；当前 `known_marketplaces.json` 无记录 |
+| minimalist-entrepreneur | https://github.com/slavingia/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
 
 安装方法（通用）：
 ```
@@ -27,10 +34,21 @@
 /plugin install <plugin>@<marketplace>
 ```
 
-## 当前启用插件（settings.json enabledPlugins，2026-08-07 快照）
+## 当前插件状态（settings.json）
 
-- 官方：claude-code-setup / claude-md-management / code-review / code-simplifier / commit-commands / context7 / feature-dev / frontend-design / github / playwright / skill-creator / superpowers
-- 三方：ecc / mattpocock-skills / ponytail / caveman / open-code-review / better-harness / andrej-karpathy-skills / understand-anything / example-skills / taste-skill / i-have-adhd
+- 配置记录日期：2026-09-04
+
+- 启用：`better-harness@better-harness`、`caveman@caveman`、`claude-md-management@claude-plugins-official`、`code-review@claude-plugins-official`、`context7@claude-plugins-official`、`github@claude-plugins-official`、`impeccable@impeccable`、`last30days@last30days-skill`、`mattpocock-skills@mattpocock`、`ponytail@ponytail`、`skill-creator@claude-plugins-official`、`taste-skill@taste-skill`
+- 禁用：`frontend-design@claude-plugins-official`、`open-code-review@open-code-review`、`playwright@claude-plugins-official`
+- 低频插件复核（`claude plugin list`，2026-09-04）：以上 3 个插件均禁用。
+
+### taste-skill 1.0.0（2026-09-04 恢复）
+- 来源：https://github.com/Leonxlnx/taste-skill
+- 安装命令原文：`claude plugin install taste-skill@taste-skill --scope user`
+- 装到哪：`~/.claude/plugins/cache/taste-skill/taste-skill/1.0.0`
+- 状态：`taste-skill@taste-skill`，scope=user，enabled；`claude plugin list` 与 `installed_plugins.json` 均已核对
+- 依赖：无额外依赖
+- cc-switch：执行 `sync_claude_common.py`，old len=9709 → new len=9746，readback=MATCH；备份 `~/.cc-switch/backups/sync-backup-20260904_171520.json`
 
 **坑**：cc-switch / claude-stack 装卸插件会丢 enabledPlugins 状态，装完立刻查 settings.json 还认不认（memory `ccswitch-plugin-integration-fragile`）。
 
@@ -38,7 +56,7 @@
 
 ### cc-switch
 - 来源：https://github.com/farion1231/cc-switch
-- 用途：Claude Code provider/配置切换 + skill 单系统同步
+- 用途：Claude Code provider/配置切换；2026-08-13 起不再管理 skills
 - 安装日期：待补
 - 安装方法：桌面应用安装包（GitHub Releases）
 - 装到哪：`~/.cc-switch/cc-switch.db`（settings.common_config_claude 会覆盖 ~/.claude/settings.json 公共配置——防降级见 skill `cc-switch-setting-sync`）
@@ -47,8 +65,20 @@
 ### lean-ctx 本体
 - 见 [mcp-install.md](mcp-install.md)（cargo 装二进制 + MCP 注册 + hooks）
 
-### GitNexus / cloudcli
+### GitNexus
 - 见 [mcp-install.md](mcp-install.md)（npm 全局/npx 形态）
+
+### cloudcli-browser（已卸载）
+- 见 [mcp-install.md](mcp-install.md)（历史 MCP 记录）
+
+### @alibaba-group/open-code-review 1.9.0
+- 来源：https://github.com/alibaba/open-code-review（npm 包 `@alibaba-group/open-code-review`）
+- 安装日期：未留存；全局包 `package.json` 文件时间戳为 2026-08-10
+- 安装命令原文：未留存；可复现命令：`npm install -g @alibaba-group/open-code-review`
+- 装到哪：`C:\Users\zys31\AppData\Roaming\npm\node_modules\@alibaba-group\open-code-review`；命令入口 `C:\Users\zys31\AppData\Roaming\npm\ocr.cmd`
+- 依赖：Node.js / npm
+- 用途：代码审查 CLI，命令为 `ocr`
+- 备注：与 Claude Code marketplace `open-code-review` 为同一上游项目的两种安装形态；当前全局版本为 1.9.0。
 
 ### GitLab CLI（glab）
 - 来源：https://gitlab.com/gitlab-org/cli（winget 包 `GLab.GLab`）
@@ -203,11 +233,34 @@
 - 依赖：Node.js / npm；运行时原生包 `@openai/codex@0.151.0-win32-x64`
 - 备注：修复主包存在但 optional dependency 缺失导致的启动失败。已验证 `codex-cli 0.151.0`；`codex.exe` 为 Windows x86-64 PE32+，Authenticode 签名有效，签名者 `OpenAI OpCo, LLC`。
 
-### browser-use 0.13.8 + browser-harness 0.1.9（2026-08-31）
-- 来源：PyPI（`browser-use`）；连接故障时参考：https://github.com/browser-use/browser-harness/blob/main/install.md
-- 安装日期：2026-08-31
-- 安装命令原文：`uv tool install --python 3.12 --upgrade --force browser-use`
-- skill 注册命令原文：`browser-use skill install --no-install --target claude`
-- 装到哪：uv 工具环境 `C:\Users\zys31\AppData\Roaming\uv\tools\browser-use`；Claude skill `C:\Users\zys31\.claude\skills\browser-use\SKILL.md`
-- 依赖：Python 3.12.10、uv 0.12.7、Chrome CDP；内嵌 `browser-harness 0.1.9`、`browser-use-sdk 3.4.2`
-- 备注：已验证 `browser-use --doctor`：Chrome、daemon、活动连接均正常（1 个）；Cloud auth 为可选项且未配置。`browser-act-cli 0.1.27` 命令独立，无直接命令覆盖；两者不要同时控制同一页面/会话。`browser-use --update -y` 因当前 harness 非独立 uv tool 失败，未另装第二套 harness。
+### browser-use / browser-harness（已卸载 2026-09-01）
+- 来源：PyPI（`browser-use`、`browser-harness`）；官方文档：https://github.com/browser-use/browser-harness/blob/main/install.md
+- 原安装日期：`browser-use` 2026-08-31；独立 `browser-harness` 2026-09-01
+- 原安装命令：`uv tool install --python 3.12 --upgrade --force browser-use`；`uv tool install --python 3.12 --upgrade --force browser-harness`
+- 原 skill 注册命令：`browser-use skill install --no-install --target claude`
+- 修复尝试命令：`browser-use --reload`；`browser-use --update -y`（失败：独立 `browser-harness` 当时未安装）
+- 卸载日期：2026-09-01
+- 卸载命令原文：`uv tool uninstall browser-harness`；`uv tool uninstall browser-use`；`rm -rf /c/Users/zys31/.claude/skills/browser-use`
+- 已删除：uv 工具环境 `C:\Users\zys31\AppData\Roaming\uv\tools\browser-harness`、`C:\Users\zys31\AppData\Roaming\uv\tools\browser-use`；Claude skill `C:\Users\zys31\.claude\skills\browser-use`
+- 原依赖：Python 3.12.10、uv 0.12.7、Chrome CDP
+- 原因：Chrome remote debugging 授权入口反复无弹窗，daemon 无法建立活动连接；用户确认全部删除。
+- 验证：`uv tool list` 不再列出两包；`browser-harness`、`browser-use` 命令均 absent；skill 目录 absent。保留 `browser-act-cli 0.1.27`、Chrome DevTools MCP、Playwright MCP。
+
+
+### Agent Reach 1.5.0（2026-09-02）
+- 来源：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md；上游包：https://github.com/Panniantong/agent-reach/archive/main.zip
+- 更新日期：2026-09-02
+- 更新命令原文：`python -m pip install --upgrade https://github.com/Panniantong/agent-reach/archive/main.zip`
+- 装到哪：Agent Reach 入口 `C:\Users\zys31\AppData\Local\Programs\Python\Python312\Scripts\agent-reach`；包目录 `C:\Users\zys31\AppData\Local\Programs\Python\Python312\Lib\site-packages`
+- 依赖：Python 3.12；feedparser 6.0.14；yt-dlp 2026.8.19；mutagen 1.48.1；pycryptodomex 3.23.0；yt-dlp-ejs 0.8.0；已有 loguru、python-dotenv、pyyaml、requests、rich、websockets、brotli
+- 同步更新：已安装 `twitter-cli`（已是最新 v0.8.5）、`bilibili-cli`（已是最新 v0.6.2）、`xiaohongshu-cli`（v0.6.4）、`yt-dlp`；未新增 OpenCLI
+- 验证：`agent-reach version`=v1.5.0；`agent-reach doctor`=5/15 个渠道可用；YouTube=`yt-dlp`、B站=`bili-cli`、V2EX=`V2EX API (public)`、RSS=`feedparser`、网页=`Jina Reader`
+- 备注：`rdt-cli` 未更新；文档要求从未由用户明确指定的 Git 仓库安装固定提交，安全策略拦截。Twitter、Reddit、小红书仍需显式 Cookie；Exa 未配置；未运行会读取或写入浏览器 Cookie 的命令。
+
+### DTSF 前端项目工具链（2026-09-04）
+- 来源：项目锁文件 `C:\ZYS\Code\dtsf-eam\code\frontend\soybean-admin\pnpm-lock.yaml`
+- 安装日期：2026-09-04
+- 安装命令原文：`pnpm install --frozen-lockfile`
+- 装到哪：`C:\ZYS\Code\dtsf-eam\code\frontend\soybean-admin\node_modules`
+- 依赖：Node.js、pnpm；pnpm workspace 共链接 897 个包，全部从本地缓存复用
+- 备注：`simple-git-hooks` 已设置项目 Git hooks；pnpm 拦截 `tesseract.js@7.0.0` 构建脚本并返回 `ERR_PNPM_IGNORED_BUILDS`，未执行 `pnpm approve-builds`；前端类型检查及生产构建均无需该脚本并已通过。
