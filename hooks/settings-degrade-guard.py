@@ -30,8 +30,9 @@ KEY = "common_config_claude"
 MISSING_HOOK_TOLERANCE = 3  # live 缺失快照 hook 命令数超过此值 → 降级
 CRITICAL_HOOK_MARKERS = (
     "git_guard.py", "secret_guard.py", "dep_gate.py", "gateguard-destructive.js",
-    "edited_tracker.py", "verify_gate.py", "verify_recorder.py",
+    "verify_recorder.py",
 )
+OBSOLETE_HOOK_MARKERS = ("edited_tracker.py", "verify_gate.py")
 
 def emit(guard_status, message):
     """SessionStart hook JSON 输出；正常时返回空串。"""
@@ -59,18 +60,18 @@ def snapshot_hook_commands(snap):
             matcher = g.get("matcher", "")
             for h in g.get("hooks", []):
                 if isinstance(h, dict) and isinstance(h.get("command"), str):
+                    if any(marker in h["command"] for marker in OBSOLETE_HOOK_MARKERS):
+                        continue
                     cmds.add((event, matcher, h.get("type", ""), h["command"]))
     return cmds
 
 
 def missing_critical_hooks(live_cmds, snap_cmds):
     missing = []
-    snapshot_commands = [binding[3] for binding in snap_cmds]
-    live_commands = [binding[3] for binding in live_cmds]
+    live_bindings = set(live_cmds)
     for marker in CRITICAL_HOOK_MARKERS:
-        in_snapshot = any(marker in command for command in snapshot_commands)
-        in_live = any(marker in command for command in live_commands)
-        if in_snapshot and not in_live:
+        expected = {binding for binding in snap_cmds if marker in binding[3]}
+        if expected - live_bindings:
             missing.append(marker)
     return missing
 
