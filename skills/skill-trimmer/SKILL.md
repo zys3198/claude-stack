@@ -191,4 +191,4 @@ python ~/.pi/agent/skills/skill-trimmer/scripts/review_server.py read --require-
 
 - 数据驱动轻量信号（mtime/引用/台账/实测）、本机自动化三件套命令、演进方向、active→stale→archived 状态映射，以及四层判定依据的来源与核验（【文章】【框架】【本机】【实践】）→ `references/evidence-sources.md`
 
-<!-- 2026-09-08 渐进披露改造（批次 3）：§数据驱动+§来源与核验→references/evidence-sources.md（内容原样下沉，~/.pi 路径原文保留，处置另见 BLOCKED）；核心立场/判定流程/触发空壳合同/红线/分工保留在入口；description 未动。 -->
+<!-- 2026-09-08 渐进披露改造（批次 3）：§数据驱动+§来源与核验→references/evidence-sources.md（内容原样下沉，遗留死路径问题处置另见 BLOCKED）；核心立场/判定流程/触发空壳合同/红线/分工保留在入口；description 未动。 -->
