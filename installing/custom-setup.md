@@ -331,3 +331,29 @@
 - **触发**：显式 `/install-ledger`，或明确提出整理、登记、核对安装台账；不接管普通安装/卸载任务。
 - **验证**：已检查 frontmatter、触发边界、台账分工和最小验收场景；实际运行验证待本次台账整理完成后执行。
 - **回退**：删除 `~/.claude/skills/install-ledger/` 与 `.gitignore` 白名单行，并移除本登记项；不涉及其他 skill 或配置。
+
+---
+
+## 全局配置收窄+skill 沉淀（2026-09-08，三方观点审计落地第一份）
+
+- **依据**：`C:\ZYS\Code\lab-area\exp\2026-09-08-wechat-audit\landing-plan.md`（三篇微信文章 24 条观点逐条确认，领导 2026-09-08 拍板）；执行任务书同目录。
+- **改动 1**：`~/CLAUDE.md`——§0 加 PRIORITY 行（用户显式指令 > 本文件 > skills，被规则卡住须报文件+原文）；§1.1 首条改「常规缺口自行假设并继续」语义、矛盾条改「裁决后继续」；§2.4 按三问删 2 条（ctx_compose 死引用、上下文压缩 harness 职责）。**§1.3 确认线收窄编辑被 auto mode classifier 拦截，旧版仍在，待领导裁决（见 BLOCKED.md B1）**。
+- **改动 2**：`~/skills/skill-auditor/SKILL.md` v2.0.0→v2.1.0——十查后新增「渐进披露追加检查」11/12 两查+反模式 1 条；原十查未动。
+- **改动 3**：`~/skills/ai-readable-project/`——AGENTS-template.md 知识索引段加六类骨架注释+新增「### 边界与验证」（IBV）；SKILL.md 维护规则加根入口 ≤120 行预算条。
+- **验证**：各文件验收命令+反向验证（红→绿）全过；skill-auditor 187 行、ai-readable-project 95 行、CLAUDE.md 153 行（收窄未落地，行数待 §1.3 落地后复核）；两 skill 新 description 已被宿主热加载（会话内实证）。
+- **回退**：`git -C ~/.claude checkout -- <文件>` 逐文件还原到 479ea70（未 commit，工作区 diff 即全部改动）。
+
+---
+
+## skill 库整库审计+渐进披露改造（2026-09-08，landing-plan 批次 3）
+
+- **依据**：`C:\ZYS\Code\lab-area\exp\2026-09-08-wechat-audit\landing-plan.md` 批次 3；执行任务书同目录（第二份）；审计规程 `~/skills/skill-auditor/SKILL.md` v2.1.0（静态十查+渐进披露 11/12）。
+- **审计**：22/22 自建 skill 逐个过 v2.1.0，一行结论见工件目录 `audit-report.md`（22 行 wc 基线+P0×1/P1×4/P2 若干+结构扫描表）。
+- **修复 4 个**（入口改写为最小路由器，内容按主题下沉 references/；触发边界/输入输出契约/验证闭环/风险确认点保留在入口；description 逐字节未动）：
+  1. `article-writer` 783→193 行；新增 `references/style-craft.md`、`human-writing.md`、`javaguide-style.md`、`ai-writing-discipline.md`
+  2. `drawio-chart` 594→195 行；新增 `references/color-tokens.md`、`xml-templates.md`、`cli-export.md`、`layout-principles.md`
+  3. `drawio-article-illustration` 233→185 行；新增 `references/chart-type-checklists.md`；其对 drawio-chart 的 §二 引用同步改新路径
+  4. `skill-trimmer` 216→194 行；新增 `references/evidence-sources.md`（~/.pi 死路径原文保留，处置见 BLOCKED B3-4）
+- **验证**：每个修复对象 wc ≤200、`grep -c "references/"` ≥1、反向验证（入口路由行临时改名 grep=0 → 还原 grep≥1，cmp 逐字节一致）、frontmatter（含 description）与改前备份逐字节一致、十查自检全 PASS、第一跳 3 场景×4 与修复前判定一致（无触发漂移）。全部证据录 `audit-report.md`。
+- **回滚**：改前备份在 `C:\ZYS\Code\lab-area\exp\2026-09-08-wechat-audit\bak\<skill名>-SKILL.md`，复制回 `~/.claude/skills/<skill名>/SKILL.md` 即还原；新增 references 文件可按需删除。
+- **遗留**：见工件目录 `BLOCKED.md` 批次 3 节（code-change-workflow 幻觉目标 P0、bili-note/.codex 与 wiki-sediment/.pi 与 skill-trimmer/.pi 死路径、examples 死接线、bili-note 与 generic-course-tutor 超行未修）。
