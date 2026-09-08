@@ -5,7 +5,7 @@ import sys, json, os, subprocess
 
 PYTHON = "C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe"
 SYNC = "C:/Users/zys31/.claude/skills/cc-switch-setting-sync/scripts/sync_claude_common.py"
-TARGET = os.path.normpath(os.path.expanduser("~/.claude/settings.json"))
+TARGET = os.path.normcase(os.path.abspath(os.path.expanduser("~/.claude/settings.json")))
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -20,7 +20,7 @@ fp = ti.get("file_path") or ""
 if not fp:
     sys.exit(0)
 try:
-    if os.path.normpath(fp) != TARGET:
+    if os.path.normcase(os.path.abspath(fp)) != TARGET:
         sys.exit(0)
 except Exception:
     sys.exit(0)

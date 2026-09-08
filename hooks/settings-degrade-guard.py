@@ -1,36 +1,21 @@
 #!/usr/bin/env python3
-"""SessionStart hook：检测 settings.json 是否被 cc-switch 切换 provider 降级，自动恢复。
+"""SessionStart hook：只读检测 settings.json 是否相对 cc-switch 快照降级。
 
-检测 marker：
-  1. statusLine 缺失
-  2. enabledPlugins 缺失
-  3. extraKnownMarketplaces 缺失
-  4. permissions.deny 缺失（安全边界变宽）
-  5. hooks 缺失快照中 >3 个 hook command（覆盖「只丢 hooks」的部分降级）
-
-恢复源：cc-switch DB 的 settings.common_config_claude（由
-cc-switch-setting-sync skill 维护）。保留 live 的 provider 字段
-（env 的 ANTHROPIC_* 与顶层 model）。hooks/permissions 为并集合并，
-live 独有内容（新增 hook、新增 allow 规则）不会被抹掉。
-
-输出约定（Claude Code SessionStart hook）：
-  - 正常/无操作：静默（无输出）
-  - 恢复成功：JSON 提示（hookSpecificOutput 会注入会话上下文）
-  - 快照不可用或快照本身缺 marker：JSON 警告，不写文件
+检测 marker：顶层关键字段、permissions.deny，以及关键 hook 绑定和 hook
+命令总量。此 hook 不写、备份或替换 settings.json；发现问题时仅通过
+SessionStart.additionalContext 告警。
 """
 import json
 import os
-import shutil
 import sqlite3
-import time
+from pathlib import Path
 
 SETTINGS = os.path.expanduser("~/.claude/settings.json")
 DB = os.path.expanduser("~/.cc-switch/cc-switch.db")
 KEY = "common_config_claude"
 MISSING_HOOK_TOLERANCE = 3  # live 缺失快照 hook 命令数超过此值 → 降级
 CRITICAL_HOOK_MARKERS = (
-    "git_guard.py", "secret_guard.py", "dep_gate.py", "gateguard-destructive.js",
-    "verify_recorder.py",
+    "git_guard.py", "secret_guard.py", "dep_gate.py", "verify_recorder.py",
 )
 OBSOLETE_HOOK_MARKERS = ("edited_tracker.py", "verify_gate.py")
 
@@ -39,15 +24,15 @@ def emit(guard_status, message):
     if guard_status == "ok":
         return
     return json.dumps({
-        "continue": True,
         "hookSpecificOutput": {
             "hookEventName": "SessionStart",
-            "settingsGuard": f"{guard_status}: {message}",
+            "additionalContext": f"settings-degrade-guard {guard_status}: {message}",
         },
     }, ensure_ascii=False)
 
 def snapshot_hook_commands(snap):
     cmds = set()
+    seen_groups = set()
     hooks = snap.get("hooks", {}) if isinstance(snap, dict) else {}
     if not isinstance(hooks, dict):
         return cmds
@@ -57,8 +42,15 @@ def snapshot_hook_commands(snap):
         for g in grps:
             if not isinstance(g, dict):
                 continue
+            group_key = (event, json.dumps(g, sort_keys=True, ensure_ascii=False))
+            if group_key in seen_groups:
+                continue
+            seen_groups.add(group_key)
             matcher = g.get("matcher", "")
-            for h in g.get("hooks", []):
+            hook_list = g.get("hooks", [])
+            if not isinstance(hook_list, list):
+                continue
+            for h in hook_list:
                 if isinstance(h, dict) and isinstance(h.get("command"), str):
                     if any(marker in h["command"] for marker in OBSOLETE_HOOK_MARKERS):
                         continue
@@ -71,7 +63,9 @@ def missing_critical_hooks(live_cmds, snap_cmds):
     live_bindings = set(live_cmds)
     for marker in CRITICAL_HOOK_MARKERS:
         expected = {binding for binding in snap_cmds if marker in binding[3]}
-        if expected - live_bindings:
+        if not expected:
+            missing.append(f"{marker} (snapshot missing)")
+        elif expected - live_bindings:
             missing.append(marker)
     return missing
 
@@ -94,67 +88,12 @@ def is_degraded(live, snap):
         return True, f"missing {missing} hooks (snapshot has {len(snap_cmds)})"
     return False, ""
 
-def merge_hooks(live_hooks, snap_hooks):
-    """事件组合并：快照组在前（权威），live 独有组在后（新增 hook 保留）。"""
-    live_hooks = live_hooks if isinstance(live_hooks, dict) else {}
-    snap_hooks = snap_hooks if isinstance(snap_hooks, dict) else {}
-    merged = {}
-    for ev in sorted(set(snap_hooks) | set(live_hooks)):
-        groups, seen = [], set()
-        for g in (snap_hooks.get(ev, []) + live_hooks.get(ev, [])):
-            key = json.dumps(g, sort_keys=True, ensure_ascii=False)
-            if key not in seen:
-                seen.add(key)
-                groups.append(g)
-        merged[ev] = groups
-    return merged
-
-def merge_permissions(live_perm, snap_perm):
-    """allow/deny/ask 并集合并，快照在前。"""
-    live_perm = live_perm if isinstance(live_perm, dict) else {}
-    snap_perm = snap_perm if isinstance(snap_perm, dict) else {}
-    if not snap_perm:
-        return live_perm
-    merged = dict(live_perm or {})
-    for k in ("allow", "deny", "ask"):
-        s = snap_perm.get(k, [])
-        l = merged.get(k, [])
-        if s or l:
-            out = list(s)
-            for x in l:
-                if x not in out:
-                    out.append(x)
-            merged[k] = out
-    return merged
-
-def merge_restore(live, snap):
-    """公共字段取快照，provider 字段保留 live。返回合并后的 dict。"""
-    merged = dict(live)
-    for k in ("statusLine", "enabledPlugins", "extraKnownMarketplaces"):
-        if k in snap:
-            merged[k] = snap[k]
-    if "hooks" in snap or "hooks" in live:
-        live_hooks = live.get("hooks") if isinstance(live.get("hooks"), dict) else {}
-        snap_hooks = snap.get("hooks") if isinstance(snap.get("hooks"), dict) else {}
-        merged["hooks"] = merge_hooks(live_hooks, snap_hooks)
-    if "permissions" in snap or "permissions" in live:
-        merged["permissions"] = merge_permissions(
-            live.get("permissions"), snap.get("permissions"))
-    live_env = live.get("env") if isinstance(live.get("env"), dict) else {}
-    snap_env = snap.get("env") if isinstance(snap.get("env"), dict) else {}
-    env = dict(live_env)
-    for k, v in snap_env.items():
-        if not k.startswith("ANTHROPIC_"):
-            env.setdefault(k, v)
-    merged["env"] = env
-    return merged
-
 def main():
     try:
         with open(SETTINGS, encoding="utf-8") as f:
             live = json.load(f)
         if not isinstance(live, dict):
-            print(emit("error", "settings.json 顶层结构不是对象，跳过恢复"))
+            print(emit("error", "settings.json 顶层结构不是对象，无法检测"))
             return
     except Exception as e:
         print(emit("error", f"read settings.json failed: {e}"))
@@ -165,7 +104,8 @@ def main():
         return
 
     try:
-        con = sqlite3.connect(DB, timeout=5)
+        db_uri = f"file:{Path(DB).as_posix()}?mode=ro"
+        con = sqlite3.connect(db_uri, uri=True, timeout=5)
         row = con.execute("SELECT value FROM settings WHERE key=?", (KEY,)).fetchone()
         con.close()
         if not row:
@@ -173,7 +113,7 @@ def main():
             return
         snap = json.loads(row[0])
         if not isinstance(snap, dict):
-            print(emit("warn", "cc-switch 快照顶层结构不是对象，跳过恢复"))
+            print(emit("warn", "cc-switch 快照顶层结构不是对象，跳过检测"))
             return
     except Exception as e:
         print(emit("warn", f"读 cc-switch DB 失败，跳过检测: {e}"))
@@ -183,36 +123,7 @@ def main():
     if not degraded:
         return  # 静默
 
-    merged = merge_restore(live, snap)
-    # 快照本身也缺 marker 时（恢复也无济于事）不写文件，只警告
-    still_degraded, still_reason = is_degraded(merged, snap)
-    if still_degraded:
-        print(emit("warn",
-            f"检测到降级({reason})但快照本身也缺字段({still_reason})，不写文件。"
-            f"请修复 settings.json 后跑 cc-switch-setting-sync"))
-        return
-
-    bakdir = os.path.join(os.path.dirname(SETTINGS), "backups")
-    os.makedirs(bakdir, exist_ok=True)
-    ts = f"{time.strftime('%Y%m%d_%H%M%S')}-{os.getpid()}-{time.time_ns() % 1_000_000:06d}"
-    bak = os.path.join(bakdir, f"settings.bak-guard-{ts}.json")
-    tmp = f"{SETTINGS}.{os.getpid()}.tmp"
-    try:
-        shutil.copy2(SETTINGS, bak)
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(merged, f, ensure_ascii=False, indent=2)
-            f.write("\n")
-        os.replace(tmp, SETTINGS)
-    except Exception as e:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-        print(emit("error", f"恢复 settings.json 失败: {e}"))
-        return
-    print(emit("restored",
-        f"检测到配置降级（{reason}），已从 cc-switch 快照自动恢复，备份在 {bak}。"
-        f"statusline 等配置下一个会话生效。"))
+    print(emit("warn", f"检测到 settings.json 配置降级（{reason}）；只读检测未修改文件，请人工修复并确认后再同步。"))
 
 if __name__ == "__main__":
     main()

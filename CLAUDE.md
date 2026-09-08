@@ -151,6 +151,3 @@
 
 句型=[事物][动作][原因]。[下一步]。`/caveman` 切级，"normal mode" 关。教程/教学讲解不用。
 
-<!-- lean-ctx -->
-<!-- lean-ctx-claude-v9 -->
-<!-- /lean-ctx -->

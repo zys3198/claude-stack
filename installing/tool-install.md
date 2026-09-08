@@ -233,20 +233,6 @@
 - 依赖：Node.js / npm；运行时原生包 `@openai/codex@0.151.0-win32-x64`
 - 备注：修复主包存在但 optional dependency 缺失导致的启动失败。已验证 `codex-cli 0.151.0`；`codex.exe` 为 Windows x86-64 PE32+，Authenticode 签名有效，签名者 `OpenAI OpCo, LLC`。
 
-### browser-use / browser-harness（已卸载 2026-09-01）
-- 来源：PyPI（`browser-use`、`browser-harness`）；官方文档：https://github.com/browser-use/browser-harness/blob/main/install.md
-- 原安装日期：`browser-use` 2026-08-31；独立 `browser-harness` 2026-09-01
-- 原安装命令：`uv tool install --python 3.12 --upgrade --force browser-use`；`uv tool install --python 3.12 --upgrade --force browser-harness`
-- 原 skill 注册命令：`browser-use skill install --no-install --target claude`
-- 修复尝试命令：`browser-use --reload`；`browser-use --update -y`（失败：独立 `browser-harness` 当时未安装）
-- 卸载日期：2026-09-01
-- 卸载命令原文：`uv tool uninstall browser-harness`；`uv tool uninstall browser-use`；`rm -rf /c/Users/zys31/.claude/skills/browser-use`
-- 已删除：uv 工具环境 `C:\Users\zys31\AppData\Roaming\uv\tools\browser-harness`、`C:\Users\zys31\AppData\Roaming\uv\tools\browser-use`；Claude skill `C:\Users\zys31\.claude\skills\browser-use`
-- 原依赖：Python 3.12.10、uv 0.12.7、Chrome CDP
-- 原因：Chrome remote debugging 授权入口反复无弹窗，daemon 无法建立活动连接；用户确认全部删除。
-- 验证：`uv tool list` 不再列出两包；`browser-harness`、`browser-use` 命令均 absent；skill 目录 absent。保留 `browser-act-cli 0.1.27`、Chrome DevTools MCP、Playwright MCP。
-
-
 ### Agent Reach 1.5.0（2026-09-02）
 - 来源：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md；上游包：https://github.com/Panniantong/agent-reach/archive/main.zip
 - 更新日期：2026-09-02
@@ -264,3 +250,97 @@
 - 装到哪：`C:\ZYS\Code\dtsf-eam\code\frontend\soybean-admin\node_modules`
 - 依赖：Node.js、pnpm；pnpm workspace 共链接 897 个包，全部从本地缓存复用
 - 备注：`simple-git-hooks` 已设置项目 Git hooks；pnpm 拦截 `tesseract.js@7.0.0` 构建脚本并返回 `ERR_PNPM_IGNORED_BUILDS`，未执行 `pnpm approve-builds`；前端类型检查及生产构建均无需该脚本并已通过。
+
+### Cloudflare Tunnel CLI 2026.8.3（2026-09-05 核验）
+- 来源：https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/（WinGet 包 `Cloudflare.cloudflared`）
+- 原安装日期：未核实；本次核验日期：2026-09-05
+- 本次安装命令原文：`winget install --id Cloudflare.cloudflared --exact --accept-package-agreements --accept-source-agreements`
+- 本次命令结果：WinGet 检测到现有 2026.8.3，且无可用升级；未重复安装
+- 装到哪：`C:\Program Files (x86)\cloudflared\cloudflared.exe`
+- 依赖与权限面：Windows Package Manager；运行 Quick Tunnel 时建立出站连接，并通过随机 `trycloudflare.com` HTTPS 地址临时公开本机目标 HTTP 服务
+- 当前状态：可用；已验证 `cloudflared version 2026.8.3 (built 2026-08-31T02:48 UTC)`
+- 备注：当前 PATH 不含安装目录，需使用绝对路径或后续单独配置 PATH；Quick Tunnel 仅用于测试，停止进程后公网入口失效。
+
+## headroom-ai 0.37.0（2026-09-05）
+
+- 来源：https://github.com/headroomlabs-ai/headroom（PyPI `headroom-ai[all]`）；决策依据：https://zhenjia.dev/posts/headroom-cc-switch-coexist
+- 安装日期：2026-09-05
+- 安装命令原文：`uv tool install --python 3.13 "headroom-ai[all]"`
+- 装到哪：exe `C:\Users\zys31\.local\bin\headroom.exe`（uv tool）；包在 uv cache `...\uv\cache\archive-v0\ZvCxZqX063vhJ65f\`
+- 依赖：uv 0.12.7；Python 3.13.13（uv 管理）
+- 配置：env `HEADROOM_BEACON=off`、`HEADROOM_CC_SWITCH_RECONCILE=1`；`headroom proxy --host 127.0.0.1 --port 8787`
+- 验证：`/health` 200；`/admin/upstream` 返回 `captured_upstream=http://127.0.0.1:15721`、`cc_switch_reconcile=true`；settings.json `ANTHROPIC_BASE_URL` 被 reconciler 改写为 `http://127.0.0.1:8787`，token/model 映射原样保留；本 CC 会话经 8787 链路正常对话
+- 备注：
+  - 持久化（2026-09-05 同日补装）：管理员终端跑 `headroom install apply --preset persistent-service --no-telemetry --env HEADROOM_BEACON=off --env HEADROOM_CC_SWITCH_RECONCILE=1`（Windows 自动降级 persistent-task），创建计划任务 `headroom-default-startup`（登录自启，动作=`C:\Users\zys31\.headroom\deploy\default\ensure-headroom.cmd`）与 `headroom-default-health`；任务部署不支持 `headroom install start`，手动拉起用 `Start-ScheduledTask -TaskName headroom-default-startup`
+  - 回滚：`uv tool uninstall headroom-ai`；cc-switch 重新切换一次 provider 即覆盖回 15721
+  - 遥测已关；官方 `{"env":{}}` 时 reconciler 默认直连不插手
+
+### OpenAI Codex CLI 0.153.4（已卸载，2026-09-05）
+- 来源：https://www.npmjs.com/package/@openai/codex（npm 包 `@openai/codex`）
+- 卸载日期：2026-09-05（此前生命周期：2026-08-26 卸载 → 2026-08-29 重装 0.151.0 → 自动升至 0.153.4）
+- 卸载命令原文：`npm uninstall -g @openai/codex`（输出 `removed 2 packages`）；`Remove-Item -LiteralPath "C:\Users\zys31\.codex" -Recurse -Force`
+- 原安装位置：启动器 `C:\Users\zys31\AppData\Roaming\npm\codex.cmd`；主包 `...\npm\node_modules\@openai\codex`；配置目录 `C:\Users\zys31\.codex`（78.7MB，其中 `.tmp/` 占 76MB）
+- 依赖：Node.js / npm
+- 恢复所需材料（已备份到 `C:\Users\zys31\.claude\backups\codex-pi-purge-20260905\`）：`codex-config.toml`（426B，cc-switch 注入的 `model_provider=arkcli-coding-plan` + Volcano bearer token + lab-area `trust_level=trusted` + `[windows] sandbox=elevated`）、`codex-version.json`、`codex-installation_id`
+- 恢复步骤：`npm install -g @openai/codex@latest --include=optional` → 从 cc-switch GUI 切一次 Codex provider 自动重建 `~/.codex/config.toml`（或直接拷回备份的 codex-config.toml）
+- 备注：**cc-switch 侧全部保留**（用户明确要求）——`~/.cc-switch/cc-switch.db`、`codex_oauth_auth.json`（2417B，version 2，1 个 account，default_account_id 在位）、`settings.json` 卸载前后均校验存在且 mtime 未变。`~/.codex/auth.json` 本就不存在（codex 账户凭据由 cc-switch 托管，与 `~/.codex` 物理隔离），故删目录不影响账户。卸载前无 codex 进程运行。
+
+### pi coding agent 残留清理（2026-09-05）
+- 背景：2026-09-04 用户拍板弃用 pi（见 [[pi-migration-native-goal]] 存档），本次做物理清理
+- 卸载/删除命令原文：`Remove-Item -LiteralPath <各路径> -Recurse -Force`（逐条字面量执行；多路径循环脚本会被 gateguard 判为 `/` 拦截）
+- 已删除清单（合计约 250MB，全部不可逆）：
+  1. `C:\ZYS\Code\pi` —— fork 仓库 86.8MB / 1438 文件。删前核验：`git status` clean、`@{u}..HEAD` 无未推送 commit、无 stash、HEAD=853a80d26 与 origin/main 同步，origin 指向 `https://github.com/earendil-works/pi`（上游），可重新 clone
+  2. `C:\Users\zys31\.claude\backups\skill-trim-20260903\pi-side` —— 150.89MB / 16263 文件（skills 27 目录 10MB + skills-sync 140.89MB）
+  3. `C:\ZYS\Code\lab-area\.pi` —— 约 200 个空 session 目录 / 0.05MB
+  4. `C:\ZYS\Code\lab-area\exp\2026-08-23-hermes-migration` —— 11.13MB（sessions.db + failures.md/MEMORY.md/USER.md）
+  5. `C:\ZYS\Code\lab-area\exp\2026-08-23-pi-smoke` —— 空目录
+  6. `C:\ZYS\Code\lab-area\exp\2026-08-23-skill-pilot` —— 0.382MB（ai-coding-guide 08-23 副本）
+- **已知永久损失（用户在明确告知后仍选择全删，2026-09-05）**：
+  - pi-side 里 7 个 skill 为孤本，既不在 `~/.claude/skills/` 也不在 skill-trim-20260903 兄弟目录：`ai-coding-guide`（08-25 最新版）、`codebase-deep-index`、`design-cold-index`、`guide-skill-auditor`、`javaguide-style-guide`、`lesson-svg-diagram`、`misc-cold-index`。其中 ai-coding-guide 尚存 3 处 08-23 旧副本（`exp/2026-08-23-skill-full`、`exp/2026-08-28-skill-unify-backup\claude` 与 `\pi-self`、`exp/2026-08-23-skill-convert-test\work`），其余 6 个无任何副本
+  - `hermes-migration/failures.md` 的 25 条长期 correction/preference（learning-first 定案、learning-personas 执行细则、PowerShell 正则坑、终端视觉别重设计、学习重点四方向等）未沉淀进 `~/.claude/projects/*/memory/`，无副本
+- 未受影响：`~/.pi` 本次开始前即不存在；`C:\ZYS\Code\pi-stack` 不存在；`skill-trim-20260903` 其余 13 项存档（ai-coding-coach / article-writing-guide / deep-learn / expose-unknowns / generic-course-tutor-workspace / hallmark / lean-ctx / learning-guide / learning-personas / preflight-check / tech-learning-roadmap / tutorial-maker / wiki-skill--from-lab-area）完好
+
+### Go 1.27.0（2026-09-07）
+- 来源：https://go.dev/dl/；WinGet 包 `GoLang.Go`
+- 安装日期：2026-09-07
+- 安装命令原文：`winget install --exact --id GoLang.Go --accept-package-agreements --accept-source-agreements --disable-interactivity`
+- 装到哪：`C:\Program Files\Go\bin\go.exe`；默认 GOPATH=`C:\Users\zys31\go`
+- 依赖：Windows Package Manager（winget）；Go 官方 Windows amd64 MSI
+- 验证：`go version go1.27.0 windows/amd64`；当前已安装但现有终端 PATH 尚未刷新，重开 PowerShell 后使用 `go` 命令
+- 备注：首次尝试带 `--scope user` 失败（当前 MSI 不支持该 scope）；移除 scope 后安装成功。用途：为 Herdr Windows 插件构建提供 Go，尤其是 `cloudmanic/herdr-plus`。
+
+### Herdr 0.8.2（2026-09-07，lab 试用中，未转正）
+- 来源：https://herdr.dev/zh-cn/docs/install/ ；上游仓库 https://github.com/herdrdev/herdr
+- 安装日期：2026-09-07
+- 用途：终端复用器（tmux/zellij 类）。核心卖点=**AI 编程 agent 感知**（自动检测 pane 内 agent 的 idle/working/blocked 并向上汇总到 pane→tab→workspace 侧栏）+ **会话持久化**（detach/reattach、重启恢复、窗格历史回放）
+- 安装命令原文（**未用官方 `irm | iex` 一行流**，改落盘方式便于杀软扫描与人工审查）：
+  1. `curl.exe -fsSLo install.cmd https://herdr.dev/install.cmd` —— 729B，审阅结论：仅把 install.ps1 下到 `%TEMP%` 再执行，无其他逻辑
+  2. `curl.exe -fsSLo install.ps1 https://herdr.dev/install.ps1` —— 834 行，审计见下
+  3. `powershell.exe -NoProfile -File "C:\ZYS\Code\lab-area\exp\2026-09-07-herdr\install.ps1"` —— **刻意不加 `-ExecutionPolicy Bypass`**（该开关被权限门拦截；实测也不需要：curl.exe 下载不打 Zone.Identifier/MOTW，LocalMachine 策略 `RemoteSigned` 按本地脚本放行）
+- 装到哪：
+  - 本体 `C:\Users\zys31\.herdr\packages\standalone\releases\0.8.2-x86_64-pc-windows-msvc\`（`herdr.exe` 22.4MB + `conpty\` + `THIRD-PARTY-NOTICES\`，合计 23.6MB）
+  - junction `C:\Users\zys31\.herdr\packages\standalone\current` → 上述版本目录
+  - junction `C:\Users\zys31\AppData\Local\Programs\Herdr\bin` → 上述版本目录（**无第二份拷贝**）
+  - 配置（尚未生成）：`%APPDATA%\herdr\config.toml`；socket `%APPDATA%\herdr\herdr.sock`
+- PATH：`HKCU\Environment` 的 `Path` 前置了**版本目录本身**（非 junction）。installer 的 `Update-PathRegistryEntry` 会按 ReleasesDir 父级匹配剔除旧版本条目，`herdr update` 理应自动改写——**升级后需复查该条目是否指向新版本**
+- 依赖：无（单二进制，自带 app-local ConPTY 运行时）。**不得只拷 `herdr.exe`，必须保留整个目录**
+- 安装器审计（2026-09-07）：只从 `herdr.dev` 拉 `latest.json` / `preview.json` 清单；对下载产物做 **SHA-256 校验**；只写 `HKCU\Environment`（不碰 HKLM）；免管理员；版本化目录 + junction，更新不覆盖运行中的二进制
+- 验证：`herdr --version` = `herdr 0.8.2`；`herdr agent list` 返回结构化 JSON `server_not_running`（预期，TUI 未启动）
+- 备注：
+  - **Claude Code 集成层级=混合**：`herdr integration install claude` 只提供原生会话恢复，状态判定仍走屏幕检测（读 pane 底部缓冲区匹配 TOML 规则）。因此**不需要改 `~/.claude/settings.json`**，绕开 safety-net hooks 锁死坑（memory `safety-net-edit-lockout`）
+  - 排障：`herdr agent list` 看识别结果；`herdr agent explain <target> --json` 看判定依据；检测规则可本地覆盖 `~/.config/herdr/agent-detection/<agent>.toml`（Windows 实际路径待确认）
+  - 通道：默认 stable；`herdr channel set preview|stable` 切换；`herdr update` 仅对自家 installer 装的实例生效
+  - **未核实项**：完整 agent 支持列表（只确认 `claude`/`codex` 为文档示例）；官方承认存在但未读到的「Windows 平台特定限制」；Windows 上 socket API / 远程访问是否受限（`herdr.dev/agent-guide.md` 该段源文本损坏）
+  - 卸载：删 `C:\Users\zys31\.herdr`、`%LOCALAPPDATA%\Programs\Herdr`、`%APPDATA%\herdr`，并从 `HKCU\Environment` 的 `Path` 移除版本目录条目
+  - 试验目录：`C:\ZYS\Code\lab-area\exp\2026-09-07-herdr\`（留存 install.cmd / install.ps1 副本）
+  - 选型理由：与 Wave Terminal 对比后选定——Wave 是宿主级替换（要重验 headroom 8787 链路 / hooks / statusline），herdr 是薄层复用器不动现有链路；且不接管 skill/配置/记忆，退出成本接近零（对照 pi 退役时丢 7 个 skill 孤本的教训）
+
+### agent-browser 0.36.0（2026-09-07）
+- 来源：https://github.com/vercel-labs/agent-browser（npm 包 `agent-browser`）
+- 安装日期：2026-09-07
+- 安装命令原文：`npm install -g agent-browser`
+- 装到哪：启动器 `C:\Users\zys31\AppData\Roaming\npm\agent-browser.ps1`；全局包 `C:\Users\zys31\AppData\Roaming\npm\node_modules\agent-browser`
+- 依赖：Node.js / npm；本次未额外执行 `agent-browser install`，由 CLI 自动启动可用浏览器
+- 用途：AI 浏览器自动化 CLI；`snapshot` 获取可访问性树和元素引用，配合 `click/fill` 操作
+- 验证：`agent-browser --version`=`0.36.0`；`open https://example.com` → `snapshot` 成功得到 `e1/e2` 引用 → `close` 正常
+- 备注：Lightpanda 未安装；恢复命令为上述 npm 安装命令，卸载为 `npm uninstall -g agent-browser`

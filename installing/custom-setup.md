@@ -166,6 +166,50 @@
 
 ## hooks / statusline / 配置
 
+### 2026-09-08 追加卸载 secret_guard.py
+- 用户明确要求删除本地自定义敏感信息守卫。来源：本地自建／调整脚本，原始创建命令未留存；原位置 `~/.claude/hooks/secret_guard.py`，依赖 Python 标准库。
+- 原生 Edit 移除 PostToolUse 命令组、PreToolUse 命令组及 MCP 组中的三个 secret_guard 注册；宿主 permissions 与插件开关未改。自动同步 cc-switch 两次均返回 `[DONE]`。
+- 删除命令：`python312 -` 接收 PowerShell here-string；实际删除语句 `src.unlink()`，`src=Path('C:/Users/zys31/.claude/hooks/secret_guard.py')`。删除前只读核对 live/DB 均无引用，并逐字节比对备份。
+- 备份：`C:/ZYS/Code/lab-area/exp/2026-09-08-hook-repair/pruned-six/secret_guard.py`。同目录 `test_before_secret_removal.py` 保存删除专属测试前版本。
+- 保留：共享库、历史日志、状态数据及插件 hook；自定义密钥路径拦截与输出提醒不再提供。恢复需用户授权，从备份复制并重建三条注册后同步。
+- Git guard 状态：此前备份曾被拒绝；用户随后再次授权，现已卸载，详见下方追加记录。
+
+### 2026-09-08 追加卸载 git_guard.py
+- 用户明确授权删除本地 Git／删除操作授权守卫；原位置 `~/.claude/hooks/git_guard.py`，来源为本地自建／调整，原始创建命令未留存，依赖 Python 标准库。
+- 原生 Edit 移除最后一个本地 PreToolUse 注册组，自动同步 cc-switch 返回 `[DONE]`；宿主 permissions 和插件开关未改。
+- 执行命令：`python312 -` 接收 PowerShell here-string，实际删除语句 `src.unlink()`，`src=Path('C:/Users/zys31/.claude/hooks/git_guard.py')`。删除前校验本地和 DB 无引用、文件与备份字节一致。
+- 备份：`C:/ZYS/Code/lab-area/exp/2026-09-08-hook-repair/pruned-six/git_guard.py`；原 Git 测试归档为同目录 `test_git_guard_retired.py`。
+- 本地剩余：`ecc-metrics-bridge.js`、`settings-sync-auto.py`、`settings-degrade-guard.py`，共 3 条注册；所有插件 hook、共享库、历史日志与状态保留。
+- 测试收尾：此前更新被权限拒绝；用户再次授权后，已将 `hooks/tests/test_verification_hooks.py` 改为退休守卫文件缺失及注册清除检查，实跑 1/1 通过；实验目录卸载回归 6/6 通过。原 Git 行为测试保留在备份中，不将退休测试替换声称为修复原守卫缺陷。
+- 恢复：仅在用户授权后复制备份回原位置，按历史 hook-baseline.json 恢复相应注册并同步 cc-switch。
+
+
+
+### 2026-09-08 逐项讨论后精简六个本地 hook
+- 授权：用户逐项确认删除，并最终确认执行；插件自带 hook 全部保留。
+- 已卸载：`check-console-log.js`、`placeholder_guard.py`、`dep_gate.py`、`skill_ledger.py`、`verify_recorder.py`、`gateguard-destructive.js`。原位置均为 `~/.claude/hooks/`。
+- 来源：`check-console-log.js`、`gateguard-destructive.js` 由第三方 ECC 剥离，本地维护；其余为本地自建／调整脚本，历史创建命令未完整留存。
+- 配置：原生 Edit 移除六条注册及相应无内容的事件组；现有五个本地入口、七条注册保留，enabledPlugins 未改。每次配置 Edit 后 settings-sync-auto 回报 `[DONE]`。
+- 执行：`python312 -` 接收 PowerShell here-string 脚本；删除语句为 `(root/'hooks'/name).unlink()`，`root=Path('C:/Users/zys31/.claude')`，name 遍历上述六个文件。删除前断言 settings 与 cc-switch common_config_claude 无对应注册，且脚本与备份逐字节一致。
+- 脚本备份：`C:/ZYS/Code/lab-area/exp/2026-09-08-hook-repair/pruned-six/`；同目录 `hook-baseline.json` 保存卸载前注册及插件开关，不含 provider 凭据。
+- 配置备份：`~/.claude/backups/settings-before-six-hook-prune-20260908-112215.json`。
+- 保留：`git_guard.py`、`secret_guard.py`、`ecc-metrics-bridge.js`、`settings-sync-auto.py`、`settings-degrade-guard.py`；全部插件 hook、共享库、历史日志及状态数据。Python／Node 未卸载，权限规则未改。
+- 验证：卸载回归 6/6 通过；本地与 cc-switch hooks、enabledPlugins 读回一致，剩 5 个入口、7 条本地注册。退休 recorder 的 6 个专属测试已移除，保留 4 个 Git／密钥守卫测试；后者实跑 3 通过、1 错误（组合 Git 命令授权预期与现行返回不一致，JSONDecodeError）。原测试备份也复现该问题，本轮未修改守卫实现或断言。
+- 恢复：仅经用户授权后从备份复制脚本、按 hook-baseline.json 恢复相应注册并同步 cc-switch；不要整体覆盖当前 settings，以免回滚其他后续变更。
+
+
+### 2026-09-08 卸载安装提醒与 MCP 健康检查 hook
+- 用户明确要求删除 `install-ledger-reminder.py` 与 `mcp-health-check.js`。
+- 来源：前者为本地自建命令正则识别／台账提醒 hook；后者由第三方 ECC 2.0.0 剥离为本地自维护脚本，历史来源见下方 ECC 卸载记录。
+- 原位置：`~/.claude/hooks/install-ledger-reminder.py`、`~/.claude/hooks/mcp-health-check.js`。
+- 配置操作：原生 Edit 移除 settings.json 中前者的 PostToolUse 注册、后者的 PreToolUse 与 PostToolUseFailure 注册；其他 hook 保留。每次 Edit 后 settings-sync-auto 均回报 cc-switch 同步 `[DONE]`。
+- 删除命令：`python312 -`，通过 PowerShell here-string 输入 Python 脚本；实际删除语句为 `src.unlink()`，其中 `root=Path('C:/Users/zys31/.claude')`、`names=['install-ledger-reminder.py','mcp-health-check.js']`、`src=root/'hooks'/name`。执行前校验注册已移除，并执行 `shutil.copy2(src,dst)`、`assert src.read_bytes()==dst.read_bytes()` 校验备份。
+- 备份：`C:/ZYS/Code/lab-area/exp/2026-09-08-hook-repair/uninstalled/` 下同名文件。
+- 依赖与保留项：不卸载 Python/Node，不删除 hooks/lib 共享库、auto-log.jsonl、MCP 状态或历史台账；MCP 服务本体与注册不变。
+- 验证：核对脚本缺失、settings.json 与 cc-switch common_config_claude 无对应命令；回归测试改为校验卸载状态，不再运行已退休 hook。
+- 恢复：仅在用户要求恢复时，从上述备份复制回原位置，重建原事件注册并同步 cc-switch；卸载不影响 CLAUDE.md 的正式安装登记要求。
+
+
 ### ~/.claude/hooks/
 - ecc 系 hooks（Fact-Forcing Gate / GateGuard 等）随 ecc 插件来；另有自建/调整个别脚本
 - 备份：`~/.claude/hooks/HOOKS_BACKUP.md`
@@ -193,6 +237,8 @@
   - `~/.claude/hooks/mcp-health-check.js`（零依赖；settings.json PreToolUse + PostToolUseFailure 注册）
   - `~/.claude/hooks/check-console-log.js`（require `./lib/utils`，复用已有 hooks/lib/utils.js；Stop 注册）
   - `~/.claude/hooks/gateguard-destructive.js`（原 ecc `gateguard-fact-force.js` 复制改名 + 加自执行入口；require `./lib/shell-substitution`；PreToolUse Bash 注册）——**只留 destructive 门**（rm -rf / reset --hard / force push / find -exec 等），Edit/Write 事实门与 routine Bash 门不保留（routine 靠 `env.GATEGUARD_BASH_ROUTINE_DISABLED=1` 关）
+    - **2026-09-05 修正**：当时台账称 Write 门已裁，实际裁剪不完全——hook 源码 Write 首建事实门仍在，且 settings.json Edit|Write matcher 里也注册着此 hook，会话中被拦 4 次。当日已从 Edit|Write matcher 摘除该注册（hook 文件未动，Bash 注册保留），settings.json 变更已自动同步 cc-switch DB。Write 门从此仅存于 hook 源码，未注册不生效。
+    - **2026-09-05 补充**：同日用户确认后彻底清除 hook 源码内 Edit/Write/MultiEdit 事实门死代码（分支 + editGateMsg/writeGateMsg/condensedGateMsg/getFullDenialBudget/markCheckedAndCountDenial/sanitizePath/EDIT_WRITE_HOOK_ID），denyResult 默认 hookId 改为 BASH_HOOK_ID。行为不变：destructive 与 routine Bash 门保留，实测 deny→retry→allow 与 Write/Edit 透传均通过。
   - `~/.claude/hooks/lib/shell-substitution.js`（零依赖）
   - 未剥离：format-typecheck / suggest-compact / memory-persistence（用户不要，随 ecc 消失）
 - **MCP**：chrome-devtools 独立保留 → `claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest`（写入 `~/.claude.json` 顶层 mcpServers，user scope；原 ecc `.mcp.json` 定义）。**注意**：settings.json 顶层不支持 `mcpServers`（死配置，官方确认），别放那。

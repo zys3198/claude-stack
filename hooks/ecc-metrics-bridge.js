@@ -48,7 +48,7 @@ function hashToolCall(toolName, toolInput) {
   let key = '';
   if (name === 'Bash') {
     key = String(toolInput?.command || '').slice(0, 160);
-  } else if (/^(Edit|MultiEdit|Write|NotebookEdit)$/.test(name)) {
+  } else if (/^(Edit|MultiEdit|Write|NotebookEdit|apply_patch)$/i.test(name)) {
     // Fingerprint the actual change, not just the path. Hashing on file_path
     // alone made every distinct edit to the same file collide, so a few normal
     // edits to one file looked like a stuck loop. Include the edit content so
@@ -65,7 +65,9 @@ function hashToolCall(toolName, toolInput) {
           old_string: toolInput?.old_string,
           new_string: toolInput?.new_string,
           content: toolInput?.content,
-          edits: toolInput?.edits
+          edits: toolInput?.edits,
+          patch: toolInput?.patch,
+          command: toolInput?.command
         })
       )
       .digest('hex');
@@ -93,6 +95,21 @@ function extractFilePaths(toolName, toolInput) {
       if (edit?.file_path && typeof edit.file_path === 'string') {
         paths.push(edit.file_path);
       }
+    }
+  }
+
+  const notebookPath = toolInput.notebook_path;
+  if (notebookPath && typeof notebookPath === 'string') paths.push(notebookPath);
+
+  const patch = typeof toolInput.patch === 'string'
+    ? toolInput.patch
+    : typeof toolInput.command === 'string' ? toolInput.command : '';
+  if (/^apply_patch$/i.test(toolName) && patch) {
+    for (const match of patch.matchAll(/^\*\*\* (?:Update|Add|Delete) File: (.+)$/gm)) {
+      paths.push(match[1].trim());
+    }
+    for (const match of patch.matchAll(/^\+\+\+ b\/(.+)$/gm)) {
+      paths.push(match[1].trim());
     }
   }
 
@@ -132,24 +149,30 @@ function writeCostWarningIfChanged(kind, costsPath, signature, message) {
 /**
  * Read cumulative cost for a session from costs.jsonl.
  *
- * Scans the full file because each row is a cumulative session total
- * (see cost-tracker.js docblock) and the row we need is the last one
- * matching `sessionId`. The previous implementation read only the
- * trailing 8 KiB; any session whose latest cumulative row was pushed
- * past that window by newer rows from other sessions silently dropped
- * to zero — the opposite sign of the double-count bug fixed in the
- * previous commit.
- *
- * costs.jsonl is append-only and unbounded today (no rotation in
- * cost-tracker.js). At a typical ~150 bytes per row, even 100k rows
- * is ~15 MB and a single sync read on every PostToolUse hook is in
- * the low milliseconds. If rotation lands later, this scan becomes
- * even cheaper.
+ * costs.jsonl is append-only and each row stores a cumulative session total.
+ * The bridge records file metadata so repeated PostToolUse calls skip a full
+ * parse when the cost log did not change.
  */
-function readSessionCost(sessionId) {
+function readSessionCost(sessionId, bridge = null) {
   let costsPath = path.join('metrics', 'costs.jsonl');
   try {
     costsPath = path.join(getClaudeDir(), 'metrics', 'costs.jsonl');
+    const stat = fs.statSync(costsPath);
+    const cacheHit = bridge
+      && bridge.costs_file_path === costsPath
+      && Number(bridge.costs_file_size) === stat.size
+      && Number(bridge.costs_file_mtime_ms) === stat.mtimeMs;
+
+    if (cacheHit) {
+      return {
+        totalCost: toNumber(bridge.total_cost_usd),
+        totalIn: toNumber(bridge.total_input_tokens),
+        totalOut: toNumber(bridge.total_output_tokens),
+        totalCacheRead: toNumber(bridge.cache_read_tokens),
+        totalCacheWrite: toNumber(bridge.cache_write_tokens)
+      };
+    }
+
     const content = fs.readFileSync(costsPath, 'utf8');
     const lines = content.split('\n').filter(Boolean);
 
@@ -187,8 +210,18 @@ function readSessionCost(sessionId) {
         `[ecc-metrics-bridge] skipped ${malformed} malformed line(s) in ${costsPath}\n`
       );
     }
+    if (bridge) {
+      bridge.costs_file_path = costsPath;
+      bridge.costs_file_size = stat.size;
+      bridge.costs_file_mtime_ms = stat.mtimeMs;
+    }
     return { totalCost, totalIn, totalOut, totalCacheRead, totalCacheWrite };
   } catch (err) {
+    if (bridge) {
+      delete bridge.costs_file_path;
+      delete bridge.costs_file_size;
+      delete bridge.costs_file_mtime_ms;
+    }
     // ENOENT is the common case (no Stop event has fired yet this session)
     // and is not actually a failure — stay silent on it. Anything else
     // (permission, EISDIR, malformed read) deserves a breadcrumb because
@@ -207,7 +240,7 @@ function readSessionCost(sessionId) {
 
 /**
  * @param {string} rawInput - Raw JSON string from stdin
- * @returns {string} Pass-through
+ * @returns {string} Empty string on success; hook context is not modified.
  */
 function run(rawInput) {
   try {
@@ -217,7 +250,7 @@ function run(rawInput) {
 
     const sessionId = sanitizeSessionId(input.session_id) || sanitizeSessionId(process.env.ECC_SESSION_ID) || sanitizeSessionId(process.env.CLAUDE_SESSION_ID);
 
-    if (!sessionId) return rawInput;
+    if (!sessionId) return '';
 
     const now = new Date().toISOString();
     const bridge = readBridge(sessionId) || {
@@ -241,8 +274,8 @@ function run(rawInput) {
     bridge.last_timestamp = now;
     if (!bridge.first_timestamp) bridge.first_timestamp = now;
 
-    // Track modified files (Write/Edit/MultiEdit only)
-    const isWriteOp = /^(Write|Edit|MultiEdit)$/i.test(toolName);
+    // Track modified files for write-like tools
+    const isWriteOp = /^(Write|Edit|MultiEdit|NotebookEdit|apply_patch)$/i.test(toolName);
     if (isWriteOp) {
       const newPaths = extractFilePaths(toolName, toolInput);
       const existing = new Set(bridge.files_modified || []);
@@ -262,7 +295,7 @@ function run(rawInput) {
     bridge.recent_tools = recent;
 
     // Update cost from costs.jsonl tail
-    const costs = readSessionCost(sessionId);
+    const costs = readSessionCost(sessionId, bridge);
     bridge.total_cost_usd = Math.round(costs.totalCost * 1e6) / 1e6;
     bridge.total_input_tokens = costs.totalIn;
     bridge.total_output_tokens = costs.totalOut;
@@ -274,17 +307,25 @@ function run(rawInput) {
     // Never block tool execution
   }
 
-  return rawInput;
+  return '';
 }
 
 if (require.main === module) {
   let data = '';
+  let bytesRead = 0;
+  let oversized = false;
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', chunk => {
-    if (data.length < MAX_STDIN) data += chunk.substring(0, MAX_STDIN - data.length);
+    bytesRead += Buffer.byteLength(chunk, 'utf8');
+    if (bytesRead > MAX_STDIN) {
+      oversized = true;
+      data = '';
+    } else if (!oversized) {
+      data += chunk;
+    }
   });
   process.stdin.on('end', () => {
-    process.stdout.write(run(data));
+    if (!oversized) run(data);
     process.exit(0);
   });
 }

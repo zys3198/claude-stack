@@ -99,6 +99,26 @@
 - 依赖：无额外依赖
 - 备注：上游目录仅含 SKILL.md 与两份 references；已审查，无 scripts、外部命令、远程安装、数据上传、密钥读取或配置修改指令。
 
+### archify
+- 来源：https://github.com/tt-a1i/archify（main HEAD `c6519401f7b91b9d43011657880893b0a8955548`；上游 based_on Cocoon-AI/architecture-diagram-generator，MIT）
+- 安装日期：2026-09-06
+- 安装命令原文：`npx -y skills add tt-a1i/archify --skill archify --agent claude-code --global --copy --yes`（skills CLI 自动识别 `claude-code_2-1-263_agent`，非交互）
+- 装到哪：`~/.claude/skills/archify/`（194 文件 / 7MB；bin、renderers、schemas、examples、recipes、references、delta、migrations、scripts、test、assets、brand-marks）
+- 依赖：Node.js >= 18（本机 v24.16.0 ✓）；CLI 声明零第三方依赖，无 `dependencies`（package.json version `2.17.0-dev.1`，SKILL.md metadata version `2.17`）
+- 用途：把代码库或系统描述编译成可交互的独立 HTML（内联 SVG）系统图——architecture / workflow / sequence / dataflow / lifecycle 五类，含 Mermaid 转换、深浅主题、trace 动画、PNG/SVG/WebM 导出、Architecture Delta（Before/Delta/After）对比
+- 验证：`node ~/.claude/skills/archify/bin/archify.mjs doctor` 全部 [ok]（Node、核心模板、5 类 renderer+schema+example、preview/visual-check/output-path-safety 运行时、compare 运行时与 proof fixtures、schema validators），末行 `Archify is ready.`
+- 安全面：安装时 skills CLI 安全评估 = Socket `Safe` / Snyk `0 alerts`（https://skills.sh/tt-a1i/archify）。`preview` 仅绑 `127.0.0.1` 随机端口（loopback）；更新检查为被动提醒不下载，可用 `ARCHIFY_UPDATE_CHECK_DISABLED=1` 关闭
+- 备注：上游无 Claude Code `.claude-plugin/plugin.json`，按「无兼容插件才记裸 skill」入本台账，不进自建白名单。`--copy` 直接复制进 `~/.claude/skills/`，**未**在 `~/.agents/skills/` 留 store 副本（已实测该路径不存在），也未产生 `skills-lock.json`。卸载 = `npx skills remove archify -g` 或直接删目录；重装 = 上面同一条命令。装的是上游 dev 版本号（`-dev.1`），非 tag 发布。
+
+### agent-browser
+- 来源：https://github.com/vercel-labs/agent-browser
+- 安装日期：2026-09-07
+- 安装命令原文：`npx skills add vercel-labs/agent-browser -g`
+- 装到哪：`C:\Users\zys31\.agents\skills\agent-browser`（skills CLI 已同步为 Claude Code 可发现 Skill）
+- 依赖：Node.js / npx；全局 `agent-browser` CLI 0.36.0；本次自动使用 `skills@1.5.24`
+- 用途：浏览器自动化、页面交互、截图、页面读取、测试和 Electron 应用操作
+- 备注：官方仓库；当前采用 Claude Code Skill 方式，未注册 agent-browser MCP；与现有 Chrome DevTools MCP 并存，后续按需评估。
+
 ## 散件来源反查登记（2026-08-11 公网反查确认）
 
 无 Claude Code plugin manifest 的裸 skill 重装方法：`npx skills add <owner/repo>` 或 clone 后 copy 进 `~/.claude/skills/<name>`。以下均为第三方，不进 git。
@@ -189,3 +209,20 @@
 - **cc-switch-setting-sync 自动化（2026-09-04）**：新增 hooks/settings-sync-auto.py（PostToolUse Edit|Write，命中 settings.json 即自动同步 cc-switch DB，幂等 NO-OP），skill 降级为排查/修复/验证文档。同轮：skill_ledger.py 接线 PostToolUse matcher=Skill（skill-usage.log 记账恢复）；chrome-devtools-mcp 固定 1.8.0；hooks/ 清残留（HOOKS_BACKUP.md/debug.log/__pycache__）。
 - **存储自动化+清理（2026-09-04）**：settings.json 加 cleanupPeriodDays=7（transcript 自动滚动清理，替代手动清）；better-harness 8 个 2026-08-05 旧 run 目录（24M）与 archive/ 旧归档（30M）清空。
 - **install-ledger 自动化（2026-09-04）**：新增 hooks/install-ledger-reminder.py（PostToolUse Bash，匹配 claude plugin/mcp、npm -g、pip/pipx/uv/cargo/winget/scoop、npx skills add 等 10 类安装/卸载命令 → 追加 installing/auto-log.jsonl 兜底 + additionalContext 提醒模型按 §7 正式登记）。自检 tests/test_install_ledger_reminder.py（10 hit + 5 quiet 全过）。skill_ledger（Skill 调用记账）+ 本 hook（安装动作记账）+ ccswitch 自动同步三件齐。
+
+### ArkCLI 内嵌 skill 套件（补登记 + 同日全量卸载，2026-09-05）
+- **补登记原因**：这批 skill 此前从未进台账——它不是手动安装，而是火山引擎 ArkCLI 的 `arkcli +connect` 命令自动铺进本机所有被检测到的 agent 目录，绕过了 §7 登记流程。2026-09-05 用户问「arkcli 是什么 skill」时才发现，同轮拍板卸载
+- 来源：npm 包 `@volcengine/ark-cli@1.0.25` 自带 `skills/` 目录（`...\npm\node_modules\@volcengine\ark-cli\skills`）；skill 自身 `version: 2.2.1`，frontmatter `requires.bins: ["arkcli"]`（无 CLI 即空壳）
+- 原安装命令（推断，非本人执行）：`arkcli +connect`——描述为「Install arkcli AI skills to all detected local agents」
+- 原装到哪：**6 个 agent 目录 × 25 个 = 150 个**：`~/.claude\skills`(25/45)、`~/.augment\skills`(25/25)、`~/.agents\skills`(cline+warp 共用, 25/25)、`~/.cursor\skills`(25/26)、`~/.copilot\skills`(25/26)、`~/.config\opencode\skills`(25/26)
+- 25 个 skill 清单：shared(公共执行协议, 其余均依赖)、onboard、helper、doctor、auth、config、profile、chat、models、infer-endpoint、deploy、custommodel、train-finetune、billing、pricing、plans、usage、agent、datasets、resources、gen、code-example、understand、api-explorer、connect
+- **卸载命令原文（2026-09-05，顺序不可颠倒）**：
+  1. `arkcli +connect uninstall`（官方命令，输出 `Removed 150 skill(s) total`，6 个 agent 各 25）
+  2. `npm uninstall -g @volcengine/ark-cli`（`removed 1 package`）
+  3. `Remove-Item -LiteralPath "C:\Users\zys31\.arkcli" -Recurse -Force`（873K 配置+凭据目录）
+- 验证：6 个目录 `arkcli-*` 与 `ark-*` 均归零；`~/.claude/skills` 45→20（余下全为自建/主动保留）；`arkcli` 命令消失；`~/.arkcli` 不存在
+- **凭据已销毁（用户选「直接删干净、不留副本」）**：`~/.arkcli` 内 `.env`(2676B)、`config.yaml`、`identities/volc-2124091730/{apikey,token,sts,user_id,metadata}.json`（火山引擎账号 2124091730）、cache 内 862K 模型元数据。**未读取任何文件内容**（secret_guard 拦下首次尝试，仅取文件名与大小）
+- **不影响 CC 对话**：CC 走火山方舟的链路是 `CC → 8787(headroom) → 15721(cc-switch) → 火山 API`，token 由 cc-switch 独立持有（`ark-55e4a0f8-…`），与 `~/.arkcli/identities/` 是两份不同凭据
+- 恢复方式：`npm install -g @volcengine/ark-cli` → `arkcli +auth` 重新登录（凭据服务端重新下发）→ `arkcli +connect` 重铺 skill。**若只想装到 CC**：`arkcli +connect --path ~/.claude/skills`
+- 安全建议（未执行，待用户定）：既已彻底不用，可去火山引擎控制台吊销账号 2124091730 名下该 API key
+- 备注：`arkcli +connect uninstall` 另有 `--purge-prefix`（强制删所有 `ark-`/`arkcli-` 前缀目录，含非它管理的）本次未用，默认模式已清干净。`+connect` 还会默认移除第三方 `byted-ark-seedance/seedream` 生成类 skill（`--keep-conflicting` 可保留）——本机无此二者。空目录 `~/.augment\skills`、`~/.agents\skills` 保留未删（属他工具目录）

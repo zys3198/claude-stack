@@ -432,7 +432,7 @@ function runCommand(cmd, options = {}) {
       stdio: ['pipe', 'pipe', 'pipe'],
       ...options
     });
-    return { success: true, output: result.trim() };
+    return { success: true, output: result.includes('\0') ? result : result.trim() };
   } catch (err) {
     return { success: false, output: err.stderr || err.message };
   }
@@ -454,10 +454,11 @@ function isGitRepo() {
 function getGitModifiedFiles(patterns = []) {
   if (!isGitRepo()) return [];
 
-  const result = runCommand('git diff --name-only HEAD');
-  if (!result.success) return [];
-
-  let files = result.output.split('\n').filter(Boolean);
+  const tracked = runCommand('git diff --name-only -z HEAD');
+  const untracked = runCommand('git ls-files --others --exclude-standard -z');
+  let files = [...new Set([tracked, untracked]
+    .filter(result => result.success)
+    .flatMap(result => result.output.split('\0').filter(Boolean)))];
 
   if (patterns.length > 0) {
     // Pre-compile patterns, skipping invalid ones
