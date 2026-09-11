@@ -357,3 +357,17 @@
 - **验证**：每个修复对象 wc ≤200、`grep -c "references/"` ≥1、反向验证（入口路由行临时改名 grep=0 → 还原 grep≥1，cmp 逐字节一致）、frontmatter（含 description）与改前备份逐字节一致、十查自检全 PASS、第一跳 3 场景×4 与修复前判定一致（无触发漂移）。全部证据录 `audit-report.md`。
 - **回滚**：改前备份在 `C:\ZYS\Code\lab-area\exp\2026-09-08-wechat-audit\bak\<skill名>-SKILL.md`，复制回 `~/.claude/skills/<skill名>/SKILL.md` 即还原；新增 references 文件可按需删除。
 - **遗留**：见工件目录 `BLOCKED.md` 批次 3 节（code-change-workflow 幻觉目标 P0、bili-note/.codex 与 wiki-sediment/.pi 与 skill-trimmer/.pi 死路径、examples 死接线、bili-note 与 generic-course-tutor 超行未修）。
+
+---
+
+### Claude Code Windows Toast 点击无动作（2026-09-10，全局）
+
+- **来源**：本地自建；用户要求区分 VS Code／Windows Terminal、覆盖输入／决定／工具错误／API 错误／回复完成，并最终选择点击不执行动作。
+- **位置**：通知入口 `~/.claude/hooks/claude-notify.ps1`；空操作启动器 `~/.claude/hooks/claude-notify-focus.vbs`；当前用户协议 `HKCU\Software\Classes\claude-notify`。
+- **安装命令原文**：先注册协议：`MSYS_NO_PATHCONV=1 reg.exe add 'HKCU\Software\Classes\claude-notify' /ve /d 'URL:Claude Notify Focus Protocol' /f && MSYS_NO_PATHCONV=1 reg.exe add 'HKCU\Software\Classes\claude-notify' /v 'URL Protocol' /d '' /f && MSYS_NO_PATHCONV=1 reg.exe add 'HKCU\Software\Classes\claude-notify\shell\open\command' /ve /d 'powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\Users\zys31\.claude\hooks\claude-notify-focus.ps1" "%1"' /f`；最终处理命令改为：`MSYS_NO_PATHCONV=1 reg.exe add 'HKCU\Software\Classes\claude-notify\shell\open\command' /ve /d 'wscript.exe "C:\Users\zys31\.claude\hooks\claude-notify-focus.vbs" "%1"' /f`。脚本由 Claude Code 原生 Write/Edit 写入。
+- **行为**：Toast 使用宿主 AppUserModelID 和 `claude-notify://dismiss`；VBS 立即退出，因此点击无白框、无跳转、无新窗口。通知脚本仅按 VS Code 环境变量识别宿主，不遍历进程、不调用 `user32.dll`、不动态 `Add-Type`，也不再尝试前台窗口抑制。`StopFailure.error` 按 `server_error`、`authentication_failed`、`billing_error`、`rate_limit`、`cloud_credential_error`、`unknown` 分别生成准确文案。
+- **安全处置**：前台抑制实验在隐藏合成测试中被卡巴斯基行为分析报为 `PDM:Trojan.Win32.Generic`，主脚本被删除；用户确认后以最简版本重建，并执行 `Remove-Item -LiteralPath 'C:\Users\zys31\.claude\hooks\claude-notify-focus.ps1' -Force -Confirm:$false` 删除停用的聚焦脚本。四条通知 hook 同时移除不必要的 `-ExecutionPolicy Bypass`。不要恢复该实验脚本或直接添加杀软白名单。
+- **依赖**：Windows PowerShell 5.1、Windows WinRT Toast、系统自带 `wscript.exe`、当前用户注册表写权限；无第三方包。
+- **验证**：重建脚本 Parser 为 0 错误；静态核对无 `Add-Type`、进程遍历或 `user32.dll`；settings.json 可解析且包含 Notification／PostToolUseFailure／StopFailure／Stop，四条命令均不含 `Bypass`；注册表逐字读回为 `wscript.exe "C:\Users\zys31\.claude\hooks\claude-notify-focus.vbs" "%1"`；无 Bypass 空输入启动退出码 0。重建后的自然 Stop 通知和卡巴斯基行为仍需观察。
+- **回退**：经删除确认后，在 Git Bash 执行 `MSYS_NO_PATHCONV=1 reg.exe delete 'HKCU\Software\Classes\claude-notify' /f`，删除 `claude-notify-focus.vbs`，并从 settings.json 移除四类通知 hook；不要只删通知脚本而留下失效注册。
+

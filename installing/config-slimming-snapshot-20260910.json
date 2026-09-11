@@ -1,0 +1,93 @@
+{
+  "capturedAt": "2026-09-10",
+  "purpose": "脱敏配置快照：移除 taste-skill 前",
+  "source": "C:\\Users\\zys31\\.claude\\settings.json",
+  "settings": {
+    "cleanupPeriodDays": 7,
+    "envKeys": [
+      "ANTHROPIC_AUTH_TOKEN",
+      "ANTHROPIC_BASE_URL",
+      "ANTHROPIC_DEFAULT_FABLE_MODEL",
+      "ANTHROPIC_DEFAULT_FABLE_MODEL_NAME",
+      "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+      "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME",
+      "ANTHROPIC_DEFAULT_OPUS_MODEL",
+      "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME",
+      "ANTHROPIC_DEFAULT_SONNET_MODEL",
+      "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME",
+      "CLAUDE_CODE_DISABLE_ARTIFACT",
+      "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS",
+      "CLAUDE_CODE_GIT_BASH_PATH",
+      "CLAUDE_CODE_SUBAGENT_MODEL",
+      "ENABLE_TOOL_SEARCH",
+      "GATEGUARD_BASH_ROUTINE_DISABLED"
+    ],
+    "attribution": {
+      "commit": "",
+      "pr": ""
+    },
+    "includeCoAuthoredBy": false,
+    "permissions": {
+      "allow": [],
+      "deny": [
+        "Grep",
+        "Glob"
+      ],
+      "ask": [
+        "Bash(git push*)"
+      ],
+      "defaultMode": "auto"
+    },
+    "model": "sonnet",
+    "hooks": {
+      "PostToolUse": [
+        "settings-sync-auto.py",
+        "ecc-metrics-bridge.js"
+      ],
+      "SessionStart": [
+        "settings-degrade-guard.py"
+      ],
+      "Notification": [
+        "claude-notify.ps1"
+      ],
+      "Stop": [
+        "claude-notify.ps1"
+      ]
+    },
+    "statusLine": {
+      "type": "command",
+      "command": "node statusline/statusline.js",
+      "padding": 0
+    },
+    "enabledPlugins": {
+      "better-harness@better-harness": true,
+      "caveman@caveman": true,
+      "context7@claude-plugins-official": true,
+      "github@claude-plugins-official": true,
+      "impeccable@impeccable": true,
+      "last30days@last30days-skill": true,
+      "mattpocock-skills@mattpocock": true,
+      "ponytail@ponytail": true,
+      "taste-skill@taste-skill": true
+    },
+    "extraKnownMarketplaces": [
+      "caveman",
+      "claude-plugins-official",
+      "impeccable",
+      "last30days-skill"
+    ],
+    "effortLevel": "high",
+    "autoUpdatesChannel": "latest",
+    "skipWorkflowUsageWarning": true,
+    "theme": "auto"
+  },
+  "plugin": {
+    "id": "taste-skill@taste-skill",
+    "scope": "user",
+    "version": "1.0.0",
+    "gitCommitSha": "ccbc15639c97057cbfcf32ecebc38ef716e4bb37",
+    "installPath": "C:\\Users\\zys31\\.claude\\plugins\\cache\\taste-skill\\taste-skill\\1.0.0",
+    "marketplacePath": "C:\\Users\\zys31\\.claude\\plugins\\marketplaces\\taste-skill",
+    "marketplaceSource": "https://github.com/Leonxlnx/taste-skill.git"
+  }
+}

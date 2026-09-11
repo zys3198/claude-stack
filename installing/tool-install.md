@@ -344,3 +344,20 @@
 - 用途：AI 浏览器自动化 CLI；`snapshot` 获取可访问性树和元素引用，配合 `click/fill` 操作
 - 验证：`agent-browser --version`=`0.36.0`；`open https://example.com` → `snapshot` 成功得到 `e1/e2` 引用 → `close` 正常
 - 备注：Lightpanda 未安装；恢复命令为上述 npm 安装命令，卸载为 `npm uninstall -g agent-browser`
+
+## 卸载 / 清除记录
+
+### Codex 桌面版 0.153.4 全量清除（2026-09-10，无备份）
+- 背景：用户要求清除本机全部 codex 记录，仅保留 cc-switch 内 codex 供应商认证（CC 经 headroom 仍使用火山 Coding Plan 提供商）
+- 已删：
+  - `C:\Users\zys31\.codex\` 整个目录（约 1.4GB：sessions/archived_sessions/*.sqlite/memories/logs/plugins/.tmp/backups/config.toml 等；无 auth.json）
+  - `C:\Users\zys31\AppData\Local\OpenAI\`（636MB，codex.exe + cua_node 运行时；便携解包安装，无注册表 Uninstall 条目）
+  - Chrome 原生消息键 `HKCU\...\NativeMessagingHosts\com.openai.codexextension`；8 个 OpenAI.Codex_2p2nqsd0c76g0 陈旧 AppX/磁贴/通知键
+  - 计划任务 `\headroom-codex-startup`、`\headroom-codex-health`（S4U，需 UAC 提权删）；`~/.headroom/deploy/codex/`、`~/.headroom/codex-proxy.{err,out}.log`（headroom 主链路 default/ 与 8787 未动）
+  - cc-switch DB（`~/.cc-switch/cc-switch.db`）内 codex 历史：proxy_request_logs 4100+1446 条（二次清除，因 cc-switch 在 ~/.codex 删除前重启触发全量重同步）、usage_daily_rollups 59、session_log_sync 461+87、settings.common_config_codex、provider_health 2 行；`~/.cc-switch/backups/`（1.2GB）、`logs/`、两个 .bak-codex-purge-20260825
+  - Temp：8 个 codex 脚本/壁纸 + openai-docs-cache（2.3MB）
+  - 仓库 untracked：`exp/2026-09-09-claude-to-codex/`、`headroom-codexrecovery.html/.txt`（routing 修复脚本经用户决定保留）
+  - `~/.claude/.codex/`、`~/.claude/backups/codex-pi-purge-20260905/`
+- 保留：cc-switch providers 表两个 codex 行（OpenAI Official、火山 Coding Plan=current，含 key）、`codex_oauth_auth.json`、copilot_auth.json；installing 台账与 memory 审计链；fix/apply-headroom-routing.mjs
+- 注意：浏览器内 ChatGPT/Codex 扩展（ID odlomjlbamekndcpllcnffbgeohgkmjh 等）需在 Chrome 中手动移除；同轮用户确认后另删两个 Codex++ 死磁贴键（程序本体 C:\ZYS\Software\Codex++ 早已不存在）与 UrlAssociations\codex 协议关联键，终扫 HKCU codex 键=0
+- 恢复方式：重装 Codex 桌面版；认证由 cc-switch 切换提供商重新渲染 config.toml/auth.json，OAuth 凭据文件仍在

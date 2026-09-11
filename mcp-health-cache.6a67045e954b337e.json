@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "servers": {
+    "chrome-devtools": {
+      "status": "unhealthy",
+      "checkedAt": 1788755884038,
+      "expiresAt": 1788755884038,
+      "failureCount": 1,
+      "lastError": "chrome-devtools stdio initialize handshake timed out",
+      "lastFailureCode": null,
+      "nextRetryAt": 1788755914038,
+      "lastRestoredAt": null
+    }
+  }
+}

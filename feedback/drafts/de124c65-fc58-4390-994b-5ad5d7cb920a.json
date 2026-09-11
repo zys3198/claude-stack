@@ -1,0 +1,29 @@
+{
+  "draft_id": "de124c65-fc58-4390-994b-5ad5d7cb920a",
+  "created_at": "2026-09-11T04:42:51.292Z",
+  "source_session_id": "dd833470-a799-4f47-8e8c-341abce1cf9a",
+  "cwd": "C:\\ZYS\\Code\\dtsf-eam",
+  "model": "claude-opus-5",
+  "cli_version": "2.1.268",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "Windows glab publishing mangled Chinese title",
+  "details": "- **What happened:** Python heredoc passed Chinese title through Windows Git Bash into `glab`, and GitLab stored mojibake in Issue #17; expected exact UTF-8 title. Follow-up correction attempts hit temp-path conversion and HTTP 415.\n- **What the user said:** “发布失败必须报告已成功创建的真实编号，并使用精确标题去重后续重试。”\n- **Repro:** From Git Bash on Windows, run a Python heredoc that invokes `glab api -X POST ... -f title=<Chinese text>` through `subprocess.run`; inspect stored issue title.\n- **Evidence:** GitLab zyts/dtsf Issue #17; 2026-09-11; branch eam-ems.",
+  "area": "Bash glab issue publishing",
+  "failure_mode": "code_quality",
+  "task_category": "other",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "enabled",
+  "thinking_budget": 31999,
+  "message_count": 189,
+  "assistant_turn_count": 10,
+  "subagent_count": 0,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\c--ZYS-Code-dtsf-eam\\dd833470-a799-4f47-8e8c-341abce1cf9a.jsonl",
+    "message_range": null,
+    "project_dir_key": "c--ZYS-Code-dtsf-eam"
+  },
+  "status": "queued"
+}

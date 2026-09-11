@@ -1,0 +1,129 @@
+{
+  "cleanupPeriodDays": 7,
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8788",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL": "claude-fable-5",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL_NAME": "gpt-6-astra",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME": "gpt-5.6-luna",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "gpt-5.6-sol",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "gpt-5.6-luna",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_GIT_BASH_PATH": "C:/ZYS/Software/Git/usr/bin/bash.exe",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "ark-code-latest",
+    "ENABLE_TOOL_SEARCH": "true",
+    "GATEGUARD_BASH_ROUTINE_DISABLED": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [],
+    "deny": [
+      "Grep",
+      "Glob"
+    ],
+    "ask": [
+      "Bash(git push*)"
+    ],
+    "defaultMode": "auto"
+  },
+  "model": "opus",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|apply_patch|update|str_replace_based_edit_tool|file_edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe \"C:/Users/zys31/.claude/hooks/settings-sync-auto.py\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:/Users/zys31/.claude/hooks/ecc-metrics-bridge.js"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe \"C:/Users/zys31/.claude/hooks/settings-degrade-guard.py\""
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"C:/Users/zys31/.claude/statusline/statusline.js\"",
+    "padding": 0
+  },
+  "enabledPlugins": {
+    "better-harness@better-harness": true,
+    "caveman@caveman": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "impeccable@impeccable": true,
+    "last30days@last30days-skill": true,
+    "mattpocock-skills@mattpocock": true,
+    "ponytail@ponytail": true,
+    "skill-creator@claude-plugins-official": true,
+    "taste-skill@taste-skill": true
+  },
+  "extraKnownMarketplaces": {
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
+    },
+    "last30days-skill": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/mvanhorn/last30days-skill.git"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "modelSettings": {
+    "claude-sonnet-5": {},
+    "claude-haiku-4-5": {},
+    "claude-opus-5": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5": {
+      "effortLevel": "medium"
+    }
+  },
+  "autoUpdatesChannel": "latest",
+  "skipWorkflowUsageWarning": true,
+  "theme": "auto"
+}

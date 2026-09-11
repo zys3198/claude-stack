@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "servers": {
+    "lean-ctx": {
+      "status": "healthy",
+      "checkedAt": 1788570570310,
+      "expiresAt": 1788570690310,
+      "failureCount": 0,
+      "lastError": null,
+      "lastFailureCode": null,
+      "nextRetryAt": 1788570570310,
+      "lastRestoredAt": 1788570570310,
+      "source": "C:\\Users\\zys31\\.claude.json"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "draft_id": "6b5e9ad8-6d4b-4d21-9342-6b211aa8d776",
+  "created_at": "2026-09-09T01:49:01.474Z",
+  "source_session_id": "53c941be-a5bf-4e13-9c1c-a148a1a96ef9",
+  "cwd": "C:\\ZYS\\Code\\lab-area",
+  "model": "claude-sonnet-5",
+  "cli_version": "2.1.266",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "混淆全局 CLAUDE 与项目记忆作用域",
+  "details": "**What happened:** 把全局 `CLAUDE.md` 规则与当前项目 `memory/` 混为同一作用域，并按分组提问；预期应按全局文件身份逐条判断、逐条询问。\n**What the user said:** \"重新来，按全局CLAUDE.md的身份\"\n**Repro:** 用户要求把全局 `CLAUDE.md` 中适合长期保存的内容放入记忆；模型先按当前项目记忆提案并把多条合并成一次问题。\n**Evidence:** 全局文件上下文为 `C:\\Users\\zys31\\.claude\\CLAUDE.md`；项目记忆目录为 `C:\\Users\\zys31\\.claude\\projects\\C--ZYS-Code-lab-area\\memory\\`。",
+  "area": "memory migration workflow",
+  "failure_mode": "context_and_memory",
+  "task_category": "code_edit",
+  "trigger": "model_judgment",
+  "effort": "max",
+  "thinking_type": "adaptive",
+  "message_count": 235,
+  "assistant_turn_count": 14,
+  "subagent_count": 0,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\C--ZYS-Code-lab-area\\53c941be-a5bf-4e13-9c1c-a148a1a96ef9.jsonl",
+    "message_range": null,
+    "project_dir_key": "C--ZYS-Code-lab-area"
+  },
+  "status": "queued"
+}

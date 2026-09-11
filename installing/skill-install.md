@@ -226,3 +226,23 @@
 - 恢复方式：`npm install -g @volcengine/ark-cli` → `arkcli +auth` 重新登录（凭据服务端重新下发）→ `arkcli +connect` 重铺 skill。**若只想装到 CC**：`arkcli +connect --path ~/.claude/skills`
 - 安全建议（未执行，待用户定）：既已彻底不用，可去火山引擎控制台吊销账号 2124091730 名下该 API key
 - 备注：`arkcli +connect uninstall` 另有 `--purge-prefix`（强制删所有 `ark-`/`arkcli-` 前缀目录，含非它管理的）本次未用，默认模式已清干净。`+connect` 还会默认移除第三方 `byted-ark-seedance/seedream` 生成类 skill（`--keep-conflicting` 可保留）——本机无此二者。空目录 `~/.augment\skills`、`~/.agents\skills` 保留未删（属他工具目录）
+
+### 插件全量精简（2026-09-10，用户拍板「除开正在启用的，其他的都删了」）
+- **背景**：盘点发现插件三态不一致——9 个启用、2 个 false、3 个开关被外部移除但缓存残留、1 个装而不用、空市场与孤儿缓存若干
+- **启用保留（9，未动）**：better-harness、caveman、context7、github、impeccable、last30days、mattpocock-skills、ponytail、taste-skill
+- **删除清单（均为直接 Remove-Item，可从 GitHub 重装恢复）**：
+  - 官方市场缓存：claude-md-management、code-review、skill-creator、playwright、frontend-design（`plugins/cache/claude-plugins-official/` 下，仅留 context7+github）
+  - 第三方插件：open-code-review（alibaba，2026-09-03 起 false）整缓存 + `plugins/marketplaces/open-code-review/`
+  - headroom 第三方插件 `headroom@headroom-marketplace`（chopratejas/headroom 0.37.0，装而未启用）：installed_plugins.json 条目、整缓存、市场注册与目录全清。**注意与 headroom-ai 代理/MCP 本体无关**：MCP stdio 注册（.claude.json mcpServers.headroom）、8787 代理、cc-switch 链路均未动
+  - 空市场 officecli、ppt-master（known_marketplaces.json 注册 + marketplaces 目录；2026-09-04 曾卸载插件但市场注册残留）
+  - 孤儿：cache/gitnexus-marketplace（早已注销，带 .orphaned_at）；marketplaces/temp_* ×4（2026-09-04 加市场时的失败克隆残留，各 82 文件）
+- **settings.json**：enabledPlugins 删 2 个 false 键（playwright、open-code-review），现存 9 键全 true；PostToolUse hook 自动同步 cc-switch DB（sync-backup-20260910_124508 为同轮早些时候手动同步所留）
+- **注册表核对**：installed_plugins.json 10→9 条；known_marketplaces.json 12→8；cache 与 marketplaces 目录各 8，与启用插件一一对应（context7+github 共用官方市场）
+- 恢复方式：`claude plugin` 重装（市场源：open-code-review=alibaba/open-code-review，headroom 插件=chopratejas/headroom，officecli/ppt-master 见 known_marketplaces 备份 git 记录；官方三件直接从 anthropics/claude-plugins-official 重装）
+
+### taste-skill 卸载复核（2026-09-10，用户拍板禁用并清理）
+- 来源：https://github.com/Leonxlnx/taste-skill；版本 `1.0.0`；插件 `taste-skill@taste-skill`；scope=user；依赖：无。
+- 原安装位置：`~/.claude/plugins/cache/taste-skill/taste-skill/1.0.0`；marketplace：`~/.claude/plugins/marketplaces/taste-skill`。
+- 卸载命令原文：`claude plugin uninstall taste-skill@taste-skill --scope user --yes`；marketplace 清理：`claude plugin marketplace remove taste-skill`；cache 残留清理：`cmd.exe /d /c "rmdir /s /q C:\\Users\\zys31\\.claude\\plugins\\cache\\taste-skill"`。
+- 处置：已从 `settings.json`、`installed_plugins.json`、插件列表移除；marketplace 注册与目录已移除；cache 已删除；cc-switch `common_config_claude` 已由 `settings-sync-auto.py` 同步为 8 个插件。
+- 恢复：重新添加 `Leonxlnx/taste-skill` marketplace 后安装；本轮保留脱敏配置快照 `~/.claude/installing/config-slimming-snapshot-20260910.json`。

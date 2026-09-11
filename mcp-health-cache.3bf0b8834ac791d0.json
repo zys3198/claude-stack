@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "servers": {
+    "lean-ctx": {
+      "status": "unhealthy",
+      "checkedAt": 1788575957243,
+      "expiresAt": 1788575957243,
+      "failureCount": 1,
+      "lastError": "lean-ctx stdio initialize handshake timed out",
+      "lastFailureCode": null,
+      "nextRetryAt": 1788575987243,
+      "lastRestoredAt": 1788575828621
+    }
+  }
+}

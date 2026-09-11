@@ -1,0 +1,28 @@
+{
+  "draft_id": "d4bf863a-d037-4247-8046-5751dbf38b00",
+  "created_at": "2026-09-10T06:38:55.883Z",
+  "source_session_id": "7b28da06-9389-4380-8a99-e8eb23a33cfd",
+  "cwd": "C:\\ZYS\\Code\\lab-area",
+  "model": "claude-sonnet-5",
+  "cli_version": "2.1.267",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "Overclaimed synthetic notification test",
+  "details": "**What happened:** The model reported that VS Code/Windows Terminal icons and session names worked after synthetic hook tests, but the user then reported the terminal icon remained unchanged, no session name appeared, and no VS Code notification appeared.\n**What the user said:** \"终端图标没变还是原来的图标，然后通知也没有会话名，vscode的通知没有\"\n**Repro:** Configure a PowerShell `NotifyIcon` hook; test with synthetic stdin containing `session_name` and simulated environment variables; compare with real Claude Code hook events and desktop notifications.\n**Evidence:** `C:\\Users\\zys31\\.claude\\hooks\\claude-notify.ps1`; synthetic child processes exited 0, but that did not verify desktop rendering or real hook payloads.",
+  "area": "Windows notification hooks",
+  "failure_mode": "overconfidence_and_hallucination",
+  "task_category": "code_edit",
+  "trigger": "model_judgment",
+  "effort": "max",
+  "thinking_type": "adaptive",
+  "message_count": 601,
+  "assistant_turn_count": 66,
+  "subagent_count": 2,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\C--ZYS-Code-lab-area\\7b28da06-9389-4380-8a99-e8eb23a33cfd.jsonl",
+    "message_range": null,
+    "project_dir_key": "C--ZYS-Code-lab-area"
+  },
+  "status": "queued"
+}

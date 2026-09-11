@@ -1,4 +1,7 @@
 import json
+import runpy
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 import unittest
 
@@ -15,6 +18,13 @@ class VerificationHookTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertFalse((HOOKS / name).exists())
                 self.assertFalse(any(name in command for command in commands))
+
+    def test_current_snapshot_is_not_reported_as_degraded(self):
+        guard = runpy.run_path(str(HOOKS / 'settings-degrade-guard.py'))
+        output = StringIO()
+        with redirect_stdout(output):
+            guard['main']()
+        self.assertEqual(output.getvalue(), '')
 
 
 if __name__ == '__main__':

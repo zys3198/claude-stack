@@ -1,0 +1,29 @@
+{
+  "draft_id": "b039a357-2837-4714-89ed-e1d5a3d8944f",
+  "created_at": "2026-09-10T07:24:23.212Z",
+  "source_session_id": "f54f60e0-b7c5-41e1-ae43-15541d906805",
+  "cwd": "C:\\ZYS\\Code\\dtsf-eam",
+  "model": "claude-opus-5",
+  "cli_version": "2.1.267",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "Remote Agent incorrectly requires origin/main base ref",
+  "details": "- **What happened:** Three remote read-only Agent launches failed with `Failed to resolve base branch \"origin/main\": git rev-parse failed`; expected remote analysis to use current HEAD or explicitly supplied baseline without requiring origin/main.\n- **What the user said:** “开始并行开发吧”\n- **Repro:** In a repository where `refs/remotes/origin/main` intentionally does not exist, call Agent with `isolation: \"remote\"` from a non-main feature branch.\n- **Evidence:** Repository baseline `fc64aebb729826960d2ca4e0dfcc1538c9c027b0`; required working branch `eam-01-10-lifecycle-approval`; all three launches failed on 2026-09-10.",
+  "area": "Agent remote isolation",
+  "failure_mode": "other",
+  "task_category": "code_edit",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "enabled",
+  "thinking_budget": 31999,
+  "message_count": 121,
+  "assistant_turn_count": 7,
+  "subagent_count": 3,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\c--ZYS-Code-dtsf-eam\\f54f60e0-b7c5-41e1-ae43-15541d906805.jsonl",
+    "message_range": null,
+    "project_dir_key": "c--ZYS-Code-dtsf-eam"
+  },
+  "status": "queued"
+}

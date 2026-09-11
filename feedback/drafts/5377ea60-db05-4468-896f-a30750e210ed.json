@@ -1,0 +1,29 @@
+{
+  "draft_id": "5377ea60-db05-4468-896f-a30750e210ed",
+  "created_at": "2026-09-11T04:45:29.932Z",
+  "source_session_id": "b9c5ba8a-d1a9-4990-8f7e-3ef5e154d342",
+  "cwd": "C:\\ZYS\\Code\\dtsf-eam",
+  "model": "claude-opus-5",
+  "cli_version": "2.1.268",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "Read offset mutates into huge invalid value",
+  "details": "- **What happened:** Model intended to read offset 1000 but emitted `offset: 1000000000000000` plus irrelevant `pages: \"1\"`, after multiple earlier decimal-place offset mistakes. Expected exact range arguments copied from the planned range.\n- **What the user said:** \"连续搜索或尝试约 3 次无实质进展时停止\"；persistent feedback already said to stop repeating invalid Read offsets.\n- **Repro:** Ask model to continue reading a large source file at lines 1000–2000 after an earlier Read range failure; inspect emitted Read arguments.\n- **Evidence:** `code/backend-java/src/main/java/com/ztys/dtsf/platform/service/BusinessDocumentService.java`; tool reported file has 2591 lines; session date 2026-09-11.",
+  "area": "Read tool invocation",
+  "failure_mode": "instruction_following",
+  "task_category": "code_edit",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "enabled",
+  "thinking_budget": 31999,
+  "message_count": 294,
+  "assistant_turn_count": 27,
+  "subagent_count": 0,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\c--ZYS-Code-dtsf-eam\\b9c5ba8a-d1a9-4990-8f7e-3ef5e154d342.jsonl",
+    "message_range": null,
+    "project_dir_key": "c--ZYS-Code-dtsf-eam"
+  },
+  "status": "queued"
+}

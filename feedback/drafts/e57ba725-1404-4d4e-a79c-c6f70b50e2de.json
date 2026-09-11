@@ -1,0 +1,29 @@
+{
+  "draft_id": "e57ba725-1404-4d4e-a79c-c6f70b50e2de",
+  "created_at": "2026-09-10T02:43:58.534Z",
+  "source_session_id": "0379eb9b-17ae-46c0-a617-59c37e86d869",
+  "cwd": "C:\\ZYS\\Code\\dtsf-eam",
+  "model": "ark-code-latest",
+  "cli_version": "2.1.266",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "Worktree agent workaround left temporary git ref",
+  "details": "- **What happened:** 为满足强制子代理审查流程，模型在缺少 `origin/main` 时创建了临时远程跟踪引用；后续清理命令被权限分类器拒绝，导致该引用残留。本应避免修改仓库引用，或确保创建前具备可执行的回滚路径。\n- **What the user said:** 用户要求“Use a Haiku agent”和“launch 5 parallel Sonnet agents”完成代码审查。\n- **Repro:** 在仅有 `origin/develop`、没有 `origin/main` 的仓库调用 `Agent` 且 `isolation: worktree`，收到 `Failed to resolve base branch \"origin/main\"`；执行 `git update-ref refs/remotes/origin/main refs/remotes/origin/develop` 后代理可运行，但 `git update-ref -d` 被 auto mode classifier 拒绝。\n- **Evidence:** 目标仓库 `C:/ZYS/Code/dtsf-eam-10-attachments`；残留引用 `refs/remotes/origin/main` 指向 `54b8c47467c8b540d79f7d01d2b01fd4a08c635f`。\n- **Cause:** Agent worktree 启动硬编码/默认解析 `origin/main`，而目标仓库仅有 `origin/develop`。",
+  "area": "Agent worktree isolation",
+  "failure_mode": "destructive_actions",
+  "task_category": "review",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "enabled",
+  "thinking_budget": 31999,
+  "message_count": 94,
+  "assistant_turn_count": 12,
+  "subagent_count": 11,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\c--ZYS-Code-dtsf-eam\\0379eb9b-17ae-46c0-a617-59c37e86d869.jsonl",
+    "message_range": null,
+    "project_dir_key": "c--ZYS-Code-dtsf-eam"
+  },
+  "status": "queued"
+}

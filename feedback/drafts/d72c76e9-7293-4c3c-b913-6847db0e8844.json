@@ -1,0 +1,29 @@
+{
+  "draft_id": "d72c76e9-7293-4c3c-b913-6847db0e8844",
+  "created_at": "2026-09-10T09:41:48.830Z",
+  "source_session_id": "f54f60e0-b7c5-41e1-ae43-15541d906805",
+  "cwd": "C:\\ZYS\\Code\\dtsf-eam",
+  "model": "claude-opus-5",
+  "cli_version": "2.1.267",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "Read offsets repeatedly expand into huge invalid values",
+  "details": "**What happened:** Model repeatedly converted ordinary line offsets into 14–16 digit values, causing `file is shorter than provided offset`, then also generated malformed file paths despite an existing memory warning to switch to `sed` after the first failure.\n**What the user said:** User didn't comment; observed by the model.\n**Repro:** Continue a long compacted code-edit session, request a small source excerpt around line 350 or 700, then inspect generated Read arguments.\n**Evidence:** Session f54f60e0-b7c5-41e1-ae43-15541d906805; memory/stop-repeating-invalid-read-offsets.md; affected task-book path docs/04-management/EAM开发任务书-20260826.md.",
+  "area": "Read tool invocation",
+  "failure_mode": "instruction_following",
+  "task_category": "code_edit",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "enabled",
+  "thinking_budget": 31999,
+  "message_count": 370,
+  "assistant_turn_count": 39,
+  "subagent_count": 0,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\c--ZYS-Code-dtsf-eam\\f54f60e0-b7c5-41e1-ae43-15541d906805.jsonl",
+    "message_range": null,
+    "project_dir_key": "c--ZYS-Code-dtsf-eam"
+  },
+  "status": "queued"
+}

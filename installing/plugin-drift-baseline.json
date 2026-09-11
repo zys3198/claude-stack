@@ -2,22 +2,12 @@
  "enabled": [
   "better-harness@better-harness",
   "caveman@caveman",
-  "claude-md-management@claude-plugins-official",
-  "code-review@claude-plugins-official",
   "context7@claude-plugins-official",
   "github@claude-plugins-official",
   "impeccable@impeccable",
   "last30days@last30days-skill",
   "mattpocock-skills@mattpocock",
-  "open-code-review@open-code-review",
-  "playwright@claude-plugins-official",
-  "ponytail@ponytail",
-  "skill-creator@claude-plugins-official"
+  "ponytail@ponytail"
  ],
- "disabled": [
-  "frontend-design@claude-plugins-official",
-  "officecli@officecli",
-  "ppt-master@ppt-master",
-  "taste-skill@taste-skill"
- ]
+ "disabled": []
 }

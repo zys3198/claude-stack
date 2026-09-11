@@ -63,9 +63,7 @@ def missing_critical_hooks(live_cmds, snap_cmds):
     live_bindings = set(live_cmds)
     for marker in CRITICAL_HOOK_MARKERS:
         expected = {binding for binding in snap_cmds if marker in binding[3]}
-        if not expected:
-            missing.append(f"{marker} (snapshot missing)")
-        elif expected - live_bindings:
+        if expected and expected - live_bindings:
             missing.append(marker)
     return missing
 

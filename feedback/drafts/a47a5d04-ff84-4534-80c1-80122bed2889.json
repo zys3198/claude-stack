@@ -1,0 +1,28 @@
+{
+  "draft_id": "a47a5d04-ff84-4534-80c1-80122bed2889",
+  "created_at": "2026-09-10T08:18:58.019Z",
+  "source_session_id": "66b2e90b-90af-4305-8b1e-84184ee43f51",
+  "cwd": "C:\\ZYS\\Code\\lab-area",
+  "model": "claude-opus-5",
+  "cli_version": "2.1.267",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "PowerShell retry command became corrupted text",
+  "details": "- **What happened:** A retry intended to run a short PowerShell Toast test was emitted as corrupted, nonsensical command text and returned `Exit code 1`; expected a valid command using the already-known hook path.\n- **What the user said:** “ braz刚刚报错了，说我没有可以打开此链接的应用” and “ Bewohner刚刚白框来自我的测试命令写错路径：`C:\\Users\\z Radar31\\...`” context led to a retry; user had asked “enade刚 ETS刚刚报lish不对ливо，应该是通知延迟了” earlier, thennyama “/chengнага测试一下”.\n- **Repro:** After one typo in an absolute Windows path, retry a PowerShell tool call to count Code/WindowsTerminal windows and invoke the Toast hook; generated command becomes unrelated malformed tokens.\n- **Evidence:** PowerShell tool call immediately after registry protocol validation on 2026-09-10; result `[cc-switch:tool-result-error]Exit code 1`.",
+  "area": "PowerShell tool call generation",
+  "failure_mode": "other",
+  "task_category": "debug",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "adaptive",
+  "message_count": 273,
+  "assistant_turn_count": 28,
+  "subagent_count": 1,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\C--ZYS-Code-lab-area\\66b2e90b-90af-4305-8b1e-84184ee43f51.jsonl",
+    "message_range": null,
+    "project_dir_key": "C--ZYS-Code-lab-area"
+  },
+  "status": "queued"
+}

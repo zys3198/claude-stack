@@ -15,6 +15,7 @@
 'use strict';
 
 const fs = require('fs');
+const net = require('net');
 const os = require('os');
 const path = require('path');
 const { sanitizeSessionId, readBridge, writeBridgeAtomic } = require('./lib/session-bridge');
@@ -192,7 +193,7 @@ const MODE_STATUS = [
     file: '.ponytail-active',
     label: 'PONYTAIL',
     color: 108,
-    valid: new Set(['', 'lite', 'full', 'ultra'])
+    valid: new Set(['', 'off', 'lite', 'full', 'ultra'])
   }
 ];
 
@@ -211,14 +212,21 @@ function readModeStatus() {
   const segments = [];
 
   for (const config of MODE_STATUS) {
+    const unknown = `\x1b[38;5;${config.color}m[${config.label}:UNKNOWN]\x1b[0m`;
     try {
       const raw = readSmallStatusFile(path.join(claudeDir, config.file));
-      if (raw === null) continue;
+      if (raw === null) {
+        segments.push(unknown);
+        continue;
+      }
       const firstLine = raw.split(/\r?\n/, 1)[0].trim().toLowerCase();
       const mode = firstLine.replace(/[^a-z0-9-]/g, '');
-      if (mode !== firstLine || !config.valid.has(mode)) continue;
+      if (mode !== firstLine || !config.valid.has(mode)) {
+        segments.push(unknown);
+        continue;
+      }
 
-      const suffix = !mode || mode === 'full' ? '' : `:${mode.toUpperCase()}`;
+      const suffix = !mode ? '' : `:${mode.toUpperCase()}`;
       let rendered = `\x1b[38;5;${config.color}m[${config.label}${suffix}]\x1b[0m`;
 
       if (config.label === 'CAVEMAN' && process.env.CAVEMAN_STATUSLINE_SAVINGS !== '0') {
@@ -230,23 +238,60 @@ function readModeStatus() {
 
       segments.push(rendered);
     } catch {
-      // Optional plugin status.
+      segments.push(unknown);
     }
   }
 
   return segments.join(' ');
 }
 
+/**
+ * Headroom marker: ANTHROPIC_BASE_URL points at the local headroom proxy
+ * (CC -> 8787 -> 15721). Probe the port live — env alone doesn't prove
+ * the proxy process is running. Remote base URLs are not probed.
+ * @returns {{host: string, port: number} | null}
+ */
+function localProxyTarget() {
+  let u;
+  try {
+    u = new URL(process.env.ANTHROPIC_BASE_URL || '');
+  } catch {
+    return null;
+  }
+  if (!['127.0.0.1', 'localhost', '::1'].includes(u.hostname.toLowerCase())) return null;
+  const port = Number(u.port) || (u.protocol === 'https:' ? 443 : 80);
+  return { host: u.hostname, port };
+}
+
+function probeTcp(host, port, timeoutMs = 250) {
+  return new Promise(resolve => {
+    const socket = net.connect(port, host);
+    let settled = false;
+    const finish = up => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(up);
+    };
+    socket.setTimeout(timeoutMs, () => finish(false));
+    socket.on('connect', () => finish(true));
+    socket.on('error', () => finish(false));
+  });
+}
+
 function runStatusline() {
   let input = '';
   const stdinTimeout = setTimeout(() => process.exit(0), 3000);
+  // Start the proxy probe in parallel with stdin read.
+  const proxyTarget = localProxyTarget();
+  const proxyProbe = proxyTarget ? probeTcp(proxyTarget.host, proxyTarget.port) : Promise.resolve(null);
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', chunk => {
     if (input.length < MAX_STDIN) {
       input += chunk.substring(0, MAX_STDIN - input.length);
     }
   });
-  process.stdin.on('end', () => {
+  process.stdin.on('end', async () => {
     clearTimeout(stdinTimeout);
     try {
       const data = JSON.parse(input);
@@ -351,6 +396,14 @@ function runStatusline() {
 
       const modeStr = readModeStatus();
 
+      let proxyStr = '\x1b[38;5;110m[HEADROOM:UNKNOWN]\x1b[0m';
+      if (proxyTarget) {
+        const up = await proxyProbe;
+        proxyStr = up
+          ? '\x1b[38;5;110m[HEADROOM:RUNNING]\x1b[0m'
+          : '\x1b[31m[HEADROOM:DOWN]\x1b[0m';
+      }
+
       const usageStr = [ctx ? `Ctx${ctx}` : '', hitStr].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
 
       // Build output
@@ -375,7 +428,8 @@ function runStatusline() {
         segments.join(' \x1b[2m│\x1b[0m ') +
         (usageStr ? ` \x1b[2m│\x1b[0m ${usageStr}` : '') +
         (rateStr ? ` \x1b[2m│\x1b[0m ${rateStr}` : '') +
-        (modeStr ? ` ${modeStr}` : '')
+        (modeStr ? ` ${modeStr}` : '') +
+        (proxyStr ? ` ${proxyStr}` : '')
       );
     } catch {
       // Silent fail

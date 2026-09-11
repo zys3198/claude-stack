@@ -1,0 +1,29 @@
+{
+  "draft_id": "e4b9172c-1742-4d39-97c5-f871fd873d93",
+  "created_at": "2026-09-11T05:21:14.934Z",
+  "source_session_id": "b9c5ba8a-d1a9-4990-8f7e-3ef5e154d342",
+  "cwd": "C:\\ZYS\\Code\\dtsf-eam",
+  "model": "claude-opus-5",
+  "cli_version": "2.1.268",
+  "os": "win32 x64",
+  "request_ids": [],
+  "type": "bug",
+  "title": "Code review ignores explicit target worktree",
+  "details": "- **What happened:** Review was requested for current diff in fixed worktree `C:\\ZYS\\Code\\dtsf-eam-11-lifecycle-approval`, but fork reviewed primary workspace `C:\\ZYS\\Code\\dtsf-eam` and reported stale findings already fixed in target. Expected review to preserve explicit target working directory.\n- **What the user said:** \"不要创建新 worktree，不要操作其他 worktree。工作位置与基线：#11 worktree：C:\\ZYS\\Code\\dtsf-eam-11-lifecycle-approval\"\n- **Repro:** Invoke `code-review` skill from primary workspace while task explicitly targets another existing worktree; inspect paths in result.\n- **Evidence:** Target HEAD `0b4567e5`; review result cited `C:\\ZYS\\Code\\dtsf-eam\\code\\backend-java\\src\\test\\...`.",
+  "area": "code-review skill",
+  "failure_mode": "context_and_memory",
+  "task_category": "review",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "enabled",
+  "thinking_budget": 31999,
+  "message_count": 580,
+  "assistant_turn_count": 73,
+  "subagent_count": 0,
+  "transcript_ref": {
+    "session_file": "C:\\Users\\zys31\\.claude\\projects\\c--ZYS-Code-dtsf-eam\\b9c5ba8a-d1a9-4990-8f7e-3ef5e154d342.jsonl",
+    "message_range": null,
+    "project_dir_key": "c--ZYS-Code-dtsf-eam"
+  },
+  "status": "queued"
+}
