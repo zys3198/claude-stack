@@ -330,8 +330,8 @@ echo "$ECC $CAVE $PONY"
 
 | Skill | 用途 |
 |-------|------|
-| content-to-note | 公众号/B 站/抖音链接→结构化 MD 笔记 |
-| bili-note | B 站视频+opus/article→MD 笔记 |
+| content-to-note | 公众号/B 站/抖音链接→结构化 MD 笔记（实体在 `C:\ZYS\Wiki\.claude\skills\`，全局为指针壳，2026-09-13） |
+| ~~bili-note~~ | 已并入 Wiki 项目 content-to-note 的 B站 路线，全局 skill 已删除（2026-09-13） |
 | douyin-video-summary | 抖音视频→whisper.cpp 转录+结构化摘要 |
 | multi-platform-publisher | 知乎/小红书/CSDN/B 站/公众号/掘金 一键分发 |
 | obsidian-vault | Obsidian vault 增删改查（`C:\ZYS\Code\wiki`） |

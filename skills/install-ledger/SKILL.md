@@ -1,11 +1,7 @@
 ---
 name: install-ledger
 description: >-
-  安装台账治理：登记、整理、核对、迁移或清理 Claude Code / Codex 的 skill、插件、MCP、CLI
-  或桌面工具安装台账，或指出台账与实际状态不一致。自动化已内置：安装/卸载类 shell 命令由
-  hooks/install-ledger-reminder.py 捕获（auto-log.jsonl 兜底 + 提醒正式登记），本 skill 负责
-  把兜底记录整理成规范台账条目。触发：装完/卸载某工具或 skill 后要登记、"查一下装过什么"、
-  台账核对、迁移盘点、恢复环境。不用于执行安装、卸载、删除或提交操作。
+  维护 Claude Code / Codex 的安装台账：登记、核对或追溯 skill、插件、MCP、CLI 和桌面工具的来源与安装状态。用户要求整理台账、登记安装、核对当前状态或追溯归属时使用；不执行安装、卸载、删除或提交。
 ---
 
 # 安装台账治理
@@ -60,13 +56,7 @@ description: >-
 
 用户对“自建 / 第三方”的明确判断优先于自动推断；但不能把用户归属判断当成当前文件存在或插件启用的证据。
 
-至少核对：
-
-- skill 目录和 `SKILL.md` frontmatter
-- 插件 `known_marketplaces.json`、`installed_plugins.json`、`settings.json`
-- CLI/桌面工具的实际版本或命令可用性
-- MCP 注册配置与服务状态
-- 目标台账的 Git diff，避免覆盖先前改动
+至少核对与目标对象对应的当前目录、运行时配置、版本或命令可用性、台账 Git diff；只有涉及跨归属、迁移、恢复或状态冲突时，才补查相关插件、MCP 或其他台账。
 
 证据缺失时写“待补 / 未核实 / 当前不可用”，不猜来源、日期、版本、命令或使用次数。
 

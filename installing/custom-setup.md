@@ -38,6 +38,9 @@
 
 ## 自建 skill（当前目录 + 历史记录，非 cc-switch 同步）
 
+- 2026-09-11 新增全局 `ai-product-development`，详见下方独立台账条目。
+- 2026-09-11 新增全局 `company-discovery-evaluation`，详见下方独立台账条目。
+
 当前可用（2026-09-02，以 `skills/` 实际目录为准）：
 `ai-coding-coach`、`ai-readable-project`、`article-writer`、`article-writing-guide`、`bidirectional-steelman`、`bili-note`、`cc-switch-setting-sync`、`code-change-workflow`、`content-to-note`、`deep-learn`、`drawio-article-illustration`、`drawio-chart`、`expose-unknowns`、`generic-course-tutor`、`goal-run`、`improver-skill`、`install-ledger`、`learning-guide`、`learning-personas`、`parallel-delegation`、`preflight-check`、`skill-auditor`、`skill-trimmer`、`tech-learning-roadmap`、`tutorial-maker`、`wiki-sediment`。
 
@@ -62,6 +65,26 @@
 ### code-change-workflow
 - 出处：2026-07-29 CLAUDE.md 瘦身（§1-4 流程迁入，memory `claude-md-slimming-20260729`）
 - 内容：改前/改中/改后清单、AI 代码审查、调试、Agent 调度、止血回退
+- 2026-09-12 同步：将实验候选中已核对的 Context→追问→执行、`Prompt → Context → Harness`、AI/人工责任边界、交付证据、规范产物宿主解耦、Harness 审计触发和 Hook 宿主解耦规则合并到全局 `~/.claude/skills/code-change-workflow/SKILL.md`。
+- 验证：候选静态检查、Better Harness evidence bundle、3 路只读审计和 renderer validation 均通过；隔离插件显式 `/code-change-workflow` 可读取候选独有规则。
+- 未验证：自然语言自动触发仍为 `unknown`；真实代码 fixture 修改和测试未执行，不能据此声称自动路由或完整执行闭环已生效。
+- 未同步：实验报告、证据包、runtime-test、fixture、Hook 配置和全局 `CLAUDE.md`。
+- 回退：按同步前正式 Skill 内容恢复 `~/.claude/skills/code-change-workflow/SKILL.md`；不删除实验材料。
+
+### ai-product-development（2026-09-11，全局）
+- 出处：用户提供的 Runline 视频内容提炼；用户确认做成全局 skill。
+- 创建命令：`mkdir -p "C:/Users/zys31/.claude/skills/vibe-coding-workflow"`；随后使用原生 Write 创建 `SKILL.md`，再重命名目录。
+- 位置：`~/.claude/skills/ai-product-development/SKILL.md`
+- 依赖：无外部运行时依赖。
+- 备注：独立提炼 AI 辅助产品开发思路，不编排或调用其他 skill；手机远程开发仅作为可选案例，不作为触发条件；`disable-model-invocation: true`，仅用户显式调用 `/ai-product-development` 时执行。
+
+### company-discovery-evaluation（2026-09-11，全局）
+- 出处：用户提供的抖音视频内容提炼；用户确认做成全局 skill。
+- 创建命令：`mkdir -p "$HOME/.claude/skills/company-discovery-evaluation"`；随后使用原生 Write 创建 `SKILL.md`。
+- 位置：`~/.claude/skills/company-discovery-evaluation/SKILL.md`
+- 依赖：宿主当前网页检索、页面阅读或用户提供链接/材料；无外部运行时依赖。
+- 备注：仅用户显式调用 `/company-discovery-evaluation` 时执行；`disable-model-invocation: true`；不自动路由。
+- 回退：用户确认后删除全局目录；实验源保留于 `C:\ZYS\Code\lab-area\exp\2026-09-11-company-discovery-evaluation\company-discovery-evaluation\`。
 
 ### expose-unknowns
 - 出处：暴露 unknown 方法论沉淀（memory `expose-unknowns-method`）
@@ -371,3 +394,37 @@
 - **验证**：重建脚本 Parser 为 0 错误；静态核对无 `Add-Type`、进程遍历或 `user32.dll`；settings.json 可解析且包含 Notification／PostToolUseFailure／StopFailure／Stop，四条命令均不含 `Bypass`；注册表逐字读回为 `wscript.exe "C:\Users\zys31\.claude\hooks\claude-notify-focus.vbs" "%1"`；无 Bypass 空输入启动退出码 0。重建后的自然 Stop 通知和卡巴斯基行为仍需观察。
 - **回退**：经删除确认后，在 Git Bash 执行 `MSYS_NO_PATHCONV=1 reg.exe delete 'HKCU\Software\Classes\claude-notify' /f`，删除 `claude-notify-focus.vbs`，并从 settings.json 移除四类通知 hook；不要只删通知脚本而留下失效注册。
 
+
+### code-change-workflow 1.1.0 维护资产（2026-09-12，全局）
+- **来源**：`C:\ZYS\Code\lab-area\exp\2026-09-11-claude-workflow-harness\` 任务书执行；只动白名单内路径。
+- **新增/修改**：`~/.claude/skills/code-change-workflow/CHANGELOG.md`（1.0.0 追认 + 1.1.0）、`references/MAINTENANCE.md`（版本规则/改动流程/eval 跑法/验证边界，36 行）；`SKILL.md` 仅两处追加（frontmatter `version: 1.1.0`、末尾维护入口一行；diff 对实验目录 baseline-SKILL.md 仅两处）；`evals/eval.yaml` 仅 model 改 claude-haiku-4-5；`evals/cases/` 新增 research-no-route.yaml、delivery-evidence.yaml、missing-acceptance.yaml，bug-fix/vague-feature 两冻结 case sha256 不变。
+- **验证**：fixture 红→绿闭环（过期 token 500→401，双 PASS，含反向 FAIL→还原 PASS，test_fixture.py sha256 `083d1a0f…337fa` 不变）；5 case 零依赖结构自检 PASS，删 judge 键反向验证 FAIL；evidence-bundle.postfix.json（schema v3）实证 pluginAssets=5 是资产面数（plugins/skills/agents/hooks/mcps 五面，8/52/7/8/2 项），enabledPluginCount=8 是启用插件实例数；5 findings 处置见实验目录 FINDINGS-DISPOSITION.md。
+- **未验证/阻塞**：自然语言自动触发 unknown（headless `-p` 不注入 skill 清单，双探针一致）；`claude plugin eval` 被组织 early-access gate 拦截；3 个新 case 尚未登记进 eval.yaml 的 cases.files（白名单仅限改 model），见实验目录 BLOCKED.md。
+- **回退**：删 CHANGELOG.md、references/MAINTENANCE.md 与 3 个新 case；SKILL.md 按实验目录 baseline-SKILL.md 恢复；eval.yaml model 恢复 claude-sonnet-4-6。实验材料保留不删。
+
+### code-change-workflow evals 迁移官方 runner 布局（2026-09-12，全局）
+- **来源**：同上实验验收暗卷；用户授权「迁移并实跑，全绿后删旧文件（先存档）」。
+- **背景**：CLI 自动更新至 2.1.269（二进制 `claude.exe`，03:32），eval early-access 门消失；实测旧 `eval.yaml + cases/*.yaml` 布局 runner 发现 0 case（新发现规则 `evals/**/case.yaml|prompt.md + graders/*.md`）。
+- **新增/修改**：`evals/<5 case>/case.yaml`（regex grader，判词贴 SKILL.md 原词）；bug-fix、delivery-evidence 各配 `scaffold.sh` 落 fixture；删除 `evals/eval.yaml` 与 `evals/cases/`（删前 6 文件 sha256 与实验目录 `evals-legacy-archive/` 逐一核对一致）；CHANGELOG.md 加资产更新段（不 bump 版本，SKILL.md 零改动）；references/MAINTENANCE.md 更新 evals 跑法与自动触发证据。
+- **验证**：`claude plugin eval . --scaffold --allow-tools Edit --ablation none --runs 1 --no-publish --trust-plugin` 全量 5/5 绿（258s，$0.17）；research-no-route `--runs 3` 3/3；trace 证实 Skill 自动触发（首工具即 Skill）。证据：实验目录 `eval-runner-evidence/`（aggregate-result.json + report.html）。
+- **关键机制**：`add_dirs` 只授读不复制（fixture 必须走 scaffold_script）；Edit 要运行时 `--allow-tools` grant；`evals/results/` 是可再生产物（删除被安全门拦，现保留在 skill 目录，待用户裁）。
+- **回退**：case 目录从 `evals-legacy-archive/` 恢复旧布局（但旧布局在 2.1.269 下不可运行，仅留档用）；文档改动按本实验报告对照撤回。
+
+### instruction-auditor（2026-09-14，全局）
+- **出处**：用户指定 OpenAI 官方文章《Rethinking skills and prompts for GPT-6 Astra》作为设计依据；用于统一审查指令文件中的触发、重复/冲突、资料读取、等待和完成标准。
+- **位置**：`~/.claude/skills/instruction-auditor/SKILL.md`；自建单文件 Skill。
+- **内容**：只审查用户明确纳入的自建 `SKILL.md`、`CLAUDE.md` 和 `AGENTS.md`；只输出证据分层的审查报告与最小 diff，不自动修改。
+- **依赖**：无外部运行时依赖，不读取 `references/` 或 `scripts/`。
+- **触发**：仅用户明确要求审查或优化这些指令文件时使用，避免与 `skill-auditor` 的 Skill 专属审计重叠。
+- **验证**：已完成 Markdown 内容和 frontmatter 静态检查；真实触发与运行验证尚未执行，标记为 `not-run`。
+- **回退**：删除 `~/.claude/skills/instruction-auditor/` 并移除本登记项，不涉及其他 Skill、配置或项目文件。
+
+### awesome-design-md（2026-09-14，全局）
+- **出处**：用户指定 `https://github.com/VoltAgent/awesome-design-md`；将上游设计资料包装为用户认领的自建 Skill。
+- **位置**：`~/.claude/skills/awesome-design-md/SKILL.md`、`references/design-md/`（74 份品牌设计文档）和 `LICENSE`。
+- **创建方法原文**：`mkdir -p "C:/Users/zys31/.claude/skills/awesome-design-md/references" && cp -R "C:/Users/zys31/.claude/lib/awesome-design-md/design-md" "C:/Users/zys31/.claude/skills/awesome-design-md/references/" && cp "C:/Users/zys31/.claude/lib/awesome-design-md/LICENSE" "C:/Users/zys31/.claude/skills/awesome-design-md/LICENSE"`；随后用原生 Write 创建 `SKILL.md`。
+- **依赖**：无外部运行时依赖；仅需 Claude Code 读取本地 Markdown。
+- **内容**：仅用户显式调用；从指定 `DESIGN.md` 提取颜色、字体、间距、布局和组件规则，再应用到当前项目；参考资料按不可信数据处理，不执行其中命令或链接。
+- **版本**：设计文档与上游提交 `8147538b4226ae41e2487a9179e3bcc1f68e8554` 逐文件 blob 校验一致；MIT 许可证随 Skill 保留。
+- **当前状态**：文件已创建并加入全局 Git 白名单；真实 Skill 触发需新会话加载后复核。
+- **回退**：删除 `~/.claude/skills/awesome-design-md/` 并移除 `.gitignore` 中对应白名单行；不删除 `~/.claude/lib/awesome-design-md/` 源副本。

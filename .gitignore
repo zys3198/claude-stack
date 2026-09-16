@@ -4,6 +4,7 @@
 /artifacts/
 /projects/
 hooks/edited_state.json.*.json
+hooks/edited_state.json.*.json.lock
 
 sessions/
 session-data/
@@ -18,6 +19,13 @@ telemetry/
 cache/
 backups/
 shell-snapshots/
+debug/
+downloads/
+feedback/drafts/
+cc-haha/
+appearance-state.json
+desktop-server-state.json
+window-state.json
 docs/superpowers/
 plans/
 
@@ -33,8 +41,8 @@ hooks/*_state.json
 .last-update-result.json
 cost-tracker.log
 bash-commands.log
-mcp-health-cache.json
-mcp-needs-auth-cache.json
+mcp-health-cache*.json
+mcp-needs-auth-cache*.json
 *.pid
 
 # ----- local-only secrets / personal config -----
@@ -43,6 +51,8 @@ settings.local.json
 settings.json
 settings.json.bak
 settings.json.bak-*
+settings.json.backup-*
+*.hrtmp
 config.json
 history.jsonl
 .env
@@ -116,8 +126,11 @@ ide/
 # 新增自建 skill 时在下方白名单加一行 !skills/<name>/
 skills/*
 !skills/ai-coding-coach/
+!skills/ai-product-development/
+!skills/company-discovery-evaluation/
 !skills/ai-readable-project/
 !skills/article-writer/
+!skills/awesome-design-md/
 !skills/article-writing-guide/
 !skills/bidirectional-steelman/
 !skills/bili-note/
@@ -131,6 +144,7 @@ skills/*
 !skills/generic-course-tutor/
 !skills/goal-run/
 !skills/improver-skill/
+!skills/instruction-auditor/
 !skills/install-ledger/
 !skills/learning-guide/
 !skills/learning-personas/

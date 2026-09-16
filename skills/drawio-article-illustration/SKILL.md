@@ -2,6 +2,7 @@
 name: drawio-article-illustration
 description: >
   技术文章/文档配图的决策、生成与验证工作流。当用户正在写技术文章、博客或文档，并要求判断哪里需要配图、选择图表类型、检查图文一致性时使用。用户已明确要实际生成或导出 draw.io 图表时不触发，走 drawio-chart；本 skill 不负责图表文件生成。
+disable-model-invocation: true
 ---
 # 技术文章配图：决策 → 生成 → 验证
 

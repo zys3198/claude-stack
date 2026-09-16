@@ -318,30 +318,97 @@ def command_propose(args: argparse.Namespace) -> dict[str, Any]:
     return {"candidate": metadata["candidate"], "path": str(target), "status": "pending"}
 
 
+VALID_EVIDENCE_STATUSES = {"passed", "failed", "blocked", "not-run"}
+COMPARISON_FIELDS = ("same_cases", "same_model", "same_runs", "same_timeout", "same_grader")
+
+
 def score(value: Any, label: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         raise WikiSkillError(f"{label} must be a finite number")
     return float(value)
 
 
-def flag(value: Any, label: str) -> bool:
-    if not isinstance(value, bool):
-        raise WikiSkillError(f"{label} must be boolean")
-    return value
+def evidence(value: Any, label: str, *, require_score: bool = False) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise WikiSkillError(f"{label} must be an object")
+    status = value.get("status")
+    if status not in VALID_EVIDENCE_STATUSES:
+        raise WikiSkillError(f"{label}.status must be one of: {', '.join(sorted(VALID_EVIDENCE_STATUSES))}")
+    observed = value.get("observed")
+    if not isinstance(observed, str) or not observed.strip():
+        raise WikiSkillError(f"{label}.observed must be non-empty text")
+    references = value.get("evidence")
+    if (
+        not isinstance(references, list)
+        or not references
+        or any(not isinstance(item, str) or not item.strip() for item in references)
+    ):
+        raise WikiSkillError(f"{label}.evidence must contain at least one non-empty reference")
+    result = {
+        "status": status,
+        "observed": observed.strip(),
+        "evidence": [item.strip() for item in references],
+    }
+    if require_score:
+        result["score"] = score(value.get("score"), f"{label}.score")
+    return result
+
+
+def comparison(value: Any) -> dict[str, bool]:
+    if not isinstance(value, dict):
+        raise WikiSkillError("comparison must be an object")
+    result: dict[str, bool] = {}
+    for field in COMPARISON_FIELDS:
+        if not isinstance(value.get(field), bool):
+            raise WikiSkillError(f"comparison.{field} must be boolean")
+        result[field] = value[field]
+    return result
+
+
+def report_status(items: list[dict[str, Any]]) -> str:
+    statuses = {item["status"] for item in items}
+    if "blocked" in statuses:
+        return "blocked"
+    if "not-run" in statuses:
+        return "not-run"
+    if "failed" in statuses:
+        return "failed"
+    return "passed"
 
 
 def evaluate_report(report: Any) -> tuple[dict[str, Any], bool]:
     if not isinstance(report, dict):
         raise WikiSkillError("gate report must be a JSON object")
-    baseline = score(report.get("baseline"), "baseline")
-    candidate = score(report.get("candidate"), "candidate")
+    if report.get("schema_version") != 1:
+        raise WikiSkillError("gate report schema_version must be 1")
+    baseline = evidence(report.get("baseline"), "baseline", require_score=True)
+    candidate = evidence(report.get("candidate"), "candidate", require_score=True)
+    target = evidence(report.get("target"), "target")
+    guardrail = evidence(report.get("guardrail"), "guardrail")
+    holdout = evidence(report.get("holdout"), "holdout")
+    same_conditions = comparison(report.get("comparison"))
     checks = {
-        "score_improved": candidate > baseline,
-        "target": flag(report.get("target"), "target"),
-        "guardrail": flag(report.get("guardrail"), "guardrail"),
-        "holdout": flag(report.get("holdout"), "holdout"),
+        "score_improved": candidate["score"] > baseline["score"],
+        "target": target["status"] == "passed",
+        "guardrail": guardrail["status"] == "passed",
+        "holdout": holdout["status"] == "passed",
+        "same_conditions": all(same_conditions.values()),
     }
-    return {"baseline": baseline, "candidate": candidate, "checks": checks}, all(checks.values())
+    status = report_status([baseline, candidate, target, guardrail, holdout])
+    if status == "passed" and not all(checks.values()):
+        status = "failed"
+    verdict = {
+        "schema_version": 1,
+        "baseline": baseline,
+        "candidate": candidate,
+        "target": target,
+        "guardrail": guardrail,
+        "holdout": holdout,
+        "comparison": same_conditions,
+        "checks": checks,
+        "status": status,
+    }
+    return verdict, status == "passed"
 
 
 def command_gate(args: argparse.Namespace) -> dict[str, Any]:
@@ -374,6 +441,8 @@ def command_gate(args: argparse.Namespace) -> dict[str, Any]:
     checks["content"] = bool(after.strip() and purpose_file.read_text(encoding="utf-8").strip())
     checks["base_match"] = metadata.get("base_skill_hash") == current_base_hash
     verdict["passed"] = bool(passed and all(checks.values()))
+    if not verdict["passed"] and verdict["status"] == "passed":
+        verdict["status"] = "failed"
     applied = False
     timestamp = now()
     if verdict["passed"] and args.apply:
@@ -388,7 +457,7 @@ def command_gate(args: argparse.Namespace) -> dict[str, Any]:
         applied = True
     entry = {"at": timestamp, "verdict": "accept" if verdict["passed"] else "reject", "applied": applied, **verdict}
     metadata.setdefault("gates", []).append(entry)
-    metadata["status"] = "accepted" if applied else ("passed" if verdict["passed"] else "rejected")
+    metadata["status"] = "applied" if applied else verdict["status"]
     write_json(candidate / "candidate.json", metadata)
     reasons = [name for name, passed_check in checks.items() if not passed_check]
     append_text(
@@ -413,7 +482,7 @@ def command_gate(args: argparse.Namespace) -> dict[str, Any]:
             ]
         ),
     )
-    return {"candidate": args.candidate, "verdict": entry["verdict"], "applied": applied, "checks": checks}
+    return {"candidate": args.candidate, "verdict": entry["verdict"], "status": verdict["status"], "applied": applied, "checks": checks}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -454,7 +523,7 @@ def build_parser() -> argparse.ArgumentParser:
     gate = commands.add_parser("gate", help="apply lightweight manual gate")
     gate.add_argument("root")
     gate.add_argument("--candidate", required=True, help="SKILL_ID/VERSION")
-    gate.add_argument("--report", required=True, help="JSON: baseline, candidate, target, guardrail, holdout; - for stdin")
+    gate.add_argument("--report", required=True, help="JSON schema 1: evidence blocks and comparison metadata; - for stdin")
     gate.add_argument("--apply", action="store_true", help="apply only when every gate passes")
     gate.set_defaults(handler=command_gate)
     return root

@@ -1,12 +1,8 @@
 ---
 name: cc-switch-setting-sync
 description: >-
-  ccswitch 配置降级/同步的排查与修复。自动化已内置：settings.json 每次 Edit/Write
-  由 hooks/settings-sync-auto.py 自动同步进 cc-switch DB（幂等 NO-OP），日常无需手动跑。
-  本 skill 只在以下场景加载：切换 provider 后 enabledPlugins/hooks/statusLine 丢失、
-  需要手动同步（命令行跑 scripts/sync_claude_common.py）、--restore 修复已降级配置、
-  切换后验证（marker 检查）、回滚。触发词：ccswitch 覆盖/重置/降级、settings.json
-  被覆盖、配置丢失、cc-switch.db、防降级、恢复 claude 配置。
+  排查或修复 Claude settings.json 在 cc-switch 切换 provider 后发生的配置降级，并验证、同步或回滚公共配置；出现配置丢失、覆盖、恢复需求或用户明确要求核对同步时使用。
+disable-model-invocation: true
 ---
 # cc-switch 设置同步（Claude）
 

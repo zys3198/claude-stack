@@ -1,0 +1,29 @@
+schema_version: "1.0"
+name: incomplete-candidate
+description: 候选缺少运行输出和替代能力信息时，应标记证据不足待验证，不得宣布保留或冗余。
+tags: [boundary, evidence]
+execution:
+  prompt: |
+    只给你一句话：“这个 Skill 可能没用了。”
+    请用 skill-trimmer 判断是否应保留、分流或移除；当前没有 baseline、实际输出、引用方或使用记录。
+    不要猜测，也不要修改、移动或删除文件。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: insufficient-evidence
+    target: last_message
+    pattern: 证据不足
+    match: contains
+  - type: regex
+    name: pending-validation
+    target: last_message
+    pattern: 待验证
+    match: contains
+  - type: regex
+    name: no-file-change
+    target: last_message
+    pattern: 不要修改
+    match: contains

@@ -246,3 +246,13 @@
 - 卸载命令原文：`claude plugin uninstall taste-skill@taste-skill --scope user --yes`；marketplace 清理：`claude plugin marketplace remove taste-skill`；cache 残留清理：`cmd.exe /d /c "rmdir /s /q C:\\Users\\zys31\\.claude\\plugins\\cache\\taste-skill"`。
 - 处置：已从 `settings.json`、`installed_plugins.json`、插件列表移除；marketplace 注册与目录已移除；cache 已删除；cc-switch `common_config_claude` 已由 `settings-sync-auto.py` 同步为 8 个插件。
 - 恢复：重新添加 `Leonxlnx/taste-skill` marketplace 后安装；本轮保留脱敏配置快照 `~/.claude/installing/config-slimming-snapshot-20260910.json`。
+
+### wiki 系 skill 迁入 Wiki 项目（2026-09-13，用户拍板「全局只留引用」）
+- 决策：wiki 专属 skill 实体全部归属 `C:\ZYS\Wiki\.claude\`，全局 `~/.claude` 只保留名指针壳（要求先 Read 项目实体再执行；项目外拒绝落盘）。
+- **wiki-sediment 整体迁移**：`~/.claude/skills/wiki-sediment/SKILL.md` → `C:\ZYS\Wiki\.claude\skills\wiki-sediment\SKILL.md`（内容原样）；`~/.claude/commands/wiki-save.md` → 项目 `.claude\commands\wiki-save.md`；两个全局原位置改为指针。
+- **content-to-note 迁移 + bili-note 并入**：`~/.claude/skills/content-to-note/`（含 wechat 脚本与 node_modules）整体移到项目 `.claude\skills\content-to-note\`；bili-note 的 8 个 Python 脚本并入同目录 `scripts\`（平铺，与 `scripts\wechat\` 不冲突）、`references\bilibili-api-notes.md`、6 个测试并入 `tests\`、MIT 许可存为 `LICENSE.bili-note`。bili 旧 SKILL 全文操作要点吸收进合并版 SKILL.md（路径参数化 `$skill`，归档目录从写死的 `D:\knowledge\…` 改为仓库根 `.archive\bili-<BVID>-<短标题>\`）。
+- 全局 `content-to-note/`、`wiki-sediment/` 各留一个指针 SKILL.md；**`bili-note/` 指针已删除**（用户拍板并入即删，2026-09-13）；bili 旧资产（README 徽章文档、agents/openai.yaml、assets/logo、.gitignore）曾备份在 `~/.claude/backups/skill-merge-20260913/`，同日用户手动执行 `rm -rf ~/.claude/skills/bili-note ~/.claude/backups/skill-merge-20260913` 一并删除。
+- 仓库内引用同步改名：`AGENTS.md` §视频笔记入库、`README.md`、`70-视频笔记/README.md`、wiki-sediment description（旧 `douyin-video-summary` 为他机 skill，本机不存在，按 content-to-note 抖音路线改写；§8 Windows 适配备注同步改写）。
+- `.gitignore`：unignore 两个新 skill 目录与 `.claude/commands/`，忽略 wechat `node_modules/`，新增 `tmp/`、`tmp_*/`、`.pytest_cache/`。
+- 验证：`python -m pytest tests` → 26 passed；`check_environment.py` 核心路线 OK（浏览器 AI 字幕需 Chrome+web-access，未开=MISSING，非回归）；wechat `extract.js` require 加载正常，换机恢复依赖 `npm install`（在 `scripts/wechat`）。
+- 恢复方式：实体在 Wiki git 仓库内可回溯；全局指针壳若误删可按本条重建（bili-note 无指针，直接由 content-to-note 承接）；bili 旧 README/agents/assets 已删，需要时从上游 GitHub 重装取。

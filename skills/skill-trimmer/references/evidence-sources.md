@@ -7,16 +7,16 @@
 主流框架用「遥测计数 + 溯源标签 + A/B 评测」做留删决策（Curator 机制：active → stale → archived；skill-up 工具做因果对照）。**本机现状没有遥测基建，不假装有。** 用轻量信号近似，证据链列全：
 
 - **轻量信号**（替代遥测计数器）：
-  - 文件 mtime / git 历史：半年未动 + 零引用 + D 类 → stale 候选（对应 Curator 的 stale→archived）。**已自动化（2026-08-17）**：scan_skills.py 每 skill 输出 `last_modified`（SKILL.md mtime）+ `usage_count`（读 metrics/skill-usage.log，由记账 hook 产生；**pi 侧记账 hook 未移植，pi 候选位 `~/.pi/agent/metrics/skill-usage.log` 缺失时 usage 归零**）+ `staleCandidate`（0 使用 + >180 天未改，STALE_DAYS=180），保鲜判据从人工回忆变数据驱动；插件 skill 不在 `~/.pi/agent/skills` 下不纳入本扫描。
+  - 文件 mtime / git 历史：半年未动 + 零引用 + D 类 → stale 候选（对应 Curator 的 stale→archived）。**已自动化（2026-08-17）**：scan_skills.py 每 skill 输出 `last_modified`（SKILL.md mtime）+ `usage_count`（读安装根目录下 `metrics/skill-usage.log`，由记账 hook 产生；文件缺失时只能视为使用信号不可用，不能证明零使用）+ `staleCandidate`（0 使用 + >180 天未改，STALE_DAYS=180），保鲜判据从人工回忆变数据驱动；插件 skill 不在当前安装根目录的 `skills/` 下纳入本扫描。
   - 引用方活跃度：被 router 引用且 router 在迭代 → active；只有 memory 里历史提过 → 偏 stale。
   - `installing/` 台账日期：装后从未用过、台账无后续 → 可疑。
   - 用户实测：同任务「开/关该 skill」各跑一次对比 = 穷人版 A/B，不搭评测集。
   - **总量健康度（新增【文章】）**：库总量 vs 维护基线 <20——远超且大量零使用 = 书签心态信号，push 整体收敛，别因单个看似合理就放行。
   - **三维上下文成本（新增【工具】）**：`currentStartupTokens`（当前可发现入口启动成本）/ `shellStartupTokens`（触发空壳入口成本）/ `postCallTokens`（命中后完整内容成本）。`startup_delta = currentStartupTokens - shellStartupTokens`：正数写「入口缩短」、负数写「入口反增」、0 写「仅治理收益」。触发空壳只有当 `shellStartupTokens < currentStartupTokens` 才真的省启动 token，不把倒挂显示成节省。本机无遥测时三值标 `不可用`，不硬填 0（对应「描述列表预算 ~2%」的定量化）。
 **本机自动化三件套（2026-08-17，使用信号的实际来源，命令在此）**：
-- 记账（全自动）：**pi 侧未移植**（CC 时代 settings.json PostToolUse → `hooks/skill_ledger.py` → `~/.claude/metrics/skill-usage.log`）。pi 侧录音缺失 → usage_count 归零，stale 判据退化为纯 mtime；pi 候选位 `~/.pi/agent/metrics/skill-usage.log`，待记账 hook 到 pi 后自动生效。
-- 保鲜（想审计时跑）：`python ~/.pi/agent/skills/skill-trimmer/scripts/scan_skills.py` → 扫两区（agent/skills 自建 + agent/skills-sync 第三方）→ inventory.json 每 skill 带 `usage_count`/`last_modified`/`staleCandidate`，stale 候选直接列在 stdout；去留拍板仍走本 skill 判定流程。
-- 复盘（周惯例）：**pi 侧未移植**（CC 时代 `~/.claude/hooks/scripts/transcript_sweep.py` → transcript-weekly）。pi 下暂无对应产物，读高频主题补缺口暂靠人工回顾。
+- 记账：由宿主 hook 写入安装根目录下 `metrics/skill-usage.log`；日志缺失时 `usage_count` 只能作为不可用信号，不能解释为真实零使用。
+- 保鲜（想审计时跑）：在宿主的 `skills/` 目录中执行 `python skill-trimmer/scripts/scan_skills.py` → 扫自建 skill → `inventory.json` 每 skill 带 `usage_count`/`last_modified`/`staleCandidate`，stale 候选直接列在 stdout；去留拍板仍走本 skill 判定流程。
+- 复盘（周惯例）：若宿主提供 transcript sweep，则按宿主配置运行；没有对应产物时标记不可用，读高频主题补缺口暂靠人工回顾。
 - **演进方向（当前不建）**：`github.com/alibaba/skill-up`（已验证存在的官方评测工具）做正式 A/B 需评测数据集，成本高；哪天想上再建。
 - **状态映射**：active（在用/有引用）→ stale（mtime 久 + 零引用）→ archived（移入 `_weak-model-backup/`）。审计报告里给每个候选标当前状态。
 
@@ -24,7 +24,7 @@
 
 ## 来源与核验（2026-08-13）
 
-【工具】层 = skill-slimming（LearnPrompt/carl-skills，2026-08-14 吸收）：复用其工具资产——`scripts/review_server.py`（1069 行，loopback 复审服务，仅绑 127.0.0.1、随机 token、无 subprocess/shell/网络、只写自己的状态目录、不读密钥；安全面 Gen Safe / Socket 0 alerts）+ `assets/review.html`（复审页）+ `references/audit-contract.md`（inventory 证据契约）+ 触发空壳合同 + 三维 token 模型 + 测量标签纪律。判定基准不吸收——slimming 的四层判据浅（只用使用频率分 global/project/trigger），替代不了本 skill 的十一档判定脑。品牌已归并（skill-slimming → skill-trimmer，状态目录 pi 侧 `~/.pi/agent/skill-trimmer/`）。
+【工具】层 = skill-slimming（LearnPrompt/carl-skills，2026-08-14 吸收）：复用其工具资产——`scripts/review_server.py`（1069 行，loopback 复审服务，仅绑 127.0.0.1、随机 token、无 subprocess/shell/网络、只写自己的状态目录、不读密钥；安全面 Gen Safe / Socket 0 alerts）+ `assets/review.html`（复审页）+ `references/audit-contract.md`（inventory 证据契约）+ 触发空壳合同 + 三维 token 模型 + 测量标签纪律。判定基准不吸收——slimming 的四层判据浅（只用使用频率分 global/project/trigger），替代不了本 skill 的十一档判定脑。品牌已归并（skill-slimming → skill-trimmer，状态目录由当前安装根目录推导，亦可用 `--state-root` 覆盖）。
 
 【文章】层 = JavaGuide 两篇：《再见 Superpowers！很多 Skill 真的可以扔掉了》(2026-07-23，本 skill 原始基准) + 《Skill 的选择与精简》(2026-08-13，javaguide.cn/ai-coding/practices/skill-selection-and-pruning.html，同作者同立场演进版——补充装前四问、先不装裸跑、维护量 <20、描述列表预算 ~2%/8000 字符、规则分流框架、装前必看 SKILL.md 安全面)。两篇一致处按原判据；后篇新增判据已并入核心立场 #5-7、流程 1.5、十一档「移入 CLAUDE.md/规则文件」。
 

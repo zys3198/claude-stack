@@ -2,7 +2,7 @@
 /**
  * ECC Statusline — statusLine command
  *
- * Displays: model[plan] | task | $cost Nt Nf Nm | dir | branch Ctx N% | Hit N% | 5h/7d limit
+ * Displays: model[plan] | task | $cost Nt Nf Nm | dir | branch | +N *N ?N !N ↑N ↓N | Ctx N% | Hit N% | 5h/7d limit
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
@@ -15,6 +15,7 @@
 'use strict';
 
 const fs = require('fs');
+const { execFileSync } = require('child_process');
 const net = require('net');
 const os = require('os');
 const path = require('path');
@@ -166,6 +167,72 @@ function getGitBranch(dir) {
   } catch {
     return '';
   }
+}
+
+/**
+ * Parse porcelain-v1 status and upstream divergence.
+ * @param {string} output
+ * @returns {{staged: number, modified: number, untracked: number, conflicts: number, ahead: number, behind: number}}
+ */
+function parseGitStatus(output) {
+  const result = { staged: 0, modified: 0, untracked: 0, conflicts: 0, ahead: 0, behind: 0 };
+  for (const line of output.split(/\r?\n/)) {
+    if (line.startsWith('## ')) {
+      const ahead = line.match(/\bahead (\d+)/);
+      const behind = line.match(/\bbehind (\d+)/);
+      result.ahead = ahead ? Number(ahead[1]) : 0;
+      result.behind = behind ? Number(behind[1]) : 0;
+      continue;
+    }
+    if (line.length < 2) continue;
+
+    const index = line[0];
+    const worktree = line[1];
+    if (index === '?' && worktree === '?') {
+      result.untracked++;
+    } else if (
+      index === 'U' ||
+      worktree === 'U' ||
+      (index === 'A' && worktree === 'A') ||
+      (index === 'D' && worktree === 'D')
+    ) {
+      result.conflicts++;
+    } else {
+      if (index !== ' ') result.staged++;
+      if (worktree !== ' ') result.modified++;
+    }
+  }
+  return result;
+}
+
+/**
+ * Read Git status without taking optional repository locks.
+ * @param {string} dir
+ * @returns {ReturnType<typeof parseGitStatus> | null}
+ */
+function getGitStatus(dir) {
+  try {
+    const output = execFileSync(
+      'git',
+      ['--no-optional-locks', 'status', '--porcelain=v1', '--branch'],
+      { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 700 }
+    );
+    return parseGitStatus(output);
+  } catch {
+    return null;
+  }
+}
+
+function formatGitStatus(status) {
+  if (!status) return '';
+  const parts = [];
+  if (status.staged) parts.push(`\x1b[32m+${status.staged}\x1b[0m`);
+  if (status.modified) parts.push(`\x1b[33m*${status.modified}\x1b[0m`);
+  if (status.untracked) parts.push(`\x1b[36m?${status.untracked}\x1b[0m`);
+  if (status.conflicts) parts.push(`\x1b[1;31m!${status.conflicts}\x1b[0m`);
+  if (status.ahead) parts.push(`\x1b[35m↑${status.ahead}\x1b[0m`);
+  if (status.behind) parts.push(`\x1b[35m↓${status.behind}\x1b[0m`);
+  return parts.join(' ');
 }
 
 function resolveModelName(modelInfo) {
@@ -424,6 +491,11 @@ function runStatusline() {
         segments.push(`\x1b[33m${branch}\x1b[0m`);
       }
 
+      const gitStatusStr = formatGitStatus(getGitStatus(dir));
+      if (gitStatusStr) {
+        segments.push(gitStatusStr);
+      }
+
       process.stdout.write(
         segments.join(' \x1b[2m│\x1b[0m ') +
         (usageStr ? ` \x1b[2m│\x1b[0m ${usageStr}` : '') +
@@ -437,6 +509,13 @@ function runStatusline() {
   });
 }
 
-module.exports = { formatDuration, buildContextBar, readCurrentTask, MAX_STDIN };
+module.exports = {
+  formatDuration,
+  buildContextBar,
+  readCurrentTask,
+  parseGitStatus,
+  formatGitStatus,
+  MAX_STDIN
+};
 
 if (require.main === module) runStatusline();

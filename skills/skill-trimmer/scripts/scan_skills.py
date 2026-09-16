@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """枚举本机 skill 清单（skill-trimmer 第 1 步）。
 
-只读。扫两个技能区：agent/skills/（31 自建 + 静态散件）+ agent/skills-sync/（sync 第三方，2026-08-25 目录分离后）。
+只读。扫描当前 Skill 安装根目录下的 `skills/`（自建 + 静态散件）。
 每个 skill 抽出 name / description / 来源 / 是否软链(含 junction) / 有无资产目录。
-结果写 skill-trimmer-workspace/inventory.json（agent/ 下）。
+结果写安装根目录下的 `skill-trimmer-workspace/inventory.json`。
 
 Windows 兼容：pathlib + utf-8。本机软链多为 junction（目录联接），
 os.path.islink() 认不出，须用「realpath 是否偏离 abspath」判定——
@@ -18,11 +18,16 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+def host_root() -> Path:
+    configured = os.environ.get("SKILL_TRIMMER_HOME")
+    return Path(configured).expanduser() if configured else Path(__file__).resolve().parents[3]
+
+
+HOST_ROOT = host_root()
 SKILL_ROOTS = [
-    Path.home() / ".pi" / "agent" / "skills",   # 自建 + 主动散件
-    Path.home() / ".pi" / "agent" / "skills-sync",  # sync 第三方（GitHub 上游）
+    HOST_ROOT / "skills",  # 自建 + 主动散件
 ]
-WORKSPACE = Path.home() / ".pi" / "agent" / "skill-trimmer-workspace"
+WORKSPACE = HOST_ROOT / "skill-trimmer-workspace"
 ASSET_DIRS = ("scripts", "references", "assets")
 STALE_DAYS = 180  # 零使用 + 超此天数未改 → 保鲜候选
 
@@ -99,14 +104,13 @@ def scan() -> list:
 
 
 def load_usage() -> Counter:
-    """读 metrics/skill-usage.log 统计每 skill 使用次数（记账 hook 产出）。
+    """读安装根目录下 metrics/skill-usage.log 统计每 skill 使用次数（记账 hook 产出）。
 
-    pi 侧暂无该记账产物（skills 区无 metrics 目录），路径保留为 pi 候选位，
-    缺失时静默降级为空计数。调用名剥最末段归一（plugin:ponytail:ponytail→ponytail、superpowers:brainstorming
+    记账产物缺失时静默降级为空计数，不把缺失解释为真实零使用。调用名剥最末段归一（plugin:ponytail:ponytail→ponytail、superpowers:brainstorming
     →brainstorming）与 frontmatter name 对齐；个别对不上归零可接受。缺失/坏行静默跳过。
     """
     usage = Counter()
-    log = Path.home() / ".pi" / "agent" / "metrics" / "skill-usage.log"
+    log = HOST_ROOT / "metrics" / "skill-usage.log"
     if not log.is_file():
         return usage
     for line in log.read_text(encoding="utf-8").splitlines():
@@ -155,7 +159,7 @@ def to_contract(rows: list) -> dict:
             "managementPolicy": "reviewable",
             "managementReason": "",
             "ownershipTags": ["用户安装"],
-            "hosts": ["Claude Code"],
+            "hosts": ["local"],
             "rareCritical": False,
             "suggestedDecision": "undecided",
             "currentStartupTokens": 0,
@@ -173,7 +177,7 @@ def to_contract(rows: list) -> dict:
     return {
         "schemaVersion": 1,
         "auditId": f"audit-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
-        "environmentId": "pi-win",
+        "environmentId": "local",
         "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "counts": {
             "installedInstances": {"value": len(rows), "measurement": "精确值"},

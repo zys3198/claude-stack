@@ -1,9 +1,8 @@
 ---
 name: ai-readable-project
 description: >-
-  让项目能被 AI 看懂——产出 AI 上下文工程静态上下文（根 CLAUDE.md + AGENTS.md 知识索引 +
-  模块领域说明），并沉淀长期维护规则，使项目持续被 AI 维护。触发：让 AI 看懂这个项目、梳理项目给 AI 用、引入 AI 协作、建
-  CLAUDE.md/AGENTS.md、项目 AI 上下文、把项目梳理成 AI 可维护、让 AI 接手老项目。<!-- v0.2.0 -->
+  为项目建立可持续维护的 AI 上下文：梳理业务、架构、真实运行链路和文档索引，并生成 CLAUDE.md/AGENTS.md 草稿。用户要求让 AI 看懂项目、建立或补充项目上下文时使用。不用于审查已有指令质量（instruction-auditor）或执行代码改动。
+disable-model-invocation: true
 ---
 # ai-readable-project
 
@@ -22,7 +21,7 @@ description: >-
 - 要在项目里引入 AI 协作、重构为 AI 可维护项目
 - 老项目债务重、AI 总判断错、想给 AI 补上下文
 
-不用：改代码/重构实现（走 code-change-workflow）、写技术文章、知识库/图谱建设。
+不用：改代码/重构实现（走 code-change-workflow）、写技术文章、知识库/图谱建设，或审查已有 SKILL.md、CLAUDE.md、AGENTS.md 的指令质量（走 instruction-auditor）。
 
 ## 产物
 
@@ -46,6 +45,13 @@ docs/ai-context/
 6. **产出**：报告 + CLAUDE.md/AGENTS.md/模块草稿
 
 问答若推翻步骤 2-4 的结论（模块切分/链路判断），回到对应步骤修正后继续。
+
+## 完成条件
+
+- `analysis-report.md`、根 `CLAUDE.md` 草稿、根 `AGENTS.md` 草稿和适用的模块说明均已列出；不适用项说明原因。
+- 业务背景、文档位置、真实运行链路、架构债务四类上下文各有证据，或明确标记「未验证」及证据缺口。
+- 未覆盖已有文件，未把推断写成已验证事实；所有待负责人确认项和剩余风险已列出。
+- 只完成上下文产出，不把代码重构、项目落地或运行生效当成本 Skill 的完成条件。
 
 ## 债务观察清单（分析报告 §5 用，只报告不改）
 

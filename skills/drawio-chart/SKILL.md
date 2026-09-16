@@ -1,7 +1,8 @@
 ---
 name: drawio-chart
 description: >-
-  Draw.io 图表生成与导出 skill：仅在用户要实际生成或导出 draw.io 图表时触发，支持流程图、架构图、时序图、ER 图等，可导出为 PNG/SVG/PDF。文章/文档配图的必要性判断、图表类型选择和图文一致性校验不触发本 skill，走 drawio-article-illustration。视觉风格与 floracat-architecture-diagram 保持一致。
+  实际生成或导出 draw.io 图表（流程、架构、时序、ER 等）时使用；文章配图决策和图文校验走 drawio-article-illustration。
+disable-model-invocation: true
 ---
 # Draw.io 配图协议
 
@@ -62,7 +63,7 @@ description: >-
 
 画布尺寸公式：`pageWidth = 最右节点右边缘 + 40`，`pageHeight = 最底节点底边缘 + 40`。不要用固定大画布。
 
-**🔴 CHECKPOINT — N > 6 或复杂图表时**：展示布局方案（主方向、画布宽高、行数×列数、预估节点坐标范围）给用户确认，通过后再进 Step 3。≤ 6 节点的简单图可跳过此检查点直接生成。
+**🔴 CHECKPOINT — N > 6 或图表复杂，且存在会实质改变结果、又无法由图表类型、节点数或用户已有偏好推导的布局选择时**：展示布局方案（主方向、画布宽高、行数×列数、预估节点坐标范围）给用户确认，通过后再进 Step 3。布局可明确推导时直接生成。
 
 #### Step 3: 生成 XML
 
@@ -112,7 +113,7 @@ open "path/to/file.drawio"
 1. **生成 .drawio 文件**：先生成原生格式
 2. **检测 draw.io CLI**：`where drawio`（Windows）/ `which drawio`（macOS/Linux）
 3. **CLI 不存在 → 🔴 STOP**：告知用户只生成了 .drawio，附导出命令和安装指引
-4. **🔴 CHECKPOINT — 展示导出命令和格式**，等用户确认再执行导出
+4. **🔴 CHECKPOINT — 导出格式、路径或命令有歧义，或导出涉及不可逆/外发动作时**，展示导出命令和格式，等用户确认再执行；用户已明确指定本地格式和路径时直接执行导出
 5. **执行导出**：使用 CLI 导出为指定格式（PNG/SVG/PDF）
 6. **导出失败 → 保留 .drawio**：告知用户导出命令和安装指引，不删除源文件
 7. **返回结果**：告知用户导出文件路径，默认保留 .drawio 源文件（用户可删除）
@@ -154,7 +155,7 @@ open "path/to/file.drawio"
 
 | # | 场景 | 触发条件 | 一线修复 | 仍失败兜底 |
 |---|------|---------|---------|-----------|
-| 1 | 用户需求模糊 | 无法判断图表类型 | 列出 6 种类型及各 1 个典型场景，等用户选择 | 降级为通用架构图 |
+| 1 | 用户需求模糊 | 无法判断图表类型 | 列出 6 种类型及各 1 个典型场景，等用户选择 | 继续等待用户选择，不生成 |
 | 2 | 不支持的图表类型 | 用户要求甘特图/热力图等 | 明确告知不支持，推荐最接近的类型 | 告知使用专业工具 |
 | 3 | 节点过多 | > 30 个节点 | 拆分为多张图或用分组容器 | 按模块拆成子图，每张 ≤ 15 节点 |
 | 4 | 用户要求 HTML 节点 | value 中含 `<b>` `<br>` 等 | 拒绝并引导：用 `&#xa;` 换行、`fontStyle=1` 加粗 | 如用户坚持，设置 `html=1` 并标注渲染风险 |
@@ -193,3 +194,9 @@ open "path/to/file.drawio"
 - 布局设计原则（紧凑不留白/方向一致/文字极简/无重叠）与布局速查表 → `references/layout-principles.md`
 
 <!-- 2026-09-08 渐进披露改造（批次 3）：§一→references/color-tokens.md、§二+§六→references/xml-templates.md、§四→references/cli-export.md、§十→references/layout-principles.md；操作流程/STOP 检查点/失败模式/反例清单/命名规范保留在入口；description 未动。 -->
+
+## 完成条件
+
+- 生成模式：类型和节点关系已确定，目标 `.drawio` 文件已写入，XML 结构校验通过。
+- 导出模式：源文件保留，指定格式的导出命令返回成功，且输出文件路径已核对；失败则标记 `failed`，不写成功结论。
+- 类型、路径、布局或覆盖行为仍有未决用户选择时，标记 `blocked`，不以默认猜测代替确认。

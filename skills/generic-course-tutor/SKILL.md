@@ -1,10 +1,7 @@
 ---
 name: generic-course-tutor
 description: >-
-  执行已存在的本地课程/教材/章节/manifest/学习计划：逐课推进、quiz 练习、实验、
-  checkpoint、学习记录与进度恢复。触发词：本地课程、manifest、README/ROADMAP 大纲、
-  源教程、逐课学习、恢复进度。硬边界：本地无现成课程需从零调研不触发（模型直接调研），
-  做可发布教程不触发，自己查资料不触发，AI 编码陪练不触发。
+  按权威本地课程或学习计划逐课教学、练习、实验和记录进度。用户提供或确认本地课程、manifest 或学习计划并要求继续学习或恢复进度时使用；无既有课程、写教程或编码陪练不使用。
 ---
 
 # Generic Course Tutor
