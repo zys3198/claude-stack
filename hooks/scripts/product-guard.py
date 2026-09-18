@@ -120,12 +120,35 @@ def is_git_token(token):
     return os.path.basename(token.replace("\\", "/")).lower() in {"git", "git.exe"}
 
 
+def without_heredocs(text):
+    # heredoc 的正文是喂给命令的数据，不是要执行的命令。提交消息、
+    # 配置文件、脚本正文里出现命令字样时，不剥掉会被当成真的执行。
+    # 代价是正文交给解释器执行的那种写法看不到了，归到已知边界。
+    # 结束标记找不到时原样返回，宁可保守也不误删可见的命令。
+    lines = text.splitlines()
+    body = [False] * len(lines)
+    found = False
+    for m in re.finditer(r"<<-?\s*['\"]?([A-Za-z_][A-Za-z0-9_]*)", text):
+        name = m.group(1)
+        start = text.count("\n", 0, m.start())
+        for i in range(start + 1, len(lines)):
+            body[i] = True
+            if lines[i].strip() == name:
+                found = True
+                break
+    if not found:
+        return text
+    return "\n".join(line for i, line in enumerate(lines) if not body[i])
+
+
 def split_tokens(command):
     # 反斜杠写法统一成斜杠后再拆词；引号不闭合时返回 None 表示无法判定。
+    text = command.replace("\\", "/")
     try:
-        return shlex.split(command.replace("\\", "/"))
+        shlex.split(text)
     except ValueError:
         return None
+    return shlex.split(without_heredocs(text))
 
 
 def leading_cd(tokens, cwd):

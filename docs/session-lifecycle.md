@@ -162,6 +162,7 @@ claude -w eam-qr-code
 | `--lock`、`--track`、`--detach` 这类不带值的选项 | 放行 |
 | 只读 git 命令、其余任何命令 | 放行 |
 | 命令里只是提到这串字（在引号内，并不真的执行） | 放行 |
+| 这串字写在 heredoc 正文里（提交消息、脚本文本等） | 放行 |
 
 被拒绝时会给出替代做法，照着改即可。
 
@@ -172,6 +173,8 @@ claude -w eam-qr-code
 git 自己的全局选项里也有吃下一个词的，按同一台机器上 git 2.54 的实测结果逐条登记：`-c`、`--git-dir`、`--work-tree`、`--namespace`、`--exec-path`、`--config-env`、`--attr-source`。它们的取值不会被当成目标路径，所以 `git --git-dir .git worktree add <仓库外>` 与 `git -c core.x=1 worktree add <仓库外>` 都拦得住。漏登记一项时，该项的取值会被当成子命令位置，该处 `git worktree add` 整个看不到。
 
 重定向与控制符（`2>&1`、`>`、`|`、`&&`、`;`）不会被当成目标路径。同一条命令里出现多处 `git worktree add` 时逐处检查，任何一处越界就拒绝整条命令，所以 `… && git worktree add <仓库外>` 拦得住。
+
+heredoc 的正文是喂给命令的数据，拆词前先剥掉，所以提交消息、脚本正文里出现命令字样时不会被当成执行。剥的时候按结束标记定位，找不到标记就原样判定，宁可保守。代价是把正文交给解释器执行的那种写法看不见了，归入下面的已知边界。
 
 判定基准是主检出的 `.claude/worktrees/`。在链接工作树里开会话时 `git rev-parse --show-toplevel` 返回工作树自身，所以改取 `git rev-parse --git-common-dir` 的上一级。命名格式按第 8 节执行：kebab-case，禁用 hash、纯日期和保留名；词数不做校验。
 
@@ -190,6 +193,11 @@ python -c "import os; os.system('git worktree add <仓库外>')"
 
 # 用命令替换拼出命令名，拆词时只看到 $(echo
 $(echo git) worktree add <仓库外>
+
+# 正文交给解释器执行，正文在拆词前已被剥掉
+bash <<EOF
+git worktree add <仓库外>
+EOF
 ```
 
 一类是刻意规避，一类是命令替换本身的限制。拦截的定位是防止误建，不作为安全边界。

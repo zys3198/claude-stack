@@ -579,6 +579,14 @@ def test_guard_global_options():
     ):
         check(f"全局选项不误拒：{label}", not denied(command), command)
 
+    # heredoc 的正文是数据。提交消息里出现命令字样时不能当成执行
+    message = ("说明：下面这行是文档正文，git worktree add " + outside + " 只是举例\n"
+               + f"cat <<'MSG' 用的结束标记是 MSG\n")
+    command = "git commit -q -F - <<'MSG'\n" + message + "MSG"
+    check("提交消息正文里的命令字样不被当成执行", not denied(command), command[:200])
+    check("heredoc 之外的真实越界命令仍然拦住",
+          denied(f"cat <<'EOF'\n说明文字\nEOF\ngit worktree add {outside}"), "")
+
 
 def run_status(st, root, sessions):
     st.active_sessions = (lambda: sessions) if sessions is not None else (lambda: None)
