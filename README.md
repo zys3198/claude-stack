@@ -1,16 +1,15 @@
 # claude-stack
 
-个人的 Claude Code 配置体系仓库（`~/.claude`）。统一管理 CLAUDE.md 全局指令、hooks、agents、skills、statusline、cc-switch 配置快照，以及第三方 plugin marketplace。
+个人的 Claude Code 配置体系仓库（`~/.claude`）。统一管理 CLAUDE.md 全局指令、hooks、skills、statusline、commands、cc-switch 配置快照，以及第三方 plugin marketplace。
 
 ## 目录结构
 
 | 目录/文件 | 内容 |
 |---|---|
 | `CLAUDE.md` | 全局指令（给 AI 的规则） |
-| `agents/` | 自定义 agent 定义（design/engineering/security/testing） |
-| `hooks/` | 拦截/守卫 hook（verify_gate、git_guard、secret_guard、placeholder_guard 等） |
-| `skills/` | 只追踪自建 skill（`.gitignore` 白名单制，26 个，2026-08-16 复核：追踪=白名单=26）；第三方 skill 不进 git，来源登记在 `installing/skill-install.md` |
-| `statusline/` | 状态栏 JS（statusline.js、cost-tracker、context-monitor、metrics-bridge） |
+| `hooks/` | 会话生命周期守卫与工具链脚本（session-guard、product-guard、lean-ctx 改写、通知与指标桥） |
+| `skills/` | 只追踪自建 skill（`.gitignore` 白名单制，20 个，2026-09-18 复核：追踪=白名单=20）；第三方 skill 不进 git，来源登记在 `installing/skill-install.md` |
+| `statusline/` | 状态栏 JS（statusline.js、cc-switch-usage、cost-tracker、context-monitor、metrics-bridge） |
 | `docs/` | 配置清单、盘点、迁移计划 |
 | `external-configs/` | cc-switch 非敏感配置**快照副本**（复制非 symlink，同步见该目录 README） |
 | `plugins/marketplaces/` | 第三方 plugin marketplace clone，**不进 git**（2026-08-11 解除追踪，约 97 MiB）；来源与安装方法见 `installing/tool-install.md` |
