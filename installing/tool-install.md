@@ -379,3 +379,13 @@
 - 保留：cc-switch providers 表两个 codex 行（OpenAI Official、火山 Coding Plan=current，含 key）、`codex_oauth_auth.json`、copilot_auth.json；installing 台账与 memory 审计链；fix/apply-headroom-routing.mjs
 - 注意：浏览器内 ChatGPT/Codex 扩展（ID odlomjlbamekndcpllcnffbgeohgkmjh 等）需在 Chrome 中手动移除；同轮用户确认后另删两个 Codex++ 死磁贴键（程序本体 C:\ZYS\Software\Codex++ 早已不存在）与 UrlAssociations\codex 协议关联键，终扫 HKCU codex 键=0
 - 恢复方式：重装 Codex 桌面版；认证由 cc-switch 切换提供商重新渲染 config.toml/auth.json，OAuth 凭据文件仍在
+
+### loopforge-cli 全局安装 + Claude Classic（2026-09-17）
+- 来源：npm 包 `loopforge-cli`
+- 安装日期：2026-09-17
+- 安装命令原文：`npm install --global loopforge-cli`
+- 集成安装命令原文：`loopforge install claude`
+- 装到哪：CLI 包目录 `C:\Users\zys31\AppData\Roaming\npm\node_modules\loopforge-cli`；入口 `C:\Users\zys31\AppData\Roaming\npm\loopforge.cmd`
+- 依赖：Node.js、npm；Claude Code 运行时
+- 验证：`loopforge plan claude` 确认 `edition=classic host=claude files=85`；安装输出 `written=85 unchanged=0`；`loopforge status claude` 返回 `classic/claude: files=85 changed=0 missing=0`
+- 备注：项目集成文件写入 `C:\ZYS\Code\lab-area\.claude\`；启动命令为 `/start-devflow`

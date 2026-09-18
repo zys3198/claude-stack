@@ -256,3 +256,11 @@
 - `.gitignore`：unignore 两个新 skill 目录与 `.claude/commands/`，忽略 wechat `node_modules/`，新增 `tmp/`、`tmp_*/`、`.pytest_cache/`。
 - 验证：`python -m pytest tests` → 26 passed；`check_environment.py` 核心路线 OK（浏览器 AI 字幕需 Chrome+web-access，未开=MISSING，非回归）；wechat `extract.js` require 加载正常，换机恢复依赖 `npm install`（在 `scripts/wechat`）。
 - 恢复方式：实体在 Wiki git 仓库内可回溯；全局指针壳若误删可按本条重建（bili-note 无指针，直接由 content-to-note 承接）；bili 旧 README/agents/assets 已删，需要时从上游 GitHub 重装取。
+
+### openmaic（项目级安装）
+- 来源：https://open.maic.chat/docs/zh-cn/agent-workbench#%E5%AE%89%E8%A3%85；技能包：https://open.maic.chat/docs/openmaic-skill.zip；上游仓库：https://github.com/THU-MAIC/OpenMAIC
+- 安装日期：2026-09-17
+- 安装命令原文：`curl --fail --location "https://open.maic.chat/docs/openmaic-skill.zip" --output "C:/ZYS/Wiki/.claude/skills/openmaic-skill.zip"`；`unzip -q "C:/ZYS/Wiki/.claude/skills/openmaic-skill.zip" -d "C:/ZYS/Wiki/.claude/skills" && rm "C:/ZYS/Wiki/.claude/skills/openmaic-skill.zip"`
+- 装到哪：`C:\ZYS\Wiki\.claude\skills\openmaic\`，包含 `SKILL.md` 和 8 份 references；未安装到用户级目录。
+- 依赖：Claude Code 项目级 Skill 加载；课堂运行还需 OpenMAIC 托管访问码，或本地 OpenMAIC 仓库、依赖、Provider 配置和服务。
+- 备注：页面未说明本地知识库导入、同步或长期学习记录；Skill 采用逐阶段确认流程，不代用户写入 API Key。
