@@ -36,6 +36,47 @@
 
 ---
 
+## 会话生命周期机制（2026-09-18）
+
+需求来源：用户指令「更简单、更干净、更能掌控；前面的会话不留残留影响后面的会话，不同会话间不互相影响；主要是规则要做好，工作产物不能胡乱产生」。
+
+### 脚本
+
+| 文件 | 作用 |
+|------|------|
+| `~/.claude/hooks/scripts/session-guard.py` | `start` / `end` 两个子命令。开发前报告当前仓库卫生状况，开发结束写收尾记录。不删除任何东西 |
+| `~/.claude/hooks/scripts/product-guard.py` | PreToolUse 拦截：`git worktree add` 建到 `.claude/worktrees/` 之外，或工作树名为 hash；`EnterWorktree` 传入 hash 名同样拒绝。命令先剥掉引号内内容再判断，避免只是提到该串就被拦 |
+| `~/.claude/hooks/scripts/session-status.py` | 只读汇总活跃会话、工作树四分类、孤儿目录、stash、主检出、仓库根散落文件、登记端口、容器 |
+
+纯 stdlib，无第三方依赖。Python 解释器固定用 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`（与 settings.json 其他 hook 一致）。
+
+设计取舍：只有工作树位置与命名进硬拦截，因为它们是客观可判定的，且建错位置的代价高。仓库根建文件、产物放错目录这类主观规则靠文本约定，由 `/dev-status` 报告违规项。所有删除都走 `/dev-clean` 并逐条确认，不存在自动删除路径。子代理工作树由 harness 以 `agent-<hash>` 命名创建，拦截管不到，只能靠 `/dev-status` 的孤儿目录分类暴露。
+
+### 命令与配置
+
+- `~/.claude/commands/dev-status.md`、`~/.claude/commands/dev-clean.md`
+- `~/.claude/settings.json` hooks 段新增：`SessionStart` 第 3 组（session-guard start，timeout 25）、`SessionEnd` 1 组（session-guard end，timeout 15）、`PreToolUse` 1 组（product-guard，matcher `Bash|EnterWorktree`，timeout 15）
+- `~/.claude/CLAUDE.md` 第 8 节「会话、产物与本地资源」，6 段：工作树 / 产物去处 / 并行会话 / 收尾 / Git 写权限 / 查看与清理
+- `~/.claude/docs/session-lifecycle.md`：机制说明、操作方式、故障处理
+
+### 运行时数据
+
+`~/.claude/session-handoff.jsonl`（收尾记录，保留 7 天，按 `repo` 字段过滤，只报告当前仓库的遗留）、`~/.claude/session-guard.log`、`~/.claude/product-guard.log`。
+
+活跃会话来自 `claude agents --json`，这是官方文档给出的受支持接口（`cwd`、`kind`、`startedAt`、`pid`、`status`、`sessionId` 等字段）。不读 `~/.claude/sessions/*.json`——官方文档从未描述该目录，并与 `~/.claude/jobs/<id>/` 同属被明确声明为「不是稳定接口」的内部层。`/dev-status` 用它区分工作树是在用还是可清理；枚举失败时输出为空，如实表现为无人占用而不伪造。
+
+### 验证
+
+- 自检脚本 `selftest.py`：48 个用例全部通过。覆盖工作树位置越界、hash 命名、反斜杠写法、引号内的干扰串、`worktree list` / `worktree remove` 放行、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、会话表缺失时不崩溃、退出提示不承诺自动清理、状态脚本报出仓库根散落文件。用临时 git 仓库，跑完自清。
+- 真实仓库实测：dtsf（18 个工作树）SessionStart 耗时 2.39 秒，product-guard 每次 0.25 秒。
+- 涉及 Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8")`，否则默认 GBK 会破坏中文 JSON。三个脚本的 `main` 都有这一行。
+
+### 回退
+
+从 `~/.claude/settings.json` 的 hooks 段删掉 `SessionStart` 第 3 组、`SessionEnd`、`PreToolUse` 三段即可，三个脚本变成不被调用的惰性文件。命令与文档（`dev-status.md`、`dev-clean.md`、`session-lifecycle.md`）可一并删除；`session-hygiene.json` 是本机端口与独占资源台账，独立于本机制，应保留。
+
+---
+
 ## 自建 skill（当前目录 + 历史记录，非 cc-switch 同步）
 
 - 2026-09-11 新增全局 `ai-product-development`，详见下方独立台账条目。
@@ -428,3 +469,33 @@
 - **版本**：设计文档与上游提交 `8147538b4226ae41e2487a9179e3bcc1f68e8554` 逐文件 blob 校验一致；MIT 许可证随 Skill 保留。
 - **当前状态**：文件已创建并加入全局 Git 白名单；真实 Skill 触发需新会话加载后复核。
 - **回退**：删除 `~/.claude/skills/awesome-design-md/` 并移除 `.gitignore` 中对应白名单行；不删除 `~/.claude/lib/awesome-design-md/` 源副本。
+
+### code-change-workflow 1.3.0 工作树与本地资源（2026-09-18，全局）
+- **出处**：grill-me 会话（设计树三轮加一轮追加）。目标是把 DTSF 项目 `CLAUDE.md` 与记忆库里跟具体项目无关的部分提取到通用位置，并解决工作树被误删导致代码消失的问题。实验目录 `C:\ZYS\Code\lab-area\exp\2026-09-18-session-artifact-hygiene\`。
+- **位置**：`~/.claude/skills/code-change-workflow/SKILL.md`（§1.3、新增 §1.6、§3）、`CHANGELOG.md`、`scripts/session-inventory.py`、`scripts/worktree-remove-guard.py`、`evals/worktree-closeout/case.yaml`。
+- **内容**：§1.6 新增工作树生命周期与本地资源，这一节与同时开几个会话无关，串行开发同样适用（并行用工作树隔离，一次只做一件事直接用主检出）；清点脚本读取本机配置列出工作树、端口占用与属主、独占容器；防护脚本挂为 `WorktreeRemove` 事件钩子，有未提交改动或未推送提交时以退出码 2 拒绝删除。
+- **规则文件**：全局 `~/.claude/CLAUDE.md` §8 由「并行会话与本地资源」改名「会话与本地资源」，补「禁止 force push、推送主干分支、删除远程分支或标签」与「启动会写共享数据库的进程前先确认目标数据库和迁移开关」两条底线。
+- **配置**：新建 `~/.claude/session-hygiene.json`（本机端口表与独占容器，端口与容器属于本机资源，不放进任何仓库）；`~/.claude/settings.json` 新增 `hooks.WorktreeRemove` 段。
+- **依赖**：psutil（本机 Python 3.12.10 已装 7.2.2）；钩子命令使用绝对解释器路径 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`，换机器需要改这一行。
+- **验证**：清点脚本在 DTSF 实跑通过，输出 20 个工作树、18 条 stash、11 条无远端分支、7 个端口的占用与属主、2 个独占容器的状态；防护脚本在独立临时仓库夹具跑 6 条用例全部通过。实测修正两处自身缺陷：中文列宽按字符数补空格错位、钩子写标准错误时未设 UTF-8。详见 `CHANGELOG.md` 1.3.0 条目。
+- **未验证**：钩子在会话退出、子代理结束、删除后台会话三条真实清理路径上的触发；`ExitWorktree` 中途主动退出已实测不经过该钩子。钩子放行之后由谁执行删除尚未确认。
+- **回退**：`SKILL.md` 与 `CHANGELOG.md` 恢复到 1.2.0 内容，删除 `scripts/` 与 `evals/worktree-closeout/`，移除 `~/.claude/settings.json` 的 `hooks.WorktreeRemove` 段；`~/.claude/session-hygiene.json` 可保留（清点脚本读不到时会跳过这两节）。
+
+### toolchain-pitfalls（2026-09-18，全局）
+- **出处**：从 DTSF 项目记忆库 `~/.claude/projects/C--ZYS-Code-dtsf/memory/` 复制出的通用工具链坑，含 MSYS 路径转换、PowerShell 引号提前展开、代码页与输出编码、包装器与可执行文件、工作树与子代理机制。
+- **位置**：`~/.claude/skills/toolchain-pitfalls/SKILL.md`；自建单文件 Skill。
+- **内容**：按路径与引号、编码与输出、脚本与解析、工作树与子代理四节列出坑位与当时的判据。2026-09-18 审查后删掉「不要手写成熟文件格式的解析器」（与全局 `CLAUDE.md` §2.1 逐字重复）与整节「触碰边界」（属敏感数据处理规则，已有对应 memory），并收录 Windows 父进程退出不连带终止子进程一条。
+- **依赖**：无外部运行时依赖。
+- **验证**：内容静态检查通过；其中「Python 输出非 ASCII 内容前先设编码」一条在本次实验中再次实测复现——脚本未设编码时，宿主读到的是系统代码页字节。
+- **回退**：删除 `~/.claude/skills/toolchain-pitfalls/` 并移除本登记项。memory 侧对应条目已于 2026-09-18 删除，回退需从会话记录还原。
+
+### code-change-workflow 1.4.0 按审查收敛（2026-09-18，全局）
+- **出处**：独立子代理对 1.3.0 新增内容的逐条审查（必要性、合理性、与既有规则是否重复）。审查对象为全局 `CLAUDE.md` §8、`SKILL.md` §1.3/§1.6/§3、`CHANGELOG.md`、`toolchain-pitfalls/SKILL.md`、`session-inventory.py`、`session-hygiene.json`、`settings.json` 的 `WorktreeRemove` 挂钩。
+- **位置**：`~/.claude/skills/code-change-workflow/SKILL.md`（1.4.0）、`CHANGELOG.md`、`scripts/session-inventory.py`、`~/.claude/skills/toolchain-pitfalls/SKILL.md`、`~/.claude/CLAUDE.md`（无改动，§8 八条审查后全部保留）。
+- **内容**：删掉 `scripts/worktree-remove-guard.py` 与 `settings.json` 的 `hooks.WorktreeRemove` 段——宿主清理工作树前自己会检查未提交改动与未推送提交，钩子重复了这套判断，且曾因按载荷字段顺序取到会话的 `cwd` 而误判主检出、静默放行。§1.6 删掉五条与全局 `CLAUDE.md` §8 或 DTSF 项目 `CLAUDE.md` 重复的条目，删掉源自 DTSF 的 Git 协作小节；「删错了怎么找回」按实测改写。§1.3「页面提示不代表通过」改「只构建通过不等于通过」，合格证据去掉截图。§3「护栏靠 hooks 不靠自觉」改「护栏以实际挂载为准」。
+- **配置**：`~/.claude/settings.json` 的 `hooks` 现只有 `Notification`、`PostToolUse`、`SessionStart`、`StopFailure` 四类；`~/.claude/session-hygiene.json` 不变。
+- **依赖**：psutil（本机 Python 3.12.10 已装 7.2.2）；清点脚本用绝对解释器路径 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe` 调用，换机器需要改 `SKILL.md` 对应那一行。
+- **验证**：清点脚本改后在 DTSF 实跑通过（退出码 0，20 个工作树、18 条 stash、11 条无远端分支、2 个独占容器运行中）。审查同时查出两处与实测不符的既有记载并已改正：memory `avoid-second-vite-port.md` 关于 9528 与 `strictPort` 的说法、`session-inventory.py` 输出里关于未提交改动能否恢复的说法。
+- **未验证**：宿主在三条自动清理路径上保留工作树的行为取自 `claude.exe` 代码与审查者复核，未做端到端实测；eval case `worktree-closeout` 尚未跑 runner。
+- **已知缺口**：`~/.claude/docs/config-checklist.md` §2.1 与 `config-inventory.md` §1.3 记载的七个 PreToolUse 脚本（`git_guard.py`、`secret_guard.py`、`dep_gate.py`、`placeholder_guard.py`、`edited_tracker.py`、`verify_recorder.py`、`verify_gate.py`）在 `~/.claude/hooks/` 下均不存在，`settings.json` 也没有挂载 `PreToolUse`；两份文档尚未按实际状态改写。
+- **回退**：`SKILL.md` 与 `CHANGELOG.md` 恢复到 1.3.0 内容并重新加入钩子脚本与 `settings.json` 挂钩；`toolchain-pitfalls` 的删除项需从会话记录还原。

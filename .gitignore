@@ -18,6 +18,7 @@ metrics/
 telemetry/
 cache/
 backups/
+statusline/.cache/
 shell-snapshots/
 debug/
 downloads/
@@ -28,6 +29,8 @@ desktop-server-state.json
 window-state.json
 docs/superpowers/
 plans/
+session-handoff.jsonl
+hooks/scripts/selftest-sandbox/
 
 # ----- locks / temp markers -----
 daemon/
