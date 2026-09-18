@@ -44,14 +44,14 @@
 
 | 文件 | 作用 |
 |------|------|
-| `~/.claude/hooks/scripts/session-guard.py` | `start` / `end` 两个子命令。开发前报告本仓库主检出与各工作树的卫生状况，开发结束写收尾记录。不删除任何东西。收尾记录的追加与裁剪共用一把锁，裁剪在锁内重新读取，避免读到旧快照整份写回而丢掉并发追加的记录。锁等待超时改写独占命名的溢出文件；锁文件记持有者令牌，释放时比对一致才删，被接管之后不会误删接管者的锁 |
-| `~/.claude/hooks/scripts/product-guard.py` | PreToolUse 拦截：`git worktree add` 的目标路径解析后不在本仓库主检出 `.claude/worktrees/` 下，或工作树名不合规（hash、纯日期、保留名、非 kebab-case）；`EnterWorktree` 的 `name` 与 `path` 同样校验。命令拆成词后取出每一处真正的目标路径再规范化比对，不按子串判断；带值选项按 git 2.54 的用法行登记 |
-| `~/.claude/hooks/scripts/session-status.py` | 只读汇总活跃会话、工作树四分类、孤儿目录、stash、主检出、仓库根散落文件、登记端口、容器。会话枚举失败时显式标注降级，可清理项标出被忽略内容 |
+| `~/.claude/hooks/scripts/session-guard.py` | `start` / `end` 两个子命令。开发前报告本仓库主检出与各工作树的卫生状况，开发结束写收尾记录。不删除任何工作树。收尾记录的追加与裁剪共用一把锁，裁剪在锁内重新读取，避免读到旧快照整份写回而丢掉并发追加的记录。锁等待超时改写独占命名的溢出文件；锁文件记持有者令牌，释放时比对一致才删，被接管之后不会误删接管者的锁 |
+| `~/.claude/hooks/scripts/product-guard.py` | PreToolUse 拦截：`git worktree add` 的目标路径解析后不在本仓库主检出 `.claude/worktrees/` 下，或工作树名不合规（hash、纯日期、保留名、非 kebab-case）；`EnterWorktree` 的 `name` 与 `path` 同样校验。命令拆成词后取出每一处真正的目标路径再规范化比对，不按子串判断；`git worktree add` 的带值选项与 git 全局选项里吃下一个词的项都按 git 2.54 实测结果逐条登记 |
+| `~/.claude/hooks/scripts/session-status.py` | 只读汇总活跃会话、工作树四分类、孤儿目录、stash、主检出、仓库根散落文件、登记端口、容器。会话枚举失败时显式标注降级，可清理项标出被忽略内容。收尾记录的时间戳只认数值，缺字段或类型错误时计数照常、明细跳过 |
 | `~/.claude/hooks/scripts/selftest.py` | 自检，`python selftest.py`，退出码 0 表示全过 |
 
 纯 stdlib，无第三方依赖。Python 解释器固定用 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`（与 settings.json 其他 hook 一致）。
 
-设计取舍：只有工作树位置与命名进硬拦截，因为它们是客观可判定的，且建错位置的代价高。仓库根建文件由 `/dev-status` 报告违规项；产物放错目录没有自动检查，靠文本约定。所有删除都走 `/dev-clean` 并逐条确认，不存在自动删除路径。子代理工作树由 harness 以 `agent-<hash>` 命名创建，拦截管不到，只能靠 `/dev-status` 的孤儿目录分类暴露。把命令再包一层解释器（`bash -c "…"`、`python -c "os.system(…)"`）之后顶层拆词看不到 `git worktree add`，会放行；拦截的定位是防止误建，不作为安全边界。
+设计取舍：只有工作树位置与命名进硬拦截，因为它们是客观可判定的，且建错位置的代价高。仓库根建文件由 `/dev-status` 报告违规项；产物放错目录没有自动检查，靠文本约定。所有工作树删除都走 `/dev-clean` 并逐条确认，不存在自动删除路径。子代理工作树由 harness 以 `agent-<hash>` 命名创建，拦截管不到，只能靠 `/dev-status` 的孤儿目录分类暴露。把命令再包一层解释器（`bash -c "…"`、`python -c "os.system(…)"`）之后顶层拆词看不到 `git worktree add`，会放行；拦截的定位是防止误建，不作为安全边界。机制自身所在仓库（`~/.claude`）按普通仓库处理，不特殊跳过。
 
 ### 命令与配置
 
@@ -62,13 +62,13 @@
 
 ### 运行时数据
 
-`~/.claude/session-handoff.jsonl`（收尾记录，保留 7 天，按 `repo` 字段过滤，只报告本仓库的遗留；`repo` 统一取主检出根，所以从链接工作树里开会话也能对上）、`~/.claude/session-handoff.d/`（锁等待超时时写的溢出记录，独占命名，开发前检查与 `/dev-status` 都读它，下一次裁剪并回主文件）、`~/.claude/session-handoff.lock`（收尾记录的写入锁，正常跑完即删，超过 30 秒视为陈旧锁自动接管，修改时间在将来时同样按陈旧接管）、`~/.claude/session-guard.log`（异常，以及过期记录被丢弃时留下的路径与改动数）、`~/.claude/product-guard.log`。
+`~/.claude/session-handoff.jsonl`（收尾记录，保留 7 天，按 `repo` 字段过滤，只报告本仓库的遗留；`repo` 统一取主检出根，所以从链接工作树里开会话也能对上。时间戳只认数值，缺字段或类型不对的记录排在排序前面，计数照常、明细跳过）、`~/.claude/session-handoff.d/`（锁等待超时时写的溢出记录，独占命名，开发前检查与 `/dev-status` 都读它，下一次裁剪并回主文件）、`~/.claude/session-handoff.lock`（收尾记录的写入锁，正常跑完即删，超过 30 秒视为陈旧锁自动接管，修改时间在将来时同样按陈旧接管）、`~/.claude/session-guard.log`（异常，以及过期记录被丢弃时留下的路径与改动数）、`~/.claude/product-guard.log`。
 
 活跃会话来自 `claude agents --json`，这是官方文档给出的受支持接口（`cwd`、`kind`、`startedAt`、`pid`、`status`、`sessionId` 等字段）。不读 `~/.claude/sessions/*.json`——官方文档从未描述该目录，并与 `~/.claude/jobs/<id>/` 同属被明确声明为「不是稳定接口」的内部层。`/dev-status` 用它区分工作树是在用还是可清理；枚举失败时 `active_sessions()` 返回 None，输出显式标注「活跃会话 枚举失败」并提示不要据此删除，不伪装成无人占用。
 
 ### 验证
 
-自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：142 个用例全部通过。覆盖工作树位置越界、相对路径上跳、`..` 路径穿越、`.claude/worktrees/` 只出现在 `-b` 参数或注释里、`.claude` 下的非约定目录、`worktrees-old` 前缀混淆、hash 命名、保留名与纯日期、非 kebab-case 命名、反斜杠写法、`worktree list` / `worktree remove` 放行、同一条命令里串联多处 `git worktree add`、重定向被当成目标路径、`--lock` / `--track` 不带值的选项、`git -C <仓库>` 与 `cd <仓库> &&` 的判定基准、`git.exe` 与绝对路径形式的 git、名字像 git 但后面不是 `worktree add` 的写法、`EnterWorktree` 的 `name` 与 `path` 两条入口（含两者同时给出时都要校验）、command 不是字符串时放行且不抛异常、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、从链接工作树里开会话按主检出汇报、会话枚举为空或字段缺失时不崩溃、枚举失败打印降级告警且不把工作树报成无会话占用、退出提示不承诺自动清理、收尾记录并发追加不丢、过期记录丢弃写日志、无需裁剪时不重写文件、陈旧锁自动接管、接管后原持有者不误删新锁、锁时间在将来时按陈旧接管、降级追加写溢出文件且裁剪时并回主文件、仓库根散落文件与孤儿目录（含符号链接）的识别、被忽略内容单列。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
+自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：151 个用例全部通过。覆盖工作树位置越界、相对路径上跳、`..` 路径穿越、`.claude/worktrees/` 只出现在 `-b` 参数或注释里、`.claude` 下的非约定目录、`worktrees-old` 前缀混淆、hash 命名、保留名与纯日期、非 kebab-case 命名、反斜杠写法、`worktree list` / `worktree remove` 放行、同一条命令里串联多处 `git worktree add`、重定向被当成目标路径、`--lock` / `--track` 不带值的选项、git 全局选项里吃下一个词的项（`-c`、`--git-dir`、`--work-tree`、`--namespace`）后仍判出越界且不误拒只读命令、`git -C <仓库>` 与 `cd <仓库> &&` 的判定基准、`git.exe` 与绝对路径形式的 git、名字像 git 但后面不是 `worktree add` 的写法、`EnterWorktree` 的 `name` 与 `path` 两条入口（含两者同时给出时都要校验）、command 不是字符串时放行且不抛异常、非 git 目录静默、机制自己的仓库按普通仓库汇报、跨仓库遗留不串味、从链接工作树里开会话按主检出汇报、会话枚举为空或字段缺失时不崩溃、枚举失败打印降级告警且不把工作树报成无会话占用、退出提示不承诺自动清理、收尾记录并发追加不丢、过期记录丢弃写日志、无需裁剪时不重写文件、陈旧锁自动接管、接管后原持有者不误删新锁、锁时间在将来时按陈旧接管、降级追加写溢出文件且裁剪时并回主文件、收尾记录时间戳缺字段或类型不对时不崩溃且不打印明细、仓库根散落文件与孤儿目录（含符号链接）的识别、被忽略内容单列。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
 
 真实仓库实测（2026-09-18，dtsf，1 个工作树）：SessionStart 耗时 0.65 秒，`/dev-status` 耗时 1.48 秒。
 
@@ -76,7 +76,11 @@
 
 第二轮审计（2026-09-19）复跑：3 个追加进程加 2 个裁剪进程，8 轮共 288 条，丢失 0 条。这一轮又查出锁的两处缺口并修掉。其一，持锁超过 30 秒被接管之后，原持有者释放时删掉了接管者的锁，两个进程同时进入临界区，实测第三方能直接拿到锁。其二，拿不到锁时的降级路径直接往共用文件追加，而同一文件并发追加在 Windows 上会互相覆盖，6 个进程同时降级时实测丢 6.7%（30 条丢 2 条）。降级改写独占命名的溢出文件之后，同样 5 轮 × 6 个进程共 30 条，丢失 0 条。另外补上了 `git.exe` 与绝对路径形式的 git 调用绕过拦截的缺口。
 
+第三轮审计（2026-09-19）复跑：锁令牌契约 17 项、降级与裁剪 35 项、放行与拒绝判定 60 项、状态汇总 9 项、并发与全局选项 14 项，除本轮查出的两处缺陷外全部通过。并发不丢记录用 48 条降级写入配 2 个裁剪线程交错，存活 48/48。查出并修掉两处。其一，`session-status.py` 打印最近记录时直接下标取 `ts`，记录缺该字段时抛 `KeyError`、写成字符串时抛 `TypeError`，`/dev-status` 与 `/dev-clean` 整个不可用；排序处早已用 `isinstance` 兜底，只有打印这段漏了。其二，`product-guard.py` 的选项跳过循环只认 `-C`，`git --git-dir .git worktree add <仓库外>` 与 `git -c core.x=1 worktree add <仓库外>` 的取值被当成子命令位置，整个 `git worktree add` 看不到，守卫放行，真实 git 确认两条都能在仓库外建出目录。git 全局选项按 2.54 实测逐条核对后登记，等号形式与空格形式都覆盖。同一轮里也确认机制自己的仓库按普通仓库处理只产出一行主检出提示，据此取消了 `~/.claude` 的静默跳过；`selftest.py` 原有的「`~/.claude` 静默」用例是靠该跳过才为空的，从未真正验证过 `handle_start` 能处理这个仓库，已改为断言它照常汇报。
+
 性能随工作树数量近线性：`/dev-status` 约每棵 84 毫秒，SessionStart 约每棵 73 毫秒，主导成本是每棵一次 `git status --porcelain` 子进程。70 棵工作树时 `/dev-status` 约 7.2 秒。
+
+第三轮的性能实测（真实仓库，2026-09-19）：SessionStart 在 `~/.claude` 约 0.11 秒、在 dtsf 约 0.58 秒，SessionEnd 在 dtsf 约 0.27 秒，`/dev-status` 在 dtsf 约 1.09 秒。收尾记录 4000 条（0.8 MB）时一次裁剪 15 毫秒；锁等待窗口固定 2 秒，与记录条数无关，空闲时追加实测 0 毫秒。
 
 Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8")`，否则默认 GBK 会破坏中文 JSON。三个脚本的 `main` 都有这一行。
 

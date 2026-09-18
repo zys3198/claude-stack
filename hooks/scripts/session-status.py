@@ -346,11 +346,15 @@ def main():
 
     recent = [
         r for r in handoff_rows()
-        if r.get("dirty") and r.get("repo") and norm(r["repo"]) == norm(repo)
+        if r.get("dirty") and r.get("repo") and r.get("cwd")
+        and norm(r["repo"]) == norm(repo)
     ]
     if recent:
+        # 时间戳只认数值。收尾记录可能被手工编辑，缺字段或写错类型时
+        # 计数照常、明细跳过，避免整个状态汇总崩掉
+        dated = [r for r in recent if isinstance(r.get("ts"), (int, float))]
         print(f"上次会话留下的未提交改动 {len(recent)} 条")
-        for r in recent[-3:]:
+        for r in dated[-3:]:
             ts = time.strftime("%m-%d %H:%M", time.localtime(r["ts"]))
             print(f"  {ts}  {os.path.basename(r['cwd'].rstrip('/\\'))}  {r['dirty']} 处")
 

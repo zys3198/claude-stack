@@ -34,6 +34,14 @@ NAME_RESERVED = {"tmp", "test"}
 NAME_RESERVED_PREFIX = ("agent-", "worktree-")
 DATE_ONLY = re.compile(r"^(?:\d{8}|\d{4}-?\d{2}-?\d{2})$")
 GIT_TIMEOUT = 10
+# git 的全局选项里会吃掉下一个词的。漏掉一项时它的取值会被当成子命令位置，
+# 该处 git worktree add 就整个看不到（实测 git --git-dir .git worktree add
+# 与 git -c core.x=1 worktree add 都能绕过）。按 git 2.54 实测逐条登记：
+# -c 只有空格形式，其余两种形式都可用。
+# --work-tree、--namespace、--exec-path 虽然也吃值，但不影响判定基准目录，
+# 这里一并跳过它们的取值，避免取值落到子命令位置。
+GIT_GLOBAL_WITH_VALUE = {"-c", "--git-dir", "--work-tree", "--namespace",
+                         "--exec-path", "--config-env", "--attr-source"}
 
 
 def log(message):
@@ -137,12 +145,18 @@ def leading_cd(tokens, cwd):
 
 def git_invocation(tokens, i, cwd):
     # tokens[i] 是 "git"，返回该次调用实际作用的目录与子命令起始下标。
+    # -C 是唯一会改变判定基准目录的全局选项，单独处理；
+    # 其余吃值的全局选项按 GIT_GLOBAL_WITH_VALUE 跳过，只为了让取值
+    # 不落到子命令位置上。
     j = i + 1
     while j < len(tokens) and tokens[j].startswith("-"):
         if tokens[j] == "-C" and j + 1 < len(tokens):
             candidate = norm(os.path.join(cwd, tokens[j + 1]))
             if os.path.isdir(candidate):
                 cwd = candidate
+            j += 2
+            continue
+        if tokens[j] in GIT_GLOBAL_WITH_VALUE:
             j += 2
             continue
         j += 1

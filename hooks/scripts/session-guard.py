@@ -6,6 +6,7 @@
 #
 # 设计约束：
 #   - 非 git 目录静默退出，不产生任何输出
+#   - 自身所在仓库按普通仓库处理，不特殊跳过
 #   - 状态读取失败时如实报告，不当作干净
 #   - 只报告当前仓库的事，不引用别的仓库的遗留
 #   - 收尾记录文件既会被追加也会被裁剪，两条写入路径都持有同一把锁，
@@ -14,7 +15,11 @@
 #     接管重建之后，原持有者不能再删掉接管者的锁
 #   - 锁等待超时不影响会话：追加改写独占命名的溢出文件，裁剪直接跳过。
 #     同一文件并发追加在 Windows 上会互相覆盖（实测丢 8% 以上），
-#     独占命名让两个降级进程不会写到同一处
+#     独占命名让两个降级进程不会写到同一处。
+#     等待窗口固定 2 秒，与收尾记录文件的规模无关（实测 4000 条记录时
+#     仍是 2.00 秒）；空闲时追加实测 0 毫秒。SessionEnd 的 hook 超时是
+#     15 秒，同一进程连续 8 次降级追加会把它耗尽，单次会话结束只追加
+#     一条，触发不了
 #   - 异常写入 session-guard.log，绝不阻塞会话启动或结束
 
 import json
@@ -344,8 +349,6 @@ def handle_start(payload):
     root = main_root(cwd)
     if not root:
         return
-    if norm(root) == norm(CLAUDE):
-        return
 
     sessions = active_sessions()
     degraded = sessions is None
@@ -424,8 +427,6 @@ def handle_end(payload):
     cwd = payload.get("cwd") or os.getcwd()
     root = main_root(cwd)
     if not root:
-        return
-    if norm(root) == norm(CLAUDE):
         return
     rc, out = git(["rev-parse", "--abbrev-ref", "HEAD"], cwd)
     branch = out.strip() if rc == 0 else ""
