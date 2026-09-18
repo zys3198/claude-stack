@@ -81,6 +81,10 @@ claude -w eam-qr-code
 
 收尾记录文件由开发前检查写入、由会话结束追加，两条路径共用一把锁（`~/.claude/session-handoff.lock`，正常跑完即删），所以同时开会话和关会话不会互相覆盖。
 
+锁等了 2 秒还没拿到时，结束环节不往共用文件里挤，改写一份独占命名的溢出文件到 `~/.claude/session-handoff.d/`。开发前的检查与 `/dev-status` 都会读这个目录，下一次裁剪把里面的记录并回主文件。同一个文件被多个进程并发追加会在 Windows 上互相覆盖（实测丢 8% 到 14%），独占命名避开了这一点。
+
+锁文件里记着持有者令牌，释放时比对一致才删。锁超过 30 秒会被别的进程判定为陈旧并接管，此时原持有者手里的令牌已经对不上，它不会把接管者的锁删掉。锁文件的修改时间落在将来时（时钟回拨）同样按陈旧处理，否则这把锁永远不会被接管，裁剪会一直跳过。
+
 ### 强杀会话的情况
 
 直接关窗口、`kill` 进程时，结束环节不触发。不影响正确性——下次开会话时开发前的检查会扫出这次留下的东西并报告。
@@ -112,7 +116,7 @@ claude -w eam-qr-code
 
 「可清理」只表示 git 没有登记改动。工作树里若还有被 `.gitignore` 覆盖的内容（构建产物、本地数据库、`.env` 之类），会额外标注「另有 N 项被忽略内容」——那些文件不在 git 管辖内，删掉工作目录会一并删掉它们，所以单独列出来给你判断。
 
-会话枚举失败时（`claude agents --json` 不可用），输出会显式标注「活跃会话 枚举失败」并提示不要据此删除。此时「在用」分组为空，被占用的工作树会落进「可清理」，这份清单不能拿来删。
+会话枚举失败时（`claude agents --json` 不可用），输出会显式标注「活跃会话 枚举失败」并提示不要据此删除。此时「在用」分组为空，被占用的工作树会落进「可清理」，这份清单不能拿来删。`/dev-clean` 看到这条提示会直接停下，不列删除清单。开会话时的卫生提示同样会写明枚举失败，并且不把工作树报成无会话占用。
 
 ---
 
@@ -150,6 +154,7 @@ claude -w eam-qr-code
 | 命令因为没有路径而判不出目标（例如 `git worktree add 2>&1 \| head`） | 拒绝 |
 | `git worktree add` 到约定位置且名字合规 | 放行 |
 | `git -C <仓库> worktree add`、`cd <仓库> && git worktree add` | 按目标仓库判定，不误拒 |
+| 写成 `git.exe` 或用绝对路径调用 git | 按同一规则判定 |
 | `--lock`、`--track`、`--detach` 这类不带值的选项 | 放行 |
 | 只读 git 命令、其余任何命令 | 放行 |
 | 命令里只是提到这串字（在引号内，并不真的执行） | 放行 |
@@ -170,14 +175,18 @@ claude -w eam-qr-code
 
 子代理的工作树由 harness 自动创建，名字是 `agent-<hash>`，拦截管不到，只能用 `/dev-status` 看。
 
-**边界**：把命令再包一层解释器之后，顶层拆词看不到 `git worktree add`，会放行：
+**边界**：下面两类写法在拆词阶段看不出 `git worktree add`，会放行：
 
 ```bash
+# 把命令再包一层解释器
 bash -c "git worktree add <仓库外>"
 python -c "import os; os.system('git worktree add <仓库外>')"
+
+# 用命令替换拼出命令名，拆词时只看到 $(echo
+$(echo git) worktree add <仓库外>
 ```
 
-这类写法需要刻意规避。拦截的定位是防止误建，不作为安全边界。
+一类是刻意规避，一类是命令替换本身的限制。拦截的定位是防止误建，不作为安全边界。
 
 ---
 
@@ -202,6 +211,7 @@ python -c "import os; os.system('git worktree add <仓库外>')"
 | `~/.claude/commands/dev-status.md` | `/dev-status` 命令 |
 | `~/.claude/commands/dev-clean.md` | `/dev-clean` 命令 |
 | `~/.claude/session-handoff.jsonl` | 会话收尾记录，保留 7 天 |
+| `~/.claude/session-handoff.d/` | 锁等待超时时写的溢出记录，下一次裁剪并回主文件 |
 | `~/.claude/session-handoff.lock` | 收尾记录的写入锁，正常跑完即删 |
 | `~/.claude/session-hygiene.json` | 本机端口与独占资源台账 |
 | `~/.claude/session-guard.log` | 异常日志与过期记录丢弃记录 |

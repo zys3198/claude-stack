@@ -10,7 +10,11 @@
 #   - 只报告当前仓库的事，不引用别的仓库的遗留
 #   - 收尾记录文件既会被追加也会被裁剪，两条写入路径都持有同一把锁，
 #     裁剪时在锁内重新读取，避免读到旧快照再整份写回而丢掉并发追加的记录
-#   - 锁等待超时不影响会话：追加照常进行并写日志，裁剪直接跳过
+#   - 锁文件里写持有者令牌，释放时比对一致才删除：锁被判定陈旧并由别的进程
+#     接管重建之后，原持有者不能再删掉接管者的锁
+#   - 锁等待超时不影响会话：追加改写独占命名的溢出文件，裁剪直接跳过。
+#     同一文件并发追加在 Windows 上会互相覆盖（实测丢 8% 以上），
+#     独占命名让两个降级进程不会写到同一处
 #   - 异常写入 session-guard.log，绝不阻塞会话启动或结束
 
 import json
@@ -22,6 +26,7 @@ from pathlib import Path
 
 CLAUDE = Path(os.path.expanduser("~")) / ".claude"
 HANDOFF = CLAUDE / "session-handoff.jsonl"
+HANDOFF_DIR = CLAUDE / "session-handoff.d"
 LOCK = CLAUDE / "session-handoff.lock"
 LOGFILE = CLAUDE / "session-guard.log"
 
@@ -42,30 +47,59 @@ def log(message):
 
 
 def lock_acquire():
+    # 拿到锁时返回持有者令牌，没拿到返回 None。
+    # 令牌写进锁文件，lock_release 据此判断锁还是不是自己的。
     deadline = time.monotonic() + LOCK_WAIT_SECONDS
+    token = f"{os.getpid()}-{os.urandom(6).hex()}"
     while True:
         try:
             fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            os.write(fd, str(os.getpid()).encode("ascii"))
-            os.close(fd)
-            return True
         except FileExistsError:
             try:
-                if time.time() - os.path.getmtime(LOCK) > LOCK_STALE_SECONDS:
+                age = time.time() - os.path.getmtime(LOCK)
+                # age 为负数说明锁文件的修改时间在将来，这种锁不会被正常持有者
+                # 释放，按陈旧处理，否则裁剪与追加会永久卡住
+                if age > LOCK_STALE_SECONDS or age < -LOCK_STALE_SECONDS:
                     os.remove(LOCK)
                     continue
             except OSError:
                 pass
         except OSError as exc:
             log(f"lock acquire failed: {exc}")
-            return False
+            return None
+        else:
+            written = False
+            try:
+                os.write(fd, token.encode("ascii"))
+                written = True
+            except OSError as exc:
+                log(f"lock write failed: {exc}")
+            finally:
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
+            if not written:
+                # 锁文件已经建出来了，不删掉会留下一个没人释放的锁
+                try:
+                    os.remove(LOCK)
+                except OSError:
+                    pass
+                return None
+            return token
         if time.monotonic() >= deadline:
-            return False
+            return None
         time.sleep(0.02)
 
 
-def lock_release():
+def lock_release(token):
+    # 只在自己的令牌还在锁文件里时才删除。锁超过陈旧阈值后会被别的进程接管
+    # 并重建，那时文件里是对方的令牌，删掉会让两个进程同时进入临界区。
+    if not token:
+        return
     try:
+        if LOCK.read_text(encoding="ascii", errors="replace").strip() != token:
+            return
         os.remove(LOCK)
     except OSError:
         pass
@@ -117,6 +151,9 @@ def is_linked_worktree(cwd):
 
 
 def active_sessions():
+    # 枚举失败时返回 None，由调用方显式报告降级。
+    # 返回空列表会被当成「没有会话在跑」，把正在被别的会话使用的工作树
+    # 报成无会话占用。
     try:
         r = subprocess.run(
             ["claude", "agents", "--json"],
@@ -127,15 +164,15 @@ def active_sessions():
             timeout=AGENTS_TIMEOUT,
         )
     except (OSError, subprocess.SubprocessError):
-        return []
+        return None
     if r.returncode != 0:
-        return []
+        return None
     try:
         rows = json.loads(r.stdout or "[]")
     except ValueError:
-        return []
+        return None
     if not isinstance(rows, list):
-        return []
+        return None
     out = []
     for d in rows:
         if isinstance(d, dict) and d.get("cwd"):
@@ -193,11 +230,13 @@ def session_owns(path, sessions, self_id):
     return False
 
 
-def handoff_records():
-    if not HANDOFF.is_file():
-        return []
+def read_jsonl(path):
     rows = []
-    for line in HANDOFF.read_text(encoding="utf-8", errors="replace").splitlines():
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return rows
+    for line in text.splitlines():
         line = line.strip()
         if not line:
             continue
@@ -208,12 +247,57 @@ def handoff_records():
     return rows
 
 
+def overflow_files():
+    if not HANDOFF_DIR.is_dir():
+        return []
+    return sorted(p for p in HANDOFF_DIR.iterdir() if p.is_file())
+
+
+def handoff_records():
+    # 主文件与溢出文件都要读。降级追加的记录先落在溢出文件里，
+    # 等下一次裁剪时并回主文件。
+    rows = read_jsonl(HANDOFF) if HANDOFF.is_file() else []
+    for path in overflow_files():
+        rows.extend(read_jsonl(path))
+    rows.sort(key=lambda r: r.get("ts") if isinstance(r.get("ts"), (int, float)) else 0)
+    return rows
+
+
+def append_record(record):
+    # 先走锁；拿不到锁时写独占命名的溢出文件。
+    # 同一文件并发追加在 Windows 上会互相覆盖，共用文件名的写法不行，
+    # 独占命名让两个降级进程各写各的。
+    token = lock_acquire()
+    if token:
+        try:
+            with open(HANDOFF, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            return True
+        except OSError as exc:
+            log(f"append handoff failed: {exc}")
+            return False
+        finally:
+            lock_release(token)
+    log("append handoff to overflow: 锁等待超时")
+    try:
+        HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
+        name = f"{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}-{os.urandom(4).hex()}.jsonl"
+        (HANDOFF_DIR / name).write_text(
+            json.dumps(record, ensure_ascii=False) + "\n", encoding="utf-8")
+        return True
+    except OSError as exc:
+        log(f"append handoff overflow failed: {exc}")
+        return False
+
+
 def prune_handoff():
     # 与 handle_end 的追加共用一把锁，并在锁内重新读取，
     # 避免用读取过的旧快照整份写回而丢掉这段时间里追加的记录。
-    if not HANDOFF.is_file():
+    # 溢出文件里的记录在这一步并回主文件。
+    if not HANDOFF.is_file() and not HANDOFF_DIR.is_dir():
         return
-    if not lock_acquire():
+    token = lock_acquire()
+    if not token:
         log("prune handoff skipped: 锁等待超时")
         return
     try:
@@ -229,14 +313,20 @@ def prune_handoff():
             dropped += 1
             if isinstance(r.get("dirty"), int) and r["dirty"] > 0:
                 log(f"prune handoff 丢弃过期记录：{r.get('cwd')} dirty={r['dirty']}")
-        if not dropped:
+        overflow = overflow_files()
+        if not dropped and not overflow:
             return
         text = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept)
         HANDOFF.write_text(text, encoding="utf-8")
+        for path in overflow:
+            try:
+                path.unlink()
+            except OSError:
+                pass
     except OSError as exc:
         log(f"prune handoff failed: {exc}")
     finally:
-        lock_release()
+        lock_release(token)
 
 
 def emit(event, context):
@@ -258,7 +348,12 @@ def handle_start(payload):
         return
 
     sessions = active_sessions()
+    degraded = sessions is None
+    if degraded:
+        sessions = []
     parts = []
+    if degraded:
+        parts.append("活跃会话枚举失败，工作树占用判定不可靠")
 
     dirty = change_count(root)
     if dirty is None:
@@ -275,7 +370,9 @@ def handle_start(payload):
             continue
         if tree["detached"]:
             detached += 1
-        if session_owns(path, sessions, self_id):
+        # 枚举失败时无从判断工作树有没有会话在用，跳过散落统计，
+        # 否则会把正在被别的会话使用的工作树报成无会话占用
+        if degraded or session_owns(path, sessions, self_id):
             continue
         n = change_count(path)
         if n is None:
@@ -343,18 +440,8 @@ def handle_end(payload):
         "worktree": is_linked_worktree(cwd),
         "dirty": dirty,
     }
-    held = lock_acquire()
-    if not held:
-        log("append handoff without lock: 锁等待超时")
-    try:
-        with open(HANDOFF, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
-    except OSError as exc:
-        log(f"append handoff failed: {exc}")
+    if not append_record(record):
         return
-    finally:
-        if held:
-            lock_release()
 
     where = os.path.basename(cwd.rstrip("/\\")) if record["worktree"] else "主检出"
     if dirty:

@@ -136,8 +136,9 @@ def test_product_guard():
     for gone in ("add_target", "check_new_file", "ROOT_DOC_EXT", "repo_root_old",
                  "unquoted", "WORKTREE_ADD", "WORKTREE_PATH"):
         check(f"product-guard 已移除 {gone}", not hasattr(pg, gone))
-    for kept in ("worktree_adds", "check_name", "name_reason", "is_control", "leading_cd",
-                 "git_invocation", "AGENT_HASH", "HASH_WORD", "OPTS_WITH_VALUE", "NAME_OK"):
+    for kept in ("worktree_adds", "is_git_token", "name_reason", "is_control", "leading_cd",
+                 "git_invocation", "enter_path_reason", "AGENT_HASH", "HASH_WORD",
+                 "OPTS_WITH_VALUE", "NAME_OK"):
         check(f"product-guard 保留 {kept}", hasattr(pg, kept))
     check("product-guard 只按 git 用法登记带值选项",
           pg.OPTS_WITH_VALUE == {"-b", "-B", "--reason"}, str(pg.OPTS_WITH_VALUE))
@@ -201,6 +202,13 @@ def test_product_guard():
          f"git -C {OTHER} worktree add {OTHER_TREES / 'cross-ok'}", True),
         ("放行 cd 之后建在约定位置",
          f"cd {REPO} && git worktree add {TREES / 'via-cd'}", True),
+        ("拒绝 git.exe 形式的命令名", "git.exe worktree add ../outsider-exe", False),
+        ("拒绝带引号的 git 绝对路径",
+         '"C:/Program Files/Git/cmd/git.exe" worktree add ../outsider-abs', False),
+        ("拒绝正斜杠绝对路径的 git",
+         "C:/ZYS/Software/Git/cmd/git.exe worktree add ../outsider-slash", False),
+        ("放行名字像 git 但后面不是 worktree add 的写法",
+         "git version && ls .claude/worktrees/git", True),
     ]
     for name, cmd, allow in cases:
         out = run(cmd)
@@ -232,8 +240,23 @@ def test_product_guard():
     out = run_tool({"tool_name": "EnterWorktree",
                     "tool_input": {"path": str(TREES / "sample-clean")}})
     check("放行约定位置内的 EnterWorktree path", out == "", out[:120])
-    out = run_tool({"tool_name": "EnterWorktree", "tool_input": {"path": str(SANDBOX)}})
+    # 越界目标用主检出根：沙箱本身可能建在工作树里，那样它就在约定位置之内，
+    # 拿它当越界样本会被判合规
+    outside = Path.home() / ".claude"
+    out = run_tool({"tool_name": "EnterWorktree", "tool_input": {"path": str(outside)}})
     check("拒绝约定位置外的 EnterWorktree path", "deny" in out, out[:120])
+    out = run_tool({"tool_name": "EnterWorktree",
+                    "tool_input": {"name": "eam-qr-code", "path": str(outside)}})
+    check("name 合规但 path 越界时仍拒绝", "deny" in out, out[:120])
+    out = run_tool({"tool_name": "EnterWorktree",
+                    "tool_input": {"name": "eam-qr-code", "path": str(TREES / "sample-clean")}})
+    check("name 与 path 都合规时放行", out == "", out[:120])
+
+    out = run_tool({"tool_name": "Bash",
+                    "tool_input": {"command": ["git", "worktree", "add", "../evil"]}})
+    check("command 不是字符串时放行且不抛异常", out == "", out[:120])
+    out = run_tool({"tool_name": "Bash", "tool_input": {"command": 12}})
+    check("command 是数字时放行且不抛异常", out == "", out[:120])
 
 
 def test_session_guard():
@@ -261,6 +284,7 @@ def test_session_guard():
 
     handoff = build_sandbox()
     sg.HANDOFF = handoff
+    sg.HANDOFF_DIR = SANDBOX / "handoff.d"
     sg.LOCK = SANDBOX / "handoff.lock"
     sg.LOGFILE = SANDBOX / "guard.log"
     sg.active_sessions = lambda: []
@@ -296,6 +320,13 @@ def test_session_guard():
 
     out_nosess = run_hook(sg, "handle_start", {"cwd": str(REPO), "session_id": "me"})
     check("会话枚举为空时不崩溃", "会话卫生" in out_nosess, out_nosess)
+
+    sg.active_sessions = lambda: None
+    out_degraded = run_hook(sg, "handle_start", {"cwd": str(REPO), "session_id": "me"})
+    check("会话枚举失败时显式报告降级", "活跃会话枚举失败" in out_degraded, out_degraded)
+    check("会话枚举失败时不报无主的散落工作树",
+          "无会话占用的工作树" not in out_degraded, out_degraded)
+    sg.active_sessions = lambda: []
 
     sg.active_sessions = lambda: [{"pid": 3, "cwd": str(REPO), "status": "busy"}]
     out_nokey = run_hook(sg, "handle_start", {"cwd": str(REPO), "session_id": "me"})
@@ -384,6 +415,50 @@ def test_prune_handoff(sg, handoff):
                                       "session_id": "stale-lock", "reason": "other"})
     check("陈旧锁不会挡住收尾记录", len(read_jsonl(handoff)) == held_before + 1, out[:120])
     check("陈旧锁之后锁文件已清掉", not sg.LOCK.exists(), str(sg.LOCK))
+
+    # 锁令牌：被接管之后，原持有者释放时不能删掉接管者的锁
+    if sg.LOCK.exists():
+        sg.LOCK.unlink()
+    token_a = sg.lock_acquire()
+    old = time.time() - 3600
+    os.utime(sg.LOCK, (old, old))
+    token_b = sg.lock_acquire()
+    sg.lock_release(token_a)
+    check("接管之后原持有者不会删掉新锁", sg.LOCK.exists(), str(sg.LOCK))
+    check("接管者拿到的是新令牌",
+          bool(token_a) and bool(token_b) and token_a != token_b, f"{token_a} / {token_b}")
+    sg.lock_release(token_b)
+    check("接管者释放后锁文件清掉", not sg.LOCK.exists(), str(sg.LOCK))
+
+    # 锁文件修改时间在将来时按陈旧处理，否则锁会永久卡住裁剪与追加
+    sg.LOCK.write_text("future", encoding="utf-8")
+    far = time.time() + 3600
+    os.utime(sg.LOCK, (far, far))
+    token_f = sg.lock_acquire()
+    check("锁时间在将来时按陈旧接管", bool(token_f), str(token_f))
+    sg.lock_release(token_f)
+
+    # 降级追加改走溢出文件，不写共享主文件
+    sg.LOCK.write_text("held-by-other", encoding="utf-8")
+    far = time.time() + 3600
+    os.utime(sg.LOCK, (far, far))
+    sg.LOCK_STALE_SECONDS = 1e9
+    before = len(read_jsonl(handoff))
+    run_hook(sg, "handle_end", {"cwd": str(TREES / "sample-clean"),
+                                "session_id": "overflow-one", "reason": "other"})
+    sg.LOCK_STALE_SECONDS = 30.0
+    overflow = sorted(sg.HANDOFF_DIR.glob("*.jsonl"))
+    check("降级追加写进溢出文件", len(overflow) == 1, str(overflow))
+    check("降级时不写主文件", len(read_jsonl(handoff)) == before, str(before))
+    ids = {r.get("session_id") for r in sg.handoff_records()}
+    check("读取时带上溢出文件里的记录", "overflow-one" in ids, str(sorted(ids)))
+
+    sg.LOCK.unlink()
+    sg.prune_handoff()
+    ids = {r.get("session_id") for r in read_jsonl(handoff)}
+    check("裁剪把溢出记录并回主文件", "overflow-one" in ids, str(sorted(ids)))
+    check("裁剪之后溢出文件清空", not list(sg.HANDOFF_DIR.glob("*.jsonl")),
+          str(list(sg.HANDOFF_DIR.glob("*.jsonl"))))
 
 
 def test_session_status():

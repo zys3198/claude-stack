@@ -44,7 +44,7 @@
 
 | 文件 | 作用 |
 |------|------|
-| `~/.claude/hooks/scripts/session-guard.py` | `start` / `end` 两个子命令。开发前报告本仓库主检出与各工作树的卫生状况，开发结束写收尾记录。不删除任何东西。收尾记录的追加与裁剪共用一把锁，裁剪在锁内重新读取，避免读到旧快照整份写回而丢掉并发追加的记录 |
+| `~/.claude/hooks/scripts/session-guard.py` | `start` / `end` 两个子命令。开发前报告本仓库主检出与各工作树的卫生状况，开发结束写收尾记录。不删除任何东西。收尾记录的追加与裁剪共用一把锁，裁剪在锁内重新读取，避免读到旧快照整份写回而丢掉并发追加的记录。锁等待超时改写独占命名的溢出文件；锁文件记持有者令牌，释放时比对一致才删，被接管之后不会误删接管者的锁 |
 | `~/.claude/hooks/scripts/product-guard.py` | PreToolUse 拦截：`git worktree add` 的目标路径解析后不在本仓库主检出 `.claude/worktrees/` 下，或工作树名不合规（hash、纯日期、保留名、非 kebab-case）；`EnterWorktree` 的 `name` 与 `path` 同样校验。命令拆成词后取出每一处真正的目标路径再规范化比对，不按子串判断；带值选项按 git 2.54 的用法行登记 |
 | `~/.claude/hooks/scripts/session-status.py` | 只读汇总活跃会话、工作树四分类、孤儿目录、stash、主检出、仓库根散落文件、登记端口、容器。会话枚举失败时显式标注降级，可清理项标出被忽略内容 |
 | `~/.claude/hooks/scripts/selftest.py` | 自检，`python selftest.py`，退出码 0 表示全过 |
@@ -62,17 +62,19 @@
 
 ### 运行时数据
 
-`~/.claude/session-handoff.jsonl`（收尾记录，保留 7 天，按 `repo` 字段过滤，只报告本仓库的遗留；`repo` 统一取主检出根，所以从链接工作树里开会话也能对上）、`~/.claude/session-handoff.lock`（收尾记录的写入锁，正常跑完即删，超过 30 秒视为陈旧锁自动接管）、`~/.claude/session-guard.log`（异常，以及过期记录被丢弃时留下的路径与改动数）、`~/.claude/product-guard.log`。
+`~/.claude/session-handoff.jsonl`（收尾记录，保留 7 天，按 `repo` 字段过滤，只报告本仓库的遗留；`repo` 统一取主检出根，所以从链接工作树里开会话也能对上）、`~/.claude/session-handoff.d/`（锁等待超时时写的溢出记录，独占命名，开发前检查与 `/dev-status` 都读它，下一次裁剪并回主文件）、`~/.claude/session-handoff.lock`（收尾记录的写入锁，正常跑完即删，超过 30 秒视为陈旧锁自动接管，修改时间在将来时同样按陈旧接管）、`~/.claude/session-guard.log`（异常，以及过期记录被丢弃时留下的路径与改动数）、`~/.claude/product-guard.log`。
 
 活跃会话来自 `claude agents --json`，这是官方文档给出的受支持接口（`cwd`、`kind`、`startedAt`、`pid`、`status`、`sessionId` 等字段）。不读 `~/.claude/sessions/*.json`——官方文档从未描述该目录，并与 `~/.claude/jobs/<id>/` 同属被明确声明为「不是稳定接口」的内部层。`/dev-status` 用它区分工作树是在用还是可清理；枚举失败时 `active_sessions()` 返回 None，输出显式标注「活跃会话 枚举失败」并提示不要据此删除，不伪装成无人占用。
 
 ### 验证
 
-自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：122 个用例全部通过。覆盖工作树位置越界、相对路径上跳、`..` 路径穿越、`.claude/worktrees/` 只出现在 `-b` 参数或注释里、`.claude` 下的非约定目录、`worktrees-old` 前缀混淆、hash 命名、保留名与纯日期、非 kebab-case 命名、反斜杠写法、`worktree list` / `worktree remove` 放行、同一条命令里串联多处 `git worktree add`、重定向被当成目标路径、`--lock` / `--track` 不带值的选项、`git -C <仓库>` 与 `cd <仓库> &&` 的判定基准、`EnterWorktree` 的 `name` 与 `path` 两条入口、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、从链接工作树里开会话按主检出汇报、会话枚举为空或字段缺失时不崩溃、退出提示不承诺自动清理、收尾记录并发追加不丢、过期记录丢弃写日志、无需裁剪时不重写文件、陈旧锁自动接管、仓库根散落文件与孤儿目录（含符号链接）的识别、被忽略内容单列、枚举失败打印降级告警。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
+自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：142 个用例全部通过。覆盖工作树位置越界、相对路径上跳、`..` 路径穿越、`.claude/worktrees/` 只出现在 `-b` 参数或注释里、`.claude` 下的非约定目录、`worktrees-old` 前缀混淆、hash 命名、保留名与纯日期、非 kebab-case 命名、反斜杠写法、`worktree list` / `worktree remove` 放行、同一条命令里串联多处 `git worktree add`、重定向被当成目标路径、`--lock` / `--track` 不带值的选项、`git -C <仓库>` 与 `cd <仓库> &&` 的判定基准、`git.exe` 与绝对路径形式的 git、名字像 git 但后面不是 `worktree add` 的写法、`EnterWorktree` 的 `name` 与 `path` 两条入口（含两者同时给出时都要校验）、command 不是字符串时放行且不抛异常、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、从链接工作树里开会话按主检出汇报、会话枚举为空或字段缺失时不崩溃、枚举失败打印降级告警且不把工作树报成无会话占用、退出提示不承诺自动清理、收尾记录并发追加不丢、过期记录丢弃写日志、无需裁剪时不重写文件、陈旧锁自动接管、接管后原持有者不误删新锁、锁时间在将来时按陈旧接管、降级追加写溢出文件且裁剪时并回主文件、仓库根散落文件与孤儿目录（含符号链接）的识别、被忽略内容单列。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
 
 真实仓库实测（2026-09-18，dtsf，1 个工作树）：SessionStart 耗时 0.65 秒，`/dev-status` 耗时 1.48 秒。
 
 收尾记录的并发行为实测：两个裁剪进程加一个追加进程各跑独立 Python 进程，6 轮共追加 240 条，丢失 0 条。修复前同一套用例的丢失率是 22.5%（240 条丢 54 条），成因是裁剪读到快照后整份写回，覆盖了这期间追加的记录。
+
+第二轮审计（2026-09-19）复跑：3 个追加进程加 2 个裁剪进程，8 轮共 288 条，丢失 0 条。这一轮又查出锁的两处缺口并修掉。其一，持锁超过 30 秒被接管之后，原持有者释放时删掉了接管者的锁，两个进程同时进入临界区，实测第三方能直接拿到锁。其二，拿不到锁时的降级路径直接往共用文件追加，而同一文件并发追加在 Windows 上会互相覆盖，6 个进程同时降级时实测丢 6.7%（30 条丢 2 条）。降级改写独占命名的溢出文件之后，同样 5 轮 × 6 个进程共 30 条，丢失 0 条。另外补上了 `git.exe` 与绝对路径形式的 git 调用绕过拦截的缺口。
 
 性能随工作树数量近线性：`/dev-status` 约每棵 84 毫秒，SessionStart 约每棵 73 毫秒，主导成本是每棵一次 `git status --porcelain` 子进程。70 棵工作树时 `/dev-status` 约 7.2 秒。
 
@@ -91,7 +93,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 从 `~/.claude/settings.json` 的 hooks 段删掉 `SessionStart` 第 3 组、`SessionEnd`、`PreToolUse` 三段即可，三个脚本变成不被调用的惰性文件。命令与文档（`dev-status.md`、`dev-clean.md`、`session-lifecycle.md`、`selftest.py`）可一并删除。
 
-运行时数据也要清掉：`session-handoff.jsonl`、`session-handoff.lock`（残留的锁会让下次写入等待 2 秒再降级）、`session-guard.log`、`product-guard.log`。`session-hygiene.json` 是本机端口与独占资源台账，独立于本机制，应保留。
+运行时数据也要清掉：`session-handoff.jsonl`、`session-handoff.d/`、`session-handoff.lock`（残留的锁会让下次写入等待 2 秒再降级）、`session-guard.log`、`product-guard.log`。`session-hygiene.json` 是本机端口与独占资源台账，独立于本机制，应保留。
 
 机制本体已提交并推送到 `~/.claude` 仓库，远程 `origin` 为 `https://github.com/zys3198/claude-stack`。要恢复某个版本，从该仓库检出对应提交即可；看当前实现则直接读 `~/.claude/hooks/scripts/` 下四个脚本。
 

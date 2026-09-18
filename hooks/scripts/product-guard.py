@@ -106,6 +106,12 @@ def is_control(token):
     return bool(re.match(r"^\d*[<>]", token))
 
 
+def is_git_token(token):
+    # 命令名按最后一段判定，覆盖 git、git.exe 与绝对路径形式的 git。
+    # 只做精确名字比对，不用子串，避免把 gitk、git-lfs 之类也算进来。
+    return os.path.basename(token.replace("\\", "/")).lower() in {"git", "git.exe"}
+
+
 def split_tokens(command):
     # 反斜杠写法统一成斜杠后再拆词；引号不闭合时返回 None 表示无法判定。
     try:
@@ -153,7 +159,7 @@ def worktree_adds(command, cwd):
     found = []
     i = 0
     while i < len(tokens):
-        if tokens[i] != "git":
+        if not is_git_token(tokens[i]):
             i += 1
             continue
         git_dir, j = git_invocation(tokens, i, base)
@@ -192,12 +198,6 @@ def name_reason(name):
     return None
 
 
-def check_name(name):
-    reason = name_reason(name)
-    if reason:
-        deny(reason)
-
-
 def location_reason(target, git_dir):
     if not target:
         return (
@@ -225,6 +225,10 @@ def location_reason(target, git_dir):
 
 
 def check_worktree_add(command, cwd):
+    if not isinstance(command, str):
+        # 命令不是字符串时拆不了词。记一条日志后放行，不做猜测。
+        log(f"skip check: command 不是字符串（{type(command).__name__}）")
+        return
     found = worktree_adds(command, cwd)
     if found is None:
         deny(
@@ -239,28 +243,33 @@ def check_worktree_add(command, cwd):
             return
 
 
-def check_enter_worktree(tool_input, cwd):
-    name = tool_input.get("name")
-    if name:
-        check_name(name)
-        return
-    path = tool_input.get("path")
-    if not path:
-        return
+def enter_path_reason(path, cwd):
     resolved = norm(path if os.path.isabs(path) else os.path.join(cwd, path))
     root = main_root(resolved)
     if not root:
-        deny(
+        return (
             f"EnterWorktree 的 path（{path}）不是可用的工作树目录。"
             "改用 name 参数，在 .claude/worktrees/<任务名> 下新建一个。"
         )
-        return
     want = norm(os.path.join(root, WORKTREE_DIR))
     if not resolved.startswith(want + os.sep):
-        deny(
+        return (
             "EnterWorktree 只能进入当前仓库 .claude/worktrees/<任务名> 下的工作树，"
             f"不允许进入别的位置（{path} 解析为 {resolved}）。"
         )
+    return None
+
+
+def check_enter_worktree(tool_input, cwd):
+    # name 与 path 同时给出时两个都要校验，只报第一条命中的原因。
+    # 只看 name 就返回的话，越界的 path 会被漏掉。
+    name = tool_input.get("name")
+    reason = name_reason(name) if name else None
+    path = tool_input.get("path")
+    if not reason and path:
+        reason = enter_path_reason(path, cwd)
+    if reason:
+        deny(reason)
 
 
 def main():

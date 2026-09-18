@@ -13,6 +13,7 @@ from pathlib import Path
 CLAUDE = Path(os.path.expanduser("~")) / ".claude"
 HYGIENE = CLAUDE / "session-hygiene.json"
 HANDOFF = CLAUDE / "session-handoff.jsonl"
+HANDOFF_DIR = CLAUDE / "session-handoff.d"
 WORKTREE_MARK = os.path.join(".claude", "worktrees")
 AGENTS_TIMEOUT = 20
 GIT_TIMEOUT = 20
@@ -214,6 +215,30 @@ def root_scatter(repo):
     return rows
 
 
+def handoff_rows():
+    # 主文件与溢出文件一起读。收尾记录拿不到锁时会改写独占命名的溢出文件，
+    # 那些记录要等下一次裁剪才并回主文件。
+    paths = [HANDOFF] if HANDOFF.is_file() else []
+    if HANDOFF_DIR.is_dir():
+        paths.extend(sorted(p for p in HANDOFF_DIR.iterdir() if p.is_file()))
+    rows = []
+    for path in paths:
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except ValueError:
+                continue
+    rows.sort(key=lambda r: r.get("ts") if isinstance(r.get("ts"), (int, float)) else 0)
+    return rows
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     target = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1].strip() else os.getcwd()
@@ -319,23 +344,15 @@ def main():
         if len(scatter) > 10:
             print(f"  ...另有 {len(scatter) - 10} 项")
 
-    if HANDOFF.is_file():
-        recent = []
-        for line in HANDOFF.read_text(encoding="utf-8", errors="replace").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                r = json.loads(line)
-            except ValueError:
-                continue
-            if r.get("dirty") and r.get("repo") and norm(r["repo"]) == norm(repo):
-                recent.append(r)
-        if recent:
-            print(f"上次会话留下的未提交改动 {len(recent)} 条")
-            for r in recent[-3:]:
-                ts = time.strftime("%m-%d %H:%M", time.localtime(r["ts"]))
-                print(f"  {ts}  {os.path.basename(r['cwd'].rstrip('/\\'))}  {r['dirty']} 处")
+    recent = [
+        r for r in handoff_rows()
+        if r.get("dirty") and r.get("repo") and norm(r["repo"]) == norm(repo)
+    ]
+    if recent:
+        print(f"上次会话留下的未提交改动 {len(recent)} 条")
+        for r in recent[-3:]:
+            ts = time.strftime("%m-%d %H:%M", time.localtime(r["ts"]))
+            print(f"  {ts}  {os.path.basename(r['cwd'].rstrip('/\\'))}  {r['dirty']} 处")
 
     hygiene = {}
     if HYGIENE.is_file():
