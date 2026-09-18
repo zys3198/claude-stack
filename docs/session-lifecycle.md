@@ -128,16 +128,22 @@ claude -w eam-qr-code
 
 | 行为 | 结果 |
 |------|------|
-| `git worktree add` 到 `.claude/worktrees/` 之外 | 拒绝 |
+| `git worktree add` 的目标解析后不在当前仓库 `.claude/worktrees/` 下 | 拒绝 |
+| 目标路径里带 `..`，绕开该目录 | 拒绝 |
 | 工作树名是 hash（`agent-a1b0f1bcd643d3066`） | 拒绝 |
 | `EnterWorktree` 传入 hash 名字 | 拒绝 |
+| `.claude/worktrees/` 只写在别的参数或注释里，目标仍在别处 | 拒绝 |
 | `git worktree add` 到约定位置且名字合规 | 放行 |
 | 只读 git 命令、其余任何命令 | 放行 |
-| 命令里只是提到这串字（在引号内） | 放行 |
+| 命令里只是提到这串字（在引号内，并不真的执行） | 放行 |
 
 被拒绝时会给出替代做法，照着改即可。
 
+判定方式是把命令拆成词、取出真正的目标路径，规范化之后和当前仓库的 `.claude/worktrees/` 比对。不按「命令里有没有出现某个子串」来判断——那样 `.claude/worktrees/../../x` 和 `# .claude/worktrees/` 都能混过去。
+
 拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件、产物放错目录这类规则靠第 8 节文本约定，由 `/dev-status` 报告违规项。
+
+非 git 目录里确定不了仓库根，此时对 `git worktree add` 一律拒绝并说明原因，不做猜测。
 
 子代理的工作树由 harness 自动创建，名字是 `agent-<hash>`，拦截管不到，只能用 `/dev-status` 看。
 

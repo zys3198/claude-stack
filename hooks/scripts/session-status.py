@@ -1,7 +1,7 @@
 # 会话与产物总览，供 /dev-status 使用，跨项目通用。
 # 用法：session-status.py [仓库路径]      默认取当前目录
 #
-# 只读。信息全部来自 git、~/.claude/sessions 与会话卫生表，不做任何修改。
+# 只读。信息全部来自 git、claude agents --json 与会话卫生表，不做任何修改。
 
 import json
 import os

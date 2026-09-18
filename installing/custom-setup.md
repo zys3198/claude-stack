@@ -45,7 +45,7 @@
 | 文件 | 作用 |
 |------|------|
 | `~/.claude/hooks/scripts/session-guard.py` | `start` / `end` 两个子命令。开发前报告当前仓库卫生状况，开发结束写收尾记录。不删除任何东西 |
-| `~/.claude/hooks/scripts/product-guard.py` | PreToolUse 拦截：`git worktree add` 建到 `.claude/worktrees/` 之外，或工作树名为 hash；`EnterWorktree` 传入 hash 名同样拒绝。命令先剥掉引号内内容再判断，避免只是提到该串就被拦 |
+| `~/.claude/hooks/scripts/product-guard.py` | PreToolUse 拦截：`git worktree add` 的目标路径解析后不在当前仓库 `.claude/worktrees/` 下，或工作树名为 hash；`EnterWorktree` 传入 hash 名同样拒绝。命令拆成词后取真正的目标路径再规范化比对，不按子串判断 |
 | `~/.claude/hooks/scripts/session-status.py` | 只读汇总活跃会话、工作树四分类、孤儿目录、stash、主检出、仓库根散落文件、登记端口、容器 |
 
 纯 stdlib，无第三方依赖。Python 解释器固定用 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`（与 settings.json 其他 hook 一致）。
@@ -67,7 +67,7 @@
 
 ### 验证
 
-自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：59 个用例全部通过。覆盖工作树位置越界、hash 命名、反斜杠写法、引号内的干扰串、`worktree list` / `worktree remove` 放行、`EnterWorktree` 传 hash 名被拒与传语义名放行、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、会话枚举为空时不崩溃、退出提示不承诺自动清理、仓库根散落文件与孤儿目录的识别。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
+自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：69 个用例全部通过。覆盖工作树位置越界、相对路径上跳、`..` 路径穿越、`.claude/worktrees/` 只出现在 `-b` 参数或注释里、`.claude` 下的非约定目录、`worktrees-old` 前缀混淆、hash 命名、反斜杠写法、`worktree list` / `worktree remove` 放行、`EnterWorktree` 传 hash 名被拒与传语义名放行、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、会话枚举为空时不崩溃、退出提示不承诺自动清理、仓库根散落文件与孤儿目录的识别。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
 
 真实仓库实测：dtsf（11 个工作树、7 个孤儿目录）SessionStart 耗时 1.63 秒，`/dev-status` 耗时 2.01 秒，product-guard 每次 0.25 秒。
 

@@ -99,24 +99,36 @@ def run_hook(mod, fn_name, payload):
 
 def test_product_guard():
     pg = load("product-guard")
-    for gone in ("check_new_file", "ROOT_DOC_EXT", "repo_root"):
+    for gone in ("check_new_file", "ROOT_DOC_EXT", "repo_root_old", "unquoted",
+                 "WORKTREE_ADD", "WORKTREE_PATH"):
         check(f"product-guard 已移除 {gone}", not hasattr(pg, gone))
-    check("product-guard 不再 import subprocess", not hasattr(pg, "subprocess"))
-    for kept in ("WORKTREE_ADD", "WORKTREE_PATH", "AGENT_HASH", "HASH_WORD", "check_name"):
+    for kept in ("add_target", "check_name", "AGENT_HASH", "HASH_WORD", "OPTS_WITH_VALUE"):
         check(f"product-guard 保留 {kept}", hasattr(pg, kept))
 
     def run(cmd):
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            pg.check_worktree_add(cmd)
+            pg.check_worktree_add(cmd, str(REPO))
         return buf.getvalue()
 
     cases = [
-        ("拒绝仓库外工作树", "git worktree add C:/ZYS/Code/foo-bar", False),
-        ("拒绝游离相对路径", "git worktree add ../outsider", False),
         ("放行约定位置", "git worktree add .claude/worktrees/eam-qr-code", True),
         ("放行反斜杠写法", "git worktree add .claude\\worktrees\\eam-qr-code", True),
         ("放行带 -b 的约定位置", "git worktree add -b feat .claude/worktrees/oa-sync", True),
+        ("放行绝对路径落在约定位置",
+         f"git worktree add {TREES / 'sample-extra'}", True),
+        ("拒绝仓库外绝对路径", "git worktree add C:/ZYS/Code/foo-bar", False),
+        ("拒绝相对上跳", "git worktree add ../outsider", False),
+        ("拒绝路径穿越", "git worktree add .claude/worktrees/../../outside-x", False),
+        ("拒绝穿越到绝对路径",
+         "git worktree add .claude/worktrees/../../../../ZYS/Code/evil", False),
+        ("拒绝字符串藏在 -b 参数里",
+         "git worktree add C:/ZYS/Code/outsider -b .claude/worktrees/x", False),
+        ("拒绝字符串藏在注释里",
+         "git worktree add C:/ZYS/Code/outsider # .claude/worktrees/", False),
+        ("拒绝 .claude 下的别处", "git worktree add .claude/scratch", False),
+        ("拒绝 worktrees-old", "git worktree add .claude/worktrees-old/x", False),
+        ("拒绝目标就是 worktrees 本身", "git worktree add .claude/worktrees", False),
         ("拒绝 agent hash 名", "git worktree add .claude/worktrees/agent-a42cf3b9896e155cb", False),
         ("拒绝 worktree-agent 名", "git worktree add .claude/worktrees/worktree-agent-a42cf3b9", False),
         ("拒绝长 hash 名", "git worktree add .claude/worktrees/task-0a1b2c3d4e5f60718293", False),
@@ -129,7 +141,7 @@ def test_product_guard():
     ]
     for name, cmd, allow in cases:
         out = run(cmd)
-        check(name, (out == "") if allow else ("deny" in out), f"cmd={cmd} out={out[:60]}")
+        check(name, (out == "") if allow else ("deny" in out), f"cmd={cmd} out={out[:80]}")
 
     def run_tool(payload):
         buf = FakeOut()
