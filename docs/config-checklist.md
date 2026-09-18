@@ -15,7 +15,6 @@
 | `~/.claude/settings.json` | 主配置：env/permissions/hooks/statusLine/plugins | 见 §1 | 改完同步 ccswitch（§3）防热切换降级 |
 | `~/.claude/settings.local.json` | 本机覆盖（不入库） | 未扫到独立项 | secrets 放这，别进 `settings.json` |
 | `~/.claude/keybindings.json` | 快捷键绑定 | 存在 | - |
-| `~/.claude/WORKFLOW_QUICKREF.md` | 工作流速查 | 存在 | - |
 | `~/.claude/long-complex-task-prompt.md` | 长复杂任务 prompt（CLAUDE.md 已不引用，手工使用） | 存在 | - |
 | `~/.claude.json` | Claude Code 根状态 | **59 projects / 5 mcpServers / 42 顶层键**（2026-08-08 实测） | 见 §7 / §9；含 `userID` `machineID` |
 | `~/.mcp.json` | 用户级 MCP（独立于 settings） | **0 servers（空）** | 实际 MCP 走 `~/.claude.json` 根 + ccswitch db |
@@ -325,7 +324,6 @@
 ```
 .claude/
 ├── CLAUDE.md                      # 全局规则
-├── WORKFLOW_QUICKREF.md           # 速查
 ├── long-complex-task-prompt.md    # 手工使用（CLAUDE.md 已不引用）
 ├── settings.json                  # 主配置
 ├── keybindings.json               # 快捷键
