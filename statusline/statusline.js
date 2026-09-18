@@ -2,24 +2,28 @@
 /**
  * ECC Statusline — statusLine command
  *
- * Displays: model[plan] | task | $cost Nt Nf Nm | dir | branch | +N *N ?N !N ↑N ↓N | Ctx N% | Hit N% | 5h/7d limit
+ * Displays: model[plan] | task | $cost Nt Nf Nm | dir | branch | +N *N ?N !N ↑N ↓N |
+ * Ctx <used>k/<budget>k <pct> | Hit N% | plan quota
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
  *
- * Context bar: uses runtime-reported context usage percentage when available;
- * older runtimes fall back to CLAUDE_CODE_AUTO_COMPACT_WINDOW and token counts.
- * This value reflects runtime context usage, not the model's full context window.
+ * The context budget is whichever is tighter: the auto-compact window resolved
+ * with Claude Code's own precedence (env > settings), or the served model's own
+ * window taken from the models.dev catalog via cc-switch-usage.js. That matches
+ * the window Claude Code enforces and reports in /context. cc-switch's
+ * coding-plan quota is appended from the same cache.
  */
 
 'use strict';
 
 const fs = require('fs');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawn } = require('child_process');
 const net = require('net');
 const os = require('os');
 const path = require('path');
 const { sanitizeSessionId, readBridge, writeBridgeAtomic } = require('./lib/session-bridge');
+const ccSwitchUsage = require('./cc-switch-usage');
 
 const MAX_STDIN = 1024 * 1024;
 
@@ -41,27 +45,90 @@ function formatDuration(isoTimestamp) {
 }
 
 /**
- * Build context progress bar with ANSI colors.
- * Runtime percentage matches Claude Code context usage; legacy fallback uses
- * CLAUDE_CODE_AUTO_COMPACT_WINDOW and token counts.
- * @param {number} totalInputTokens - Legacy input token count
- * @param {number} autoCompactWindow - Legacy compaction window in tokens
- * @param {number} usedPercentage - Runtime-reported context usage percentage
- * @returns {string} Colored bar string
+ * Render tokens as a whole-k count, e.g. 77406 -> "77k", 1000000 -> "1000k".
+ * @param {number} n
+ * @returns {string}
  */
-function buildContextBar(totalInputTokens, autoCompactWindow, usedPercentage) {
-  const used = usedPercentage !== null && usedPercentage !== undefined
-    ? Math.min(100, Math.max(0, Math.round(usedPercentage)))
-    : totalInputTokens === null || totalInputTokens === undefined || !autoCompactWindow
-      ? null
-      : Math.min(100, Math.round((totalInputTokens / autoCompactWindow) * 100));
+function formatTokens(n) {
+  return `${Math.round(n / 1000)}k`;
+}
 
-  if (used === null) return '';
+/**
+ * Parse a token count from a number or a settings string like "372000",
+ * "372k" or "1m".
+ * @param {number|string} value
+ * @returns {number|null}
+ */
+function parseTokenCount(value) {
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0 ? value : null;
+  const match = String(value ?? '').trim().match(/^(\d+(?:\.\d+)?)\s*([km])?$/i);
+  if (!match) return null;
+  const scale = { k: 1000, m: 1000000 }[match[2]?.toLowerCase()] || 1;
+  const n = Number(match[1]) * scale;
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
 
-  if (used < 50) return ` \x1b[32m${used}%\x1b[0m`;
-  if (used < 65) return ` \x1b[33m${used}%\x1b[0m`;
-  if (used < 80) return ` \x1b[38;5;208m${used}%\x1b[0m`;
-  return ` \x1b[1;31m${used}%\x1b[0m \x1b[33m/compact\x1b[0m`;
+function isTruthyEnv(value) {
+  return value !== undefined && value !== '' && value !== '0' && value.toLowerCase() !== 'false';
+}
+
+const AUTO_COMPACT_MIN = 100000;
+const AUTO_COMPACT_MAX = 1000000;
+
+/**
+ * Read the auto-compact window from settings.json. Only consulted when the
+ * environment variable is absent, matching Claude Code's precedence.
+ * @returns {number|string|undefined}
+ */
+function readSettingAutoCompactWindow() {
+  try {
+    const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+    const settings = JSON.parse(fs.readFileSync(path.join(claudeDir, 'settings.json'), 'utf8'));
+    return settings.autoCompactWindow;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Resolve the auto-compact window the way Claude Code does
+ * (resolveAutoCompactWindow precedence: env > settings > ...), clamped to the
+ * model window. The env value is additionally bounded to [100k, 1M] and raised
+ * to the 100k floor; the settings value is used as written.
+ * @param {number} modelWindow - Served model's window, 0 when unresolved (no clamp)
+ * @returns {number|null} Window in tokens, or null when unconfigured/disabled
+ */
+function resolveAutoCompactWindow(modelWindow) {
+  if (isTruthyEnv(process.env.DISABLE_COMPACT) || isTruthyEnv(process.env.DISABLE_AUTO_COMPACT)) return null;
+
+  const bound = modelWindow > 0 ? modelWindow : Infinity;
+
+  const fromEnv = parseTokenCount(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW);
+  if (fromEnv !== null) {
+    const configured = Math.max(AUTO_COMPACT_MIN, Math.min(AUTO_COMPACT_MAX, fromEnv));
+    return Math.min(bound, configured);
+  }
+
+  const fromSettings = parseTokenCount(readSettingAutoCompactWindow());
+  if (fromSettings !== null) return Math.min(bound, fromSettings);
+
+  return null;
+}
+
+/**
+ * Build the context segment: used tokens over the binding budget, in k, then
+ * the share already consumed, colored by level. The budget is whichever is
+ * tighter — the auto-compact window or the model's own window — matching the
+ * window Claude Code actually enforces.
+ * @param {number} usedTokens - Current context occupancy
+ * @param {number} limitTokens - Binding context budget
+ * @returns {string} Colored segment, or empty when data is missing
+ */
+function buildContextBar(usedTokens, limitTokens) {
+  if (!usedTokens || !limitTokens) return '';
+
+  const used = Math.min(100, Math.max(0, Math.round((usedTokens / limitTokens) * 100)));
+  return `Ctx ${formatTokens(usedTokens)}/${formatTokens(limitTokens)} ${colorPct(used)}`;
 }
 
 /**
@@ -346,6 +413,50 @@ function probeTcp(host, port, timeoutMs = 250) {
   });
 }
 
+/**
+ * Kick off a detached cache refresh so no render waits on the network.
+ * Only the child writes the cache; its output goes to a log file.
+ */
+function refreshUsageInBackground() {
+  const dir = path.dirname(ccSwitchUsage.CACHE_FILE);
+  fs.mkdirSync(dir, { recursive: true });
+  const log = fs.openSync(path.join(dir, 'ccswitch-usage.log'), 'w');
+  const child = spawn(process.execPath, [path.join(__dirname, 'cc-switch-usage.js'), '--refresh'], {
+    detached: true,
+    stdio: ['ignore', log, log],
+    windowsHide: true
+  });
+  child.unref();
+}
+
+const QUOTA_LABEL = 'Usage';
+const QUOTA_WINDOWS = [
+  ['rolling', 'h'],
+  ['weekly', 'w'],
+  ['monthly', 'm']
+];
+
+/**
+ * Render the active cc-switch provider's coding-plan quota, e.g.
+ * "Usage h3% w16% m8%". Every window is a used percentage.
+ * @param {object|null} cache - cc-switch usage cache
+ * @returns {string} Colored segment, or empty when unavailable
+ */
+function buildQuotaSegment(cache) {
+  const quota = cache?.quota;
+  if (!quota) return '';
+
+  const windows = QUOTA_WINDOWS
+    .map(([key, label]) => {
+      const usedPct = quota[key]?.usedPct;
+      return usedPct === null || usedPct === undefined ? '' : `${label}${colorPct(usedPct)}`;
+    })
+    .filter(Boolean);
+  if (windows.length === 0) return '';
+
+  return `\x1b[38;5;110m${QUOTA_LABEL}\x1b[0m ${windows.join(' ')}`;
+}
+
 function runStatusline() {
   let input = '';
   const stdinTimeout = setTimeout(() => process.exit(0), 3000);
@@ -368,11 +479,14 @@ function runStatusline() {
       const cw = data.context_window || {};
       const remaining = cw.remaining_percentage;
       const totalInputTokens = cw.total_input_tokens;
-      // Compaction point = AUTO_COMPACT_WINDOW env; fall back to reported window size
-      const autoCompactWindow = Number(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW) || cw.context_window_size || 0;
-      const usedPercentage = remaining === null || remaining === undefined
-        ? cw.used_percentage
-        : 100 - Number(remaining);
+
+      // cc-switch provider identity + plan quota, refreshed by a detached child
+      const usageCache = ccSwitchUsage.readCache();
+      if (ccSwitchUsage.isStale(usageCache)) refreshUsageInBackground();
+      const cachedWindow = ccSwitchUsage.modelWindow(usageCache, model);
+      const modelWindow = cachedWindow?.window || 0;
+      const compactWindow = resolveAutoCompactWindow(modelWindow);
+      const contextLimit = compactWindow || modelWindow;
 
       const sessionId = sanitizeSessionId(session);
       const bridge = sessionId ? readBridge(sessionId) : null;
@@ -432,7 +546,7 @@ function runStatusline() {
       }
 
       // Context usage (text-only, colored by level) + cache hit, | separated
-      const ctx = buildContextBar(totalInputTokens, autoCompactWindow, usedPercentage);
+      const ctx = buildContextBar(totalInputTokens, contextLimit);
       let hitStr = '';
       const currentUsage = cw.current_usage;
       const cacheRead = Number(currentUsage?.cache_read_input_tokens) || 0;
@@ -471,7 +585,7 @@ function runStatusline() {
           : '\x1b[31m[HEADROOM:DOWN]\x1b[0m';
       }
 
-      const usageStr = [ctx ? `Ctx${ctx}` : '', hitStr].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
+      const usageStr = [ctx, hitStr, buildQuotaSegment(usageCache)].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
 
       // Build output
       const dirname = path.basename(dir);
@@ -503,15 +617,20 @@ function runStatusline() {
         (modeStr ? ` ${modeStr}` : '') +
         (proxyStr ? ` ${proxyStr}` : '')
       );
-    } catch {
-      // Silent fail
+    } catch (err) {
+      // Silent fail in normal operation; STATUSLINE_DEBUG surfaces the cause.
+      if (process.env.STATUSLINE_DEBUG) process.stderr.write(`${err.stack || err}\n`);
     }
   });
 }
 
 module.exports = {
   formatDuration,
+  formatTokens,
+  parseTokenCount,
+  resolveAutoCompactWindow,
   buildContextBar,
+  buildQuotaSegment,
   readCurrentTask,
   parseGitStatus,
   formatGitStatus,
