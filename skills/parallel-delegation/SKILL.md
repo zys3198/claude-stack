@@ -12,8 +12,9 @@ compatibility: 需要宿主提供 agent/subagent 调度能力；模型、effort�
 
 1. 先判断子任务是否独立、边界是否清楚、结果是否可单独验收，以及并行收益是否超过协调成本。
 2. 准备派发时读取 [`dispatch-contract.md`](dispatch-contract.md)。只读且范围不重叠、宿主明确支持并发的任务可并行；有依赖或冲突风险时分阶段或顺序执行。
-3. 涉及模型、effort、并发、隔离能力、失败或子代理配置选择时，读取 [`runtime-and-failure.md`](runtime-and-failure.md)。需要选择或调整配置时，先向用户说明配置是否合理及原因，再询问是否采用；未确认前不启动 worker。
-4. 整合前读取 [`verification.md`](verification.md)，按风险完成主代理复核和最终报告。
+3. 批量并行（≥2 个 worker）前先派一个 worker 单跑同类任务，核对路由、权限、输入契约和产物格式；单跑未验证可靠不得放并行——首次暴露的通常是脚本和配置问题（参数传错、prompt 漏条件、权限少一项），单步不可靠就并行只会同时收到一堆看不懂的改动。
+4. 涉及模型、effort、并发、隔离能力、失败或子代理配置选择时，读取 [`runtime-and-failure.md`](runtime-and-failure.md)。需要选择或调整配置时，先向用户说明配置是否合理及原因，再询问是否采用；未确认前不启动 worker。
+5. 整合前读取 [`verification.md`](verification.md)，按风险完成主代理复核和最终报告。
 
 ## Keep in main agent
 
