@@ -6,9 +6,6 @@ description: >-
 
 # 安装台账治理
 
-> **自动化（2026-09-04 起）**：`hooks/install-ledger-reminder.py`（PostToolUse Bash）捕获安装/卸载命令，
-> 追加 `installing/auto-log.jsonl` 兜底并提醒正式登记。本 skill 的「登记」步骤由该提醒触发或用户点名时执行。
-
 ## 触发
 
 用户明确提出以下台账意图时，由助手自行调用本 skill；用户显式调用 `/install-ledger` 仅作备用：
