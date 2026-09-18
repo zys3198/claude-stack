@@ -16,6 +16,7 @@ HANDOFF = CLAUDE / "session-handoff.jsonl"
 WORKTREE_MARK = os.path.join(".claude", "worktrees")
 AGENTS_TIMEOUT = 20
 GIT_TIMEOUT = 20
+NOTE_WIDTH = 26
 
 
 def git(args, cwd):
@@ -30,12 +31,29 @@ def git(args, cwd):
 
 
 def norm(path):
-    return os.path.normcase(os.path.abspath(path))
+    return os.path.normcase(os.path.realpath(os.path.abspath(path)))
+
+
+def main_root(cwd):
+    # 主检出的根目录。从链接工作树里调用时 --show-toplevel 返回工作树自身，
+    # 统一取主检出根，工作树分类与四类分组才有同一个参照物。
+    rc, out = git(["rev-parse", "--path-format=absolute", "--git-common-dir"], cwd)
+    common = out.strip().rstrip("/\\")
+    if rc == 0 and os.path.basename(common) == ".git":
+        return os.path.dirname(common)
+    rc, out = git(["rev-parse", "--show-toplevel"], cwd)
+    if rc != 0 or not out.strip():
+        return None
+    return out.strip()
+
+
+def worktree_prefix(repo):
+    return norm(os.path.join(repo, WORKTREE_MARK)) + os.sep
 
 
 def short(path, root):
-    p = os.path.normcase(os.path.abspath(path))
-    r = os.path.normcase(os.path.abspath(root))
+    p = norm(path)
+    r = norm(root)
     if p == r:
         return "主检出"
     if p.startswith(r + os.sep):
@@ -44,21 +62,22 @@ def short(path, root):
 
 
 def active_sessions():
+    # 枚举失败时返回 None，由调用方显式标注降级，不伪装成「没有会话」。
     try:
         r = subprocess.run(
             ["claude", "agents", "--json"], capture_output=True, text=True,
             encoding="utf-8", errors="replace", timeout=AGENTS_TIMEOUT,
         )
     except (OSError, subprocess.SubprocessError):
-        return []
+        return None
     if r.returncode != 0:
-        return []
+        return None
     try:
         rows = json.loads(r.stdout or "[]")
     except ValueError:
-        return []
+        return None
     if not isinstance(rows, list):
-        return []
+        return None
     rows = [d for d in rows if isinstance(d, dict) and d.get("cwd")]
     rows.sort(key=lambda d: d.get("startedAt", 0))
     return rows
@@ -91,6 +110,15 @@ def change_count(path):
     if rc != 0:
         return None
     return sum(1 for line in out.splitlines() if line.strip())
+
+
+def ignored_count(path):
+    # 被 .gitignore 覆盖的内容不计入 git status --porcelain，
+    # 但会随工作树目录一起被删除，所以单列出来给用户看。
+    rc, out = git(["status", "--porcelain", "--ignored"], path)
+    if rc != 0:
+        return None
+    return sum(1 for line in out.splitlines() if line.startswith("!!"))
 
 
 def stash_rows(repo):
@@ -126,6 +154,7 @@ def containers():
 
 
 def port_owners(ports):
+    # Windows 专用：netstat -ano -p TCP。其他平台返回空，端口段显示为无占用者。
     try:
         r = subprocess.run(
             ["netstat", "-ano", "-p", "TCP"],
@@ -140,7 +169,7 @@ def port_owners(ports):
     found = {}
     for line in (r.stdout or "").splitlines():
         cols = line.split()
-        if len(cols) < 4 or cols[0].upper() != "TCP":
+        if len(cols) < 5 or cols[0].upper() != "TCP":
             continue
         local = cols[1]
         if ":" not in local:
@@ -160,7 +189,10 @@ def orphan_dirs(repo):
     branches = set(out.split()) if rc == 0 else set()
     rows = []
     for entry in sorted(base.iterdir()):
-        if not entry.is_dir() or norm(str(entry)) in known:
+        # junction 与符号链接都不是工作树副本，跟着进去会看到别人的内容
+        if os.path.islink(entry) or os.path.isjunction(entry) or not entry.is_dir():
+            continue
+        if norm(str(entry)) in known:
             continue
         same = [b for b in (entry.name, f"worktree-{entry.name}") if b in branches]
         rows.append({"name": entry.name, "branches": same})
@@ -185,11 +217,10 @@ def root_scatter(repo):
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     target = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1].strip() else os.getcwd()
-    rc, out = git(["rev-parse", "--show-toplevel"], target)
-    if rc != 0 or not out.strip():
+    repo = main_root(target)
+    if not repo:
         print(f"不是 git 仓库：{target}")
         return
-    repo = out.strip()
     rc, out = git(["rev-parse", "--abbrev-ref", "HEAD"], repo)
     branch = out.strip() if rc == 0 else "?"
     stamp = time.strftime("%Y-%m-%d %H:%M")
@@ -197,14 +228,22 @@ def main():
     print(f"分支 {branch}    检查时间 {stamp}")
 
     sessions = active_sessions()
+    degraded = sessions is None
+    if degraded:
+        sessions = []
     print()
-    print(f"活跃会话 {len(sessions)} 个")
-    for s in sessions:
-        ts = time.strftime("%m-%d %H:%M", time.localtime(s.get("startedAt", 0) / 1000))
-        where = short(s["cwd"], repo) if norm(s["cwd"]).startswith(norm(repo)) else s["cwd"]
-        print(f"  pid {s.get('pid'):<7} {s.get('kind', ''):<11} {s.get('status', ''):<7} "
-              f"{ts}  {where}")
+    if degraded:
+        print("活跃会话 枚举失败（claude agents --json 不可用）")
+        print("  工作树占用判定不可靠，本节与「可清理」分组仅供参考，不要据此删除")
+    else:
+        print(f"活跃会话 {len(sessions)} 个")
+        for s in sessions:
+            ts = time.strftime("%m-%d %H:%M", time.localtime(s.get("startedAt", 0) / 1000))
+            where = short(s["cwd"], repo) if norm(s["cwd"]).startswith(norm(repo)) else s["cwd"]
+            print(f"  pid {s.get('pid'):<7} {s.get('kind', ''):<11} {s.get('status', ''):<7} "
+                  f"{ts}  {where}")
 
+    prefix = worktree_prefix(repo)
     trees = list_worktrees(repo)
     others = [t for t in trees if norm(t["path"]) != norm(repo)]
     print()
@@ -222,17 +261,20 @@ def main():
         label = os.path.basename(path.rstrip("/\\"))
         br = t["branch"] or ("(detached)" if t["detached"] else "?")
         note = f"{n} 处改动" if isinstance(n, int) and n else "干净"
-        inside = WORKTREE_MARK.replace("/", os.sep) in norm(path)
+        inside = norm(path).startswith(prefix)
         if holder:
-            buckets["在用"].append(f"  pid {holder.get('pid'):<7} {label:<38} {note:<10} [{br}]")
+            buckets["在用"].append(f"  pid {holder.get('pid'):<7} {label:<38} {note:<{NOTE_WIDTH}} [{br}]")
         elif not isinstance(n, int):
-            buckets["游离"].append(f"  {'':<11} {label:<38} 无法读取   [{br}]")
+            buckets["游离"].append(f"  {'':<11} {label:<38} 无法读取{'':<{NOTE_WIDTH - 8}} [{br}]")
         elif n:
-            buckets["有改动"].append(f"  {'':<11} {label:<38} {note:<10} [{br}]")
+            buckets["有改动"].append(f"  {'':<11} {label:<38} {note:<{NOTE_WIDTH}} [{br}]")
         elif inside:
-            buckets["可清理"].append(f"  {'':<11} {label:<38} {note:<10} [{br}]")
+            ig = ignored_count(path)
+            if ig:
+                note = f"干净，另有 {ig} 项被忽略内容"
+            buckets["可清理"].append(f"  {'':<11} {label:<38} {note:<{NOTE_WIDTH}} [{br}]")
         else:
-            buckets["游离"].append(f"  {'':<11} {label:<38} {note:<10} [{br}]")
+            buckets["游离"].append(f"  {'':<11} {label:<38} {note:<{NOTE_WIDTH}} [{br}]")
     for name in ("在用", "有改动", "可清理", "游离"):
         rows = buckets[name]
         if not rows:
@@ -240,6 +282,8 @@ def main():
         print(f"  [{name}] {len(rows)}")
         for r in rows:
             print(r)
+    if buckets["可清理"]:
+        print("  可清理只表示 git 未登记改动；标出被忽略内容的项，删除会一并删掉那些文件")
 
     orphans = orphan_dirs(repo)
     if orphans:

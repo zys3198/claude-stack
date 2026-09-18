@@ -8,6 +8,9 @@
 #   - 非 git 目录静默退出，不产生任何输出
 #   - 状态读取失败时如实报告，不当作干净
 #   - 只报告当前仓库的事，不引用别的仓库的遗留
+#   - 收尾记录文件既会被追加也会被裁剪，两条写入路径都持有同一把锁，
+#     裁剪时在锁内重新读取，避免读到旧快照再整份写回而丢掉并发追加的记录
+#   - 锁等待超时不影响会话：追加照常进行并写日志，裁剪直接跳过
 #   - 异常写入 session-guard.log，绝不阻塞会话启动或结束
 
 import json
@@ -19,9 +22,12 @@ from pathlib import Path
 
 CLAUDE = Path(os.path.expanduser("~")) / ".claude"
 HANDOFF = CLAUDE / "session-handoff.jsonl"
+LOCK = CLAUDE / "session-handoff.lock"
 LOGFILE = CLAUDE / "session-guard.log"
 
 HANDOFF_KEEP_DAYS = 7
+LOCK_WAIT_SECONDS = 2.0
+LOCK_STALE_SECONDS = 30.0
 AGENTS_TIMEOUT = 20
 GIT_TIMEOUT = 20
 
@@ -31,6 +37,36 @@ def log(message):
         stamp = time.strftime("%Y-%m-%d %H:%M:%S")
         with open(LOGFILE, "a", encoding="utf-8") as f:
             f.write(f"{stamp} {message}\n")
+    except OSError:
+        pass
+
+
+def lock_acquire():
+    deadline = time.monotonic() + LOCK_WAIT_SECONDS
+    while True:
+        try:
+            fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, str(os.getpid()).encode("ascii"))
+            os.close(fd)
+            return True
+        except FileExistsError:
+            try:
+                if time.time() - os.path.getmtime(LOCK) > LOCK_STALE_SECONDS:
+                    os.remove(LOCK)
+                    continue
+            except OSError:
+                pass
+        except OSError as exc:
+            log(f"lock acquire failed: {exc}")
+            return False
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(0.02)
+
+
+def lock_release():
+    try:
+        os.remove(LOCK)
     except OSError:
         pass
 
@@ -46,13 +82,14 @@ def git(args, cwd):
             errors="replace",
             timeout=GIT_TIMEOUT,
         )
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError) as exc:
+        log(f"git {' '.join(args)} 执行失败：{exc}")
         return 1, ""
     return r.returncode, r.stdout or ""
 
 
 def norm(path):
-    return os.path.normcase(os.path.abspath(path))
+    return os.path.normcase(os.path.realpath(os.path.abspath(path)))
 
 
 def repo_root(cwd):
@@ -60,6 +97,16 @@ def repo_root(cwd):
     if rc != 0 or not out.strip():
         return None
     return out.strip()
+
+
+def main_root(cwd):
+    # 主检出的根目录。链接工作树里 --show-toplevel 返回工作树自身，
+    # 用 --git-common-dir 的上一级取主检出，收尾记录的 repo 字段据此对齐。
+    rc, out = git(["rev-parse", "--path-format=absolute", "--git-common-dir"], cwd)
+    common = out.strip().rstrip("/\\")
+    if rc == 0 and os.path.basename(common) == ".git":
+        return os.path.dirname(common)
+    return repo_root(cwd)
 
 
 def is_linked_worktree(cwd):
@@ -135,9 +182,12 @@ def change_count(path):
 def session_owns(path, sessions, self_id):
     target = norm(path)
     for s in sessions:
-        if self_id and s["session_id"] == self_id:
+        if self_id and s.get("session_id") == self_id:
             continue
-        c = norm(s["cwd"])
+        cwd = s.get("cwd")
+        if not cwd:
+            continue
+        c = norm(cwd)
         if c == target or c.startswith(target + os.sep):
             return True
     return False
@@ -158,14 +208,35 @@ def handoff_records():
     return rows
 
 
-def prune_handoff(rows):
-    cutoff = time.time() - HANDOFF_KEEP_DAYS * 86400
-    kept = [r for r in rows if isinstance(r.get("ts"), (int, float)) and r["ts"] >= cutoff]
+def prune_handoff():
+    # 与 handle_end 的追加共用一把锁，并在锁内重新读取，
+    # 避免用读取过的旧快照整份写回而丢掉这段时间里追加的记录。
+    if not HANDOFF.is_file():
+        return
+    if not lock_acquire():
+        log("prune handoff skipped: 锁等待超时")
+        return
     try:
+        rows = handoff_records()
+        cutoff = time.time() - HANDOFF_KEEP_DAYS * 86400
+        kept = []
+        dropped = 0
+        for r in rows:
+            fresh = isinstance(r.get("ts"), (int, float)) and r["ts"] >= cutoff
+            if fresh:
+                kept.append(r)
+                continue
+            dropped += 1
+            if isinstance(r.get("dirty"), int) and r["dirty"] > 0:
+                log(f"prune handoff 丢弃过期记录：{r.get('cwd')} dirty={r['dirty']}")
+        if not dropped:
+            return
         text = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept)
         HANDOFF.write_text(text, encoding="utf-8")
     except OSError as exc:
         log(f"prune handoff failed: {exc}")
+    finally:
+        lock_release()
 
 
 def emit(event, context):
@@ -180,7 +251,7 @@ def emit(event, context):
 def handle_start(payload):
     cwd = payload.get("cwd") or os.getcwd()
     self_id = payload.get("session_id")
-    root = repo_root(cwd)
+    root = main_root(cwd)
     if not root:
         return
     if norm(root) == norm(CLAUDE):
@@ -229,11 +300,11 @@ def handle_start(payload):
         where = os.path.basename(str(latest.get("cwd", "")).rstrip("/\\")) or "上次会话"
         parts.append(f"上次会话在 {where} 留有 {latest['dirty']} 处改动")
 
-    prune_handoff(handoff_records())
+    prune_handoff()
 
     same_here = sum(
         1 for s in sessions
-        if s["session_id"] != self_id and norm(s["cwd"]) == norm(cwd)
+        if s.get("session_id") != self_id and norm(s.get("cwd") or "") == norm(cwd)
     )
     hint = ""
     if same_here >= 1 and not is_linked_worktree(cwd):
@@ -254,7 +325,7 @@ def handle_start(payload):
 
 def handle_end(payload):
     cwd = payload.get("cwd") or os.getcwd()
-    root = repo_root(cwd)
+    root = main_root(cwd)
     if not root:
         return
     if norm(root) == norm(CLAUDE):
@@ -272,12 +343,18 @@ def handle_end(payload):
         "worktree": is_linked_worktree(cwd),
         "dirty": dirty,
     }
+    held = lock_acquire()
+    if not held:
+        log("append handoff without lock: 锁等待超时")
     try:
         with open(HANDOFF, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     except OSError as exc:
         log(f"append handoff failed: {exc}")
         return
+    finally:
+        if held:
+            lock_release()
 
     where = os.path.basename(cwd.rstrip("/\\")) if record["worktree"] else "主检出"
     if dirty:

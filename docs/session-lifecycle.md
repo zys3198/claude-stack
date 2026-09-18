@@ -34,6 +34,8 @@ claude -w eam-qr-code
 
 任务名要求 kebab-case、2～4 个词、能看懂在做什么。`eam-qr-code`、`oa-dingtalk-sync` 合格，`test`、`tmp`、`fix2`、`agent-a1b0f1bcd643d3066` 不合格。
 
+拦截按 kebab-case 与禁用名单判定，词数不校验。任务是两词或五词的照常放行，`test`、`tmp`、纯日期、`agent-` 与 `worktree-` 开头的名字会被拒绝。
+
 ### 已经开着的会话要改代码
 
 说一句「迁到工作树做」，或者直接说任务名。Claude 会调用 `EnterWorktree` 迁移，之后的改动都在独立工作树里。
@@ -75,6 +77,10 @@ claude -w eam-qr-code
 
 改动不会丢。下次开会话时会再提醒一次，直到你把它归位到分支上或明确处理掉。
 
+收尾记录保留 7 天。工作树还在磁盘上时，开发前的检查会直接扫出当前状态，不依赖这条记录。记录因过期被清掉时，若它还带着未提交改动，会往 `~/.claude/session-guard.log` 写一行，写明丢掉的是哪个路径、几条改动，不会无声消失。
+
+收尾记录文件由开发前检查写入、由会话结束追加，两条路径共用一把锁（`~/.claude/session-handoff.lock`，正常跑完即删），所以同时开会话和关会话不会互相覆盖。
+
 ### 强杀会话的情况
 
 直接关窗口、`kill` 进程时，结束环节不触发。不影响正确性——下次开会话时开发前的检查会扫出这次留下的东西并报告。
@@ -104,6 +110,10 @@ claude -w eam-qr-code
 /dev-status C:/ZYS/Code/other-repo
 ```
 
+「可清理」只表示 git 没有登记改动。工作树里若还有被 `.gitignore` 覆盖的内容（构建产物、本地数据库、`.env` 之类），会额外标注「另有 N 项被忽略内容」——那些文件不在 git 管辖内，删掉工作目录会一并删掉它们，所以单独列出来给你判断。
+
+会话枚举失败时（`claude agents --json` 不可用），输出会显式标注「活跃会话 枚举失败」并提示不要据此删除。此时「在用」分组为空，被占用的工作树会落进「可清理」，这份清单不能拿来删。
+
 ---
 
 ## 六、清理
@@ -112,7 +122,7 @@ claude -w eam-qr-code
 /dev-clean
 ```
 
-列出可清理的空工作树，经你逐条确认后执行。判定条件是零改动（`git status` 完全干净，含未跟踪文件）且没有任何活跃会话占用。
+列出可清理的空工作树，经你逐条确认后执行。判定条件是：没有任何活跃会话占用，且 `git status --porcelain` 没有输出——含未跟踪文件，不含被 `.gitignore` 覆盖的内容。被忽略的那部分不会被判定拦住，所以清单里会单独标注出来。
 
 只删工作目录，**分支保留**，`git branch` 里还在。有未提交改动的工作树会被 `git worktree remove` 拒绝，这是设计如此；不要用 `--force` 绕过，先把改动归位到分支上。
 
@@ -128,24 +138,46 @@ claude -w eam-qr-code
 
 | 行为 | 结果 |
 |------|------|
-| `git worktree add` 的目标解析后不在当前仓库 `.claude/worktrees/` 下 | 拒绝 |
+| `git worktree add` 的目标解析后不在本仓库主检出的 `.claude/worktrees/` 下 | 拒绝 |
 | 目标路径里带 `..`，绕开该目录 | 拒绝 |
-| 工作树名是 hash（`agent-a1b0f1bcd643d3066`） | 拒绝 |
-| `EnterWorktree` 传入 hash 名字 | 拒绝 |
+| 工作树名是 hash（`agent-a1b0f1bcd643d3066`）或含 16 位以上的十六进制串 | 拒绝 |
+| 工作树名是 `tmp`、`test`、纯日期，或以 `agent-`、`worktree-` 开头 | 拒绝 |
+| 工作树名不是 kebab-case（出现大写、下划线、空格） | 拒绝 |
+| `EnterWorktree` 传入 hash 名或保留名 | 拒绝 |
+| `EnterWorktree` 的 `path` 指向约定位置之外 | 拒绝 |
 | `.claude/worktrees/` 只写在别的参数或注释里，目标仍在别处 | 拒绝 |
+| 同一条命令里有多处 `git worktree add`，其中任一处越界 | 拒绝 |
+| 命令因为没有路径而判不出目标（例如 `git worktree add 2>&1 \| head`） | 拒绝 |
 | `git worktree add` 到约定位置且名字合规 | 放行 |
+| `git -C <仓库> worktree add`、`cd <仓库> && git worktree add` | 按目标仓库判定，不误拒 |
+| `--lock`、`--track`、`--detach` 这类不带值的选项 | 放行 |
 | 只读 git 命令、其余任何命令 | 放行 |
 | 命令里只是提到这串字（在引号内，并不真的执行） | 放行 |
 
 被拒绝时会给出替代做法，照着改即可。
 
-判定方式是把命令拆成词、取出真正的目标路径，规范化之后和当前仓库的 `.claude/worktrees/` 比对。不按「命令里有没有出现某个子串」来判断——那样 `.claude/worktrees/../../x` 和 `# .claude/worktrees/` 都能混过去。
+判定方式是把命令拆成词、取出每一处 `git worktree add` 的真正目标路径，规范化之后和主检出的 `.claude/worktrees/` 比对。不按「命令里有没有出现某个子串」来判断——那样 `.claude/worktrees/../../x` 和 `# .claude/worktrees/` 都能混过去。
 
-拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件、产物放错目录这类规则靠第 8 节文本约定，由 `/dev-status` 报告违规项。
+带值的选项按 git 2.54 的用法行登记，只有 `-b`、`-B` 和跟随 `--lock` 的 `--reason` 会吃掉下一个词。`--lock`、`--track` 不吃后续词，所以 `git worktree add --lock .claude/worktrees/x` 不会被误判成路径缺失。
+
+重定向与控制符（`2>&1`、`>`、`|`、`&&`、`;`）不会被当成目标路径。同一条命令里出现多处 `git worktree add` 时逐处检查，任何一处越界就拒绝整条命令，所以 `… && git worktree add <仓库外>` 拦得住。
+
+判定基准是主检出的 `.claude/worktrees/`。在链接工作树里开会话时 `git rev-parse --show-toplevel` 返回工作树自身，所以改取 `git rev-parse --git-common-dir` 的上一级。命名格式按第 8 节执行：kebab-case，禁用 hash、纯日期和保留名；词数不做校验。
+
+拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件由 `/dev-status` 报告；产物放错目录没有自动检查，靠第 8 节的文本约定。
 
 非 git 目录里确定不了仓库根，此时对 `git worktree add` 一律拒绝并说明原因，不做猜测。
 
 子代理的工作树由 harness 自动创建，名字是 `agent-<hash>`，拦截管不到，只能用 `/dev-status` 看。
+
+**边界**：把命令再包一层解释器之后，顶层拆词看不到 `git worktree add`，会放行：
+
+```bash
+bash -c "git worktree add <仓库外>"
+python -c "import os; os.system('git worktree add <仓库外>')"
+```
+
+这类写法需要刻意规避。拦截的定位是防止误建，不作为安全边界。
 
 ---
 
@@ -154,6 +186,8 @@ claude -w eam-qr-code
 **提示太吵** —— 卫生提示只在有问题时出现。如果每次开会话都有内容，那说明仓库里确实有东西没归位，看 `/dev-status`。
 
 **误删了工作树** —— 分支还在。`git branch` 能找到，`git worktree add <路径> <分支>` 重新检出即可。删除只在 `/dev-clean` 确认后发生，不会自动执行。
+
+**删掉的工作树里有被忽略的文件** —— 分支还在，但被 `.gitignore` 覆盖的内容（构建产物、本地数据库、`.env`）没有其他副本，找不回来。`/dev-status` 会在可清理项上标注「另有 N 项被忽略内容」，看到这行先确认那些文件可以不要，再同意删除。
 
 **拦截太严** —— 检查 `~/.claude/product-guard.log` 看拦了什么。规则本身在 `~/.claude/CLAUDE.md` 第 8 节。
 
@@ -164,11 +198,13 @@ claude -w eam-qr-code
 | `~/.claude/hooks/scripts/session-guard.py` | 开发前检查与开发结束记录 |
 | `~/.claude/hooks/scripts/product-guard.py` | 工作树拦截 |
 | `~/.claude/hooks/scripts/session-status.py` | 状态汇总，`/dev-status` 调用 |
+| `~/.claude/hooks/scripts/selftest.py` | 自检，`python selftest.py`，退出码 0 为全过 |
 | `~/.claude/commands/dev-status.md` | `/dev-status` 命令 |
 | `~/.claude/commands/dev-clean.md` | `/dev-clean` 命令 |
 | `~/.claude/session-handoff.jsonl` | 会话收尾记录，保留 7 天 |
+| `~/.claude/session-handoff.lock` | 收尾记录的写入锁，正常跑完即删 |
 | `~/.claude/session-hygiene.json` | 本机端口与独占资源台账 |
-| `~/.claude/session-guard.log` | 异常日志 |
+| `~/.claude/session-guard.log` | 异常日志与过期记录丢弃记录 |
 | `~/.claude/product-guard.log` | 拦截日志 |
 
 活跃会话从 `claude agents --json` 读取，这是官方文档给出的受支持接口。不读 `~/.claude/sessions/*.json`——那个目录属于内部实现，没有兼容性保证。
