@@ -67,13 +67,23 @@
 
 ### 验证
 
-- 自检脚本 `selftest.py`：48 个用例全部通过。覆盖工作树位置越界、hash 命名、反斜杠写法、引号内的干扰串、`worktree list` / `worktree remove` 放行、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、会话表缺失时不崩溃、退出提示不承诺自动清理、状态脚本报出仓库根散落文件。用临时 git 仓库，跑完自清。
-- 真实仓库实测：dtsf（18 个工作树）SessionStart 耗时 2.39 秒，product-guard 每次 0.25 秒。
-- 涉及 Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8")`，否则默认 GBK 会破坏中文 JSON。三个脚本的 `main` 都有这一行。
+自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：59 个用例全部通过。覆盖工作树位置越界、hash 命名、反斜杠写法、引号内的干扰串、`worktree list` / `worktree remove` 放行、`EnterWorktree` 传 hash 名被拒与传语义名放行、非 git 目录静默、`~/.claude` 静默、跨仓库遗留不串味、会话枚举为空时不崩溃、退出提示不承诺自动清理、仓库根散落文件与孤儿目录的识别。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
+
+真实仓库实测：dtsf（11 个工作树、7 个孤儿目录）SessionStart 耗时 1.63 秒，`/dev-status` 耗时 2.01 秒，product-guard 每次 0.25 秒。
+
+Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8")`，否则默认 GBK 会破坏中文 JSON。三个脚本的 `main` 都有这一行。
+
+### 删除安全边界
+
+删除是不可恢复动作，机制按三条线约束：
+
+1. **机制自身不删任何东西。** 没有自动清理路径，只有 `/dev-clean` 命令，且必须逐条列出路径等用户确认。
+2. **有未提交改动的工作树删不掉。** `/dev-clean` 只列零改动的项，`git worktree remove` 本身也会拒绝脏工作树。被拒时不许用 `--force`。
+3. **孤儿目录一律不删。** git 已不再注册它们，里面的改动不在任何分支上，`/dev-status` 会标出有没有同名分支。标「无同名分支」的目录是内容的唯一副本，机制不碰，交用户判断。
 
 ### 回退
 
-从 `~/.claude/settings.json` 的 hooks 段删掉 `SessionStart` 第 3 组、`SessionEnd`、`PreToolUse` 三段即可，三个脚本变成不被调用的惰性文件。命令与文档（`dev-status.md`、`dev-clean.md`、`session-lifecycle.md`）可一并删除；`session-hygiene.json` 是本机端口与独占资源台账，独立于本机制，应保留。
+从 `~/.claude/settings.json` 的 hooks 段删掉 `SessionStart` 第 3 组、`SessionEnd`、`PreToolUse` 三段即可，三个脚本变成不被调用的惰性文件。命令与文档（`dev-status.md`、`dev-clean.md`、`session-lifecycle.md`、`selftest.py`）可一并删除；`session-hygiene.json` 是本机端口与独占资源台账，独立于本机制，应保留。
 
 ---
 
