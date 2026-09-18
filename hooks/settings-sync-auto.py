@@ -4,7 +4,7 @@ import sys, json, os, subprocess
 # 非 settings.json 命中时毫秒级退出；命中时调 sync_claude_common.py（自带 NO-OP 幂等）。
 
 PYTHON = "C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe"
-SYNC = "C:/Users/zys31/.claude/skills/cc-switch-setting-sync/scripts/sync_claude_common.py"
+SYNC = "C:/Users/zys31/.claude/skills/cc-switch-setting-sync-by-user/scripts/sync_claude_common.py"
 TARGET = os.path.normcase(os.path.abspath(os.path.expanduser("~/.claude/settings.json")))
 
 try:

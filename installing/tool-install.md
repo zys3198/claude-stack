@@ -15,7 +15,7 @@
 | caveman | https://github.com/JuliusBrussee/caveman | marketplace 存在；插件启用 |
 | ponytail | https://github.com/DietrichGebert/ponytail | marketplace 存在；插件启用 |
 | open-code-review | https://github.com/alibaba/open-code-review | marketplace 存在；插件启用 |
-| better-harness | https://github.com/QoderAI/better-harness | marketplace 存在；插件启用 |
+| better-harness | https://github.com/QoderAI/better-harness | 已移除（2026-09-19）；当前 `known_marketplaces.json` 无记录 |
 | taste-skill | https://github.com/Leonxlnx/taste-skill | marketplace 存在；插件启用 |
 | last30days-skill | https://github.com/mvanhorn/last30days-skill | marketplace 存在；插件启用 |
 | officecli | https://github.com/officecli/officecli | marketplace 存在；插件禁用 |
@@ -23,7 +23,7 @@
 | ppt-master | https://github.com/hugohe3/ppt-master | marketplace 存在；插件禁用 |
 | anthropic-agent-skills | https://github.com/anthropics/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
 | ecc | https://github.com/affaan-m/ECC | 已移除；当前 `known_marketplaces.json` 无记录 |
-| karpathy-skills | https://github.com/forrestchang/andrej-karpathy-skills | marketplace 存在；插件启用 |
+| karpathy-skills | https://github.com/forrestchang/andrej-karpathy-skills | 已移除（2026-09-18）；当前 `known_marketplaces.json` 无记录 |
 | understand-anything | https://github.com/Egonex-AI/Understand-Anything | **已删 2026-08-18（二次）**：08-17 首删后插件文件+settings 注册被某机制回拉复活（原因未查明，疑插件同步），今日按 wayfinder ticket 02 拍板再删——settings.json 去 enabledPlugins+marketplace 注册、删 plugins/{marketplaces,cache,data}/understand-anything*、WORKFLOW_QUICKREF.md 引用改 gitnexus/lean-ctx。恢复=`claude plugin install understand-anything@understand-anything` 后重加 marketplace |
 | i-have-adhd | https://github.com/ayghri/i-have-adhd | 已移除；当前 `known_marketplaces.json` 无记录 |
 | minimalist-entrepreneur | https://github.com/slavingia/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
@@ -41,15 +41,36 @@
 - 启用：`better-harness@better-harness`、`caveman@caveman`、`claude-md-management@claude-plugins-official`、`code-review@claude-plugins-official`、`context7@claude-plugins-official`、`github@claude-plugins-official`、`impeccable@impeccable`、`last30days@last30days-skill`、`mattpocock-skills@mattpocock`、`ponytail@ponytail`、`skill-creator@claude-plugins-official`、`taste-skill@taste-skill`
 - 禁用：`frontend-design@claude-plugins-official`、`open-code-review@open-code-review`、`playwright@claude-plugins-official`
 - 低频插件复核（`claude plugin list`，2026-09-04）：以上 3 个插件均禁用。
+- 2026-09-18 更新：`andrej-karpathy-skills@karpathy-skills` 已卸载（插件与 marketplace 一并移除），详见下方条目。
+- 2026-09-19 更新：`better-harness@better-harness` 已卸载（插件与 marketplace 一并移除），详见下方条目。
 
 ### andrej-karpathy-skills 1.0.0（2026-09-12）
 - 来源：https://github.com/forrestchang/andrej-karpathy-skills；本次核对用户提供的 https://github.com/multica-ai/andrej-karpathy-skills，README 安装命令与 marketplace 元数据均指向原仓库
 - 安装命令原文：`claude plugin marketplace add --scope user forrestchang/andrej-karpathy-skills`；`claude plugin install andrej-karpathy-skills@karpathy-skills --scope user --yes`
 - 装到哪：`C:\Users\zys31\.claude\plugins\cache\karpathy-skills\andrej-karpathy-skills\1.0.0`
 - 依赖：无额外依赖
-- 当前状态：`andrej-karpathy-skills@karpathy-skills`，scope=user，enabled；`claude plugin list` 与 `claude plugin marketplace list` 已核对
+- 当前状态：已于 2026-09-18 卸载，见下方「andrej-karpathy-skills 卸载」条目
 - 备注：插件提供 `karpathy-guidelines` skill；全局 `CLAUDE.md` 已删除对应重复规则，保留全局专属约束。cc-switch 已同步，备份：`C:\Users\zys31\.cc-switch\backups\sync-backup-20260912_201838.json`
 - 恢复：`claude plugin uninstall andrej-karpathy-skills@karpathy-skills --scope user --yes`；`claude plugin marketplace remove karpathy-skills`
+
+### andrej-karpathy-skills 卸载（2026-09-18）
+
+- 背景：`/doctor` 体检统计该插件累计使用 1 次、末次 2026-06-28；插件唯一载荷是 `karpathy-guidelines` 技能，其内容与已启用的 `ponytail` 在「最简实现、最短改动」两条上重合
+- 卸载命令原文：`claude plugin uninstall andrej-karpathy-skills@karpathy-skills --scope user --yes`；`claude plugin marketplace remove karpathy-skills`
+- 卸载范围（合计约 222KB）：
+  1. `~/.claude/settings.json`：`enabledPlugins` 删 `andrej-karpathy-skills@karpathy-skills`，`extraKnownMarketplaces` 删 `karpathy-skills`
+  2. `~/.claude/plugins/installed_plugins.json` 删插件条目；`known_marketplaces.json` 删 `karpathy-skills`
+  3. `~/.claude/plugins/marketplaces/karpathy-skills/`（154KB，CLI 自动删除）
+  4. `~/.claude/plugins/cache/karpathy-skills/`（68KB / 16 文件）：CLI 只打 `.orphaned_at` 标记不删文件，手动执行 `Remove-Item -LiteralPath 'C:\Users\zys31\.claude\plugins\cache\karpathy-skills' -Recurse -Force`
+- 同步：`python ~/.claude/skills/cc-switch-setting-sync/scripts/sync_claude_common.py`，两次（禁用后 5179→5180，卸载后 5180→4987），终态 readback `MATCH (len=4987)`，备份 `~/.cc-switch/backups/sync-backup-20260918_213010.json` 与 `sync-backup-20260918_214458.json`
+- **踩坑**：`hooks/settings-sync-auto.py` 只挂在 PostToolUse(Edit|Write) 上，经 `claude plugin uninstall/disable/install` 这类 CLI 命令改的 `settings.json` 不触发自动同步，必须手动跑脚本，否则下次切 provider 会从 DB 旧快照把插件复活
+- 未清理项：`~/.claude.json` 的 `pluginUsage` / `skillUsage` 仍留该插件累计计数（历史统计，不影响加载，与其它 `@inline` 旧条目同处理）；`~/.claude/docs/config-inventory.md` 与 `config-checklist.md` 仍含该插件行，两文件头部已自标「已废弃、计数过时，权威口径以 installing/ 台账为准」，按该声明不改
+- 规则迁移：`karpathy-guidelines` 四条准则中判定可采纳且与现有规则不冲突的部分并入 `~/.claude/CLAUDE.md`
+  - 新增 §1.1：需求存在多种合理解释时，把每种解释逐条列出由用户选定，不静默选定一种
+  - 新增 §2.1「改动范围」4 条：只改与任务直接相关的代码、不与相邻代码注释格式较劲、不重构没坏掉的、匹配文件现有风格、只清理自己改动造成的孤立导入变量函数、无关死代码报告但不删除、每行改动可追溯到用户要求
+  - 新增 §2.1「实现复杂度」4 条：只实现被要求的功能、不为一次性代码建抽象、不加没被要求的灵活性与配置项扩展点、不为不可能场景写错误处理
+  - 未采纳及理由：准则一「有更简单做法就说出来、该顶就顶」（与 §2.1 疑问句条款、§1.4 禁止无脑多方案冲突）；准则二「200 行能 50 行就重写」（与 §2.1「禁止简化任何设计」边界难划）；准则四全部（与 §2.3 成功标准、§4.2 交付自检重复）
+- 恢复：`claude plugin marketplace add --scope user forrestchang/andrej-karpathy-skills` → `claude plugin install andrej-karpathy-skills@karpathy-skills --scope user --yes` → 再跑同一 sync 脚本；`~/.claude/CLAUDE.md` 如需一并还原，删掉上述 §1.1 一条与 §2.1 两个小节
 
 ### taste-skill 1.0.0（2026-09-04 恢复）
 - 来源：https://github.com/Leonxlnx/taste-skill
@@ -344,15 +365,19 @@
   - 试验目录：`C:\ZYS\Code\lab-area\exp\2026-09-07-herdr\`（留存 install.cmd / install.ps1 副本）
   - 选型理由：与 Wave Terminal 对比后选定——Wave 是宿主级替换（要重验 headroom 8787 链路 / hooks / statusline），herdr 是薄层复用器不动现有链路；且不接管 skill/配置/记忆，退出成本接近零（对照 pi 退役时丢 7 个 skill 孤本的教训）
 
-### agent-browser 0.36.0（2026-09-07）
+### agent-browser 0.38.1（2026-09-07 装，2026-09-18 升级）
 - 来源：https://github.com/vercel-labs/agent-browser（npm 包 `agent-browser`）
-- 安装日期：2026-09-07
-- 安装命令原文：`npm install -g agent-browser`
-- 装到哪：启动器 `C:\Users\zys31\AppData\Roaming\npm\agent-browser.ps1`；全局包 `C:\Users\zys31\AppData\Roaming\npm\node_modules\agent-browser`
-- 依赖：Node.js / npm；本次未额外执行 `agent-browser install`，由 CLI 自动启动可用浏览器
+- 安装日期：2026-09-07；2026-09-18 升到 0.38.1 并执行 `agent-browser install`
+- 安装命令原文：
+  ```powershell
+  npm install -g agent-browser
+  agent-browser install
+  ```
+- 装到哪：启动器 `C:\Users\zys31\AppData\Roaming\npm\agent-browser.ps1`；全局包 `C:\Users\zys31\AppData\Roaming\npm\node_modules\agent-browser`；浏览器 `C:\Users\zys31\.agent-browser\browsers\`
+- 依赖：Node.js / npm；`agent-browser install` 下载 Chrome for Testing（本次 153.0.8010.52，196 MB）
 - 用途：AI 浏览器自动化 CLI；`snapshot` 获取可访问性树和元素引用，配合 `click/fill` 操作
-- 验证：`agent-browser --version`=`0.36.0`；`open https://example.com` → `snapshot` 成功得到 `e1/e2` 引用 → `close` 正常
-- 备注：Lightpanda 未安装；恢复命令为上述 npm 安装命令，卸载为 `npm uninstall -g agent-browser`
+- 验证：`agent-browser --version`=`0.38.1`；`open https://www.baidu.com` → `snapshot -i` 得到 `ref=e11` 等引用 → `close --all` 正常
+- 备注：Lightpanda 未安装；恢复命令为上述两条。`.agent-browser\browsers\` 下 153.0.8010.36 为旧版本，可删。
 
 ### Better Harness 0.7.0-alpha1（2026-09-11，重装）
 - 来源：https://github.com/QoderAI/better-harness；Marketplace：`better-harness`
@@ -362,8 +387,20 @@
 - 依赖：Node.js；Claude Code 插件运行时
 - 验证：插件列表显示 `better-harness@better-harness`；`.claude-plugin/plugin.json` 版本=`0.7.0-alpha1`；CLI 入口存在
 - 备注：保留 `better-harness` Marketplace；未修改其他插件、实验源文件或 Claude 全局规则。重装用于排除旧缓存/版本问题；证据包 `agentCustomize` 截断问题仍需重跑验证。
+- 当前状态：已于 2026-09-19 卸载（插件与 marketplace 一并移除），见下方「Better Harness 0.7.0-alpha1 卸载」条目。
 
 ## 卸载 / 清除记录
+
+### Better Harness 0.7.0-alpha1 卸载（2026-09-19）
+- 来源：https://github.com/QoderAI/better-harness；Marketplace：`better-harness`
+- 卸载命令原文：`claude plugin uninstall better-harness@better-harness --scope user -y`；`claude plugin marketplace remove better-harness`
+- 已删目录：`C:\Users\zys31\.claude\plugins\cache\better-harness\`（插件本体 0.7.0-alpha1）、`C:\Users\zys31\.claude\plugins\marketplaces\better-harness\`（git 克隆，35M）、`C:\Users\zys31\.claude\better-harness\`（空目录）
+- 注册清除：`settings.json` enabledPlugins、`installed_plugins.json`、`known_marketplaces.json` 三处均由上述两条命令自动清除；卸载后 cache 残留 0.7.0-alpha1（带 `.orphaned_at`）由 `Remove-Item -Recurse -Force` 手工补删
+- 引用清理：`skills/code-change-workflow/SKILL.md` 删「Harness 审计触发」规则（指向已不存在的 `/better-harness`）；`docs/config-checklist.md` 删插件行与 marketplace 行并同步计数（启用 23→22、marketplace 13→12）；`installing/plugin-drift-baseline.json` 删基线条目；`.gitignore` 删 `better-harness/` 忽略规则；记忆 `projects/C--Users-zys31/memory/better-harness-diffimpact-overcount.md` 备份到 `memory/recovery/2026-09-19-better-harness-diffimpact-overcount.md` 后删除，并去除 `grill-firstprinciples-claudemd-2026-08-07.md` 中的指向链接
+- 保留未动：`installing/config-slimming-snapshot-20260910.json`（历史快照）、`skills/code-change-workflow/CHANGELOG.md` 两处历史记述、`C:\ZYS\Code\lab-area\exp\2026-09-11-claude-workflow-harness\`（code-change-workflow 的来源实验证据，用户确认保留）
+- 恢复方式：`claude plugin marketplace add QoderAI/better-harness` → `claude plugin install better-harness@better-harness --scope user`
+- 依赖：Node.js，无其他依赖
+- 备注：gitCommitSha 卸载前为 `e084d2c3e3984c7df7ec1fd08f88f05f18270193`；恢复后需重跑证据包 `agentCustomize` 截断验证
 
 ### Codex 桌面版 0.153.4 全量清除（2026-09-10，无备份）
 - 背景：用户要求清除本机全部 codex 记录，仅保留 cc-switch 内 codex 供应商认证（CC 经 headroom 仍使用火山 Coding Plan 提供商）

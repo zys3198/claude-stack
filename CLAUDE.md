@@ -6,7 +6,7 @@
 
 ## 0. 核心原则与优先级
 
-- **以中文回复。**
+- **全程以中文回复。**
 - **时刻保持用户认知参与，不得擅自做出超出授权范围的决策。**
 - 本文规则冲突时：强制项与人工确认线 > 决策分层 > 执行偏好；仍有冲突或边界不明时，停下来询问。
 - 优先级：用户当场显式指令 > 本文件 > skills 一般指导。被某条规则卡住时：指出具体文件与规则原文，区分「规则要求的」和「自己对规则的理解」，再按优先级继续。
@@ -268,5 +268,5 @@
 
 **查看与清理**：`/dev-status` 列出当前仓库的活跃会话、工作树、stash、仓库根散落文件、端口与容器；`/dev-clean` 逐条确认后清理无会话占用的空工作树。
 
-细则见 `code-change-workflow` §1.6；本机工具链踩坑清单见 `toolchain-pitfalls`；机制说明见 `~/.claude/docs/session-lifecycle.md`。
+细则见 `code-change-workflow-by-user` §1.6；本机工具链踩坑清单见 `toolchain-pitfalls-by-user`；机制说明见 `~/.claude/docs/session-lifecycle.md`。
 

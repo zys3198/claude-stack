@@ -1,6 +1,5 @@
 {
  "enabled": [
-  "better-harness@better-harness",
   "caveman@caveman",
   "context7@claude-plugins-official",
   "github@claude-plugins-official",

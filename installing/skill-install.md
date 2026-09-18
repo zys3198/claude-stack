@@ -112,12 +112,16 @@
 
 ### agent-browser
 - 来源：https://github.com/vercel-labs/agent-browser
-- 安装日期：2026-09-07
-- 安装命令原文：`npx skills add vercel-labs/agent-browser -g`
-- 装到哪：`C:\Users\zys31\.agents\skills\agent-browser`（skills CLI 已同步为 Claude Code 可发现 Skill）
-- 依赖：Node.js / npx；全局 `agent-browser` CLI 0.36.0；本次自动使用 `skills@1.5.24`
+- 安装日期：2026-09-07；2026-09-18 改接线
+- 安装命令原文：
+  ```powershell
+  npm install -g agent-browser
+  New-Item -ItemType Junction -Path 'C:\Users\zys31\.claude\skills\agent-browser' -Target 'C:\Users\zys31\AppData\Roaming\npm\node_modules\agent-browser\skills\agent-browser'
+  ```
+- 装到哪：`C:\Users\zys31\.claude\skills\agent-browser`（junction）→ `C:\Users\zys31\AppData\Roaming\npm\node_modules\agent-browser\skills\agent-browser`
+- 依赖：Node.js / npm；全局 `agent-browser` CLI 0.38.1
 - 用途：浏览器自动化、页面交互、截图、页面读取、测试和 Electron 应用操作
-- 备注：官方仓库；当前采用 Claude Code Skill 方式，未注册 agent-browser MCP；与现有 Chrome DevTools MCP 并存，后续按需评估。
+- 备注：官方 README 的 `npx skills add vercel-labs/agent-browser` 会写回 `~/.agents`，本机 skill 权威源为 `~/.claude/skills`，故改用 junction。junction 指向 npm 包内的 skill 目录，随包升级自动同步，避免 README 警告的「复制 SKILL.md 会过期」。未注册 agent-browser MCP。卸载 = 删 junction + `npm uninstall -g agent-browser`。
 
 ## 散件来源反查登记（2026-08-11 公网反查确认）
 
@@ -256,6 +260,7 @@
 - `.gitignore`：unignore 两个新 skill 目录与 `.claude/commands/`，忽略 wechat `node_modules/`，新增 `tmp/`、`tmp_*/`、`.pytest_cache/`。
 - 验证：`python -m pytest tests` → 26 passed；`check_environment.py` 核心路线 OK（浏览器 AI 字幕需 Chrome+web-access，未开=MISSING，非回归）；wechat `extract.js` require 加载正常，换机恢复依赖 `npm install`（在 `scripts/wechat`）。
 - 恢复方式：实体在 Wiki git 仓库内可回溯；全局指针壳若误删可按本条重建（bili-note 无指针，直接由 content-to-note 承接）；bili 旧 README/agents/assets 已删，需要时从上游 GitHub 重装取。
+- **2026-09-19 撤销**：本条迁移已反向。`content-to-note` 实体移回 `~/.claude/skills/content-to-note/`，落盘约定改为调用时由用户指定目录；`wiki-sediment`（悬空指针）与 `wiki-save` 命令（全局与 Wiki 侧）删除；`C:\ZYS\Wiki` 目录同日在用户操作下整体删除。详见 `custom-setup.md` 的「自建 skill 精简批次（2026-09-19）」。
 
 ### openmaic（项目级安装）
 - 来源：https://open.maic.chat/docs/zh-cn/agent-workbench#%E5%AE%89%E8%A3%85；技能包：https://open.maic.chat/docs/openmaic-skill.zip；上游仓库：https://github.com/THU-MAIC/OpenMAIC

@@ -34,6 +34,7 @@ hooks/scripts/selftest-sandbox/
 
 # ----- locks / temp markers -----
 daemon/
+/tmp/
 /daemon.*
 *.log
 .caveman-active
@@ -83,9 +84,6 @@ plugins/marketplaces/*/build/
 usage-data/facets/
 usage-data/session-meta/
 
-# ----- better-harness: run outputs (transient analysis artifacts) -----
-better-harness/
-
 # ----- lib: 第三方整库不入 git (2026-08-16 移出追踪) -----
 lib/awesome-design-md/
 
@@ -128,25 +126,24 @@ ide/
 
 # ----- skills: 默认忽略全部, 只追踪自建 (2026-08-07 收窄) -----
 # 第三方/插件/官方 skill 随官方源更新、不需进 git, 只在 installing/ 台账登记。
-# 新增自建 skill 时在下方白名单加一行 !skills/<name>/
+# 新增自建 skill 时在下方白名单加一行 !skills/<name>-by-user/
+# 自建 skill 目录名统一带 -by-user 后缀，与第三方/插件 skill 区分（2026-09-19 起）
 skills/*
-!skills/ai-product-development/
-!skills/company-discovery-evaluation/
-!skills/ai-readable-project/
-!skills/article-writer/
-!skills/awesome-design-md/
-!skills/bidirectional-steelman/
-!skills/cc-switch-setting-sync/
-!skills/code-change-workflow/
-!skills/content-to-note/
-!skills/drawio-article-illustration/
-!skills/drawio-chart/
-!skills/generic-course-tutor/
-!skills/improver-skill/
-!skills/instruction-auditor/
-!skills/install-ledger/
-!skills/parallel-delegation/
-!skills/skill-auditor/
-!skills/skill-trimmer/
-!skills/toolchain-pitfalls/
-!skills/wiki-sediment/
+!skills/ai-product-development-by-user/
+!skills/company-discovery-evaluation-by-user/
+!skills/article-writer-by-user/
+!skills/awesome-design-md-by-user/
+!skills/bidirectional-steelman-by-user/
+!skills/cc-switch-setting-sync-by-user/
+!skills/code-change-workflow-by-user/
+!skills/content-to-note-by-user/
+skills/content-to-note-by-user/scripts/wechat/node_modules/
+!skills/drawio-article-illustration-by-user/
+!skills/drawio-chart-by-user/
+!skills/improver-skill-by-user/
+!skills/instruction-engineering-by-user/
+!skills/install-ledger-by-user/
+!skills/parallel-delegation-by-user/
+!skills/skill-auditor-by-user/
+!skills/skill-trimmer-by-user/
+!skills/toolchain-pitfalls-by-user/

@@ -104,12 +104,13 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 2026-09-11 新增全局 `ai-product-development`，详见下方独立台账条目。
 - 2026-09-11 新增全局 `company-discovery-evaluation`，详见下方独立台账条目。
 
-当前可用（2026-09-02，以 `skills/` 实际目录为准）：
-`ai-coding-coach`、`ai-readable-project`、`article-writer`、`article-writing-guide`、`bidirectional-steelman`、`bili-note`、`cc-switch-setting-sync`、`code-change-workflow`、`content-to-note`、`deep-learn`、`drawio-article-illustration`、`drawio-chart`、`expose-unknowns`、`generic-course-tutor`、`goal-run`、`improver-skill`、`install-ledger`、`learning-guide`、`learning-personas`、`parallel-delegation`、`preflight-check`、`skill-auditor`、`skill-trimmer`、`tech-learning-roadmap`、`tutorial-maker`、`wiki-sediment`。
+当前可用（2026-09-19，17 个，全部带 `-by-user` 后缀，以 `skills/` 实际目录为准）：
+`ai-product-development-by-user`、`article-writer-by-user`、`awesome-design-md-by-user`、`bidirectional-steelman-by-user`、`cc-switch-setting-sync-by-user`、`code-change-workflow-by-user`、`company-discovery-evaluation-by-user`、`content-to-note-by-user`、`drawio-article-illustration-by-user`、`drawio-chart-by-user`、`improver-skill-by-user`、`install-ledger-by-user`、`instruction-engineering-by-user`、`parallel-delegation-by-user`、`skill-auditor-by-user`、`skill-trimmer-by-user`、`toolchain-pitfalls-by-user`。
 
 `generic-course-tutor-workspace` 是配套工作区，不计入 skill。
 
-### generic-course-tutor（2026-09-01，全局）
+### ~~generic-course-tutor~~（2026-09-19 已删除，用户拍板）
+- 删除前状态：本地自建全局 Skill，单文件 `~/.claude/skills/generic-course-tutor/SKILL.md`，用户 2026-09-01 台账审计确认归属。
 - 出处：本地自建；用户于 2026-09-01 台账审计确认归属。
 - 关键文件：`~/.claude/skills/generic-course-tutor/SKILL.md`
 - 迁移：复制整个 `generic-course-tutor/` 目录，并在 `.gitignore` 加入 `!skills/generic-course-tutor/`。
@@ -193,7 +194,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 出处：用户逐个勾选自认定稿（推翻此前「ignored 即第三方」的机器推断）。注：critical-thinking、humanizer-zh 公网存在同名项目，以用户判定为准——若实为改过/重写版本，建议日后在 SKILL.md 注明 fork 来源。
 - **2026-08-16 审查实测**：7 个磁盘目录均不存在（疑 2026-08-13 清理随备份夹消失），`.gitignore` 白名单条目已移除；**恢复口径更正（2026-08-16 盘查）**：7 个全部存在于 `d57e5c0^`（28-skill 移备份批次的父提交），`git checkout d57e5c0^ -- skills/<名>` 即恢复，无需重建；ai-text-polisher 例外——已删、被 human-writing 替代，**不恢复**，见下文终判。critical-thinking 来源见 skill-install.md 更正。
 
-### ai-readable-project（2026-08-13，全局）
+### ~~ai-readable-project~~（2026-09-19 已删除，思想并入 instruction-auditor）
 - 位置：`~/.claude/skills/ai-readable-project/`（SKILL.md + references/DESIGN.md + references/templates/ 3 模板）
 - 出处：腾讯技术工程微信文章《从胡言乱语到精准改代码：我是如何让 AI 读懂老项目的》（AI 上下文工程）提炼；设计决策见 references/DESIGN.md
 - 内容：让项目能被 AI 看懂——产出根 CLAUDE.md + AGENTS.md 知识索引 + 模块领域说明 + 长期维护规范；CLAUDE.md 用 `@AGENTS.md` 导入实现单源双生态（Claude Code 官方不读 AGENTS.md，只读 CLAUDE.md，@ 导入为官方推荐做法，不双写）
@@ -226,7 +227,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 ### learning-guide 配套归档
 - 学习记录归档流程，归档目录 `C:\ZYS\Wiki\80-records`（外部路径，迁移时另拷）
 
-### wiki-sediment + /wiki-save（2026-08-11，全局）
+### ~~wiki-sediment + /wiki-save~~（2026-09-19 已删除，用户拍板）
 - 位置：`~/.claude/skills/wiki-sediment/SKILL.md` + `~/.claude/commands/wiki-save.md`（全局，随 ~/.claude git 迁移——已加 .gitignore skills/ 白名单）
 - 出处：spec `C:\ZYS\Wiki\docs\superpowers\specs\2026-08-11-wiki-sediment-design.md`（原 commit 3cdfb7e 为 wiki 项目级，同日用户拍板改全局）
 - 内容：沉淀四路径（书籍→knowledge-note / 对话→learning-record / 错误→memory feedback / 仪表盘刷新），复用 wiki-structure 规约；wiki 目标路径硬编码 `C:\ZYS\Wiki`（迁机需改）
@@ -521,3 +522,24 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **未验证**：宿主在三条自动清理路径上保留工作树的行为取自 `claude.exe` 代码与审查者复核，未做端到端实测；eval case `worktree-closeout` 尚未跑 runner。
 - **已知缺口**：`~/.claude/docs/config-checklist.md` §2.1 与 `config-inventory.md` §1.3 记载的七个 PreToolUse 脚本（`git_guard.py`、`secret_guard.py`、`dep_gate.py`、`placeholder_guard.py`、`edited_tracker.py`、`verify_recorder.py`、`verify_gate.py`）在 `~/.claude/hooks/` 下均不存在，`settings.json` 也没有挂载 `PreToolUse`；两份文档尚未按实际状态改写。
 - **回退**：`SKILL.md` 与 `CHANGELOG.md` 恢复到 1.3.0 内容并重新加入钩子脚本与 `settings.json` 挂钩；`toolchain-pitfalls` 的删除项需从会话记录还原。
+
+### 自建 skill 精简批次（2026-09-19，用户逐项拍板）
+
+- **删除 `generic-course-tutor`**：`~/.claude/skills/generic-course-tutor/SKILL.md`（单文件），同步移除 `.gitignore` 白名单行 `!skills/generic-course-tutor/`。备份：`~/.claude/backups/skill-prune-20260919/skills/generic-course-tutor/`。
+- **删除 `ai-readable-project`，思想并入 `instruction-auditor`**：原 8 个文件（SKILL.md、evals ×2、references/DESIGN.md 与 refactor-roadmap.md、templates ×3）。并入内容为上下文工程四类上下文、产物结构、六步执行流程、完成条件、债务观察清单、`@AGENTS.md` 单源双生态文件策略、维护规则；三个模板移到 `instruction-auditor/references/templates/`。未并入：`references/refactor-roadmap.md`（重构五步路线属 code-change-workflow 域）。备份：`~/.claude/backups/skill-prune-20260919/skills/ai-readable-project/`。
+- **删除 `wiki-sediment`**：全局 `~/.claude/skills/wiki-sediment/` 是悬空指针，它指向的 `C:\ZYS\Wiki\.claude\skills\wiki-sediment\SKILL.md` 在此之前已不存在（Wiki 仓库 git status 记为未提交删除）。同时删除全局 `~/.claude/commands/wiki-save.md`；用户同日删除整个 `C:\ZYS\Wiki` 目录，Wiki 侧 `wiki-save` 命令随之消失。两份命令文件备份：`~/.claude/backups/skill-prune-20260919/commands/` 与 `wiki-commands/`。
+- **`content-to-note` 移回全局**：实体从 `C:\ZYS\Wiki\.claude\skills\content-to-note\` 移回 `~/.claude/skills/content-to-note\`（16 个源码文件 + `scripts/wechat/node_modules`，合计 12M），覆盖原指针 SKILL.md。SKILL.md 与 `references/note-template.md` 改写落盘约定：删除 wiki 固定目录（`71-公众号文章/`、`70-视频笔记/`）与仓库根 `.archive/`，改为**调用时由用户指定笔记目录**，未指定就不落盘、只输出到对话；归档目录默认取笔记目录下的 `.archive/<slug>/`。`.gitignore` 保留 `!skills/content-to-note/`，新增 `skills/content-to-note/scripts/wechat/node_modules/` 排除，12M 依赖不入 git。
+- **`bidirectional-steelman` 触发条件重写**：原 description 只暴露「用户明确要求方案对比」一条路径，并写着「普通『该不该/哪个好』问答不触发」，与正文触发范围（「该不该」「值不值得」「哪个好」「怎么办」问句触发）直接矛盾，这是它在真实决策场景从不触发的直接原因。description 改为把三类未决取舍纳入触发，负向边界收为「只有唯一可验证答案的事实问题、方案已定的执行任务、用户要求直接给结论」。版本标记 v1.1.0 → v1.2.0。正文未改。
+- **验证**：`content-to-note` 的 `python -m pytest tests` → 26 passed；`check_environment.py --json` 核心路线 OK（Python 3.12.10、脚本齐全、ffmpeg 与 yt-dlp 在位；funasr 缺失属增强路线）；wechat 依赖 `node -e require('cheerio'/'dayjs'/'qs')` 加载正常。`git status -- skills/` 确认三处删除、三处修改、新增文件目录正确，无 node_modules 泄漏。`instruction-auditor` 与 `bidirectional-steelman` 的新 description 已被宿主热加载（会话内实证）。
+- **未验证**：`content-to-note` 新落盘约定的真实执行（需要一次真实链接提取）；`instruction-auditor` 第一部分未在真实项目上跑过；`bidirectional-steelman` 新触发条件是否在真实决策场景命中，需后续观察。
+- **回退**：三个删除项从 `~/.claude/backups/skill-prune-20260919/` 复制回原位，并恢复 `.gitignore` 白名单行；`content-to-note` 的项目实体可从 Wiki git 仓库历史取回；`bidirectional-steelman` 的 description 恢复为 v1.1.0 文本。
+
+### 自建 skill 目录统一加 `-by-user` 后缀（2026-09-19，用户拍板）
+
+- **决策**：用户要求「从名称就能知道这是我自建的」。全局 `~/.claude/skills/` 下 17 个自建 skill 目录全部改名加 `-by-user` 后缀；第三方与插件 skill 不加（插件 skill 在宿主里本来带 `插件名:` 前缀，天然可分）。
+- **未加后缀的第三方**：`agent-browser`（junction 到 npm 包）、`agent-reach`、`archify`、`eli5`、`leader`。
+- **改名清单**：`ai-product-development`、`article-writer`、`awesome-design-md`、`bidirectional-steelman`、`cc-switch-setting-sync`、`code-change-workflow`、`company-discovery-evaluation`、`content-to-note`、`drawio-article-illustration`、`drawio-chart`、`improver-skill`、`install-ledger`、`instruction-engineering`、`parallel-delegation`、`skill-auditor`、`skill-trimmer`、`toolchain-pitfalls` 各自加 `-by-user`。
+- **改动范围**：17 个目录改名 + 各自 `SKILL.md` 的 frontmatter `name:` 与正文自指；`.gitignore` 白名单 17 行与 node_modules 排除路径；全局 `CLAUDE.md` §8 尾部两处引用；`hooks/settings-sync-auto.py` 的同步脚本绝对路径（不改会让 PostToolUse 同步失效）；`external-configs/README.md`；`skills/leader/SKILL.md`（第三方 skill 对 `parallel-delegation` 的转介）；各 skill 的 evals/cases、references、test-prompts 里的互指。
+- **保留原名的部分**：`skill-trimmer` 的状态目录名与 `skill-trimmer-workspace`、`review_server.py` 与 `scan_skills.py` 里的 `[skill-trimmer]` 日志前缀和 state root 目录名（内部程序标识，改了会让已有状态数据失联）；`CHANGELOG.md` 与台账历史条目（记录当时事实）；`drawio-chart` 示例 XML 的 `agent="drawio-chart"` 属性。
+- **验证**：`content-to-note-by-user` 的 `python -m pytest tests` → 26 passed；`settings-sync-auto.py` 指向的 `sync_claude_common.py` 路径实测存在；全仓 grep 排除历史文档与 CHANGELOG 后无残留旧名；宿主已热加载新名字。
+- **回退**：目录名去掉后缀，`.gitignore` 白名单与 `hooks/settings-sync-auto.py` 路径还原；`CLAUDE.md`、`external-configs/README.md` 与各 skill 内互指按本条逐项还原。

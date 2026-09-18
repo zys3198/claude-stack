@@ -1,0 +1,28 @@
+schema_version: "1.0"
+name: route-library-trim
+description: 整个 Skill 库的留删和生命周期治理应转交 skill-trimmer-by-user，不应进入 improver-skill-by-user 的单个候选迭代流程。
+tags: [negative, routing, boundary]
+execution:
+  prompt: |
+    我想盘点整个 Skill 库，判断哪些 Skill 应保留、收窄、归档或移除。
+    不要记录 Trace、提出候选或执行 gate；只判断 improver-skill-by-user 是否负责，并给出正确转介路径。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: trim-route
+    target: last_message
+    pattern: skill-trimmer-by-user
+    match: contains
+  - type: regex
+    name: improver-boundary
+    target: last_message
+    pattern: 不负责|不应由 improver-skill-by-user
+    match: contains
+  - type: regex
+    name: no-apply
+    target: last_message
+    pattern: 不.*apply|不.*gate|不.*候选
+    match: contains

@@ -1,0 +1,20 @@
+schema_version: "1.0"
+name: bug-fix
+description: bug 修复先定位根因并检查所有调用方，不修症状。
+tags: [behavior]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    用 code-change-workflow-by-user 处理：src/login.go 的 login 函数偶发 panic，登录接口 500，帮我修一下。
+    环境事实：本机没有 Go 工具链，禁止尝试 go 命令；不要派 Agent 子代理。请检查全部调用方、定位根因，用 Edit 做最小修复，并在最终回复中写明根因。
+  max_turns: 10
+  model: claude-haiku-4-5
+  allowed_tools: [Read, Glob, Grep, Edit]
+runs: 1
+graders:
+  - type: regex
+    name: mentions-root-cause
+    target: last_message
+    pattern: 根因
+    match: contains

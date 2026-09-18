@@ -161,9 +161,9 @@
 
 ## 4. 插件（enabledPlugins + marketplaces）
 
-启用 **23 个**（来自 13 marketplace：12 GitHub + 1 本地 directory）。`installed_plugins.json` 记 23 条。
+启用 **22 个**（来自 12 marketplace：11 GitHub + 1 本地 directory）。`installed_plugins.json` 记 22 条。
 
-### 4.1 启用插件（23）
+### 4.1 启用插件（22）
 
 | 插件 | 来源 marketplace | 用途速记 |
 |------|-----------------|----------|
@@ -188,10 +188,9 @@
 | `open-code-review@open-code-review` | open-code-review | review 工具 |
 | `understand-anything@understand-anything` | understand-anything | 知识图谱 |
 | `i-have-adhd@i-have-adhd` | i-have-adhd | ADHD 辅助 |
-| `better-harness@better-harness` | better-harness | harness 增强 |
 | `taste-skill@taste-skill` | taste-skill（本地 directory） | taste 设计 |
 
-### 4.2 marketplaces（`known_marketplaces.json` 13 个）
+### 4.2 marketplaces（`known_marketplaces.json` 12 个）
 
 | marketplace | 来源 |
 |-------------|------|
@@ -205,7 +204,6 @@
 | `open-code-review` | github: alibaba/open-code-review |
 | `understand-anything` | github: Egonex-AI/Understand-Anything |
 | `i-have-adhd` | github: ayghri/i-have-adhd |
-| `better-harness` | github: QoderAI/better-harness |
 | `minimalist-entrepreneur` | github: slavingia/skills（marketplace 在，无启用插件） |
 | `taste-skill` | **directory: `C:\ZYS\Code\lab-area\taste-skill`**（唯一本地） |
 
