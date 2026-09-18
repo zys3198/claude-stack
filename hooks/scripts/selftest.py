@@ -12,6 +12,7 @@ import stat
 import subprocess
 import sys
 import contextlib
+import tempfile
 import time
 from pathlib import Path
 
@@ -333,12 +334,19 @@ def test_session_guard():
     check("会话字段缺失时不崩溃", "会话卫生" in out_nokey, out_nokey)
     sg.active_sessions = lambda: []
 
-    out_other = run_hook(sg, "handle_start", {"cwd": str(SANDBOX), "session_id": "me"})
-    check("非 git 目录静默", out_other == "", out_other)
+    # 沙箱建在机制自己的仓库里，git 会向上找到那个仓库，
+    # 所以非 git 目录要用仓库之外的空目录来试
+    outside_repo = Path(tempfile.gettempdir()) / f"session-guard-{os.urandom(4).hex()}"
+    outside_repo.mkdir()
+    try:
+        out_other = run_hook(sg, "handle_start", {"cwd": str(outside_repo), "session_id": "me"})
+        check("非 git 目录静默", out_other == "", out_other)
+    finally:
+        outside_repo.rmdir()
 
     out_claude = run_hook(sg, "handle_start",
                           {"cwd": str(Path.home() / ".claude"), "session_id": "me"})
-    check("~/.claude 静默", out_claude == "", out_claude)
+    check("机制自己的仓库按普通仓库汇报", "会话卫生" in out_claude, out_claude)
 
     out_wt = run_hook(sg, "handle_start",
                       {"cwd": str(TREES / "sample-hold"), "session_id": "me"})
@@ -463,6 +471,10 @@ def test_prune_handoff(sg, handoff):
 
 def test_session_status():
     st = load("session-status")
+    # 不写这一行会去读真实的 ~/.claude/session-handoff.jsonl，
+    # 断言就跟着机器上的实际内容走
+    st.HANDOFF = SANDBOX / "handoff-status.jsonl"
+    st.HANDOFF_DIR = SANDBOX / "handoff-status.d"
     root = git(["rev-parse", "--show-toplevel"], REPO).strip()
 
     prefix = st.worktree_prefix(root)
@@ -518,6 +530,64 @@ def test_session_status():
     check("降级时提示不要据此删除", "不要据此删除" in text3, text3[:400])
 
 
+def test_handoff_ts_guard():
+    # 收尾记录可能被手工编辑，时间戳缺字段或类型不对时，
+    # 计数照常、明细跳过，不能让整个状态汇总崩掉
+    st = load("session-status")
+    root = git(["rev-parse", "--show-toplevel"], REPO).strip()
+    handoff = SANDBOX / "handoff-ts.jsonl"
+    st.HANDOFF = handoff
+    st.HANDOFF_DIR = SANDBOX / "handoff-ts.d"
+    handoff.write_text(
+        json.dumps({"ts": time.time(), "repo": root, "cwd": str(REPO), "dirty": 3}) + "\n"
+        + json.dumps({"repo": root, "cwd": str(REPO), "dirty": 5}) + "\n"
+        + json.dumps({"ts": "2026-01-01", "repo": root, "cwd": str(REPO), "dirty": 2}) + "\n",
+        encoding="utf-8")
+
+    text = run_status(st, root, sessions=[])
+    check("缺时间戳的记录不让状态汇总崩溃", "上次会话留下的未提交改动 3 条" in text, text[-500:])
+    # 有效时间戳那条的改动数是 3，缺字段与非法字段两条分别是 5 和 2；
+    # 后两个数字出现在明细里就说明跳过逻辑没生效
+    check("缺时间戳与非数值时间戳的记录都不打印明细",
+          "3 处" in text and "2 处" not in text and "5 处" not in text, text[-400:])
+
+
+def test_guard_global_options():
+    # git 的全局选项里吃下一个词的项，取值不能被当成子命令位置
+    pg = load("product-guard")
+    root = git(["rev-parse", "--show-toplevel"], REPO).strip()
+    outside = str(Path(SANDBOX) / "outside-wt")
+
+    def denied(command):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            pg.check_worktree_add(command, root)
+        return "permissionDecision" in buf.getvalue()
+
+    for command, label in (
+        (f"git --git-dir .git worktree add {outside}", "--git-dir 空格形式"),
+        (f"git -c core.x=1 worktree add {outside}", "-c 带值"),
+        (f"git --work-tree=. worktree add {outside}", "--work-tree 等号形式"),
+        (f"git --namespace=x worktree add {outside}", "--namespace 等号形式"),
+    ):
+        check(f"全局选项后仍判出越界：{label}", denied(command), command)
+
+    for command, label in (
+        (f"git --git-dir .git worktree add .claude/worktrees/ok", "--git-dir 加合规目标"),
+        (f"git -c core.x=1 worktree add .claude/worktrees/ok", "-c 加合规目标"),
+        ("git --git-dir=.git status", "加选项的只读命令"),
+    ):
+        check(f"全局选项不误拒：{label}", not denied(command), command)
+
+    # heredoc 的正文是数据。提交消息里出现命令字样时不能当成执行
+    message = ("说明：下面这行是文档正文，git worktree add " + outside + " 只是举例\n"
+               + f"cat <<'MSG' 用的结束标记是 MSG\n")
+    command = "git commit -q -F - <<'MSG'\n" + message + "MSG"
+    check("提交消息正文里的命令字样不被当成执行", not denied(command), command[:200])
+    check("heredoc 之外的真实越界命令仍然拦住",
+          denied(f"cat <<'EOF'\n说明文字\nEOF\ngit worktree add {outside}"), "")
+
+
 def run_status(st, root, sessions):
     st.active_sessions = (lambda: sessions) if sessions is not None else (lambda: None)
     st.sys.argv = ["session-status.py", root]
@@ -547,6 +617,8 @@ try:
     test_product_guard()
     test_session_guard()
     test_session_status()
+    test_handoff_ts_guard()
+    test_guard_global_options()
 finally:
     cleanup()
 
