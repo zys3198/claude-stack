@@ -5,6 +5,7 @@ description: >-
   用户分享 mp.weixin.qq.com / bilibili.com / b23.tv / v.douyin.com / douyin.com
   链接，或说「提取/整理/做笔记/存一下这篇/记成笔记」时触发。纯网页文章（Jina Reader
   路线）、只要口头摘要不落盘、本地已有内容不触发。
+disable-model-invocation: true
 ---
 # content-to-note-by-user
 

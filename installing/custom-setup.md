@@ -547,3 +547,10 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **保留原名的部分**：`skill-trimmer` 的状态目录名与 `skill-trimmer-workspace`、`review_server.py` 与 `scan_skills.py` 里的 `[skill-trimmer]` 日志前缀和 state root 目录名（内部程序标识，改了会让已有状态数据失联）；`CHANGELOG.md` 与台账历史条目（记录当时事实）；`drawio-chart` 示例 XML 的 `agent="drawio-chart"` 属性。
 - **验证**：`content-to-note-by-user` 的 `python -m pytest tests` → 26 passed；`settings-sync-auto.py` 指向的 `sync_claude_common.py` 路径实测存在；全仓 grep 排除历史文档与 CHANGELOG 后无残留旧名；宿主已热加载新名字。
 - **回退**：目录名去掉后缀，`.gitignore` 白名单与 `hooks/settings-sync-auto.py` 路径还原；`CLAUDE.md`、`external-configs/README.md` 与各 skill 内互指按本条逐项还原。
+
+### content-to-note 改为仅手动调用（2026-09-20，用户拍板）
+
+- **改动**：`~/.claude/skills/content-to-note-by-user/SKILL.md` 的 frontmatter 新增 `disable-model-invocation: true`；模型不再按「分享公众号/B站/抖音链接」自动加载，改由用户显式调用 `/content-to-note-by-user`。
+- **未改动**：description、正文触发说明、`scripts/`、`references/`、`.gitignore` 白名单。
+- **验证**：frontmatter 读回 1 处 `disable-model-invocation: true`；全库 grep 无其他文件引用本 skill 的自动触发路径。宿主侧生效需新会话加载 skill 清单后复核（同批次已有 10 个带该字段的自建 skill 在本机清单中均不出现）。
+- **回退**：删除该行即恢复自动触发。
