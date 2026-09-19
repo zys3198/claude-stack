@@ -23,7 +23,7 @@
 | ppt-master | https://github.com/hugohe3/ppt-master | marketplace 存在；插件禁用 |
 | anthropic-agent-skills | https://github.com/anthropics/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
 | ecc | https://github.com/affaan-m/ECC | 已移除；当前 `known_marketplaces.json` 无记录 |
-| karpathy-skills | https://github.com/forrestchang/andrej-karpathy-skills | 已移除（2026-09-18）；当前 `known_marketplaces.json` 无记录 |
+| karpathy-skills | https://github.com/forrestchang/andrej-karpathy-skills | 已移除（2026-09-19 二次）；当前 `known_marketplaces.json` 无记录 |
 | understand-anything | https://github.com/Egonex-AI/Understand-Anything | **已删 2026-08-18（二次）**：08-17 首删后插件文件+settings 注册被某机制回拉复活（原因未查明，疑插件同步），今日按 wayfinder ticket 02 拍板再删——settings.json 去 enabledPlugins+marketplace 注册、删 plugins/{marketplaces,cache,data}/understand-anything*、WORKFLOW_QUICKREF.md 引用改 gitnexus/lean-ctx。恢复=`claude plugin install understand-anything@understand-anything` 后重加 marketplace |
 | i-have-adhd | https://github.com/ayghri/i-have-adhd | 已移除；当前 `known_marketplaces.json` 无记录 |
 | minimalist-entrepreneur | https://github.com/slavingia/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
@@ -42,6 +42,7 @@
 - 禁用：`frontend-design@claude-plugins-official`、`open-code-review@open-code-review`、`playwright@claude-plugins-official`
 - 低频插件复核（`claude plugin list`，2026-09-04）：以上 3 个插件均禁用。
 - 2026-09-18 更新：`andrej-karpathy-skills@karpathy-skills` 已卸载（插件与 marketplace 一并移除），详见下方条目。
+- 2026-09-19 更新：`andrej-karpathy-skills@karpathy-skills` 二次卸载。09-18 卸载后于 09-19 22:03 复活重装，根因是 cc-switch 当前 provider 快照回写，详见下方「二次卸载」条目。
 - 2026-09-19 更新：`better-harness@better-harness` 已卸载（插件与 marketplace 一并移除），详见下方条目。
 
 ### andrej-karpathy-skills 1.0.0（2026-09-12）
@@ -49,7 +50,7 @@
 - 安装命令原文：`claude plugin marketplace add --scope user forrestchang/andrej-karpathy-skills`；`claude plugin install andrej-karpathy-skills@karpathy-skills --scope user --yes`
 - 装到哪：`C:\Users\zys31\.claude\plugins\cache\karpathy-skills\andrej-karpathy-skills\1.0.0`
 - 依赖：无额外依赖
-- 当前状态：已于 2026-09-18 卸载，见下方「andrej-karpathy-skills 卸载」条目
+- 当前状态：已于 2026-09-18 卸载、2026-09-19 二次卸载，见下方两条卸载条目
 - 备注：插件提供 `karpathy-guidelines` skill；全局 `CLAUDE.md` 已删除对应重复规则，保留全局专属约束。cc-switch 已同步，备份：`C:\Users\zys31\.cc-switch\backups\sync-backup-20260912_201838.json`
 - 恢复：`claude plugin uninstall andrej-karpathy-skills@karpathy-skills --scope user --yes`；`claude plugin marketplace remove karpathy-skills`
 
@@ -71,6 +72,26 @@
   - 新增 §2.1「实现复杂度」4 条：只实现被要求的功能、不为一次性代码建抽象、不加没被要求的灵活性与配置项扩展点、不为不可能场景写错误处理
   - 未采纳及理由：准则一「有更简单做法就说出来、该顶就顶」（与 §2.1 疑问句条款、§1.4 禁止无脑多方案冲突）；准则二「200 行能 50 行就重写」（与 §2.1「禁止简化任何设计」边界难划）；准则四全部（与 §2.3 成功标准、§4.2 交付自检重复）
 - 恢复：`claude plugin marketplace add --scope user forrestchang/andrej-karpathy-skills` → `claude plugin install andrej-karpathy-skills@karpathy-skills --scope user --yes` → 再跑同一 sync 脚本；`~/.claude/CLAUDE.md` 如需一并还原，删掉上述 §1.1 一条与 §2.1 两个小节
+
+### andrej-karpathy-skills 二次卸载（2026-09-19）
+
+- 触发：用户发现 09-18 卸载后复活。证据：`installed_plugins.json` 中 `installedAt=2026-09-19T14:04:06Z`，`known_marketplaces.json` 中 `karpathy-skills.lastUpdated=2026-09-19T14:03:07Z`（本地时间 22:03/22:04），均晚于 09-18 卸载
+- 根因：cc-switch 当前 provider `OpenCode Go` 的 `meta.commonConfigEnabled=false`。切换或重应用该 provider 时，cc-switch 直接用 `providers.settings_config` 快照覆盖 `~/.claude/settings.json`，不读 `settings.common_config_claude`。该 provider 快照内仍含 `enabledPlugins["andrej-karpathy-skills@karpathy-skills"]` 与 `extraKnownMarketplaces["karpathy-skills"]`，回写后 Claude Code 启动即重注册 marketplace 并重装插件
+- 09-18 卸载为何没拦住：`hooks/settings-sync-auto.py` 与 `sync_claude_common.py` 只维护 `settings.common_config_claude` 一个 key，既不触碰 `providers.settings_config`，也不触碰 `proxy_live_backup`。本次复活走的正是这两处
+- 本次覆盖范围：
+  1. `~/.cc-switch/cc-switch.db`：`providers[OpenCode Go].settings_config` 与 `proxy_live_backup.original_config` 两处删除上述两键；`settings.common_config_claude` 复查本就干净。整库备份 `~/.cc-switch/backups/karpathy-purge-20260919_222226.db`（写前 `shutil.copy2`）
+  2. `~/.claude/settings.json`：CLI 卸载已一并清除 `enabledPlugins` 与 `extraKnownMarketplaces` 中的该两条
+  3. `~/.claude/plugins/installed_plugins.json`、`known_marketplaces.json`：条目已删
+  4. `~/.claude/plugins/marketplaces/karpathy-skills/`：CLI 自动删除
+  5. `~/.claude/plugins/cache/karpathy-skills/`：CLI 只打 `.orphaned_at` 不删文件，手动 `Remove-Item -LiteralPath 'C:\Users\zys31\.claude\plugins\cache\karpathy-skills' -Recurse -Force`；无 `plugins/data/` 数据目录
+- 卸载命令原文：`claude plugin uninstall andrej-karpathy-skills@karpathy-skills --scope user --yes`；`claude plugin marketplace remove karpathy-skills`
+- 验证：SQL 直查三处（`settings.value`、`providers.settings_config`、`proxy_live_backup.original_config`）karpathy 命中数 0；`grep -c karpathy` 对 settings.json / installed_plugins.json / known_marketplaces.json 均为 0；cache 与 marketplaces 目录 `Test-Path` 为 False
+- 遗留风险：cc-switch 进程（PID 6948）运行中，若其内存仍缓存旧 provider 快照，下次切换 provider 可能再次回写。校验方式：切换后查 `~/.claude/settings.json` 是否再现 `karpathy`；再现则重启 cc-switch 载入新 DB 值后重删
+- 工具边界：`~/.claude/skills/cc-switch-setting-sync-by-user/scripts/sync_claude_common.py` 只同步 common 快照，**不覆盖 provider 快照与 proxy_live_backup**；后两者需按本次流程处理
+- 手动复现（无脚本版）：备份 db → 打开 `~/.cc-switch/cc-switch.db` → 删 `providers` 表 `app_type='claude'` 各行 `settings_config` JSON 内的 `enabledPlugins["andrej-karpathy-skills@karpathy-skills"]` 与 `extraKnownMarketplaces["karpathy-skills"]` → `proxy_live_backup.original_config` 同样处理 → UPDATE 回写 → SQL 复查
+- 恢复：`claude plugin marketplace add --scope user forrestchang/andrej-karpathy-skills` → `claude plugin install andrej-karpathy-skills@karpathy-skills --scope user --yes`
+- 未清理项：`~/.claude/docs/config-inventory.md`、`config-checklist.md`、`opencode-migration-plan.md`、`~/.claude/skill-trimmer-workspace/inventory-summary.md` 仍含该插件行。四份文件头各自已标「已废弃」或「历史文档」，按既有口径不改，权威口径以本台账为准
+- 关联异常（未处理）：`better-harness@better-harness` 于 2026-09-19 卸载且已不在 `known_marketplaces.json` / `installed_plugins.json`，但 `~/.claude/settings.json` 的 `enabledPlugins` 仍留 `"better-harness@better-harness": true`，与本次复活同一特征，待用户决定是否一并处理
 
 ### taste-skill 1.0.0（2026-09-04 恢复）
 - 来源：https://github.com/Leonxlnx/taste-skill
@@ -426,3 +447,13 @@
 - 依赖：Node.js、npm；Claude Code 运行时
 - 验证：`loopforge plan claude` 确认 `edition=classic host=claude files=85`；安装输出 `written=85 unchanged=0`；`loopforge status claude` 返回 `classic/claude: files=85 changed=0 missing=0`
 - 备注：项目集成文件写入 `C:\ZYS\Code\lab-area\.claude\`；启动命令为 `/start-devflow`
+
+### FunASR + kaldi-native-fbank（2026-09-20，Python 全局环境）
+- 来源：PyPI `funasr`、`modelscope`、`kaldi-native-fbank`；模型 `iic/SenseVoiceSmall`（ModelScope）
+- 安装日期：2026-09-20
+- 安装命令原文：`python -m pip install funasr modelscope`；随后补装 `python -m pip install kaldi-native-fbank`
+- 装到哪：`C:\Users\zys31\AppData\Local\Programs\Python\Python312\Lib\site-packages\`（funasr、modelscope、kaldi_native_fbank）
+- 依赖：Python 3.12（`C:\Users\zys31\AppData\Local\Programs\Python\Python312\python.exe`）、已有 `torch 2.12.1+cpu`；ffmpeg（`C:\Users\zys31\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_...\bin\ffmpeg.exe`）用于抽音频
+- 模型缓存：`C:\Users\zys31\.cache\modelscope\hub\models\iic\SenseVoiceSmall`（首次下载约 901MB）
+- 验证：`transcribe.py`（见 `C:\ZYS\Code\lab-area\.claude\tmp\douyin-notes\transcribe.py` 与 `exp\2026-09-20-douyin-content-notes\raw\transcribe.py`）对 16kHz 单声道 wav 转写成功，实测 rtf 0.098～0.114（CPU），103 秒音频耗时约 12 秒
+- 备注：装 funasr 后首次运行报 `ImportError: torchaudio is not installed and neither is the kaldi-native-fbank fallback backend`，补装 `kaldi-native-fbank` 解决；选它而非 torchaudio 是为了避免重装匹配 CPU 版 torch。脚本 print 到 GBK 控制台会抛 `UnicodeEncodeError`（SenseVoice 输出含 emoji），写文件不受影响

@@ -269,3 +269,11 @@
 - 装到哪：`C:\ZYS\Wiki\.claude\skills\openmaic\`，包含 `SKILL.md` 和 8 份 references；未安装到用户级目录。
 - 依赖：Claude Code 项目级 Skill 加载；课堂运行还需 OpenMAIC 托管访问码，或本地 OpenMAIC 仓库、依赖、Provider 配置和服务。
 - 备注：页面未说明本地知识库导入、同步或长期学习记录；Skill 采用逐阶段确认流程，不代用户写入 API Key。
+
+### openmaic（改迁到 Study 项目，2026-09-19）
+- 来源：https://open.maic.chat/docs/zh-cn/agent-workbench#%E5%AE%89%E8%A3%85；技能包：https://open.maic.chat/docs/openmaic-skill.zip；上游仓库：https://github.com/THU-MAIC/OpenMAIC
+- 安装日期：2026-09-19
+- 安装命令原文：`mkdir -p .claude/tmp && curl -fsSL -o .claude/tmp/openmaic-skill.zip https://open.maic.chat/docs/openmaic-skill.zip`；`cd .claude/tmp && unzip -o -q openmaic-skill.zip`；`mv .claude/tmp/openmaic .claude/skills/openmaic && rm -rf .claude/tmp`
+- 装到哪：`C:\ZYS\Study\.claude\skills\openmaic\`，含 `SKILL.md` 与 8 份 references（clone、extend、extend-cookbook、extend-sdk、generate-flow、live-demo、provider-keys、startup-modes）；未安装到用户级目录。
+- 依赖：Claude Code 项目级 Skill 加载（`SKILL.md` 的 `name: openmaic`、`user-invocable: true`）；课堂运行还需 OpenMAIC 托管访问码，或本地 OpenMAIC 仓库、依赖、Provider 配置和服务。
+- 备注：上一处 `C:\ZYS\Wiki` 项目已于 2026-09-19 整体删除，本条为该 skill 在新项目的落点。技能包与上游仓库 `skills/openmaic/` 目录结构一致。

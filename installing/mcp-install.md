@@ -55,3 +55,13 @@
 - 依赖：Node/npx
 - 备注：用途=查库/框架官方文档。同名插件版 `context7@claude-plugins-official` 也启用着（见 tool-install.md），两者并存。
 - **卸载（2026-08-09）**：与插件版 `plugin:context7:context7` 功能重复（resolve-library-id 实测两实例返回完全一致），清理冗余 user scope 实例、保留插件版。执行 `claude mcp remove a1b2c3d4-context7-mcp-001`。原样装回见上方"安装方法"。
+
+### douyin / douyin-mcp-server（2026-09-20，mcporter 注册）
+- 来源：https://github.com/yzfly/douyin-mcp-server （PyPI 包 `douyin-mcp-server`，pipx 安装，版本 1.2.1）
+- 安装日期：包本身早于本记录（pipx 已装）；注册日期 2026-09-20
+- 注册命令原文：`mcporter config add douyin --command "C:/Users/zys31/pipx/venvs/douyin-mcp-server/Scripts/douyin-mcp-server.exe" --scope home`
+- 装到哪：`C:\Users\zys31\.mcporter\mcporter.json`（home scope），条目 `{"douyin": {"command": "C:/Users/zys31/pipx/venvs/douyin-mcp-server/Scripts/douyin-mcp-server.exe"}}`
+- 依赖：Node/npm 提供的 `mcporter`（0.13.8）；pipx 包 `douyin-mcp-server`（venv 在 `C:\Users\zys31\pipx\venvs\douyin-mcp-server`）；`recognize_audio_*` 与 `extract_douyin_text` 需要环境变量 `DASHSCOPE_API_KEY`
+- 工具面（5 个）：`get_douyin_download_link`、`extract_douyin_text`、`parse_douyin_video_info`、`recognize_audio_file`、`recognize_audio_url`
+- 验证：`mcporter list` 显示 `douyin (5 tools)` healthy；`mcporter list douyin` 能打印 5 个工具的 schema
+- 备注：shared link 解析依赖 `https://www.iesdouyin.com/share/video/{id}` 页面的 `window._ROUTER_DATA`，2026-09-20 实测该页面已不再返回 `videoInfoRes`，`parse_douyin_video_info` 与 `get_douyin_download_link` 因此报 `'videoInfoRes'` KeyError。另一处缺陷：两个工具理论上不需要密钥，但构造函数仍调用 `create_asr_instance`，未设 `DASHSCOPE_API_KEY` 时直接抛 `未设置 DASHSCOPE_API_KEY`。本次实际提取改走浏览器路线（agent-browser 读取页面 + CDN 音频轨 + 本地 FunASR），详见 `exp/2026-09-20-douyin-content-notes/`
