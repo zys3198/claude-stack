@@ -12,7 +12,8 @@
  * with Claude Code's own precedence (env > settings), or the served model's own
  * window taken from the models.dev catalog via cc-switch-usage.js. That matches
  * the window Claude Code enforces and reports in /context. cc-switch's
- * coding-plan quota is appended from the same cache.
+ * coding-plan quota is appended from the same cache, and only while that cache
+ * still describes the provider cc-switch serves.
  */
 
 'use strict';
@@ -439,7 +440,8 @@ const QUOTA_WINDOWS = [
 /**
  * Render the active cc-switch provider's coding-plan quota, e.g.
  * "Usage h3% w16% m8%". Every window is a used percentage.
- * @param {object|null} cache - cc-switch usage cache
+ * @param {object|null} cache - cache for the currently served cc-switch
+ *   provider, or null when ownership is unproven
  * @returns {string} Colored segment, or empty when unavailable
  */
 function buildQuotaSegment(cache) {
@@ -482,7 +484,8 @@ function runStatusline() {
 
       // cc-switch provider identity + plan quota, refreshed by a detached child
       const usageCache = ccSwitchUsage.readCache();
-      if (ccSwitchUsage.isStale(usageCache)) refreshUsageInBackground();
+      const usageIsCurrent = ccSwitchUsage.isCurrent(usageCache);
+      if (!usageIsCurrent || ccSwitchUsage.isStale(usageCache)) refreshUsageInBackground();
       const cachedWindow = ccSwitchUsage.modelWindow(usageCache, model);
       const modelWindow = cachedWindow?.window || 0;
       const compactWindow = resolveAutoCompactWindow(modelWindow);
@@ -585,7 +588,7 @@ function runStatusline() {
           : '\x1b[31m[HEADROOM:DOWN]\x1b[0m';
       }
 
-      const usageStr = [ctx, hitStr, buildQuotaSegment(usageCache)].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
+      const usageStr = [ctx, hitStr, buildQuotaSegment(usageIsCurrent ? usageCache : null)].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
 
       // Build output
       const dirname = path.basename(dir);

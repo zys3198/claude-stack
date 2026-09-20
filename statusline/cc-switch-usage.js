@@ -254,30 +254,46 @@ function numberOrNull(value) {
 /**
  * Rebuild the cache. Records `attemptedAt` first so a crash mid-flight still
  * counts as an attempt and the statusline does not respawn every render.
+ * The entry is rebuilt from scratch: a quota fetched for the previous provider
+ * must never outlive the provider switch that invalidated it.
  */
 async function refresh() {
-  const previous = readCache();
-  writeJsonAtomic(CACHE_FILE, { ...previous, attemptedAt: Math.floor(Date.now() / 1000) });
+  const now = Math.floor(Date.now() / 1000);
+  writeJsonAtomic(CACHE_FILE, { attemptedAt: now });
 
   const provider = readProvider(currentProviderId());
-  const catalog = await loadCatalog();
-  const matched = matchCatalogProvider(provider, catalog);
 
   const entry = {
-    ...previous,
-    checkedAt: Math.floor(Date.now() / 1000),
-    attemptedAt: Math.floor(Date.now() / 1000),
+    checkedAt: now,
+    attemptedAt: now,
     providerId: provider.id,
     providerName: provider.name,
     baseUrl: provider.baseUrl,
     planProvider: provider.planProvider,
     model: provider.model,
-    modelWindowSource: matched ? `models.dev:${matched.id}` : null,
-    modelWindows: matched ? matched.models : {}
+    modelWindowSource: null,
+    modelWindows: {},
+    catalogError: null,
+    quota: null,
+    quotaError: null
   };
 
+  try {
+    const matched = matchCatalogProvider(provider, await loadCatalog());
+    entry.modelWindowSource = matched ? `models.dev:${matched.id}` : null;
+    entry.modelWindows = matched ? matched.models : {};
+  } catch (err) {
+    entry.catalogError = err.message;
+  }
+
   if (provider.planProvider) {
-    entry.quota = await fetchQuota(provider.planProvider, provider.apiKey);
+    // A quota the bridge cannot fetch leaves the entry without one; the
+    // statusline then renders no usage rather than the previous provider's.
+    try {
+      entry.quota = await fetchQuota(provider.planProvider, provider.apiKey);
+    } catch (err) {
+      entry.quotaError = err.message;
+    }
   }
   writeJsonAtomic(CACHE_FILE, entry);
   return entry;
@@ -294,7 +310,23 @@ function modelWindow(cache, model) {
   return window ? { window, source: cache.modelWindowSource } : null;
 }
 
-module.exports = { readCache, isStale, modelWindow, refresh, CACHE_FILE, REFRESH_TTL_MS };
+/**
+ * Whether a cache entry describes the provider cc-switch currently serves.
+ * A cache whose provider cannot be read is treated as not current, so a stale
+ * quota is never rendered as if it belonged to the served subscription.
+ * @param {object|null} cache
+ * @returns {boolean}
+ */
+function isCurrent(cache) {
+  if (!cache?.providerId) return false;
+  try {
+    return cache.providerId === currentProviderId();
+  } catch {
+    return false;
+  }
+}
+
+module.exports = { readCache, isStale, isCurrent, modelWindow, refresh, CACHE_FILE, REFRESH_TTL_MS };
 
 if (require.main === module) {
   refresh()
