@@ -57,8 +57,14 @@ WRITE_COMMANDS = {"tee", "cp", "mv"}
 # sed 只有带 -i 时才写回原文件，不带 -i 是只读过滤。
 INPLACE_COMMANDS = {"sed"}
 
-COMPOSE_VERBS = {"up", "down", "create", "start", "restart", "stop", "kill", "rm", "run"}
+COMPOSE_VERBS = {"up", "down", "create", "start", "restart", "stop", "kill", "rm", "run", "build"}
 DOCKER_VERBS = {"create", "start", "restart", "stop", "kill", "rm", "run", "update"}
+# docker 的全局选项出现在子命令之前，其中这些会吃掉下一个词。漏登记一项会让它的取值
+# 被当成子命令，整个 docker 段因此被跳过（实测 docker -H tcp://... restart <容器> 能绕过）。
+DOCKER_GLOBAL_OPTS_WITH_VALUE = {
+    "-H", "--host", "-c", "--context", "--config", "-l", "--log-level",
+    "--tlscacert", "--tlscert", "--tlskey",
+}
 # docker container restart X、docker volume rm X 这类写法在动词前多一层名词。
 DOCKER_OBJECT_NOUNS = {"container", "volume", "image", "network", "service"}
 # 会改变当前目录的命令，用来推断不带 -p/-f 的整项目命令作用于哪个项目。
@@ -105,6 +111,9 @@ ENV_ASSIGN = re.compile(r"^\w+=")
 # shlex 因引号不闭合拆不开时的兜底切分：shell 控制符与普通词各自成词，
 # 形态与 punctuation_chars 的正常输出一致，下游判据不需要区分两种来源。
 FALLBACK_TOKENS = re.compile(r"[;&|()<>]+|[^\s;&|()<>]+")
+# 行末反斜杠续行：单个反斜杠把下一行接上来，两行合起来才是同一条命令。
+# 前面已经有反斜杠时那是字面反斜杠，不构成续行。
+CONTINUATION = re.compile(r"(?<!\\)\\\n")
 
 DOCKER_TIMEOUT = 10
 AGENTS_TIMEOUT = 20
@@ -238,7 +247,8 @@ def split_tokens(command):
     # 或用分号连接时，第二行起首的工具链名字取不到起首位置。
     # punctuation_chars 让 shlex 把 ; | & ( ) < > 各自成词，同时保留引号语义，
     # 因此引号里的分号不会被子句切分。
-    text = strip_heredoc_bodies(command).replace("\n", ";").replace("\r", ";")
+    text = CONTINUATION.sub("", strip_heredoc_bodies(command))
+    text = text.replace("\n", ";").replace("\r", ";")
     tokens = lex(text)
     if tokens is not None:
         return tokens
@@ -274,7 +284,14 @@ def payload_after(tokens, i, name):
     j = i + 1
     while j < len(tokens) and not is_control(tokens[j]):
         if is_shell_c_flag(name, tokens[j]):
-            return tokens[j + 1] if j + 1 < len(tokens) else None
+            # 开关之后到子句结束全是载荷。cmd /c 与不带引号的 powershell -Command
+            # 后面跟的是整条命令，只取一个词会漏掉后面的动词与目标。
+            rest = []
+            for t in tokens[j + 1:]:
+                if is_control(t):
+                    break
+                rest.append(t)
+            return " ".join(rest) or None
         j += 1
     return None
 
@@ -466,14 +483,36 @@ def check_compose_write(command, cwd):
 def scan_docker(tokens, out):
     # 扫一遍拆好的词，把每一处 docker 变更动作作用的对象写进 out，返回是否匹配到变更动作。
     matched = False
+    pipe_words = set()
+    seg = []
     i = 0
     while i < len(tokens):
+        token = tokens[i]
+        # 记下管道左侧段里出现过的词，供 xargs 取参；碰到子句分隔符就清空。
+        if is_control(token):
+            if token == "|":
+                pipe_words |= set(seg)
+            else:
+                pipe_words = set()
+            seg = []
+        else:
+            seg.append(token)
         # 只认命令起首位置的 docker。提交消息、配置文件正文里出现的 docker 字样
         # 不在起首位置，不会被当成真的执行。
-        if is_docker_token(tokens[i]) and starts_command(tokens, i):
+        if is_docker_token(token) and starts_command(tokens, i):
+            if "xargs" in {command_name(t) for t in seg[:-1]}:
+                # xargs 把标准输入里的词追加到命令末尾（echo 容器名 | xargs docker restart），
+                # 追加部分静态看不到，改用管道左侧出现过的词当候选，多收词只会多问一次。
+                out["containers"].update(pipe_words)
             i += 1
             while i < len(tokens) and tokens[i].startswith("-") and not is_control(tokens[i]):
-                i += 1
+                key, sep, _ = tokens[i].partition("=")
+                if not sep and key in DOCKER_GLOBAL_OPTS_WITH_VALUE and i + 1 < len(tokens):
+                    # 全局选项里有一部分要吃下一个词（-H tcp://... ），不消费取值
+                    # 会把取值当成子命令，整个 docker 段因此被跳过
+                    i += 2
+                else:
+                    i += 1
             if i >= len(tokens):
                 break
             # docker container restart X、docker volume rm X 在动词前多一层名词
@@ -595,6 +634,12 @@ def hit_entries(targets, entries):
     dirs.discard(None)
     for entry in entries:
         if entry["container"] in targets["containers"]:
+            hits.append(entry)
+            continue
+        # 一次性容器名字带随机后缀，登记时给不出完整名字，容器名按前缀认，
+        # 与 is_running 保持一致；少了这半边，命中的半边等于没登记。
+        prefix = entry.get("container_prefix")
+        if prefix and any(name.startswith(prefix) for name in targets["containers"]):
             hits.append(entry)
             continue
         service = entry.get("service")

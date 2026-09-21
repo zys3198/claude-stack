@@ -374,6 +374,116 @@ with tempfile.TemporaryDirectory() as tmp:
         "command": "docker compose -f deploy/docker-compose.local.yml config"}})
     check("docker 只读子命令不因文件名提问", (decision(out), rc), (None, 0))
 
+# --- 绕过路径（F3 至 F8） ---
+# docker 的全局选项排在子命令之前，其中一部分要吃下一个词。不消费取值时它的取值
+# 会被当成子命令，整个 docker 段因此被跳过。
+check("--context 吃取值",
+      sorted(g.docker_targets("docker --context default restart deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("--context= 等号写法",
+      sorted(g.docker_targets("docker --context=default restart deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("-H 吃取值",
+      sorted(g.docker_targets("docker -H tcp://127.0.0.1:2375 restart deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("--log-level 吃取值",
+      sorted(g.docker_targets("docker --log-level debug restart deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("取值不看成子命令",
+      g.docker_targets("docker --context default ps -a", "."), None)
+
+# 行末反斜杠把下一行接上来，两行合起来才是同一条命令
+check("反斜杠续行接上第二行",
+      sorted(g.docker_targets("docker restart \\\n  deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("续行之后的容器名照取",
+      sorted(g.docker_targets("docker \\\n  restart \\\n  deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("翻倍的反斜杠不算续行",
+      sorted(g.docker_targets("echo a \\\\\ndocker restart deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+
+# cmd /c 与不带引号的 powershell -Command 后面跟的是整条命令
+check("cmd /c 后面整段都是载荷",
+      sorted(g.docker_targets("cmd /c docker restart deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("cmd //c 后面整段都是载荷",
+      sorted(g.docker_targets("cmd //c docker stop deploy-nginx-1", ".")["containers"]),
+      ["deploy-nginx-1"])
+check("powershell -Command 后面整段都是载荷",
+      sorted(g.docker_targets('powershell -Command docker restart deploy-nginx-1', ".")["containers"]),
+      ["deploy-nginx-1"])
+
+# xargs 把标准输入里的词追加到命令末尾，追加部分静态看不到
+check("xargs 从管道左侧取容器名",
+      sorted(g.docker_targets("echo deploy-nginx-1 | xargs docker restart", ".")["containers"]),
+      ["deploy-nginx-1", "echo"])
+check("xargs 带选项时也取得到",
+      sorted(g.docker_targets("echo deploy-nginx-1 | xargs -I{} docker stop {}", ".")["containers"]),
+      ["deploy-nginx-1", "echo", "{}"])
+check("换个子句后管道左侧的词不再沿用",
+      sorted(g.docker_targets("echo deploy-nginx-1 | cat; xargs docker restart", ".")["containers"]),
+      [])
+
+# compose 的 build 会把镜像换掉，算变更动作
+check("compose build 取服务名",
+      sorted(g.docker_targets(
+          "docker compose -f deploy/docker-compose.local.yml build backend-java", ".")["services"]),
+      ["backend-java"])
+check("compose build 不带服务名",
+      g.docker_targets("docker compose -f deploy/docker-compose.local.yml build", ".")["all_services"],
+      True)
+
+PREFIXED = [
+    {"container": "deploy-frontend-build-run-*",
+     "container_prefix": "deploy-frontend-build-run-", "service": "frontend-build",
+     "project": "deploy", "label": "构建"},
+]
+t = g.docker_targets("docker stop deploy-frontend-build-run-68c0c66bbee6", ".")
+check("一次性容器按前缀命中条目", [e["container"] for e in g.hit_entries(t, PREFIXED)],
+      ["deploy-frontend-build-run-*"])
+t = g.docker_targets("docker stop deploy-frontend-build-1", ".")
+check("前缀对不上时不命中", g.hit_entries(t, PREFIXED), [])
+
+with tempfile.TemporaryDirectory() as tmp:
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker --context default restart deploy-nginx-1"}})
+    check("--context 绕过时仍提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker -H tcp://127.0.0.1:2375 restart deploy-nginx-1"}})
+    check("-H 绕过时仍提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker restart \\\n  deploy-nginx-1"}})
+    check("续行绕过时仍提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "cmd /c docker restart deploy-nginx-1"}})
+    check("cmd /c 绕过时仍提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "echo deploy-nginx-1 | xargs docker restart"}})
+    check("xargs 绕过时仍提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker stop deploy-frontend-build-run-68c0c66bbee6"}},
+        prefix_patch({"deploy-frontend-build-run-68c0c66bbee6"}))
+    check("按容器名停一次性容器时提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker stop deploy-frontend-build-run-68c0c66bbee6"}},
+        prefix_patch({"deploy-chroma-1"}))
+    check("一次性容器没在跑时不提问", decision(out), None)
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker compose -f deploy/docker-compose.local.yml build nginx"}})
+    check("compose build 独占服务时提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker compose -f deploy/docker-compose.local.yml build redis"}})
+    check("compose build 别的服务不提问", decision(out), None)
+
 # --- 宿主工具链判据（拆词层） ---
 check("pnpm 在起首位置", g.host_toolchain("pnpm build"), "pnpm")
 check("控制符之后的 pnpm", g.host_toolchain("cd code/frontend && pnpm install"), "pnpm")
