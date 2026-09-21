@@ -2,18 +2,16 @@
 /**
  * ECC Statusline — statusLine command
  *
- * Displays: model[plan] | task | $cost Nt Nf Nm | dir | branch | +N *N ?N !N ↑N ↓N |
- * Ctx <used>k/<budget>k <pct> | Hit N% | plan quota
+ * Displays: model[plan] | $cost Nt Nf Nm | dir | branch | +N *N ?N !N ↑N ↓N |
+ * Ctx <used>k | Hit N% | plan quota
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
  *
- * The context budget is whichever is tighter: the auto-compact window resolved
- * with Claude Code's own precedence (env > settings), or the served model's own
- * window taken from the models.dev catalog via cc-switch-usage.js. That matches
- * the window Claude Code enforces and reports in /context. cc-switch's
- * coding-plan quota is appended from the same cache, and only while that cache
- * still describes the provider cc-switch serves.
+ * The context budget is the one Claude Code hands over in the payload as
+ * context_window.context_window_size — the window it enforces and reports in
+ * /context. cc-switch's coding-plan quota is appended from the usage cache,
+ * and only while that cache still describes the provider cc-switch serves.
  */
 
 'use strict';
@@ -55,81 +53,17 @@ function formatTokens(n) {
 }
 
 /**
- * Parse a token count from a number or a settings string like "372000",
- * "372k" or "1m".
- * @param {number|string} value
- * @returns {number|null}
- */
-function parseTokenCount(value) {
-  if (typeof value === 'number') return Number.isFinite(value) && value > 0 ? value : null;
-  const match = String(value ?? '').trim().match(/^(\d+(?:\.\d+)?)\s*([km])?$/i);
-  if (!match) return null;
-  const scale = { k: 1000, m: 1000000 }[match[2]?.toLowerCase()] || 1;
-  const n = Number(match[1]) * scale;
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
-
-function isTruthyEnv(value) {
-  return value !== undefined && value !== '' && value !== '0' && value.toLowerCase() !== 'false';
-}
-
-const AUTO_COMPACT_MIN = 100000;
-const AUTO_COMPACT_MAX = 1000000;
-
-/**
- * Read the auto-compact window from settings.json. Only consulted when the
- * environment variable is absent, matching Claude Code's precedence.
- * @returns {number|string|undefined}
- */
-function readSettingAutoCompactWindow() {
-  try {
-    const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-    const settings = JSON.parse(fs.readFileSync(path.join(claudeDir, 'settings.json'), 'utf8'));
-    return settings.autoCompactWindow;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Resolve the auto-compact window the way Claude Code does
- * (resolveAutoCompactWindow precedence: env > settings > ...), clamped to the
- * model window. The env value is additionally bounded to [100k, 1M] and raised
- * to the 100k floor; the settings value is used as written.
- * @param {number} modelWindow - Served model's window, 0 when unresolved (no clamp)
- * @returns {number|null} Window in tokens, or null when unconfigured/disabled
- */
-function resolveAutoCompactWindow(modelWindow) {
-  if (isTruthyEnv(process.env.DISABLE_COMPACT) || isTruthyEnv(process.env.DISABLE_AUTO_COMPACT)) return null;
-
-  const bound = modelWindow > 0 ? modelWindow : Infinity;
-
-  const fromEnv = parseTokenCount(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW);
-  if (fromEnv !== null) {
-    const configured = Math.max(AUTO_COMPACT_MIN, Math.min(AUTO_COMPACT_MAX, fromEnv));
-    return Math.min(bound, configured);
-  }
-
-  const fromSettings = parseTokenCount(readSettingAutoCompactWindow());
-  if (fromSettings !== null) return Math.min(bound, fromSettings);
-
-  return null;
-}
-
-/**
- * Build the context segment: used tokens over the binding budget, in k, then
- * the share already consumed, colored by level. The budget is whichever is
- * tighter — the auto-compact window or the model's own window — matching the
- * window Claude Code actually enforces.
+ * Build the context segment: used tokens in k, colored by the share of the
+ * budget Claude Code reports that they occupy.
  * @param {number} usedTokens - Current context occupancy
- * @param {number} limitTokens - Binding context budget
+ * @param {number} limitTokens - Context budget reported by Claude Code
  * @returns {string} Colored segment, or empty when data is missing
  */
 function buildContextBar(usedTokens, limitTokens) {
   if (!usedTokens || !limitTokens) return '';
 
   const used = Math.min(100, Math.max(0, Math.round((usedTokens / limitTokens) * 100)));
-  return `Ctx ${formatTokens(usedTokens)}/${formatTokens(limitTokens)} ${colorPct(used)}`;
+  return `Ctx ${colorPct(used).replace(/\d+%/, formatTokens(usedTokens))}`;
 }
 
 /**
@@ -163,36 +97,6 @@ function fmtReset(ts, withDay) {
     ? `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]} ${hh}:${mm}`
     : `${hh}:${mm}`;
   return `\x1b[2m→${t}\x1b[0m`;
-}
-
-/**
- * Read current in-progress task from todos directory.
- * @param {string} sessionId
- * @returns {string} Task activeForm text or empty string
- */
-function readCurrentTask(sessionId) {
-  try {
-    const safeSessionId = sanitizeSessionId(sessionId);
-    if (!safeSessionId) return '';
-
-    const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-    const todosDir = path.join(claudeDir, 'todos');
-    if (!fs.existsSync(todosDir)) return '';
-
-    const files = fs
-      .readdirSync(todosDir)
-      .filter(f => f.startsWith(safeSessionId) && f.includes('-agent-') && f.endsWith('.json'))
-      .map(f => ({ name: f, mtime: fs.statSync(path.join(todosDir, f)).mtime }))
-      .sort((a, b) => b.mtime - a.mtime);
-
-    if (files.length === 0) return '';
-
-    const todos = JSON.parse(fs.readFileSync(path.join(todosDir, files[0].name), 'utf8'));
-    const inProgress = todos.find(t => t.status === 'in_progress');
-    return inProgress?.activeForm || '';
-  } catch {
-    return '';
-  }
 }
 
 /**
@@ -482,14 +386,14 @@ function runStatusline() {
       const remaining = cw.remaining_percentage;
       const totalInputTokens = cw.total_input_tokens;
 
-      // cc-switch provider identity + plan quota, refreshed by a detached child
+      // cc-switch coding-plan quota, refreshed by a detached child. Only
+      // staleness gates the refresh: a cache a failed refresh left without a
+      // providerId would otherwise look "not current" on every render and
+      // spawn a child per render. isCurrent still decides what may be shown.
       const usageCache = ccSwitchUsage.readCache();
       const usageIsCurrent = ccSwitchUsage.isCurrent(usageCache);
-      if (!usageIsCurrent || ccSwitchUsage.isStale(usageCache)) refreshUsageInBackground();
-      const cachedWindow = ccSwitchUsage.modelWindow(usageCache, model);
-      const modelWindow = cachedWindow?.window || 0;
-      const compactWindow = resolveAutoCompactWindow(modelWindow);
-      const contextLimit = compactWindow || modelWindow;
+      if (ccSwitchUsage.isStale(usageCache)) refreshUsageInBackground();
+      const contextLimit = cw.context_window_size;
 
       const sessionId = sanitizeSessionId(session);
       const bridge = sessionId ? readBridge(sessionId) : null;
@@ -518,9 +422,6 @@ function runStatusline() {
           /* best effort */
         }
       }
-
-      // Current task
-      const task = sessionId ? readCurrentTask(sessionId) : '';
 
       // Metrics from bridge; cost from live harness report, bridge as fallback
       // (gateway doesn't relay usage, so metrics-bridge cost can be 0)
@@ -595,9 +496,6 @@ function runStatusline() {
       const effort = data.effort?.level;
       const segments = [`\x1b[2m${model}${effort ? ` [${effort}]` : ''}\x1b[0m`];
 
-      if (task) {
-        segments.push(`\x1b[1;97m${task}\x1b[0m`);
-      }
       if (metricsStr) {
         segments.push(metricsStr);
       }
@@ -630,11 +528,8 @@ function runStatusline() {
 module.exports = {
   formatDuration,
   formatTokens,
-  parseTokenCount,
-  resolveAutoCompactWindow,
   buildContextBar,
   buildQuotaSegment,
-  readCurrentTask,
   parseGitStatus,
   formatGitStatus,
   MAX_STDIN

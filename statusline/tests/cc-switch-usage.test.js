@@ -106,9 +106,6 @@ function seededFromOpencode() {
     providerName: PROVIDERS.opencode.name,
     baseUrl: PROVIDERS.opencode.baseUrl,
     planProvider: 'opencode_go',
-    model: 'deepseek-v4.1-flash',
-    modelWindowSource: null,
-    modelWindows: {},
     quota: QUOTA_OF_PREVIOUS_PROVIDER
   };
 }
@@ -123,7 +120,7 @@ test('refresh keeps the served identity and drops the previous provider quota', 
     assert.strictEqual(cache.providerId, PROVIDERS.volcengine.id);
     assert.strictEqual(cache.providerName, '火山 Coding Plan');
     assert.strictEqual(cache.quota, null);
-    assert.match(cache.quotaError, /no quota endpoint mapped for plan provider volcengine/);
+    assert.match(cache.quotaError, /volcengine usage query needs the account AccessKey ID \+ Secret/);
   } finally {
     sandbox.cleanup();
   }
@@ -149,7 +146,7 @@ function renderStatusline(env) {
     model: { display_name: 'Opus 5' },
     workspace: { current_dir: STATUSLINE_DIR },
     session_id: 'ccswitch-usage-test',
-    context_window: { remaining_percentage: 90, total_input_tokens: 1000 }
+    context_window: { remaining_percentage: 90, total_input_tokens: 100000, context_window_size: 372000 }
   };
   const result = spawnSync(process.execPath, [STATUSLINE], {
     env,
@@ -164,6 +161,15 @@ test('statusline renders the quota of the served provider', () => {
   const sandbox = makeSandbox(PROVIDERS.opencode, seededFromOpencode());
   try {
     assert.match(renderStatusline(sandbox.env), /Usage/);
+  } finally {
+    sandbox.cleanup();
+  }
+});
+
+test('statusline takes the context budget from the payload', () => {
+  const sandbox = makeSandbox(PROVIDERS.opencode, seededFromOpencode());
+  try {
+    assert.match(renderStatusline(sandbox.env), /Ctx 100k .*27%/);
   } finally {
     sandbox.cleanup();
   }

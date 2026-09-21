@@ -5,7 +5,6 @@
  *
  * Resolves, for the provider cc-switch currently serves Claude Code with:
  *   - the provider identity (name, base URL, plan provider key)
- *   - the real context window of the served model, from the models.dev catalog
  *   - the provider's coding-plan quota, queried the same way cc-switch does
  *     (see src/services/coding_plan.rs inside cc-switch.exe)
  *
@@ -14,6 +13,7 @@
  * the network.
  */
 
+const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -23,12 +23,9 @@ const CLAUDE_DIR = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.cl
 const CCSWITCH_DIR = process.env.CC_SWITCH_DIR || path.join(os.homedir(), '.cc-switch');
 const CACHE_DIR = path.join(CLAUDE_DIR, 'statusline', '.cache');
 const CACHE_FILE = path.join(CACHE_DIR, 'ccswitch-usage.json');
-const CATALOG_FILE = path.join(CACHE_DIR, 'models.dev.json');
 
 const REFRESH_TTL_MS = 60_000;
-const CATALOG_TTL_MS = 7 * 24 * 3600_000;
 const HTTP_TIMEOUT_MS = 8000;
-const CATALOG_URL = 'https://models.dev/api.json';
 
 /**
  * Coding-plan quota endpoints, transcribed from cc-switch's coding_plan.rs.
@@ -40,6 +37,184 @@ const QUOTA_ENDPOINTS = {
   zhipu_glm: 'https://open.bigmodel.cn/api/monitor/usage/quota/limit',
   minimax: 'https://api.minimax.io/v1/api/openplatform/coding_plan/remains'
 };
+
+// ── Volcengine (Ark coding plan) ────────────────────────────
+// The usage API is a control-plane OpenAPI behind the unified gateway
+// open.volcengineapi.com, authenticated with Volcengine Signature V4 over the
+// account AK/SK (the inference Bearer key is rejected by the gateway with
+// 400 InvalidAuthorization). Transcribed from cc-switch's coding_plan.rs.
+
+const VOLCENGINE_HOST = 'open.volcengineapi.com';
+const VOLCENGINE_API_VERSION = '2024-01-01';
+const VOLCENGINE_SERVICE = 'ark';
+const VOLCENGINE_CONTENT_TYPE = 'application/json; charset=utf-8';
+const VOLCENGINE_SIGNED_HEADERS = 'host;x-date;x-content-sha256;content-type';
+
+function volcHmac(key, data) {
+  return crypto.createHmac('sha256', key).update(data).digest();
+}
+
+function volcSha256Hex(data) {
+  return crypto.createHash('sha256').update(data).digest('hex');
+}
+
+/**
+ * Region for the control-plane OpenAPI, derived from the data-plane base URL
+ * host (e.g. ark.cn-beijing.volces.com -> cn-beijing).
+ * @param {string} baseUrl
+ * @returns {string}
+ */
+function volcengineRegion(baseUrl) {
+  const host = (baseUrl.split('://')[1] || baseUrl).split('/')[0] || '';
+  const region = host.split('.').find(p => p.startsWith('cn-') || p.startsWith('ap-'));
+  return region || 'cn-beijing';
+}
+
+/**
+ * Volcengine Signature V4. Differs from AWS SigV4 in: fixed SignedHeaders
+ * order (not alphabetical), `HMAC-SHA256` without the AWS4 prefix, credential
+ * scope ending in `request`, and kDate = HMAC(SK, date) with no AWS4 prefix.
+ * @param {string} ak
+ * @param {string} sk
+ * @param {string} region
+ * @param {string} canonicalQuery
+ * @param {Date} now
+ * @returns {{authorization: string, xDate: string, bodySha: string}}
+ */
+function volcengineSign(ak, sk, region, canonicalQuery, now) {
+  const pad = n => String(n).padStart(2, '0');
+  const xDate =
+    `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}` +
+    `T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+  const shortDate = xDate.slice(0, 8);
+  const bodySha = volcSha256Hex('');
+
+  const canonicalHeaders =
+    `host:${VOLCENGINE_HOST}\nx-date:${xDate}\nx-content-sha256:${bodySha}\ncontent-type:${VOLCENGINE_CONTENT_TYPE}\n`;
+  const canonicalRequest =
+    `POST\n/\n${canonicalQuery}\n${canonicalHeaders}\n${VOLCENGINE_SIGNED_HEADERS}\n${bodySha}`;
+
+  const credentialScope = `${shortDate}/${region}/${VOLCENGINE_SERVICE}/request`;
+  const stringToSign =
+    `HMAC-SHA256\n${xDate}\n${credentialScope}\n${volcSha256Hex(canonicalRequest)}`;
+
+  const kDate = volcHmac(sk, shortDate);
+  const kRegion = volcHmac(kDate, region);
+  const kService = volcHmac(kRegion, VOLCENGINE_SERVICE);
+  const kSigning = volcHmac(kService, 'request');
+  const signature = volcHmac(kSigning, stringToSign).toString('hex');
+
+  return {
+    authorization: `HMAC-SHA256 Credential=${ak}/${credentialScope}, SignedHeaders=${VOLCENGINE_SIGNED_HEADERS}, Signature=${signature}`,
+    xDate,
+    bodySha
+  };
+}
+
+/**
+ * One control-plane OpenAPI call. Business errors arrive as HTTP 200 with a
+ * ResponseMetadata.Error envelope, or as 4xx with the same envelope.
+ * @param {string} region
+ * @param {string} ak
+ * @param {string} sk
+ * @param {string} action
+ * @returns {Promise<object>}
+ */
+async function volcengineCall(region, ak, sk, action) {
+  const canonicalQuery = `Action=${action}&Region=${region}&Version=${VOLCENGINE_API_VERSION}`;
+  const { authorization, xDate, bodySha } = volcengineSign(ak, sk, region, canonicalQuery, new Date());
+  const res = await fetch(`https://${VOLCENGINE_HOST}/?${canonicalQuery}`, {
+    method: 'POST',
+    headers: {
+      'X-Date': xDate,
+      'X-Content-Sha256': bodySha,
+      'Content-Type': VOLCENGINE_CONTENT_TYPE,
+      Authorization: authorization
+    },
+    body: '',
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
+  });
+  const body = await res.json();
+  const err = body?.ResponseMetadata?.Error || body?.Error;
+  if (err?.Code || err?.Message) {
+    throw new Error(`${action} returned ${err.Code || res.status}: ${err.Message || ''}`.trim());
+  }
+  if (!res.ok) throw new Error(`${action} returned HTTP ${res.status}`);
+  return body;
+}
+
+/**
+ * Normalize a Volcengine usage Result into the shared window shape. Agent
+ * Plan (GetAFPUsage) answers absolute Quota/Used per window; Coding Plan
+ * (GetCodingPlanUsage) answers QuotaUsage[] with used percent per level.
+ * @param {object} body
+ * @returns {{rolling: object|null, weekly: object|null, monthly: object|null}}
+ */
+function parseVolcengineWindows(body) {
+  const result = body?.Result || body || {};
+  const windows = { rolling: null, weekly: null, monthly: null };
+  let found = false;
+  for (const [key, name] of [
+    ['AFPFiveHour', 'rolling'],
+    ['AFPWeekly', 'weekly'],
+    ['AFPMonthly', 'monthly']
+  ]) {
+    const win = result[key];
+    const quota = Number(win?.Quota);
+    if (!Number.isFinite(quota) || quota <= 0) continue;
+    windows[name] = {
+      status: null,
+      usedPct: (Number(win.Used) / quota) * 100,
+      resetsAt: win.ResetTime ?? null
+    };
+    found = true;
+  }
+  if (found) return windows;
+
+  const levels = { session: 'rolling', '5h': 'rolling', rolling: 'rolling', weekly: 'weekly', '7d': 'weekly', monthly: 'monthly' };
+  const arr = result.QuotaUsage || result.Usages || result.Details || [];
+  for (const item of arr) {
+    const name = levels[String(item.Level ?? item.Type ?? '').toLowerCase()];
+    if (!name) continue;
+    windows[name] = {
+      status: item.Status ?? null,
+      usedPct: numberOrNull(item.Percent ?? item.UsedPercent ?? item.UsagePercent),
+      resetsAt: item.ResetTimestamp ?? item.ResetTime ?? null
+    };
+  }
+  return windows;
+}
+
+/**
+ * Query the Volcengine coding-plan quota: GetAFPUsage (Agent Plan) first,
+ * falling back to GetCodingPlanUsage when no AFP window is subscribed.
+ * @param {{baseUrl: string, accessKeyId: string, secretAccessKey: string}} provider
+ * @returns {Promise<object>}
+ */
+async function fetchVolcengineQuota(provider) {
+  const ak = (provider.accessKeyId || '').trim();
+  const sk = (provider.secretAccessKey || '').trim();
+  if (!ak || !sk) {
+    throw new Error('volcengine usage query needs the account AccessKey ID + Secret (not the inference API key)');
+  }
+  const region = volcengineRegion(provider.baseUrl);
+  const errors = [];
+  for (const action of ['GetAFPUsage', 'GetCodingPlanUsage']) {
+    let body;
+    try {
+      body = await volcengineCall(region, ak, sk, action);
+    } catch (err) {
+      errors.push(err.message);
+      continue;
+    }
+    const windows = parseVolcengineWindows(body);
+    if (windows.rolling || windows.weekly || windows.monthly) {
+      return { endpoint: `https://${VOLCENGINE_HOST}/ (Action=${action})`, auth: 'ak-sk', ...windows };
+    }
+    errors.push(`${action} returned no quota windows`);
+  }
+  throw new Error(errors.join('; '));
+}
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -99,7 +274,7 @@ function currentProviderId() {
 
 /**
  * @param {string} providerId
- * @returns {{id: string, name: string, baseUrl: string, apiKey: string, model: string, planProvider: string|null}}
+ * @returns {{id: string, name: string, baseUrl: string, apiKey: string, planProvider: string|null}}
  */
 function readProvider(providerId) {
   const db = new DatabaseSync(path.join(CCSWITCH_DIR, 'cc-switch.db'), { readOnly: true });
@@ -120,8 +295,9 @@ function readProvider(providerId) {
     name: row.name,
     baseUrl: env.ANTHROPIC_BASE_URL || '',
     apiKey: env.ANTHROPIC_API_KEY || '',
-    model: env.ANTHROPIC_MODEL || env.ANTHROPIC_DEFAULT_OPUS_MODEL_NAME || '',
-    planProvider: meta.usage_script?.codingPlanProvider || null
+    planProvider: meta.usage_script?.codingPlanProvider || null,
+    accessKeyId: meta.usage_script?.accessKeyId || '',
+    secretAccessKey: meta.usage_script?.secretAccessKey || ''
   };
 }
 
@@ -131,61 +307,6 @@ function readJsonText(text) {
   } catch {
     return {};
   }
-}
-
-/**
- * Load the models.dev catalog, refreshing the local snapshot when it expires.
- * Snapshot shape: { [providerId]: { api, models: { [modelId]: contextTokens } } }
- * @returns {object}
- */
-async function loadCatalog() {
-  const cached = (() => {
-    try {
-      const snapshot = readJson(CATALOG_FILE);
-      return Date.now() - snapshot.fetchedAt * 1000 < CATALOG_TTL_MS ? snapshot.catalog : null;
-    } catch {
-      return null;
-    }
-  })();
-  if (cached) return cached;
-
-  const res = await fetch(CATALOG_URL, { signal: AbortSignal.timeout(HTTP_TIMEOUT_MS) });
-  if (!res.ok) throw new Error(`models.dev returned HTTP ${res.status}`);
-  const raw = await res.json();
-
-  const catalog = {};
-  for (const [providerId, provider] of Object.entries(raw)) {
-    const models = {};
-    for (const [modelId, model] of Object.entries(provider.models || {})) {
-      if (model.limit?.context) models[modelId] = model.limit.context;
-    }
-    catalog[providerId] = { api: provider.api || '', models };
-  }
-  writeJsonAtomic(CATALOG_FILE, { fetchedAt: Math.floor(Date.now() / 1000), catalog });
-  return catalog;
-}
-
-/**
- * Match a cc-switch provider to its models.dev entry. The base URL is the
- * strongest signal; the plan-provider key is the fallback.
- * @param {{baseUrl: string, planProvider: string|null}} provider
- * @param {object} catalog
- * @returns {{id: string, models: object}|null}
- */
-function matchCatalogProvider(provider, catalog) {
-  const strip = url => url.replace(/\/+$/, '').toLowerCase();
-  const base = strip(provider.baseUrl);
-  if (base) {
-    for (const [id, entry] of Object.entries(catalog)) {
-      const api = strip(entry.api);
-      if (api && (api === base || api.startsWith(`${base}/`) || base.startsWith(`${api}/`))) {
-        return { id, models: entry.models };
-      }
-    }
-  }
-  const key = provider.planProvider?.replace(/_/g, '-');
-  if (key && catalog[key]) return { id: key, models: catalog[key].models };
-  return null;
 }
 
 function quotaRequestOptions(apiKey, useApiKeyHeader) {
@@ -199,13 +320,15 @@ function quotaRequestOptions(apiKey, useApiKeyHeader) {
  * Query the provider's coding-plan quota. OpenCode Zen answers 401 for a
  * malformed Authorization header, so that one status retries with x-api-key;
  * any other failure is reported as-is.
- * @param {string} planProvider
- * @param {string} apiKey
+ * @param {object} provider
  * @returns {Promise<object>}
  */
-async function fetchQuota(planProvider, apiKey) {
-  const endpoint = QUOTA_ENDPOINTS[planProvider];
-  if (!endpoint) throw new Error(`no quota endpoint mapped for plan provider ${planProvider}`);
+async function fetchQuota(provider) {
+  if (provider.planProvider === 'volcengine') return fetchVolcengineQuota(provider);
+
+  const endpoint = QUOTA_ENDPOINTS[provider.planProvider];
+  if (!endpoint) throw new Error(`no quota endpoint mapped for plan provider ${provider.planProvider}`);
+  const apiKey = provider.apiKey;
   if (!apiKey) throw new Error('provider has no API key');
 
   let res = await fetch(endpoint, quotaRequestOptions(apiKey, false));
@@ -217,7 +340,7 @@ async function fetchQuota(planProvider, apiKey) {
   const body = await res.text();
   if (!res.ok) throw new Error(`${endpoint} returned HTTP ${res.status}: ${body.slice(0, 300)}`);
 
-  return { endpoint, auth, ...parseQuota(planProvider, JSON.parse(body)) };
+  return { endpoint, auth, ...parseQuota(provider.planProvider, JSON.parse(body)) };
 }
 
 /**
@@ -270,44 +393,21 @@ async function refresh() {
     providerName: provider.name,
     baseUrl: provider.baseUrl,
     planProvider: provider.planProvider,
-    model: provider.model,
-    modelWindowSource: null,
-    modelWindows: {},
-    catalogError: null,
     quota: null,
     quotaError: null
   };
-
-  try {
-    const matched = matchCatalogProvider(provider, await loadCatalog());
-    entry.modelWindowSource = matched ? `models.dev:${matched.id}` : null;
-    entry.modelWindows = matched ? matched.models : {};
-  } catch (err) {
-    entry.catalogError = err.message;
-  }
 
   if (provider.planProvider) {
     // A quota the bridge cannot fetch leaves the entry without one; the
     // statusline then renders no usage rather than the previous provider's.
     try {
-      entry.quota = await fetchQuota(provider.planProvider, provider.apiKey);
+      entry.quota = await fetchQuota(provider);
     } catch (err) {
       entry.quotaError = err.message;
     }
   }
   writeJsonAtomic(CACHE_FILE, entry);
   return entry;
-}
-
-/**
- * Resolve the context window advertised for a served model.
- * @param {object|null} cache
- * @param {string} model
- * @returns {{window: number, source: string}|null}
- */
-function modelWindow(cache, model) {
-  const window = cache?.modelWindows?.[model];
-  return window ? { window, source: cache.modelWindowSource } : null;
 }
 
 /**
@@ -326,7 +426,7 @@ function isCurrent(cache) {
   }
 }
 
-module.exports = { readCache, isStale, isCurrent, modelWindow, refresh, CACHE_FILE, REFRESH_TTL_MS };
+module.exports = { readCache, isStale, isCurrent, refresh, CACHE_FILE, REFRESH_TTL_MS };
 
 if (require.main === module) {
   refresh()
