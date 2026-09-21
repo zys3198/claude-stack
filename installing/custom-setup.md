@@ -569,3 +569,87 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **未改动**：description、正文触发说明、`scripts/`、`references/`、`.gitignore` 白名单。
 - **验证**：frontmatter 读回 1 处 `disable-model-invocation: true`；全库 grep 无其他文件引用本 skill 的自动触发路径。宿主侧生效需新会话加载 skill 清单后复核（同批次已有 10 个带该字段的自建 skill 在本机清单中均不出现）。
 - **回退**：删除该行即恢复自动触发。
+
+### resource-guard.py 资源守卫（2026-09-21，全局）
+
+- **出处**：DTSF 会话中用户定下「只能用 docker、docker 内存占用必须严格限制」后，要求把限制做成其他项目也能生效的机械检查。
+- **位置**：新建 `~/.claude/hooks/scripts/resource-guard.py`；`~/.claude/settings.json` 的 `hooks.PreToolUse` 新增一条，matcher `Bash|Write|Edit|MultiEdit`，超时 30 秒；`~/.claude/session-hygiene.json` 的 `exclusive` 两条各补 `service` 与 `project` 字段，并订正 nginx 那条描述（现挂命名卷 `dtsf_frontend_dist`，不再挂主检出的 dist）。
+- **内容**：三条判据。一、改动 compose 文件后，相对改动前新增的服务必须同时声明 `mem_limit` 与 `security_opt`，缺项时提请确认；只查新增服务，历史文件里本来就缺限制的老服务不重复报。二、命令要对 `session-hygiene.json` 独占清单里的容器做变更动作、该容器正在运行、且本机另有活跃 Claude 会话时提请确认；容器与端口按本机共享，不按项目隔离。三、命令要在宿主机上执行构建工具链（`pnpm`、`npm`、`npx`、`yarn`、`bun`、`corepack`、`node`、`vite`、`tsc`、`vue-tsc`、`tsx`、`ts-node`、`webpack`、`mvn`、`mvnw`、`gradle`、`gradlew`、`java`、`javac`）时提请确认，判定要求名字处在命令起首位置（行首，或管道与分号、换行、包装命令、环境变量赋值之后），因此容器内执行的 `docker compose exec <服务> mvn test`、提交消息与普通实参里的同名文字都不会被拦。
+- **内容补充（拆词、包装命令与 Bash 写入路径）**：拆词改用 `shlex` 的 `punctuation_chars`，换行与回车先转成子句分隔符，因此把命令写成多行、用分号连接、控制符紧贴上一词都取得到起首位置；`sh`/`bash`/`zsh`/`dash`/`ksh`/`ash` 的 `-c`（含 `-lc` 这类合并短选项）、`cmd /c`（Git Bash 的 MSYS 路径转换会逼着人写成 `//c`，两种都认）、`powershell`/`pwsh` 的 `-Command`（含缩写）、`eval` 的载荷会被拆出来递归再扫，最多三层。`COMMAND_PREFIX`（`env`、`sudo`、`time`、`nohup`、`exec`、`command`、`xargs`、`winpty`）与 `WRAPPER_WITH_ARGS`（`timeout`、`nice`、`ionice`、`stdbuf`、`setsid`、`chroot`、`doas`、`watch`、`parallel`、`unbuffer`、`taskset`、`wsl`、`start`）之后到本子句结束都按命令起首位置处理；两类都会吃选项与取值，被包装的命令名字不紧跟在后面，因此回溯扫描认这两类的并集，`sudo -u root pnpm build`、`time -p pnpm build`、`xargs -I{} pnpm build` 都拦得住。heredoc 正文按行剥掉：正文是数据，里面的工具链名字不是命令；正文交给宿主机上的 shell 解释器时才保留（`bash <<'EOF'`、`sudo bash <<'EOF'`），交给容器里的 shell 时仍剥掉（`docker compose exec x sh <<'EOF'`），否则正文里的 `mvn` 会因为它前面多出一个子句分隔符而被当成宿主机上的命令。docker 侧补了三处：旧式 `docker-compose` 命令、`docker container restart X` 这类对象名词形式、以及不带 `-p`/`-f` 的整项目命令（用 `-p` 项目名、`-f` 所在目录名、`--project-directory` 目录名、命令里的 `cd` 目标与当前工作目录名五者之一对项目名）。判据一在 Bash 路径上按「写文件命令加目标文件名」粗判：重定向 `>`/`>>`、`tee`、`cp`、`mv`、`sed -i`（含 `-Ei`、`-i.bak`、`--in-place`）取出的目标基本名命中 compose 文件名正则时提请确认，`cp` 与 `mv` 只取最后一个位置实参（前面的算来源），`sed` 不带 `-i` 视为只读不触发，输入重定向 `<` 不算。三条判据同时命中时结论合并成一个 JSON 输出，之前分两次打印会让标准输出变成两行、调用方解析不了。判据三不含 `python`：宿主机上的 python 在本机只用于只读查看（查进程与端口、跑 `~/.claude` 下的状态脚本），而它是通用解释器，命令行上看不出是查一下还是起一个服务。三条都用 `permissionDecision: "ask"`，不直接拒绝。
+- **依赖**：`PyYAML` 6.0.3（本机 Python 3.12.10 已装）；`docker` 与 `claude` 两条命令走子进程调用。钩子命令使用绝对解释器路径 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`，换机器需要改这一行。
+- **验证**：断言套件 `~/.claude/hooks/tests/test_resource_guard.py` 127 条全部通过（拆词与目标提取 21 条、Bash 写 compose 文件的目标提取 11 条、独占清单命中 11 条、compose 判据 7 条、Bash 判据 23 条、宿主工具链拆词 13 条、多行与 shell 包装 35 条、宿主工具链端到端 6 条）。判据二原先照实机跑，断言只能写成「要么放行要么提问」，两种结果都接受等于不测；现改为在子进程里替换掉独占清单、容器运行状态与活跃会话数三处读取，命中断言不随机器状态变化，同时走的是同一个 `main()`。拦下路径覆盖多行、分号紧贴、回车分隔、圆括号子壳、`sh -c`、`bash -c`、`bash -lc`、`cmd /c` 与 `cmd //c`、`powershell -Command`、`pwsh -Command`、`eval`、两层 shell 包装、`timeout`/`nice`/`sudo`/`xargs` 吃取值、旧式 `docker-compose`、对象名词形式、不带 `-f` 的整项目命令、`--project-directory`，以及 Bash 路径上重定向、`tee`、`cp`、`sed -i`、heredoc 五种改写 compose 文件的写法。反向不误报覆盖容器内构建、容器内 `exec mvn`、`git status`、提交消息里的工具链名、普通实参里的包装命令与工具链名、引号里的分号与换行、`echo sudo -u root pnpm`、`docker ps`、别的服务、写普通文件、读 compose 文件、`sed` 不带 `-i`、`cp` 的来源、输入重定向。
+- **验证补充**：三条判据同时命中时标准输出只有一行（`docker compose ... up -d nginx && pnpm build` 实测），两条理由都在同一个 `permissionDecisionReason` 里。耗时实测：空命令 68 毫秒、普通命令 68 毫秒、多行加 shell 载荷 69 毫秒、heredoc 写文件 67 毫秒。
+- **未验证**：本机另有会话这一条依赖 `claude agents --json` 的输出结构与 `sessionId` 字段，只按 session-guard 的既有读法对齐，未做双会话实测；命令替换 `$(...)` 里的文本取不到，会放行；判据一在 Bash 路径上认不出 `python -c "open(...)"` 与变量拼出来的目标路径；判据二在 `-p`、`-f` 目录名、`--project-directory`、`cd` 目标与当前目录名五者都对不上时放行；判据三的名单是人工枚举，名单以外的运行方式（`py -m http.server`、`go run`、`dotnet run`）不覆盖，需要时往 `HOST_TOOLCHAIN` 加名字。
+- **已知缺口**：`frontend-build` 写共享命名卷 `dtsf_frontend_dist`，两个会话同时构建会互相覆盖产物，但它是 `docker compose run --rm` 的一次性容器，容器名随 compose 版本变化，没有可凭据确定的名字，因此未登记进 `exclusive`。要覆盖它需要在守卫里按 `<项目>-<服务>-` 前缀匹配运行中容器，前缀格式同样需要实测确认。
+- **回退**：删除该脚本与 `settings.json` 的对应 `hooks.PreToolUse` 条目；`session-hygiene.json` 的两条 `service`/`project` 字段可保留（旧守卫不读它们，新守卫读不到时会跳过独占判据）。
+
+### context-budget-guard.py 上下文预算提醒（2026-09-21，全局）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法落到本机配置的实验中，用户拍板「加自动提醒机制，在上下文快到压缩阈值时提醒 Agent 写接续笔记」，并定下压缩阈值 200k、提醒线 150k。
+- **位置**：新建 `~/.claude/hooks/scripts/context-budget-guard.py` 与 `~/.claude/hooks/tests/test_context_budget_guard.py`；`~/.claude/settings.json` 的 `hooks.PostToolUse` 新增一条，matcher `.*`，超时 10 秒；同文件 `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW` 由 `"150000"` 改为 `"200000"`。会话状态目录 `~/.claude/context-budget/`（每个会话一个文件，内容是一行数字）。
+- **内容**：PostToolUse 钩子。读 payload 的 `transcript_path`，从文件尾部往前找最后一条带 `message.usage` 的 assistant 记录，把 `input_tokens`、`cache_read_input_tokens`、`cache_creation_input_tokens`、`output_tokens` 四项求和，得当前上下文规模。达到 `REMIND_AT`（150k）就注入 `additionalContext`，文案给出当前用量并列出接续笔记该写的四类内容（做到哪一步、为什么这么选、哪条路已否掉、下一步），已有的 commit/diff/文档要求引路径。节流靠会话状态文件：记下上次提醒时的用量，涨过 `REMIND_STEP`（25k）才再提醒一次，否则每次工具调用都会刷同一条。
+- **依据**：150k 是 Matt Pocock 的 smart zone 终点（`mattpocock-skills@1.2.3` 的 `ask-matt/PHASE-BOUNDARIES.md:21`）。提醒落在线上而不是线后，因为越过之后模型判断力下降，此时写的接续笔记质量也跟着下降。压缩点抬到 200k 是用户决定，代价是 150k 到 200k 这段在降智区干活。
+- **依赖**：无第三方依赖，只用标准库。钩子命令使用绝对解释器路径 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`，换机器需要改这一行。
+- **验证**：断言套件 `~/.claude/hooks/tests/test_context_budget_guard.py` 15 条全部通过（usage 求和与跳行 5 条、文件读取与扩窗 2 条、端到端提醒与节流 7 条、真实 transcript 1 条）。注入通道与用量计算端到端实测：把 `REMIND_AT` 临时降到 50k，紧接着一次 Edit 的工具结果里出现 `PostToolUse:Edit hook additional context: 上下文已用约 118k。…`，确认 payload 里的 `session_id` 与 `transcript_path` 在本机形态下可用、算出的用量与真实值一致；改回 150k 后同会话不再触发。真实阈值触发同日实测：会话内用量涨到 151k 时提醒自动出现一次（文案「上下文已用约 151k。150k 是 smart zone 终点…」），之后数次工具调用不再重复，节流生效。cc-switch 侧核实 `settings.common_config_claude` 已带上 `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW = "200000"` 与第三个 PostToolUse 组；当前 provider（OpenCode Go）的 `meta.commonConfigEnabled` 实测为 `true`，切换时读 common 快照，provider 快照里本来就没有这些键，无需另改。
+- **未验证**：transcript 异步写入的滞后幅度只按官方文档记载（「may lag in-memory conversation」），未实测偏差大小；提醒是否真的促成 Agent 写笔记，需要后续长会话观察。
+- **回退**：删除 `~/.claude/hooks/scripts/context-budget-guard.py`、`~/.claude/hooks/tests/test_context_budget_guard.py` 与 `settings.json` 的对应 `hooks.PostToolUse` 条目；`env.CLAUDE_CODE_AUTO_COMPACT_WINDOW` 改回 `"150000"`；`~/.claude/context-budget/` 可直接删除（丢了最多让某个会话重复提醒一次）。改完 settings.json 需让 cc-switch 重新同步一次 common 快照。
+
+### task-notes-by-user 任务笔记三级结构（2026-09-21，全局）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`）中，接续笔记写成一个 `STATE.md` 越写越长（163 行 / 17,893 字节），用户据此定下做法：先要求「笔记也应该做成类似于 SKILL.md 和 MEMORY.md 具体条目的那样，也就是一个目录文件里面索引其他笔记文件」，再要求「把渐进式披露做到极致」，最后要求「可以做成一个 skill 专门管这个，这些专门放到一个最外层的 notes 文件夹里面」。
+- **位置**：新建 `~/.claude/skills/task-notes-by-user/SKILL.md`（目录名带 `-by-user` 后缀）；`~/.claude/.gitignore` 白名单新增一行 `!skills/task-notes-by-user/`，插在 `skill-trimmer-by-user`（第 151 行）与 `toolchain-pitfalls-by-user` 之间；全局 `CLAUDE.md` §8 的「产物去处」增加一项 `notes/<任务名>/`，原句「仓库根不新建任何文件或目录」收窄为「除这几处之外，仓库根不新建任何文件或目录」。
+- **内容**：三级结构。入口 `STATE.md` 只放目的、当前会话目录名、进度、下一步候选、未决、产物指针表，每个新会话都要读，所以按一屏控制；索引 `ITEMS.md` 放清单表格与一行一条的记录索引，索引行格式 `- <编号> [<标题>](<会话目录>/<同级文件名>) — <一句结论>`，hook 写结论而不写同义反复；单条 `<会话目录>/<编号>-<短名>.md` 放一条笔记的完整正文，按自足接续单元写。存放位置 `<仓库根>/notes/<任务名>/`，任务名用 `YYYY-MM-DD-主题`，单条再按会话落子目录（见本台账下一条）。写作要求五条：及时（时点是相位边界，不等压缩触发）、必要、无冗余（别处已有的引路径）、无遗漏（被否掉的路子漏了算遗漏，改了哪些文件漏了不算）、准确（拿不准的标「未验证」）。维护动作三步：建单条笔记文件、索引加一行、入口只改进度那一行。写作时避开「落地、落到」这类词，全程用完整动宾结构。
+- **依赖**：无。skill 不引用任何宿主专有工具，正文只讲文件结构。
+- **验证**：宿主热加载生效，本会话的可用 skill 清单里出现 `task-notes-by-user`，description 与文件一致，按「新建、追加或整理任务笔记时」触发。结构实例 `lab-area/notes/2026-09-21-context-hygiene/` 同日建成：入口 35 行 / 2,175 字节、索引 77 行 / 3,512 字节、10 个笔记文件合计 11,871 字节，全部相对链接在搬迁后重算（索引行由 `notes/xx.md` 改为同级 `xx.md`，材料路径由 `../2026-09-17-wechat-content-notes/...` 改为 `../../exp/2026-09-17-wechat-content-notes/notes/article-3.md`），搬迁用 `git mv` 保留历史，搬空的 `exp/2026-09-21-context-hygiene/` 目录已删除。
+- **回退**：删除 `~/.claude/skills/task-notes-by-user/` 与 `.gitignore` 白名单那一行；全局 `CLAUDE.md` §8「产物去处」去掉 `notes/<任务名>/` 一项并把「除这几处之外」还原为「仓库根不新建任何文件或目录，说明文档、日志、笔记、脚本都不例外」。
+
+### code-change-workflow 的 grilling 入口改用 grill-with-docs（2026-09-21，用户拍板）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`）第 10 项。插件 `ask-matt/SKILL.md:17` 写明在有工作目录时 `grill-with-docs` 严格优于 `grill-me`：跑同一套 `/grilling`，另用 `domain-modeling` 留下档案。本机原来只指了无状态的 `grill-me`，用户拍板改用前者。
+- **位置**：`~/.claude/skills/code-change-workflow-by-user/SKILL.md` 第 26 行（§1.1 的 grilling 协议末尾）；同目录 `CHANGELOG.md` 新增 1.4.1 条；`~/.claude/CLAUDE.md` §8「产物去处」。
+- **内容**：指名由 `mattpocock-skills:grill-me` 改为 `mattpocock-skills:grill-with-docs`，并写明两处产物——仓库根 `CONTEXT.md` 是纯术语表、不含实现细节，`docs/adr/` 只在难以逆转、缺上下文会让人意外、经过真实取舍三条同时成立时才写。§8 产物去处补「架构决定放 `docs/adr/`」「项目术语表放仓库根 `CONTEXT.md`」两项，使它们不与同段的「仓库根不新建任何文件或目录」冲突。
+- **依赖**：插件 `mattpocock-skills@1.2.3` 的 `engineering/grill-with-docs` 与 `engineering/domain-modeling` 两个目录已存在于缓存，属手动调用的 skill，无需额外安装。
+- **验证**：改后两处文件读回一致；`grill-with-docs/SKILL.md` 与 `domain-modeling/SKILL.md` 实测存在。全库 grep `grill-me|grill-with-docs`，其余命中都是历史记录或举例（本台账的会话出处、`docs/config-inventory.md` 的清单、`skill-trimmer` 的两处举例、`code-change-workflow` CHANGELOG 的旧版本条目），没有别处仍把 `grill-me` 当作入口。
+- **未验证**：本机尚未在真实项目里跑过一次 `grill-with-docs`，`CONTEXT.md` 与 `docs/adr/` 的实际落盘形态未实测。
+- **回退**：SKILL.md 第 26 行改回 `mattpocock-skills:grill-me` 并删掉产物那半句；§8 去掉 `docs/adr/` 与 `CONTEXT.md` 两项；CHANGELOG 的 1.4.1 条按本台账惯例保留为历史。
+
+### code-change-workflow 去重：四处流程骨架改为引用插件 skill（2026-09-21，用户要求）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`）。用户先问该 skill 与插件 `mattpocock-skills` 是否重复，核对后确认四处流程骨架重复、约束层不重复；随后要求「删除其中冗余的内容，改成直接引用已有的 skill」。
+- **位置**：`~/.claude/skills/code-change-workflow-by-user/SKILL.md` 的 §1.1 grilling 协议、§1.3 Bug 修复、§1.4 AI 代码审查、§1.5 规范驱动产物、§3 Agent 调度；同目录 `CHANGELOG.md` 新增 1.5.0 条；frontmatter `version: 1.4.0` 改为 `1.5.0`。
+- **内容**：grilling 协议删掉设计树、前沿分批、每问附推荐答案、拍板后推进四句复述，改指 `mattpocock-skills:grilling` 与两个入口 skill，保留本机三条（数十问正常、纯文本不用 AskUserQuestion、每条拍板记依据）。Bug 修复删掉红绿回路描述，改指 `mattpocock-skills:tdd` 与 `diagnosing-bugs`，保留人工确认与验收 checklist。§1.4 新增引用 `mattpocock-skills:code-review`（固定点 diff、两轴并行子代理、Fowler 坏味道基线），本机三维、动作清单、权限归属、反模式保留。§1.5 新增一句指向 `mattpocock-skills:to-spec`。§3 删掉竖切规则与「第一片穿全部层」，与 decompose 那条合并为指向 `mattpocock-skills:to-tickets`，保留 4-6 片、外部可观察现象判据、沿用宿主执行计划、Plan 审批后执行。
+- **依赖**：插件 `mattpocock-skills@1.2.3` 已启用（`tool-install.md` 记 2026-09-21 实测启用列表含它）。`code-review`、`tdd`、`diagnosing-bugs`、`grilling` 无 `disable-model-invocation`，可自动触发；`to-spec`、`to-tickets`、`grill-with-docs`、`grill-me` 标了 `disable-model-invocation`，需用户手打命令。
+- **验证**：改后 SKILL.md 读回逐段核对；全库 grep 四个被删概念的残留表述（设计树/前沿、2-3 个失败测试、竖切判据、第一片）确认只在本台账与 CHANGELOG 的历史条目里出现。
+- **未验证**：这四处引用尚未在真实编码任务里跑过一遍。
+- **回退**：从本台账前两条（1.4.1、本条）的正文可还原被删语句；SKILL.md 恢复复述文字并去掉四个引用，CHANGELOG 保留 1.5.0 条为历史。
+
+### code-change-workflow 补「进循环前先单跑一轮」（2026-09-21）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`）第 18 项先单跑一次（材料 §6.1）。材料要求放进 AFK 循环前先手动跑一次，把要补进 prompt 的调优在这一步做完，第一次暴露的通常是脚本与配置问题，与模型能力关系不大。
+- **位置**：`~/.claude/skills/code-change-workflow-by-user/SKILL.md` 第 148 行（§3「护栏以实际挂载为准」那条的长链编排句末尾）；frontmatter `version: 1.5.0` 改为 `1.5.1`；同目录 `CHANGELOG.md` 新增 1.5.1 条。
+- **内容**：补一句「进循环或放并行之前先单跑一轮同类任务：核对路由、权限、输入契约与产物格式（细见 `parallel-delegation-by-user` 第 3 条），单步不可靠就上并行或进循环，只会同时收到一堆看不懂的改动」。本机原有同源规则在 `parallel-delegation-by-user` 第 3 条（批量并行 ≥2 个 worker 前先单跑），触发条件只写了并行，本次只补「循环」这一半，规则正文不复制。
+- **依赖**：无。两处都是本机自建 skill 的正文。
+- **验证**：改后读回第 148 行；`parallel-delegation-by-user` 第 3 条原文比对，症状清单与材料一致，未发现第三处同义规则。
+- **未验证**：本机尚未跑过 AFK 循环。
+- **回退**：删掉第 148 行末尾补的那一句，`version` 退回 1.5.0；CHANGELOG 的 1.5.1 条按本台账惯例保留为历史。
+
+### docker-only-by-user（2026-09-21，全局）
+
+- **出处**：DTSF 会话中用户定下「之后只看 docker 的事情」，三条目的为限制占用、全部在容器里执行、安全性；同轮先做 `resource-guard.py` 机械检查，再要求「做一个 skill 专门让项目来实现我要的 docker 需求」。
+- **位置**：新建 `~/.claude/skills/docker-only-by-user/SKILL.md`（单文件）；`~/.claude/.gitignore` 白名单新增 `!skills/docker-only-by-user/`，插在 `content-to-note-by-user` 的 node_modules 排除行与 `drawio-article-illustration-by-user` 之间。
+- **内容**：开头三条目的。接入清单七条——容器定义集中到项目 `deploy/` 目录、代码来源用环境变量指向工作树、每个服务写全五个资源字段、端口只绑回环、按需启动的服务挂 `profiles`、容器内自设上限低于容器上限、名称与端口登记到 `~/.claude/session-hygiene.json`。资源字段按 `${VAR:-默认值}` 留出部署时覆盖的入口。机械保证一节只写 `resource-guard.py` 挂在哪里、拦哪三类动作，判据细节指回脚本头部注释，不在 skill 正文里复述。
+- **关键规则**：`memswap_limit` 与 `mem_limit` 写成同一个变量表达式，两者相等即完全禁用交换；上限走顶层字段而不写进 `deploy.resources.limits`，同一个服务里两者同值可以共存、异值报 `can't set distinct values`，`pids_limit` 更严格，只要 `deploy.resources.limits` 在而里面没有同名项就冲突。这两条由本机实测得出，写进 skill 是为了不再重复踩。
+- **依赖**：无外部运行时依赖；引用的 `~/.claude/hooks/scripts/resource-guard.py` 与 `~/.claude/session-hygiene.json` 均已存在。
+- **验证**：宿主热加载生效，本会话可用 skill 清单里出现 `docker-only-by-user`，description 与文件一致。
+- **未验证**：尚未在新项目上按这份清单接入过一次。
+- **回退**：删除 `~/.claude/skills/docker-only-by-user/` 与 `.gitignore` 白名单那一行。
+
+### task-notes-by-user 单条笔记按会话分目录（2026-09-21，用户要求）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`）中，用户提出「笔记应该要按会话分开，免的串了。记录到笔记 skill 里面吧」。两个会话写同一份 `notes/<任务名>/` 时，单条笔记落在同一个平面上，编号会撞、会话之间分不清谁写的。经 AskUserQuestion 确认：方案取「会话子目录」，生效范围取「只对新会话生效」（已写在顶层的那批笔记不搬，本会话后续笔记仍写顶层，新会话才启用）。
+- **位置**：`~/.claude/skills/task-notes-by-user/SKILL.md` 五处——frontmatter 的 description、第 10 行存放位置句、第 18 行三级表格的「单条」行、新增的「## 会话目录」小节（第 22-29 行）、第 42 行索引行示例、第 70 行维护动作句。本台账上一节「task-notes-by-user 任务笔记三级结构」的内容描述同步改写为会话子目录口径。
+- **内容**：会话目录名 `<日期>-s<序号>`，序号从 1 起按该任务已有会话目录递增。开工先读入口的「当前会话」行，那个目录是自己写过（上下文里还有当时内容）就沿用，认不出就是新会话，取下一个序号新建并把入口那一行改成新目录。同一会话续写只往自己目录加文件，不新建目录、不改别的会话目录里的文件。索引行写相对路径如 `2026-09-21-s2/18-single-run-first.md`，总索引仍是一份跨会话共用，行只由产出它的会话新增，别的会话可改错字但不重排别人的行。入口的「进度、下一步、未决」三块仍是单份跨会话共写，因此入口文件那一节的「只放四块」改为「只放五块」，加进「当前会话」。
+- **依赖**：无。skill 不引用宿主专有工具。
+- **验证**：改后 SKILL.md 读回全文一致；入口文件一节与「## 会话目录」小节对「当前会话」行的要求互相对上，不存在只在一处出现的字段。本会话（`2026-09-21-s1`）已有 20 个顶层笔记文件按生效范围保持原位不动。
+- **未验证**：会话子目录模式尚未在真实的新会话里跑过一次，序号递增与「当前会话」行的识别办法都没有实战检验。
+- **回退**：删掉「## 会话目录」小节与「当前会话」行要求；第 18 行「单条」行改回 `<编号>-<短名>.md`，第 10 行、第 42 行、第 70 行、description 各自退回上一版本的说法；本台账上一节的内容描述照旧改回。

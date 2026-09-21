@@ -30,6 +30,7 @@ window-state.json
 docs/superpowers/
 plans/
 session-handoff.jsonl
+context-budget/
 hooks/scripts/selftest-sandbox/
 
 # ----- locks / temp markers -----
@@ -140,6 +141,7 @@ skills/*
 !skills/dev-clean-by-user/
 !skills/dev-status-by-user/
 skills/content-to-note-by-user/scripts/wechat/node_modules/
+!skills/docker-only-by-user/
 !skills/drawio-article-illustration-by-user/
 !skills/drawio-chart-by-user/
 !skills/improver-skill-by-user/
@@ -148,4 +150,5 @@ skills/content-to-note-by-user/scripts/wechat/node_modules/
 !skills/parallel-delegation-by-user/
 !skills/skill-auditor-by-user/
 !skills/skill-trimmer-by-user/
+!skills/task-notes-by-user/
 !skills/toolchain-pitfalls-by-user/
