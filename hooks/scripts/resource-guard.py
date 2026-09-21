@@ -102,6 +102,9 @@ PREFIX_WITH_ARGS = COMMAND_PREFIX | WRAPPER_WITH_ARGS
 SHELL_INTERPRETERS = {"sh", "bash", "zsh", "dash", "ksh", "ash", "cmd", "powershell", "pwsh"}
 EVAL_COMMANDS = {"eval"}
 ENV_ASSIGN = re.compile(r"^\w+=")
+# shlex 因引号不闭合拆不开时的兜底切分：shell 控制符与普通词各自成词，
+# 形态与 punctuation_chars 的正常输出一致，下游判据不需要区分两种来源。
+FALLBACK_TOKENS = re.compile(r"[;&|()<>]+|[^\s;&|()<>]+")
 
 DOCKER_TIMEOUT = 10
 AGENTS_TIMEOUT = 20
@@ -235,8 +238,14 @@ def split_tokens(command):
     # 或用分号连接时，第二行起首的工具链名字取不到起首位置。
     # punctuation_chars 让 shlex 把 ; | & ( ) < > 各自成词，同时保留引号语义，
     # 因此引号里的分号不会被子句切分。
-    text = strip_heredoc_bodies(command)
-    return lex(text.replace("\n", ";").replace("\r", ";"))
+    text = strip_heredoc_bodies(command).replace("\n", ";").replace("\r", ";")
+    tokens = lex(text)
+    if tokens is not None:
+        return tokens
+    # 引号不闭合时 shlex 拆不开。返回空会让整条命令跳过三条判据（实测
+    # echo \" && docker restart <独占容器> 能绕过，引号个数为偶数时又被正常拦下），
+    # 因此退化成按控制符与普通词粗暴切分，照常交给下游扫描。
+    return FALLBACK_TOKENS.findall(text.replace("\\", "/"))
 
 
 def is_shell_c_flag(name, flag):
@@ -689,8 +698,6 @@ def check_host_toolchain(command):
 def check_docker(command, cwd, self_id):
     if not isinstance(command, str):
         log(f"skip docker check: command 不是字符串（{type(command).__name__}）")
-        return
-    if "docker" not in command:
         return
     targets = docker_targets(command, cwd)
     if targets is None:

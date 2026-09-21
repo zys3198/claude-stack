@@ -114,7 +114,11 @@ check("只读子命令不触发", g.docker_targets("docker compose -f deploy/doc
 check("docker ps 不触发", g.docker_targets("docker ps -a", "."), None)
 check("非起首位置的 docker 不触发",
       g.docker_targets("git commit -m '说明 docker compose down 的用法'", "."), None)
-check("引号不闭合时无法判定", g.docker_targets("docker compose up -d 'x", "."), None)
+check("引号不闭合时仍取出目标",
+      sorted(g.docker_targets("docker compose up -d 'x", ".")["services"]), ["'x"])
+check("引号不闭合且奇数引号时仍取出容器名",
+      sorted(g.docker_targets('echo \\" && docker restart deploy-nginx-1', ".")["containers"]),
+      ["deploy-nginx-1"])
 check("sh -c 包装里的 docker 也取得到",
       sorted(g.docker_targets("sh -c 'docker restart deploy-nginx-1'", ".")["containers"]),
       ["deploy-nginx-1"])
@@ -294,6 +298,14 @@ with tempfile.TemporaryDirectory() as tmp:
     check("shell 包装里的重启也提问", decision(out), "ask")
 
     out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": '"dock"er restart deploy-nginx-1'}})
+    check("引号拆写的 docker 也提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": 'echo \\" && docker restart deploy-nginx-1'}})
+    check("引号不闭合时判据二仍提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "docker-compose -f deploy/docker-compose.local.yml restart nginx"}})
     check("旧式 docker-compose 也提问", decision(out), "ask")
 
@@ -327,7 +339,7 @@ with tempfile.TemporaryDirectory() as tmp:
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "docker compose up -d '未闭合"}})
-    check("引号不闭合时放行", (decision(out), rc), (None, 0))
+    check("引号不闭合但目标不在独占清单时放行", (decision(out), rc), (None, 0))
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "sed -i 's/1024m/512m/' deploy/docker-compose.local.yml"}})
@@ -395,6 +407,7 @@ check("wsl 包装", g.host_toolchain("wsl pnpm build"), "pnpm")
 check("普通实参里的 sh 不算", g.host_toolchain("echo sh -c 'pnpm build'"), None)
 check("普通实参里的 timeout 不算", g.host_toolchain("echo timeout 300 mvn test"), None)
 check("引号里的分号不切子句", g.host_toolchain("git commit -m 'a; pnpm build'"), None)
+check("引号不闭合时仍认得出工具链", g.host_toolchain('echo \\" ; pnpm build'), "pnpm")
 check("引号里的换行不切子句", g.host_toolchain("git commit -m 'a\npnpm build'"), None)
 check("sudo 无选项", g.host_toolchain("sudo pnpm build"), "pnpm")
 check("sudo 带选项", g.host_toolchain("sudo -u root pnpm build"), "pnpm")
