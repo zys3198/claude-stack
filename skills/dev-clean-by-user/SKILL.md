@@ -1,4 +1,5 @@
 ---
+name: dev-clean-by-user
 description: 清理无会话占用的空工作树
 argument-hint: "[仓库路径，留空取当前目录]"
 ---

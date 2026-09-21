@@ -1,4 +1,5 @@
 ---
+name: dev-status-by-user
 description: 列出当前仓库的活跃会话、工作树、stash、端口与容器状态
 argument-hint: "[仓库路径，留空取当前目录]"
 ---

@@ -51,36 +51,45 @@
 
 纯 stdlib，无第三方依赖。Python 解释器固定用 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`（与 settings.json 其他 hook 一致）。
 
-设计取舍：只有工作树位置与命名进硬拦截，因为它们是客观可判定的，且建错位置的代价高。仓库根建文件由 `/dev-status` 报告违规项；产物放错目录没有自动检查，靠文本约定。所有工作树删除都走 `/dev-clean` 并逐条确认，不存在自动删除路径。子代理工作树由 harness 以 `agent-<hash>` 命名创建，拦截管不到，只能靠 `/dev-status` 的孤儿目录分类暴露。把命令再包一层解释器（`bash -c "…"`、`python -c "os.system(…)"`）之后顶层拆词看不到 `git worktree add`，会放行；拦截的定位是防止误建，不作为安全边界。机制自身所在仓库（`~/.claude`）按普通仓库处理，不特殊跳过。
+设计取舍：只有工作树位置与命名进硬拦截，因为它们是客观可判定的，且建错位置的代价高。仓库根建文件由 `/dev-status-by-user` 报告违规项；产物放错目录没有自动检查，靠文本约定。所有工作树删除都走 `/dev-clean-by-user` 并逐条确认，不存在自动删除路径。子代理工作树由 harness 以 `agent-<hash>` 命名创建，拦截管不到，只能靠 `/dev-status-by-user` 的孤儿目录分类暴露。把命令再包一层解释器（`bash -c "…"`、`python -c "os.system(…)"`）之后顶层拆词看不到 `git worktree add`，会放行；拦截的定位是防止误建，不作为安全边界。机制自身所在仓库（`~/.claude`）按普通仓库处理，不特殊跳过。
 
-### 命令与配置
+### Skills 与配置
 
-- `~/.claude/commands/dev-status.md`、`~/.claude/commands/dev-clean.md`
+- `~/.claude/skills/dev-status-by-user/SKILL.md`、`~/.claude/skills/dev-clean-by-user/SKILL.md`
 - `~/.claude/settings.json` hooks 段新增：`SessionStart` 第 3 组（session-guard start，timeout 25）、`SessionEnd` 1 组（session-guard end，timeout 15）、`PreToolUse` 1 组（product-guard，matcher `Bash|EnterWorktree`，timeout 15）
 - `~/.claude/CLAUDE.md` 第 8 节「会话、产物与本地资源」，7 段：工作树 / 产物去处 / 交接文档 / 并行会话 / 收尾 / Git 写权限 / 查看与清理
 - `~/.claude/docs/session-lifecycle.md`：机制说明、操作方式、故障处理
 
+#### Skills 迁移（2026-09-20）
+
+- 来源：原全局命令 `~/.claude/commands/dev-status.md`、`~/.claude/commands/dev-clean.md`
+- 日期：2026-09-20
+- 安装命令原文：`mkdir -p "C:/Users/zys31/.claude/skills/dev-status" "C:/Users/zys31/.claude/skills/dev-clean"`，随后执行 `mv "C:/Users/zys31/.claude/skills/dev-status" "C:/Users/zys31/.claude/skills/dev-status-by-user" && mv "C:/Users/zys31/.claude/skills/dev-clean" "C:/Users/zys31/.claude/skills/dev-clean-by-user"`；文件正文由 Claude Code 原生 `Write` 写入
+- 安装位置：`~/.claude/skills/dev-status-by-user/SKILL.md`、`~/.claude/skills/dev-clean-by-user/SKILL.md`
+- 依赖：`C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`、`~/.claude/hooks/scripts/session-status.py`
+- 备注：保持原参数和执行规则；按自建 skill 命名约定使用 `-by-user` 后缀，调用名相应改为 `/dev-status-by-user`、`/dev-clean-by-user`；迁移后删除旧 `commands/*.md`
+
 ### 运行时数据
 
-`~/.claude/session-handoff.jsonl`（收尾记录，保留 7 天，按 `repo` 字段过滤，只报告本仓库的遗留；`repo` 统一取主检出根，所以从链接工作树里开会话也能对上。时间戳只认数值，缺字段或类型不对的记录排在排序前面，计数照常、明细跳过）、`~/.claude/session-handoff.d/`（锁等待超时时写的溢出记录，独占命名，开发前检查与 `/dev-status` 都读它，下一次裁剪并回主文件）、`~/.claude/session-handoff.lock`（收尾记录的写入锁，正常跑完即删，超过 30 秒视为陈旧锁自动接管，修改时间在将来时同样按陈旧接管）、`~/.claude/session-guard.log`（异常，以及过期记录被丢弃时留下的路径与改动数）、`~/.claude/product-guard.log`。
+`~/.claude/session-handoff.jsonl`（收尾记录，保留 7 天，按 `repo` 字段过滤，只报告本仓库的遗留；`repo` 统一取主检出根，所以从链接工作树里开会话也能对上。时间戳只认数值，缺字段或类型不对的记录排在排序前面，计数照常、明细跳过）、`~/.claude/session-handoff.d/`（锁等待超时时写的溢出记录，独占命名，开发前检查与 `/dev-status-by-user` 都读它，下一次裁剪并回主文件）、`~/.claude/session-handoff.lock`（收尾记录的写入锁，正常跑完即删，超过 30 秒视为陈旧锁自动接管，修改时间在将来时同样按陈旧接管）、`~/.claude/session-guard.log`（异常，以及过期记录被丢弃时留下的路径与改动数）、`~/.claude/product-guard.log`。
 
-活跃会话来自 `claude agents --json`，这是官方文档给出的受支持接口（`cwd`、`kind`、`startedAt`、`pid`、`status`、`sessionId` 等字段）。不读 `~/.claude/sessions/*.json`——官方文档从未描述该目录，并与 `~/.claude/jobs/<id>/` 同属被明确声明为「不是稳定接口」的内部层。`/dev-status` 用它区分工作树是在用还是可清理；枚举失败时 `active_sessions()` 返回 None，输出显式标注「活跃会话 枚举失败」并提示不要据此删除，不伪装成无人占用。
+活跃会话来自 `claude agents --json`，这是官方文档给出的受支持接口（`cwd`、`kind`、`startedAt`、`pid`、`status`、`sessionId` 等字段）。不读 `~/.claude/sessions/*.json`——官方文档从未描述该目录，并与 `~/.claude/jobs/<id>/` 同属被明确声明为「不是稳定接口」的内部层。`/dev-status-by-user` 用它区分工作树是在用还是可清理；枚举失败时 `active_sessions()` 返回 None，输出显式标注「活跃会话 枚举失败」并提示不要据此删除，不伪装成无人占用。
 
 ### 验证
 
 自检脚本 `~/.claude/hooks/scripts/selftest.py`（`python selftest.py`，退出码 0 表示全过）：153 个用例全部通过。覆盖工作树位置越界、相对路径上跳、`..` 路径穿越、`.claude/worktrees/` 只出现在 `-b` 参数或注释里、`.claude` 下的非约定目录、`worktrees-old` 前缀混淆、hash 命名、保留名与纯日期、非 kebab-case 命名、反斜杠写法、`worktree list` / `worktree remove` 放行、同一条命令里串联多处 `git worktree add`、重定向被当成目标路径、`--lock` / `--track` 不带值的选项、git 全局选项里吃下一个词的项（`-c`、`--git-dir`、`--work-tree`、`--namespace`）后仍判出越界且不误拒只读命令、`git -C <仓库>` 与 `cd <仓库> &&` 的判定基准、`git.exe` 与绝对路径形式的 git、名字像 git 但后面不是 `worktree add` 的写法、`EnterWorktree` 的 `name` 与 `path` 两条入口（含两者同时给出时都要校验）、command 不是字符串时放行且不抛异常、非 git 目录静默、机制自己的仓库按普通仓库汇报、跨仓库遗留不串味、从链接工作树里开会话按主检出汇报、会话枚举为空或字段缺失时不崩溃、枚举失败打印降级告警且不把工作树报成无会话占用、退出提示不承诺自动清理、收尾记录并发追加不丢、过期记录丢弃写日志、无需裁剪时不重写文件、陈旧锁自动接管、接管后原持有者不误删新锁、锁时间在将来时按陈旧接管、降级追加写溢出文件且裁剪时并回主文件、收尾记录时间戳缺字段或类型不对时不崩溃且不打印明细、仓库根散落文件与孤儿目录（含符号链接）的识别、被忽略内容单列。在脚本同级建临时 git 仓库当沙箱，`try/finally` 保证跑完自删。
 
-真实仓库实测（2026-09-18，dtsf，1 个工作树）：SessionStart 耗时 0.65 秒，`/dev-status` 耗时 1.48 秒。
+真实仓库实测（2026-09-18，dtsf，1 个工作树）：SessionStart 耗时 0.65 秒，`/dev-status-by-user` 耗时 1.48 秒。
 
 收尾记录的并发行为实测：两个裁剪进程加一个追加进程各跑独立 Python 进程，6 轮共追加 240 条，丢失 0 条。修复前同一套用例的丢失率是 22.5%（240 条丢 54 条），成因是裁剪读到快照后整份写回，覆盖了这期间追加的记录。
 
 第二轮审计（2026-09-19）复跑：3 个追加进程加 2 个裁剪进程，8 轮共 288 条，丢失 0 条。这一轮又查出锁的两处缺口并修掉。其一，持锁超过 30 秒被接管之后，原持有者释放时删掉了接管者的锁，两个进程同时进入临界区，实测第三方能直接拿到锁。其二，拿不到锁时的降级路径直接往共用文件追加，而同一文件并发追加在 Windows 上会互相覆盖，6 个进程同时降级时实测丢 6.7%（30 条丢 2 条）。降级改写独占命名的溢出文件之后，同样 5 轮 × 6 个进程共 30 条，丢失 0 条。另外补上了 `git.exe` 与绝对路径形式的 git 调用绕过拦截的缺口。
 
-第三轮审计（2026-09-19）复跑：锁令牌契约 17 项、降级与裁剪 35 项、放行与拒绝判定 60 项、状态汇总 9 项、并发与全局选项 14 项，除本轮查出的缺陷外全部通过。并发不丢记录用 48 条降级写入配 2 个裁剪线程交错，存活 48/48。查出并修掉三处。其一，`session-status.py` 打印最近记录时直接下标取 `ts`，记录缺该字段时抛 `KeyError`、写成字符串时抛 `TypeError`，`/dev-status` 与 `/dev-clean` 整个不可用；排序处早已用 `isinstance` 兜底，只有打印这段漏了。其二，`product-guard.py` 的选项跳过循环只认 `-C`，带 `--git-dir` 与 `-c` 的越界命令里取值被当成子命令位置，整个 `git worktree add` 看不到而放行，真实 git 确认两条都能在仓库外建出目录；git 全局选项按 2.54 实测逐条核对后登记，等号形式与空格形式都覆盖。其三，拆词时把 heredoc 正文也算进命令，任何提交消息或脚本文本里出现 `git … worktree add` 字样都会被拒绝，实测本轮修复自己的提交消息就被拦下；改为拆词前剥掉正文，按结束标记定位，找不到标记时原样判定。同一轮里也确认机制自己的仓库按普通仓库处理只产出一行主检出提示，据此取消了 `~/.claude` 的静默跳过；`selftest.py` 原有的「`~/.claude` 静默」用例是靠该跳过才为空的，从未真正验证过 `handle_start` 能处理这个仓库，已改为断言它照常汇报。
+第三轮审计（2026-09-19）复跑：锁令牌契约 17 项、降级与裁剪 35 项、放行与拒绝判定 60 项、状态汇总 9 项、并发与全局选项 14 项，除本轮查出的缺陷外全部通过。并发不丢记录用 48 条降级写入配 2 个裁剪线程交错，存活 48/48。查出并修掉三处。其一，`session-status.py` 打印最近记录时直接下标取 `ts`，记录缺该字段时抛 `KeyError`、写成字符串时抛 `TypeError`，`/dev-status-by-user` 与 `/dev-clean-by-user` 整个不可用；排序处早已用 `isinstance` 兜底，只有打印这段漏了。其二，`product-guard.py` 的选项跳过循环只认 `-C`，带 `--git-dir` 与 `-c` 的越界命令里取值被当成子命令位置，整个 `git worktree add` 看不到而放行，真实 git 确认两条都能在仓库外建出目录；git 全局选项按 2.54 实测逐条核对后登记，等号形式与空格形式都覆盖。其三，拆词时把 heredoc 正文也算进命令，任何提交消息或脚本文本里出现 `git … worktree add` 字样都会被拒绝，实测本轮修复自己的提交消息就被拦下；改为拆词前剥掉正文，按结束标记定位，找不到标记时原样判定。同一轮里也确认机制自己的仓库按普通仓库处理只产出一行主检出提示，据此取消了 `~/.claude` 的静默跳过；`selftest.py` 原有的「`~/.claude` 静默」用例是靠该跳过才为空的，从未真正验证过 `handle_start` 能处理这个仓库，已改为断言它照常汇报。
 
-性能随工作树数量近线性：`/dev-status` 约每棵 84 毫秒，SessionStart 约每棵 73 毫秒，主导成本是每棵一次 `git status --porcelain` 子进程。70 棵工作树时 `/dev-status` 约 7.2 秒。
+性能随工作树数量近线性：`/dev-status-by-user` 约每棵 84 毫秒，SessionStart 约每棵 73 毫秒，主导成本是每棵一次 `git status --porcelain` 子进程。70 棵工作树时 `/dev-status-by-user` 约 7.2 秒。
 
-第三轮的性能实测（真实仓库，2026-09-19）：SessionStart 在 `~/.claude` 约 0.11 秒、在 dtsf 约 0.58 秒，SessionEnd 在 dtsf 约 0.27 秒，`/dev-status` 在 dtsf 约 1.09 秒。收尾记录 4000 条（0.8 MB）时一次裁剪 15 毫秒；锁等待窗口固定 2 秒，与记录条数无关，空闲时追加实测 0 毫秒。
+第三轮的性能实测（真实仓库，2026-09-19）：SessionStart 在 `~/.claude` 约 0.11 秒、在 dtsf 约 0.58 秒，SessionEnd 在 dtsf 约 0.27 秒，`/dev-status-by-user` 在 dtsf 约 1.09 秒。收尾记录 4000 条（0.8 MB）时一次裁剪 15 毫秒；锁等待窗口固定 2 秒，与记录条数无关，空闲时追加实测 0 毫秒。
 
 Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8")`，否则默认 GBK 会破坏中文 JSON。三个脚本的 `main` 都有这一行。
 
@@ -88,10 +97,10 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 删除是不可恢复动作，机制按三条线约束：
 
-1. **机制自身不删任何东西。** 没有自动清理路径，只有 `/dev-clean` 命令，且必须逐条列出路径等用户确认。
-2. **有未提交改动的工作树删不掉。** `/dev-clean` 只列零改动的项，`git worktree remove` 本身也会拒绝脏工作树。被拒时不许用 `--force`。
-3. **孤儿目录一律不删。** git 已不再注册它们，里面的改动不在任何分支上，`/dev-status` 会标出有没有同名分支。标「无同名分支」的目录是内容的唯一副本，机制不碰，交用户判断。
-4. **被 `.gitignore` 覆盖的内容会被连带删除，所以单列标注。** `git status --porcelain` 看不到被忽略的文件，只含这类文件的工作树会被判定为干净并列入可清理，而 `git worktree remove` 会连那些文件一起删掉且退出码为 0。`/dev-status` 因此在可清理项上标出「另有 N 项被忽略内容」，`/dev-clean` 要求用户确认完整路径清单后才执行。
+1. **机制自身不删任何东西。** 没有自动清理路径，只有 `/dev-clean-by-user` 命令，且必须逐条列出路径等用户确认。
+2. **有未提交改动的工作树删不掉。** `/dev-clean-by-user` 只列零改动的项，`git worktree remove` 本身也会拒绝脏工作树。被拒时不许用 `--force`。
+3. **孤儿目录一律不删。** git 已不再注册它们，里面的改动不在任何分支上，`/dev-status-by-user` 会标出有没有同名分支。标「无同名分支」的目录是内容的唯一副本，机制不碰，交用户判断。
+4. **被 `.gitignore` 覆盖的内容会被连带删除，所以单列标注。** `git status --porcelain` 看不到被忽略的文件，只含这类文件的工作树会被判定为干净并列入可清理，而 `git worktree remove` 会连那些文件一起删掉且退出码为 0。`/dev-status-by-user` 因此在可清理项上标出「另有 N 项被忽略内容」，`/dev-clean-by-user` 要求用户确认完整路径清单后才执行。
 
 ### 回退
 
@@ -108,8 +117,8 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 2026-09-11 新增全局 `ai-product-development`，详见下方独立台账条目。
 - 2026-09-11 新增全局 `company-discovery-evaluation`，详见下方独立台账条目。
 
-当前可用（2026-09-19，17 个，全部带 `-by-user` 后缀，以 `skills/` 实际目录为准）：
-`ai-product-development-by-user`、`article-writer-by-user`、`awesome-design-md-by-user`、`bidirectional-steelman-by-user`、`cc-switch-setting-sync-by-user`、`code-change-workflow-by-user`、`company-discovery-evaluation-by-user`、`content-to-note-by-user`、`drawio-article-illustration-by-user`、`drawio-chart-by-user`、`improver-skill-by-user`、`install-ledger-by-user`、`instruction-engineering-by-user`、`parallel-delegation-by-user`、`skill-auditor-by-user`、`skill-trimmer-by-user`、`toolchain-pitfalls-by-user`。
+当前可用（2026-09-20，19 个，全部带 `-by-user` 后缀，以 `skills/` 实际目录为准）：
+`ai-product-development-by-user`、`article-writer-by-user`、`awesome-design-md-by-user`、`bidirectional-steelman-by-user`、`cc-switch-setting-sync-by-user`、`code-change-workflow-by-user`、`company-discovery-evaluation-by-user`、`content-to-note-by-user`、`dev-clean-by-user`、`dev-status-by-user`、`drawio-article-illustration-by-user`、`drawio-chart-by-user`、`improver-skill-by-user`、`install-ledger-by-user`、`instruction-engineering-by-user`、`parallel-delegation-by-user`、`skill-auditor-by-user`、`skill-trimmer-by-user`、`toolchain-pitfalls-by-user`。
 
 `generic-course-tutor-workspace` 是配套工作区，不计入 skill。
 
@@ -128,6 +137,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 ### 四域开工路由器（历史记录，部分已退役）
 - ~~`ai-coding-guide`（编码域，v1.4.9）~~ **更正 2026-09-02**：编码域散文路由器终版 v1.9.0 已退役归档（`~/.claude/archive/ai-coding-guide-v1.9.0/`）；后续 fork 版已删除并备份（`~/.claude/backups/ai-coding-guide-delete-20260902/`） / `article-writing-guide`（写作域）/ `learning-guide`（学习域，v1.4.6）/ `frontend-guide`（前端域，v1.5.3）
 - 出处：2026-07 多轮会话沉淀；质量标准见 memory `router-guide-skill-quality-bar`；审查工具 `guide-skill-auditor`
+- **2026-09-21 复查**：`~/.claude/archive/ai-coding-guide-v1.9.0/` 与 `~/.claude/backups/ai-coding-guide-delete-20260902/` 两处路径均已不存在（`~/.claude/archive/` 整个目录不存在），本条只剩历史出处价值，恢复需重建。
 - 迁移要点：四个一起拷；各有 CHANGELOG.md 记演进；互相有跨域转介引用，别只拷一个。
 
 ### code-change-workflow
@@ -189,8 +199,8 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 出处：2026-06/07 写作流程沉淀；publish-final-check 演进耦合在 article-writing-guide/CHANGELOG.md；plagiarism-audit 针对实战漏网（Codex-book 整源漏审）设计；tech-article-review 与 review-doc 划边界（单 agent 逐段增量 vs 4 agent 并行）
 - ~~edit-article~~：2026-08-11 复核用户未认领为自建，移出 Git 白名单（归 skill-install.md 待补来源）
 
-### 学习 skill（自建 2 个）
-- deep-learn / tutorial-maker
+### 学习 skill（自建 2 个，均已退役）
+- ~~deep-learn / tutorial-maker~~：2026-09-03 随 skill 库精简批次卸载，移入 `~/.claude/backups/skill-trim-20260903/`（见 [skill-install.md](skill-install.md)「Skill 库精简（2026-09-03）」）。**该备份目录 2026-09-21 实测已不存在，恢复路径失效。**
 - ~~cram-engine~~：2026-08-11 复核用户未认领为自建，移出 Git 白名单（归 skill-install.md 待补来源）
 
 ### ~~2026-08-11 复核新增自建（7 个，已入 Git 白名单）~~（2026-08-16 核实全不在磁盘，白名单已清）
@@ -239,6 +249,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 ### /fy 翻译命令（2026-08-14，全局）
 - 位置：`~/.claude/commands/fy.md`（全局自定义命令，单文件，随 ~/.claude git 迁移）
+- **2026-09-21 实测：已不在本机**——`~/.claude/commands/` 已空，`fy.md` 不存在，也没有 skill 顶替。删除时间与原因未登记；同目录的 `dev-clean.md`、`dev-status.md` 是 2026-09-20 迁为 `-by-user` skill 的已知项，`fy.md` 不属于该批次，待用户确认是否有意删除。恢复：`git -C ~/.claude checkout -- commands/fy.md`。
 - 出处：需求「/ 命令菜单描述看不懂，想要预翻译/实时翻译功能」→ 边界澄清后拍板做按需翻译命令。约束依据（官方 docs 已核）：内置命令/内置 skill 描述硬编码、无 i18n 无本地化、同名命令无法覆盖；`/` 菜单由 TUI 渲染、hook 无法改写显示。故「实时改菜单」形态不存在，能做的是「按需翻译」+「自有 skill 描述预翻译」（后者用户本次未选）。
 - 内容：`/fy <英文>` 或 `/fy <粘贴的英文描述>` → 当前会话 Claude 直接翻成中文；只输出译文；输入已中文则原样返回并提示；空输入有提示。零依赖（走本会话 LLM，不配 API、无脚本）。
 - 验证：重启会话后 `/` 菜单出现 /fy；`/fy /permissions` 或 `/fy statusline` 应返回中文说明。
@@ -283,7 +294,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 配置：原生 Edit 移除六条注册及相应无内容的事件组；现有五个本地入口、七条注册保留，enabledPlugins 未改。每次配置 Edit 后 settings-sync-auto 回报 `[DONE]`。
 - 执行：`python312 -` 接收 PowerShell here-string 脚本；删除语句为 `(root/'hooks'/name).unlink()`，`root=Path('C:/Users/zys31/.claude')`，name 遍历上述六个文件。删除前断言 settings 与 cc-switch common_config_claude 无对应注册，且脚本与备份逐字节一致。
 - 脚本备份：`C:/ZYS/Code/lab-area/exp/2026-09-08-hook-repair/pruned-six/`；同目录 `hook-baseline.json` 保存卸载前注册及插件开关，不含 provider 凭据。
-- 配置备份：`~/.claude/backups/settings-before-six-hook-prune-20260908-112215.json`。
+- 配置备份：`~/.claude/backups/settings-before-six-hook-prune-20260908-112215.json`。**2026-09-21 实测该文件已不存在，本条的恢复路径失效**；`~/.claude/backups/` 现只剩 `claude-md-slim-20260919/`、`drawio-chart-embedded-git-20260919/`、`skill-prune-20260919/` 三项。同条目引用的 `~/.claude/hooks/HOOKS_BACKUP.md` 与 `hook-baseline.json` 亦需按上表复查。
 - 保留：`git_guard.py`、`secret_guard.py`、`ecc-metrics-bridge.js`、`settings-sync-auto.py`、`settings-degrade-guard.py`；全部插件 hook、共享库、历史日志及状态数据。Python／Node 未卸载，权限规则未改。
 - 验证：卸载回归 6/6 通过；本地与 cc-switch hooks、enabledPlugins 读回一致，剩 5 个入口、7 条本地注册。退休 recorder 的 6 个专属测试已移除，保留 4 个 Git／密钥守卫测试；后者实跑 3 通过、1 错误（组合 Git 命令授权预期与现行返回不一致，JSONDecodeError）。原测试备份也复现该问题，本轮未修改守卫实现或断言。
 - 恢复：仅经用户授权后从备份复制脚本、按 hook-baseline.json 恢复相应注册并同步 cc-switch；不要整体覆盖当前 settings，以免回滚其他后续变更。
@@ -303,10 +314,11 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 ### ~/.claude/hooks/
 - ecc 系 hooks（Fact-Forcing Gate / GateGuard 等）随 ecc 插件来；另有自建/调整个别脚本
-- 备份：`~/.claude/hooks/HOOKS_BACKUP.md`
-- **~~turn_counter.py~~ / ~~learning_nudge.py~~（2026-08-08 已删）**：曾为死代码（settings.json 未引用），2026-08-08 经用户确认物理删除；状态文件 `turn_state.json` / `learning_state.json` 同删。hooks/ 现有 settings.json 引用的 8 个 Python hook，另有 2 个未挂载的 dormant Python hook：`plugin_drift_check.py`、`skill_ledger.py`。
-- **settings-degrade-guard.py（2026-08-13 新建）**：SessionStart 自动检测 cc-switch 切 provider 降级 settings.json（缺 statusLine/enabledPlugins/extraKnownMarketplaces/permissions.deny 或 >3 个 hook），从 cc-switch DB `common_config_claude` 快照并集合并恢复（保留 provider env），原子写+备份到 `~/.claude/backups/settings.bak-guard-<ts>.json`。静默运行，恢复时输出 JSON 提示。注册在 settings.json SessionStart `*` matcher。与 cc-switch-setting-sync skill 的 `--restore` 同源逻辑（见该 skill SKILL.md §4）。
-- **skill_ledger.py（2026-08-17 新建）**：PostToolUse 记账 hook，matcher `Skill`。记 Skill 调用 → `~/.claude/metrics/skill-usage.log`（JSONL，坏输入/非 Skill 静默 exit(0) 不阻塞）。配 skill-trimmer 的 scan_skills.py 做使用计数（`load_usage()` 读它，剥 `plugin:` 前缀归一）。Python312 调用。
+- 备份：`~/.claude/hooks/HOOKS_BACKUP.md`（2026-09-21 实测该文件已不存在，仅存历史记载）
+- **~~turn_counter.py~~ / ~~learning_nudge.py~~（2026-08-08 已删）**：曾为死代码（settings.json 未引用），2026-08-08 经用户确认物理删除；状态文件 `turn_state.json` / `learning_state.json` 同删。~~hooks/ 现有 settings.json 引用的 8 个 Python hook，另有 2 个未挂载的 dormant Python hook：`plugin_drift_check.py`、`skill_ledger.py`。~~（此句已过期）
+- **hooks 现状（2026-09-21 实测，以此为准）**：磁盘 `~/.claude/hooks/` 下 7 个脚本被 `settings.json` 注册，合计 9 条注册——Python 4 个（`settings-degrade-guard.py`、`scripts/session-guard.py`、`scripts/product-guard.py`、`settings-sync-auto.py`）、Node 1 个（`ecc-metrics-bridge.js`）、PowerShell 2 个（`herdr-agent-state.ps1`、`claude-notify.ps1`）。未挂载的 dormant 脚本只剩 `plugin_drift_check.py` 一个；`skill_ledger.py` 已于 2026-09-08 卸载（见上方条目），磁盘无此文件。另有不注册为 hook 的工具脚本 `scripts/session-status.py`、`scripts/selftest.py`、`scripts/transcript_sweep.py` 与 `tests/`。
+- **settings-degrade-guard.py（2026-08-13 新建）**：SessionStart 自动检测 cc-switch 切 provider 降级 settings.json（缺 statusLine/enabledPlugins/extraKnownMarketplaces/permissions.deny 或 >3 个 hook），从 cc-switch DB `common_config_claude` 快照并集合并恢复（保留 provider env），原子写+备份到 `~/.claude/backups/settings.bak-guard-<ts>.json`（2026-09-21 实测 `~/.claude/backups/` 下已无任何 `settings.bak-guard-*` 文件，历史自动备份已被清理）。静默运行，恢复时输出 JSON 提示。注册在 settings.json SessionStart `*` matcher。与 cc-switch-setting-sync skill 的 `--restore` 同源逻辑（见该 skill SKILL.md §4）。
+- **skill_ledger.py（2026-08-17 新建；2026-09-08 已卸载，2026-09-21 复查磁盘无此文件）**：PostToolUse 记账 hook，matcher `Skill`。记 Skill 调用 → `~/.claude/metrics/skill-usage.log`（JSONL，坏输入/非 Skill 静默 exit(0) 不阻塞）。配 skill-trimmer 的 scan_skills.py 做使用计数（`load_usage()` 读它，剥 `plugin:` 前缀归一）。Python312 调用。**该 hook 已随 2026-09-08 六个本地 hook 精简批次卸载**（见上方条目），`settings.json` 与 cc-switch `common_config_claude` 均无注册，本段保留为历史。
 - **hooks/scripts/transcript_sweep.py（2026-08-17 新建）**：周复盘脚本，非 hook（不进 settings.json）。扫最近 N 天会话 user 消息 → 去重/CJK 高频主题 → `~/.claude/metrics/transcript-weekly-YYYYMMDD.md`。纯 stdlib。周惯例手动跑：`python ~/.claude/hooks/scripts/transcript_sweep.py 7`。
 - **2026-08-17 settings.json**：PostToolUse 末尾加独立 `Skill` matcher 分组（调 skill_ledger.py）；备份见常规 settings 快照。
 - **2026-08-17 skill 修改（非新建，git 已追踪）**：code-change-workflow 加 §1.4.1「Agent 汇报核对清单」（JavaGuide Redis 案例）；skill-trimmer 加保鲜维度——scan_skills.py 每 skill 输出 `last_modified`/`usage_count`/`staleCandidate`（STALE_DAYS=180）+ SKILL.md 数据驱动段加「本机自动化三件套」命令引用。
@@ -317,9 +329,10 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **2026-08-13 数据源剥离完成**：statusline 脚本早已独立，但其 cost/工具计数数据源（`post:ecc-metrics-bridge` hook 写 `/tmp/ecc-metrics-{session}.json`）此前仍绑 ecc 插件。已复制为自建 hook：`~/.claude/hooks/ecc-metrics-bridge.js` + `~/.claude/hooks/lib/`（agent-data-home.js / session-bridge.js / utils.js，ecc 版；require 路径已改 `./lib/`）。settings.json PostToolUse 已注册 `*` matcher 调它。验证：喂真实 session 数据 → bridge 文件生成 → statusline 输出含 `Nt 时长` 段。cc-switch `common_config_claude` 快照已同步。
 - **2026-08-13 晚：ecc 插件整体卸载**（见下方「ecc 剥离/卸载」章节），原 `env.ECC_DISABLED_HOOKS`（禁 ecc 原版 metrics-bridge + gateguard）已随卸载删除。自建 metrics-bridge 是唯一 bridge 数据源，无双写问题。
 
-### settings.json 关键本机定制
+### settings.json 关键本机配置
 - `enabledPlugins` 清单快照见 tool-install.md
-- lean-ctx 注入段在 CLAUDE.md 尾部（`<!-- lean-ctx -->` 包围，官方注入，别手改）
+- `hooks` 现注册 6 类事件：`SessionStart`、`SessionEnd`、`PreToolUse`、`PostToolUse`、`Notification`、`StopFailure`（2026-09-21 实测）
+- ~~lean-ctx 注入段在 CLAUDE.md 尾部（`<!-- lean-ctx -->` 包围，官方注入，别手改）~~ **失效**：lean-ctx 已于 2026-09-05 卸载，2026-09-21 实测 `~/.claude/CLAUDE.md` 内 `lean-ctx` 命中 0 处，无需再避让该段。
 
 ## ecc 剥离/卸载（2026-08-13）
 
@@ -332,7 +345,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
     - **2026-09-05 补充**：同日用户确认后彻底清除 hook 源码内 Edit/Write/MultiEdit 事实门死代码（分支 + editGateMsg/writeGateMsg/condensedGateMsg/getFullDenialBudget/markCheckedAndCountDenial/sanitizePath/EDIT_WRITE_HOOK_ID），denyResult 默认 hookId 改为 BASH_HOOK_ID。行为不变：destructive 与 routine Bash 门保留，实测 deny→retry→allow 与 Write/Edit 透传均通过。
   - `~/.claude/hooks/lib/shell-substitution.js`（零依赖）
   - 未剥离：format-typecheck / suggest-compact / memory-persistence（用户不要，随 ecc 消失）
-- **MCP**：chrome-devtools 独立保留 → `claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest`（写入 `~/.claude.json` 顶层 mcpServers，user scope；原 ecc `.mcp.json` 定义）。**注意**：settings.json 顶层不支持 `mcpServers`（死配置，官方确认），别放那。
+- **MCP**：chrome-devtools 独立保留 → `claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest`（写入 `~/.claude.json` 顶层 mcpServers，user scope；原 ecc `.mcp.json` 定义）。**注意**：settings.json 顶层不支持 `mcpServers`（死配置，官方确认），别放那。**2026-09-21 状态**：chrome-devtools 已于 2026-09-07 卸载（见 [mcp-install.md](mcp-install.md)），当前 `~/.claude.json` 顶层 `mcpServers` 只剩 `headroom` 一条；关于 settings.json 不支持 mcpServers 的注意事项仍然有效。
 - **settings.json 变更**：`ecc@ecc:false`；删 `ECC_DISABLED_HOOKS`；加 `GATEGUARD_BASH_ROUTINE_DISABLED=1`；PreToolUse Bash 加 gateguard-destructive + mcp-health-check；PostToolUseFailure 加 mcp-health-check；Stop 加 check-console-log。备份 `settings.json.bak-ecc-rm-20260813`（更早 `settings.json.bak-ecc-20260813` 在卸载前；**注意该备份含死配置 mcpServers 段，回退时删掉**）。
 - **卸载**：`claude plugin uninstall ecc@ecc`（2026-08-13）。缓存 `plugins/cache/ecc/` 目录残留（未删，留作回退对照）。
 - **marketplace 删除**（2026-08-13）：`claude plugin marketplace remove ecc`（市场源 affaan-m/ECC），登记 + 缓存 `plugins/marketplaces/ecc/` 一并清除，其余 11 个 marketplace 不受影响。`~/.claude.json` 的 `ecc@ecc`/`ecc@inline` pluginUsage 统计段已手术式清除（Python 字节级替换 + JSON 校验通过）。
@@ -351,6 +364,8 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 验证：检查 SKILL.md frontmatter、源依据和 Wiki 状态/证据约束；`git diff --check` 通过。
 - 回退：删除 `C:\ZYS\Wiki\.claude\skills\wiki-course-tutor\`，并移除本登记项；不涉及 OpenMAIC、Wiki 知识正文或全局配置。
 
+
+## Claude Code → Codex CLI 配置迁移（2026-08-25 前后，精确日期与任务源待补）
 
 **背景**：把 Claude Code 配置生态（规则/skills/hooks/MCP）搬到 Codex CLI，过渡期并存，最终卸掉 Claude Code。claude 侧零改动（指纹对比：settings.json 一致；skills 目录 21:00 后 mtime 零变化；.claude.json 变化来自运行中的 claude.exe 自身写入）。
 
@@ -520,7 +535,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **出处**：独立子代理对 1.3.0 新增内容的逐条审查（必要性、合理性、与既有规则是否重复）。审查对象为全局 `CLAUDE.md` §8、`SKILL.md` §1.3/§1.6/§3、`CHANGELOG.md`、`toolchain-pitfalls/SKILL.md`、`session-inventory.py`、`session-hygiene.json`、`settings.json` 的 `WorktreeRemove` 挂钩。
 - **位置**：`~/.claude/skills/code-change-workflow/SKILL.md`（1.4.0）、`CHANGELOG.md`、`scripts/session-inventory.py`、`~/.claude/skills/toolchain-pitfalls/SKILL.md`、`~/.claude/CLAUDE.md`（无改动，§8 八条审查后全部保留）。
 - **内容**：删掉 `scripts/worktree-remove-guard.py` 与 `settings.json` 的 `hooks.WorktreeRemove` 段——宿主清理工作树前自己会检查未提交改动与未推送提交，钩子重复了这套判断，且曾因按载荷字段顺序取到会话的 `cwd` 而误判主检出、静默放行。§1.6 删掉五条与全局 `CLAUDE.md` §8 或 DTSF 项目 `CLAUDE.md` 重复的条目，删掉源自 DTSF 的 Git 协作小节；「删错了怎么找回」按实测改写。§1.3「页面提示不代表通过」改「只构建通过不等于通过」，合格证据去掉截图。§3「护栏靠 hooks 不靠自觉」改「护栏以实际挂载为准」。
-- **配置**：`~/.claude/settings.json` 的 `hooks` 现只有 `Notification`、`PostToolUse`、`SessionStart`、`StopFailure` 四类；`~/.claude/session-hygiene.json` 不变。
+- **配置**：`~/.claude/settings.json` 的 `hooks` 当时只有 `Notification`、`PostToolUse`、`SessionStart`、`StopFailure` 四类；**2026-09-21 实测为六类**，同日新增 `SessionEnd` 与 `PreToolUse`（见上文「会话生命周期机制（2026-09-18）」）。`~/.claude/session-hygiene.json` 不变。
 - **依赖**：psutil（本机 Python 3.12.10 已装 7.2.2）；清点脚本用绝对解释器路径 `C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe` 调用，换机器需要改 `SKILL.md` 对应那一行。
 - **验证**：清点脚本改后在 DTSF 实跑通过（退出码 0，20 个工作树、18 条 stash、11 条无远端分支、2 个独占容器运行中）。审查同时查出两处与实测不符的既有记载并已改正：memory `avoid-second-vite-port.md` 关于 9528 与 `strictPort` 的说法、`session-inventory.py` 输出里关于未提交改动能否恢复的说法。
 - **未验证**：宿主在三条自动清理路径上保留工作树的行为取自 `claude.exe` 代码与审查者复核，未做端到端实测；eval case `worktree-closeout` 尚未跑 runner。

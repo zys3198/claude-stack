@@ -18,13 +18,16 @@
 - 依赖：无
 - 备注：**双形态并存**（memory `matt-skills-dual-form`）：裸名 model-invoked 可调；插件版 14 个 user-invoked 模型调不到需手动敲（含 ask-matt，见 `ask-matt-key-flow-decision`）。选型拍板：Matt 主力 + Superpowers 备用 + ECC 跳过（memory `skill-ecosystem-choice-2026-07`）。
 
-### ~~Superpowers（备用套件）~~（已卸载 2026-08-19）
+### ~~Superpowers（备用套件）~~（已彻底移除 2026-09-21）
 - 来源：https://github.com/obra/superpowers
 - 安装日期：2026-06/07（待补）
 - 安装方法：曾 clone/copy 进 `~/.claude/skills/`，并启用插件 `superpowers@claude-plugins-official`
 - 装到哪：曾在 `~/.claude/skills/`（brainstorming、systematic-debugging、test-driven-development、writing-plans、worktrees 等）
-- 当前状态：插件已卸载，缓存目录按历史记录保留；当前不加载。
-- 备注：历史定位=备用（流程类与 Matt 重叠时以 Matt 优先）；恢复方式见本文件下方卸载记录。
+- 卸载记录 2026-08-19：插件卸载，缓存目录按历史记录保留
+- **彻底移除 2026-09-21**：用户拍板「不再使用 superpowers」，不保留备份。当日实测 dtsf 项目级 `.claude/skills/` 下仍有两份 Superpowers 血统的副本在被加载（`brainstorming`、`writing-plans`），已删除；`~/.claude/plugins/data/superpowers-inline`（空目录）一并删除。判定依据：两份 SKILL.md 与配套文件引用 `github.com/obra/superpowers`、`superpowers:*` 子技能名、`docs/superpowers/` 默认路径，且无任何 loopforge/devflow 痕迹。
+- 当前状态：插件、项目级副本、插件数据目录均已清除；`plugin-catalog-cache.json` 里仍有 superpowers 条目，那是官方市场目录缓存，不是安装记录，会随目录刷新。
+- ~~遗留待处理~~（2026-09-21 复查已消除）：dtsf 的 `commands/start-devflow.md:72-76` 与 `commands/analyze-requirement.md:35-39` 两处指向已删除 skill 的引用，随同日 dtsf 的 LoopForge/devflow 项目副本整体移除而一并消失——2026-09-21 实测 `C:\ZYS\Code\dtsf\.claude\` 只剩 `better-harness\`、`scheduled_tasks.lock`、`worktrees\`，两个命令文件均已不存在。处置范围见 [tool-install.md](tool-install.md)「loopforge-cli 全局安装 + Claude Classic（2026-09-17）」。`docs/superpowers/` 目录下的计划与 spec 是真实产物，未动。
+- 备注：历史定位=备用（流程类与 Matt 重叠时以 Matt 优先）。
 
 ### 仓颉 cangjie-skill + first-principles pack
 - 来源：https://github.com/Yeadon8888/cangjie-skill（仓颉）+ https://github.com/kangarooking/first-principles-skill（第一性原理 pack；2026-08-11 公网反查锁定）
@@ -44,20 +47,19 @@
 ### ~~LoopForge devflow~~ → 已 fork 脱轨为自有系统 ai-coding-guide（2026-08-18）
 - 来源：https://github.com/Tencent/LoopForge（上游 clone 在 `C:\ZYS\Code\loopforge`，HEAD 09c7652，仅作「看官方更新」参考窗口，**不再 pull 升级**，好更新人工挑拣吸收）
 - 安装日期：2026-08（fork 脱轨定案 2026-08-18，用户拍板）
-- 历史状态：`~/.claude/skills/ai-coding-guide/` 曾是 DevFlow 官方骨架 fork；现已退出全局 skill，旧 guide 归档于 `~/.claude/archive/ai-coding-guide-v1.9.0/`，后续 fork 版已删除并备份于 `~/.claude/backups/ai-coding-guide-delete-20260902/`。本条仅保留来源与 fork 前史。
+- 历史状态：`~/.claude/skills/ai-coding-guide/` 曾是 DevFlow 官方骨架 fork；现已退出全局 skill，旧 guide 归档于 `~/.claude/archive/ai-coding-guide-v1.9.0/`，后续 fork 版已删除并备份于 `~/.claude/backups/ai-coding-guide-delete-20260902/`。本条仅保留来源与 fork 前史。**2026-09-21 复查：这两处路径均已不存在（`~/.claude/archive/` 整个目录不存在），恢复路径失效。**
 - 装到哪/构成：状态机骨架（scripts/templates/rules/agents/adapters=仅 claude+shared）+ `references/clarify-requirements.md`（2026-08-18 起顶层 `devflow-clarify-requirements/` skill 吸收入本体，原目录已删）+ 根级 `manifest.json`（adapter_registry.py 依赖，load-bearing）
 - 定制点：SKILL.md 名前/描述/标题 + 编码路由 stopgap 段、`commands/ai-coding-guide.md`（claude 化重写）、`references/routing-stopgap.md`（新建）、`references/runtime-core.md` 适配器段改 claude、`rules/stages/summary.md` 第 4 条（82-能力沉淀证据草稿）；删 `adapters/{codebuddy,codex,cursor}` + `agents/openai.yaml`；tests 删 7 个 codebuddy 专项、4 个适配 claude
 - 依赖：Python 3.8+ 标准库
 - 测试基线：**20 passed / 2 failed**（2 失败 = Windows 路径分隔符断言，平台差异勿修）；`scripts/validate_config.py` OK（adapters=1）。注意：跑 pytest 先清 `PYTHONIOENCODING`/`PYTHONUTF8` 环境变量（harness 注入 utf-8 会致子进程输出被 GBK 解码假失败）
 - 维护归属：自有系统，日常维护见 custom-setup.md「ai-coding-guide（编码域总入口系统）」；本条目仅留来源与 fork 前史
 
-#### DTSF 项目 DevFlow Claude 适配器
+#### ~~DTSF 项目 DevFlow Claude 适配器~~ 已移除 2026-09-21
 - 来源：本地 `~/.claude/skills/ai-coding-guide/` 的 Claude adapter（上游前史见本节 LoopForge 条目）
-- 安装日期：2026-08-20
-- 安装命令原文：`python3 /c/Users/zys31/.claude/skills/ai-coding-guide/scripts/install_adapter.py --adapter claude --project-root . --refresh-managed --copy-skills`
-- 装到哪：`C:\ZYS\Code\dtsf\.claude\`（2 个 DevFlow 执行器、portable `ai-coding-guide` 副本及托管清单）
-- 依赖：Python 3.8+、Claude Code `Agent` 工具
-- 备注：Windows 按项目约束使用复制，不尝试 symlink；只为 OA 考勤计划及后续隔离阶段服务。安装输出：`agents_installed=2`、`agents_preserved=0`、`ai-coding-guide=copied`。
+- 安装日期：2026-08-20；安装命令原文：`python3 /c/Users/zys31/.claude/skills/ai-coding-guide/scripts/install_adapter.py --adapter claude --project-root . --refresh-managed --copy-skills`
+- 曾装到哪：`C:\ZYS\Code\dtsf\.claude\`（DevFlow 执行器、portable `ai-coding-guide` 副本及托管清单）
+- 移除日期：2026-09-21，随 LoopForge/devflow 全局卸载一并执行。删除范围、保留项与残留见 `tool-install.md`「loopforge-cli 全局安装 + Claude Classic（2026-09-17）」条目。
+- 备注：Windows 按项目约束使用复制，不尝试 symlink。安装输出：`agents_installed=2`、`agents_preserved=0`、`ai-coding-guide=copied`。
 
 ### 思维/写作/学习类散件
 - 安装方法：clone/copy 进 `~/.claude/skills/`（`npx skills add <owner/repo>` 或手动 copy）
@@ -133,13 +135,13 @@
 | kangarooking/first-principles-skill | axiomatic-thinking, contrarian-decision, implicit-assumption, logic-triple-check, multi-mental-models, organizational-refresh, reductionism-deconstruction（critical-thinking 已被用户认定为自建，入 git） |
 | Yeadon8888（仓颉生态） | cangjie-skill, nuwa-skill, darwin-skill |
 | KKKKhazix/khazix-skills | hv-analysis, leader, neat-freak, storage-analyzer |
-| emilkowalski/skills | emil-design-eng, animation-vocabulary, review-animations, improve-animations, find-animation-opportunities, apple-design, ~~pick-ui-library~~（2026-08-18 归档 `~/.claude/archive/pick-ui-library`，wayfinder ticket 02 拍板：未接路由+原生可覆盖） |
-
-> 2026-08-18 归档登记（wayfinder ticket 02「coding 域深耕判定」）：`design`（来源待补）、`pick-ui-library`（emilkowalski/skills）移入 `~/.claude/archive/`，可逆；判据=未接 frontend-visual 路由且模型原生可覆盖。
+| emilkowalski/skills | emil-design-eng, animation-vocabulary, review-animations, improve-animations, find-animation-opportunities, apple-design, ~~pick-ui-library~~（2026-08-18 归档 `~/.claude/archive/pick-ui-library`，wayfinder ticket 02 拍板：未接路由+原生可覆盖；该归档目录 2026-09-21 实测已不存在） |
 | alvinunreal/oh-my-opencode-slim | worktrees, codemap, clonedeps, deepwork, simplify, reflect |
 | mattpocock/skills（插件外裸名） | to-prd, to-issues, request-refactor-plan, qa, design-an-interface, zoom-out |
 | abhigyanpatwari/GitNexus（`npx gitnexus analyze` 自动装） | gitnexus-cli, gitnexus-debugging, gitnexus-exploring, gitnexus-guide, gitnexus-impact-analysis, gitnexus-pdg-query, gitnexus-pr-review, gitnexus-refactoring, gitnexus-taint-analysis |
 | 单件 | agent-reach=Panniantong/Agent-Reach（外部，非自建，https://github.com/Panniantong/Agent-Reach/tree/main）, douyin-video-summary=liu-wei-ai, shuorenhua=MrGeDiao/shuorenhua, find-skills=vercel-labs/skills, lean-ctx=yvgude/lean-ctx, hatch-pet=openai/skills, officecli=officecli/officecli, markdown-viewer=markdown-viewer/skills, ~~bili-note~~（用户确认自建，移至 custom-setup.md） |
+
+> 2026-08-18 归档登记（wayfinder ticket 02「coding 域深耕判定」）：`design`（来源待补）、`pick-ui-library`（emilkowalski/skills）移入 `~/.claude/archive/`，可逆；判据=未接 frontend-visual 路由且模型原生可覆盖。**2026-09-21 复查：`~/.claude/archive/` 整个目录已不存在，这两项的归档副本同样不可恢复。**
 
 插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
 
@@ -153,11 +155,12 @@
 - 依赖：python3 + webbrowser（loopback HTTP 服务，无第三方包）
 - **处置：吸收式合并进 skill-trimmer（2026-08-14，用户拍板）**。复用资产已收编进 `~/.claude/skills/skill-trimmer/`：`scripts/review_server.py`（1069 行，品牌已归并 skill-slimming→skill-trimmer，状态目录 `~/.skill-trimmer/`）+ `assets/review.html` + `references/audit-contract.md`；scan_skills.py 新增输出 `inventory-review.json`（review 契约）。SKILL.md 接入：网页复审页（§4.5）、触发空壳合同、三维 token 模型、测量标签纪律。未吸收（有意）：多宿主/插件/MCP 审计、apply/delete 阶段+verification_receipt、recheck 漂移复查、agents/openai.yaml（Codex 专属）、probe 子命令（本机 settings.json 无 skillOverrides，空转）。判定基准不吸收（slimming 判据浅，仅 global/project/trigger 三值）。安全面已核：仅绑 127.0.0.1 随机端口、随机 token、无 subprocess/shell/网络、只写自己状态目录、不读密钥。端到端验证通过：scan→validate→serve 冒烟（health 200 / 页面 200 / 无 token 401 / 坏 Host 400 / bootstrap 69 skills）。可逆：`npx skills add LearnPrompt/carl-skills --skill skill-slimming -g` 重装。
 
-### taste-skill 插件版（Leonxlnx/taste-skill）
+### ~~taste-skill 插件版（Leonxlnx/taste-skill）~~（2026-08-13 安装，2026-09-10 卸载）
 - 来源：https://github.com/Leonxlnx/taste-skill
 - 安装日期：2026-08-13
 - 安装方法：用户手动安装插件（命令原文未提供，待补；结果经 `installed_plugins.json` 实测确认）
 - 装到哪：`~/.claude/plugins/cache/taste-skill/taste-skill/1.0.0`（插件 `taste-skill@taste-skill`，scope=user，version 1.0.0，commit `e988add20dab0fa97d7a76781c48961c8184288e`，installedAt 2026-08-13T02:21）
+- 当前状态（2026-09-21 实测）：已卸载，插件注册、marketplace 注册与 `plugins/cache/taste-skill/` 均已清除，详见下方「taste-skill 卸载复核（2026-09-10）」。本条下方「当日确认本会话可用」是安装当日的事实，不代表当前可用。
 - 依赖：无
 - 备注：与上方反查表「leonxlnx/taste-skill」裸名散件同源双形态。插件版自带 13 个 skill，前缀 `taste-skill:`（brandkit / brutalist-skill / gpt-tasteskill / image-to-code-skill / imagegen-frontend-mobile / imagegen-frontend-web / minimalist-skill / output-skill / redesign-skill / soft-skill / stitch-skill / taste-skill / taste-skill-v1）。当日确认本会话可用。
 
@@ -203,11 +206,11 @@
 
 ### Skill 库精简（2026-09-03，skill-trimmer 流程 + 用户逐项拍板）
 - **卸载（移入备份，非真删）**：learning-guide、article-writing-guide（纯域路由器砍除，下游直达）、lean-ctx、learning-personas、deep-learn、tech-learning-roadmap、expose-unknowns、preflight-check（预检清单并入 code-change-workflow §1.1）、tutorial-maker、ai-coding-coach（学习域收敛用户拍板）、hallmark（与插件 impeccable 重叠，归档 60 天观察至 2026-11-02）、generic-course-tutor-workspace（产物目录挪出）、wiki-skill（lab-area 项目级，与全局 improver-skill 重复）
-- **备份位置**：`~/.claude/backups/skill-trim-20260903/`（含 README.md 判定理由+恢复方式，恢复 = `mv` 回 `~/.claude/skills/`）
+- **备份位置**：`~/.claude/backups/skill-trim-20260903/`（含 README.md 判定理由+恢复方式，恢复 = `mv` 回 `~/.claude/skills/`）。**2026-09-21 实测该备份目录已不存在，本批次所有「移入备份」项的恢复路径失效**；`~/.claude/backups/` 现只剩 `claude-md-slim-20260919/`、`drawio-chart-embedded-git-20260919/`、`skill-prune-20260919/` 三项。
 - **改写**：generic-course-tutor / article-writer / bili-note / content-to-note / wiki-sediment 描述去路由转介自包含；parallel-delegation / bidirectional-steelman / leader 触发面收窄；code-change-workflow 并入 5 项环境预检清单
 - **插件**：`enabledPlugins.open-code-review → false`（review 三重撞车，留 official code-review + matt code-review + ponytail-review），已同步 cc-switch DB common_config_claude（backup: sync-backup-20260903_235738.json），providers commonConfigEnabled 均 True
 - **库规模**：32 目录 → 20 skill
-- **pi 侧退役（2026-09-04）**：用户拍板弃用 pi。`~/.pi/agent/skills/` + `skills-sync/`（185M，27+20 目录）移入 `~/.claude/backups/skill-trim-20260903/pi-side/`。~/.pi 其余（auth.json/memory/sessions/settings/台账/github-sync 脚本）保留未动，pi-stack git 仓库完好。恢复 = mv 回原位。
+- **pi 侧退役（2026-09-04）**：用户拍板弃用 pi。`~/.pi/agent/skills/` + `skills-sync/`（185M，27+20 目录）移入 `~/.claude/backups/skill-trim-20260903/pi-side/`。~/.pi 其余（auth.json/memory/sessions/settings/台账/github-sync 脚本）保留未动，pi-stack git 仓库完好。~~恢复 = mv 回原位~~（**2026-09-21 实测 `~/.claude/backups/skill-trim-20260903/` 已不存在，本条恢复路径失效**；pi 侧 skill 内容如需找回，只能从上游仓库重装）。
 - **插件卸载（2026-09-04）**：彻底卸载 ppt-master（缓存 102M）、officecli、taste-skill、frontend-design（均为长期禁用态）——settings.json enabledPlugins/extraKnownMarketplaces、installed_plugins.json、known_marketplaces.json、plugins/cache/ 四处同步清理。open-code-review 维持禁用未卸。playwright 禁用（浏览器自动化二选一，留 chrome-devtools MCP）。同步 cc-switch DB 完成。
 - **历史会话清理（2026-09-04）**：~/.claude/projects 清 3 天前 transcript（uuid 条目，memory 保留），释放 1.4G（2.2G→419M）。
 - **cc-switch-setting-sync 自动化（2026-09-04）**：新增 hooks/settings-sync-auto.py（PostToolUse Edit|Write，命中 settings.json 即自动同步 cc-switch DB，幂等 NO-OP），skill 降级为排查/修复/验证文档。同轮：skill_ledger.py 接线 PostToolUse matcher=Skill（skill-usage.log 记账恢复）；chrome-devtools-mcp 固定 1.8.0；hooks/ 清残留（HOOKS_BACKUP.md/debug.log/__pycache__）。

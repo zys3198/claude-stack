@@ -137,6 +137,8 @@ skills/*
 !skills/cc-switch-setting-sync-by-user/
 !skills/code-change-workflow-by-user/
 !skills/content-to-note-by-user/
+!skills/dev-clean-by-user/
+!skills/dev-status-by-user/
 skills/content-to-note-by-user/scripts/wechat/node_modules/
 !skills/drawio-article-illustration-by-user/
 !skills/drawio-chart-by-user/

@@ -14,7 +14,7 @@
 | 开发中 | 每次跑 Bash | 拦截绕过约定位置的工作树创建 |
 | 开发结束 | 会话退出 | 记录收尾状态；有未提交改动时提示，干净时静默 |
 
-没有自动删除。清理只发生在你运行 `/dev-clean` 并逐条确认之后。
+没有自动删除。清理只发生在你运行 `/dev-clean-by-user` 并逐条确认之后。
 
 ---
 
@@ -59,7 +59,7 @@ claude -w eam-qr-code
 - 同一端口只允许一个实例。启动前先看占用者，再决定复用还是接管。端口被占就显式失败，不顺延到下一个端口。
 - 重建后端镜像、执行数据库迁移这类操作，同一时间只允许一个会话做。
 
-系统里登记的端口和独占资源写在 `~/.claude/session-hygiene.json`，`/dev-status` 会一并列出来。
+系统里登记的端口和独占资源写在 `~/.claude/session-hygiene.json`，`/dev-status-by-user` 会一并列出来。
 
 ---
 
@@ -83,7 +83,7 @@ claude -w eam-qr-code
 
 收尾记录文件由开发前检查写入、由会话结束追加，两条路径共用一把锁（`~/.claude/session-handoff.lock`，正常跑完即删），所以同时开会话和关会话不会互相覆盖。
 
-锁等了 2 秒还没拿到时，结束环节不往共用文件里挤，改写一份独占命名的溢出文件到 `~/.claude/session-handoff.d/`。开发前的检查与 `/dev-status` 都会读这个目录，下一次裁剪把里面的记录并回主文件。同一个文件被多个进程并发追加会在 Windows 上互相覆盖（实测丢 8% 到 14%），独占命名避开了这一点。
+锁等了 2 秒还没拿到时，结束环节不往共用文件里挤，改写一份独占命名的溢出文件到 `~/.claude/session-handoff.d/`。开发前的检查与 `/dev-status-by-user` 都会读这个目录，下一次裁剪把里面的记录并回主文件。同一个文件被多个进程并发追加会在 Windows 上互相覆盖（实测丢 8% 到 14%），独占命名避开了这一点。
 
 等待窗口固定 2 秒，与收尾记录文件的规模无关（实测 4000 条记录时仍是 2.00 秒）。空闲时追加实测耗时 0 毫秒，这个代价只在锁确实被别人持有时出现。SessionEnd 的 hook 超时是 15 秒，同一进程连续 8 次降级追加会把它耗尽；单次会话结束只追加一条，触发不了。
 
@@ -98,7 +98,7 @@ claude -w eam-qr-code
 ## 五、查看当前状态
 
 ```
-/dev-status
+/dev-status-by-user
 ```
 
 一屏列出：
@@ -115,19 +115,19 @@ claude -w eam-qr-code
 加参数可以看别的仓库：
 
 ```
-/dev-status C:/ZYS/Code/other-repo
+/dev-status-by-user C:/ZYS/Code/other-repo
 ```
 
 「可清理」只表示 git 没有登记改动。工作树里若还有被 `.gitignore` 覆盖的内容（构建产物、本地数据库、`.env` 之类），会额外标注「另有 N 项被忽略内容」——那些文件不在 git 管辖内，删掉工作目录会一并删掉它们，所以单独列出来给你判断。
 
-会话枚举失败时（`claude agents --json` 不可用），输出会显式标注「活跃会话 枚举失败」并提示不要据此删除。此时「在用」分组为空，被占用的工作树会落进「可清理」，这份清单不能拿来删。`/dev-clean` 看到这条提示会直接停下，不列删除清单。开会话时的卫生提示同样会写明枚举失败，并且不把工作树报成无会话占用。
+会话枚举失败时（`claude agents --json` 不可用），输出会显式标注「活跃会话 枚举失败」并提示不要据此删除。此时「在用」分组为空，被占用的工作树会落进「可清理」，这份清单不能拿来删。`/dev-clean-by-user` 看到这条提示会直接停下，不列删除清单。开会话时的卫生提示同样会写明枚举失败，并且不把工作树报成无会话占用。
 
 ---
 
 ## 六、清理
 
 ```
-/dev-clean
+/dev-clean-by-user
 ```
 
 列出可清理的空工作树，经你逐条确认后执行。判定条件是：没有任何活跃会话占用，且 `git status --porcelain` 没有输出——含未跟踪文件，不含被 `.gitignore` 覆盖的内容。被忽略的那部分不会被判定拦住，所以清单里会单独标注出来。
@@ -136,7 +136,7 @@ claude -w eam-qr-code
 
 建在 `.claude/worktrees/` 之外的游离目录不会被列为可清理项，只会被列出，由你判断用途。
 
-**孤儿目录本机制一律不删。** 指 `.claude/worktrees/` 下存在、但 git 已经不认的目录。子代理的工作树由 harness 创建，被回收时只清掉 git 注册，目录留在磁盘上就成了孤儿。它里面有完整的工作副本，但改动不在任何分支上。`/dev-status` 会标出每个孤儿目录有没有同名分支——标「无同名分支，内容只在此目录」的，目录就是内容的唯一副本，删掉就找不回来。这类目录怎么处理由你决定。
+**孤儿目录本机制一律不删。** 指 `.claude/worktrees/` 下存在、但 git 已经不认的目录。子代理的工作树由 harness 创建，被回收时只清掉 git 注册，目录留在磁盘上就成了孤儿。它里面有完整的工作副本，但改动不在任何分支上。`/dev-status-by-user` 会标出每个孤儿目录有没有同名分支——标「无同名分支，内容只在此目录」的，目录就是内容的唯一副本，删掉就找不回来。这类目录怎么处理由你决定。
 
 ---
 
@@ -178,11 +178,11 @@ heredoc 的正文是喂给命令的数据，拆词前先剥掉，所以提交消
 
 判定基准是主检出的 `.claude/worktrees/`。在链接工作树里开会话时 `git rev-parse --show-toplevel` 返回工作树自身，所以改取 `git rev-parse --git-common-dir` 的上一级。命名格式按第 8 节执行：kebab-case，禁用 hash、纯日期和保留名；词数不做校验。
 
-拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件由 `/dev-status` 报告；产物放错目录没有自动检查，靠第 8 节的文本约定。
+拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件由 `/dev-status-by-user` 报告；产物放错目录没有自动检查，靠第 8 节的文本约定。
 
 非 git 目录里确定不了仓库根，此时对 `git worktree add` 一律拒绝并说明原因，不做猜测。
 
-子代理的工作树由 harness 自动创建，名字是 `agent-<hash>`，拦截管不到，只能用 `/dev-status` 看。
+子代理的工作树由 harness 自动创建，名字是 `agent-<hash>`，拦截管不到，只能用 `/dev-status-by-user` 看。
 
 **边界**：下面两类写法在拆词阶段看不出 `git worktree add`，会放行：
 
@@ -212,11 +212,11 @@ EOF
 
 ## 九、出问题时
 
-**提示太吵** —— 卫生提示只在有问题时出现。如果每次开会话都有内容，那说明仓库里确实有东西没归位，看 `/dev-status`。
+**提示太吵** —— 卫生提示只在有问题时出现。如果每次开会话都有内容，那说明仓库里确实有东西没归位，看 `/dev-status-by-user`。
 
-**误删了工作树** —— 分支还在。`git branch` 能找到，`git worktree add <路径> <分支>` 重新检出即可。删除只在 `/dev-clean` 确认后发生，不会自动执行。
+**误删了工作树** —— 分支还在。`git branch` 能找到，`git worktree add <路径> <分支>` 重新检出即可。删除只在 `/dev-clean-by-user` 确认后发生，不会自动执行。
 
-**删掉的工作树里有被忽略的文件** —— 分支还在，但被 `.gitignore` 覆盖的内容（构建产物、本地数据库、`.env`）没有其他副本，找不回来。`/dev-status` 会在可清理项上标注「另有 N 项被忽略内容」，看到这行先确认那些文件可以不要，再同意删除。
+**删掉的工作树里有被忽略的文件** —— 分支还在，但被 `.gitignore` 覆盖的内容（构建产物、本地数据库、`.env`）没有其他副本，找不回来。`/dev-status-by-user` 会在可清理项上标注「另有 N 项被忽略内容」，看到这行先确认那些文件可以不要，再同意删除。
 
 **拦截太严** —— 检查 `~/.claude/product-guard.log` 看拦了什么。规则本身在 `~/.claude/CLAUDE.md` 第 8 节。
 
@@ -226,10 +226,10 @@ EOF
 |------|------|
 | `~/.claude/hooks/scripts/session-guard.py` | 开发前检查与开发结束记录 |
 | `~/.claude/hooks/scripts/product-guard.py` | 工作树拦截 |
-| `~/.claude/hooks/scripts/session-status.py` | 状态汇总，`/dev-status` 调用 |
+| `~/.claude/hooks/scripts/session-status.py` | 状态汇总，`/dev-status-by-user` 调用 |
 | `~/.claude/hooks/scripts/selftest.py` | 自检，`python selftest.py`，退出码 0 为全过 |
-| `~/.claude/commands/dev-status.md` | `/dev-status` 命令 |
-| `~/.claude/commands/dev-clean.md` | `/dev-clean` 命令 |
+| `~/.claude/skills/dev-status-by-user/SKILL.md` | `/dev-status-by-user` skill |
+| `~/.claude/skills/dev-clean-by-user/SKILL.md` | `/dev-clean-by-user` skill |
 | `~/.claude/session-handoff.jsonl` | 会话收尾记录，保留 7 天 |
 | `~/.claude/session-handoff.d/` | 锁等待超时时写的溢出记录，下一次裁剪并回主文件 |
 | `~/.claude/session-handoff.lock` | 收尾记录的写入锁，正常跑完即删 |

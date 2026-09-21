@@ -6,7 +6,7 @@
 
 ## Claude Code 插件 marketplace（/plugin marketplace add）
 
-当前集合来自 `plugins/known_marketplaces.json`；插件启用状态来自 `settings.json`。
+当前集合来自 `plugins/known_marketplaces.json`；插件启用状态来自 `settings.json`。**下表状态为 2026-09-21 实测**；标「已移除」的行保留为历史记录，不代表当前可用。
 
 | marketplace | 来源 | 当前状态 |
 |---|---|---|
@@ -14,13 +14,13 @@
 | mattpocock | https://github.com/mattpocock/skills | marketplace 存在；插件启用 |
 | caveman | https://github.com/JuliusBrussee/caveman | marketplace 存在；插件启用 |
 | ponytail | https://github.com/DietrichGebert/ponytail | marketplace 存在；插件启用 |
-| open-code-review | https://github.com/alibaba/open-code-review | marketplace 存在；插件启用 |
+| open-code-review | https://github.com/alibaba/open-code-review | 已移除（2026-09-10 清缓存与市场目录；2026-09-03 起已禁用） |
 | better-harness | https://github.com/QoderAI/better-harness | 已移除（2026-09-19）；当前 `known_marketplaces.json` 无记录 |
-| taste-skill | https://github.com/Leonxlnx/taste-skill | marketplace 存在；插件启用 |
+| taste-skill | https://github.com/Leonxlnx/taste-skill | 已移除（2026-09-10 卸载复核） |
 | last30days-skill | https://github.com/mvanhorn/last30days-skill | marketplace 存在；插件启用 |
-| officecli | https://github.com/officecli/officecli | marketplace 存在；插件禁用 |
+| officecli | https://github.com/officecli/officecli | 已移除（2026-09-10 清空市场注册与目录；2026-09-04 曾卸载插件） |
 | impeccable | https://github.com/pbakaus/impeccable | marketplace 存在；插件启用 |
-| ppt-master | https://github.com/hugohe3/ppt-master | marketplace 存在；插件禁用 |
+| ppt-master | https://github.com/hugohe3/ppt-master | 已移除（2026-09-10 清空市场注册与目录；2026-09-04 曾卸载插件） |
 | anthropic-agent-skills | https://github.com/anthropics/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
 | ecc | https://github.com/affaan-m/ECC | 已移除；当前 `known_marketplaces.json` 无记录 |
 | karpathy-skills | https://github.com/forrestchang/andrej-karpathy-skills | 已移除（2026-09-19 二次）；当前 `known_marketplaces.json` 无记录 |
@@ -36,14 +36,14 @@
 
 ## 当前插件状态（settings.json）
 
-- 配置记录日期：2026-09-04
-
-- 启用：`better-harness@better-harness`、`caveman@caveman`、`claude-md-management@claude-plugins-official`、`code-review@claude-plugins-official`、`context7@claude-plugins-official`、`github@claude-plugins-official`、`impeccable@impeccable`、`last30days@last30days-skill`、`mattpocock-skills@mattpocock`、`ponytail@ponytail`、`skill-creator@claude-plugins-official`、`taste-skill@taste-skill`
-- 禁用：`frontend-design@claude-plugins-official`、`open-code-review@open-code-review`、`playwright@claude-plugins-official`
-- 低频插件复核（`claude plugin list`，2026-09-04）：以上 3 个插件均禁用。
-- 2026-09-18 更新：`andrej-karpathy-skills@karpathy-skills` 已卸载（插件与 marketplace 一并移除），详见下方条目。
-- 2026-09-19 更新：`andrej-karpathy-skills@karpathy-skills` 二次卸载。09-18 卸载后于 09-19 22:03 复活重装，根因是 cc-switch 当前 provider 快照回写，详见下方「二次卸载」条目。
-- 2026-09-19 更新：`better-harness@better-harness` 已卸载（插件与 marketplace 一并移除），详见下方条目。
+- **2026-09-21 实测**（`settings.json` 的 `enabledPlugins`、`plugins/installed_plugins.json`、`plugins/known_marketplaces.json` 三处口径一致）：启用 7 个——`caveman@caveman`、`context7@claude-plugins-official`、`github@claude-plugins-official`、`impeccable@impeccable`、`last30days@last30days-skill`、`mattpocock-skills@mattpocock`、`ponytail@ponytail`。
+- 无 `false` 键：`enabledPlugins` 现存 7 个键全为 `true`；早期记录里的禁用态键（`frontend-design`、`open-code-review`、`playwright`）是被删除，不是置 false。
+- `plugins/cache/` 6 个目录与 `known_marketplaces.json` 的 6 条一一对应。`plugins/data/` 另存 `ecc-ecc`、`gitnexus-gitnexus-marketplace`、`headroom-headroom-marketplace`、`playwright-inline` 四个已卸载插件的遗留数据目录，不影响加载，未清。
+- 历史变更（原「配置记录日期 2026-09-04」的清单已失效，保留如下）：
+  - 2026-09-04：`ppt-master`、`officecli`、`taste-skill`、`frontend-design` 卸载；`open-code-review` 维持禁用。
+  - 2026-09-10：插件全量精简——官方缓存 `claude-md-management`、`code-review`、`skill-creator`、`playwright`、`frontend-design`，第三方 `open-code-review`、`headroom@headroom-marketplace`，空市场 `officecli`、`ppt-master` 一并清除。同轮复核卸载 `taste-skill`。
+  - 2026-09-18 / 2026-09-19：`andrej-karpathy-skills@karpathy-skills` 两度卸载，详见下方两条条目。
+  - 2026-09-19：`better-harness@better-harness` 卸载，详见下方条目。
 
 ### andrej-karpathy-skills 1.0.0（2026-09-12）
 - 来源：https://github.com/forrestchang/andrej-karpathy-skills；本次核对用户提供的 https://github.com/multica-ai/andrej-karpathy-skills，README 安装命令与 marketplace 元数据均指向原仓库
@@ -91,13 +91,13 @@
 - 手动复现（无脚本版）：备份 db → 打开 `~/.cc-switch/cc-switch.db` → 删 `providers` 表 `app_type='claude'` 各行 `settings_config` JSON 内的 `enabledPlugins["andrej-karpathy-skills@karpathy-skills"]` 与 `extraKnownMarketplaces["karpathy-skills"]` → `proxy_live_backup.original_config` 同样处理 → UPDATE 回写 → SQL 复查
 - 恢复：`claude plugin marketplace add --scope user forrestchang/andrej-karpathy-skills` → `claude plugin install andrej-karpathy-skills@karpathy-skills --scope user --yes`
 - 未清理项：`~/.claude/docs/config-inventory.md`、`config-checklist.md`、`opencode-migration-plan.md`、`~/.claude/skill-trimmer-workspace/inventory-summary.md` 仍含该插件行。四份文件头各自已标「已废弃」或「历史文档」，按既有口径不改，权威口径以本台账为准
-- 关联异常（未处理）：`better-harness@better-harness` 于 2026-09-19 卸载且已不在 `known_marketplaces.json` / `installed_plugins.json`，但 `~/.claude/settings.json` 的 `enabledPlugins` 仍留 `"better-harness@better-harness": true`，与本次复活同一特征，待用户决定是否一并处理
+- 关联异常（2026-09-21 复查已消除）：`better-harness@better-harness` 卸载后一度在 `~/.claude/settings.json` 的 `enabledPlugins` 残留 `"better-harness@better-harness": true`，与本次复活同一特征。2026-09-21 实测 `enabledPlugins`、`installed_plugins.json`、`known_marketplaces.json` 三处均已无该键。
 
-### taste-skill 1.0.0（2026-09-04 恢复）
+### ~~taste-skill 1.0.0~~（2026-09-04 恢复，2026-09-10 卸载）
 - 来源：https://github.com/Leonxlnx/taste-skill
 - 安装命令原文：`claude plugin install taste-skill@taste-skill --scope user`
 - 装到哪：`~/.claude/plugins/cache/taste-skill/taste-skill/1.0.0`
-- 状态：`taste-skill@taste-skill`，scope=user，enabled；`claude plugin list` 与 `installed_plugins.json` 均已核对
+- 状态（2026-09-21 实测）：已卸载。`enabledPlugins`、`installed_plugins.json`、`known_marketplaces.json`、`plugins/cache/taste-skill/` 四处均已无该插件；下一条「scope=user，enabled」的记载是 2026-09-04 恢复当时的状态，已失效。卸载命令与残留清理见 [skill-install.md](skill-install.md)「taste-skill 卸载复核（2026-09-10）」
 - 依赖：无额外依赖
 - cc-switch：执行 `sync_claude_common.py`，old len=9709 → new len=9746，readback=MATCH；备份 `~/.cc-switch/backups/sync-backup-20260904_171520.json`
 
@@ -130,6 +130,7 @@
 - 依赖：Node.js / npm
 - 用途：代码审查 CLI，命令为 `ocr`
 - 备注：与 Claude Code marketplace `open-code-review` 为同一上游项目的两种安装形态；当前全局版本为 1.9.0。
+- **2026-09-21 实测：已不在本机**——`~/AppData/Roaming/npm/node_modules/@alibaba-group/` 目录不存在，`ocr` 命令不可解析，`npm ls -g` 无该包。npm 侧与插件侧的移除过程均未单独登记，日期待补；本条保留为历史。
 
 ### GitLab CLI（glab）
 - 来源：https://gitlab.com/gitlab-org/cli（winget 包 `GLab.GLab`）
@@ -359,10 +360,13 @@
 - 依赖：Windows Package Manager（winget）；Go 官方 Windows amd64 MSI
 - 验证：`go version go1.27.0 windows/amd64`；当前已安装但现有终端 PATH 尚未刷新，重开 PowerShell 后使用 `go` 命令
 - 备注：首次尝试带 `--scope user` 失败（当前 MSI 不支持该 scope）；移除 scope 后安装成功。用途：为 Herdr Windows 插件构建提供 Go，尤其是 `cloudmanic/herdr-plus`。
+- **2026-09-21 实测：已不在本机**——`C:\Program Files\Go` 目录不存在、`where go` 无结果、`C:\Users\zys31\go`（GOPATH）不存在、`winget list --id GoLang.Go` 返回「找不到与输入条件匹配的已安装程序包」。与 Herdr 同批消失，移除过程未登记，日期待补；本条保留为历史。
 
-### Herdr 0.8.2（2026-09-07，lab 试用中，未转正）
+### ~~Herdr 0.8.2~~（2026-09-07 安装，lab 试用未转正；2026-09-21 实测已不在本机）
 - 来源：https://herdr.dev/zh-cn/docs/install/ ；上游仓库 https://github.com/herdrdev/herdr
 - 安装日期：2026-09-07
+- 当前状态（2026-09-21 实测）：已不在本机。`C:\Users\zys31\.herdr`、`%APPDATA%\herdr`、`%LOCALAPPDATA%\Programs\Herdr` 三处目录均不存在，用户 PATH 无 herdr 条目，`herdr` 命令不可解析。**卸载日期与执行记录未留存，待补**。
+- 残留：`C:\Users\zys31\.claude\hooks\herdr-agent-state.ps1`（文件头自标 `installed by herdr / HERDR_INTEGRATION_VERSION=9`）仍在磁盘，且仍注册在 `~/.claude/settings.json` 的 `SessionStart` 第 2 组（matcher `*`，timeout 10）。脚本自带守卫，`HERDR_ENV` 不为 `1` 或 `HERDR_PANE_ID` 为空时直接 `exit 0`，因此在本机是惰性调用，但属于已卸载工具留下的死注册，待用户决定是否摘除。
 - 用途：终端复用器（tmux/zellij 类）。核心卖点=**AI 编程 agent 感知**（自动检测 pane 内 agent 的 idle/working/blocked 并向上汇总到 pane→tab→workspace 侧栏）+ **会话持久化**（detach/reattach、重启恢复、窗格历史回放）
 - 安装命令原文（**未用官方 `irm | iex` 一行流**，改落盘方式便于杀软扫描与人工审查）：
   1. `curl.exe -fsSLo install.cmd https://herdr.dev/install.cmd` —— 729B，审阅结论：仅把 install.ps1 下到 `%TEMP%` 再执行，无其他逻辑
@@ -447,6 +451,7 @@
 - 依赖：Node.js、npm；Claude Code 运行时
 - 验证：`loopforge plan claude` 确认 `edition=classic host=claude files=85`；安装输出 `written=85 unchanged=0`；`loopforge status claude` 返回 `classic/claude: files=85 changed=0 missing=0`
 - 备注：项目集成文件写入 `C:\ZYS\Code\lab-area\.claude\`；启动命令为 `/start-devflow`
+- **彻底卸载 2026-09-21**：用户拍板「删掉全局的 loopforge/devflow」，不保留备份。卸载命令原文：`loopforge uninstall claude --edition classic`（在 `C:\ZYS\Code\lab-area` 执行，输出 `OK: uninstall host=claude removed=85 preserved=0`，`.devflow\install-state.json` 随卸载一并删除）；`npm uninstall -g loopforge-cli`（输出 `removed 1 package`）。残留复查：`which loopforge` 无结果、`~/AppData/Roaming/npm/node_modules/loopforge-cli` 与三个入口 `loopforge`/`loopforge.cmd`/`loopforge.ps1` 均已不存在、`npm ls -g` 无 loopforge 条目；lab-area `.claude\` 只剩 `tmp\` 与 `worktrees\`（非 loopforge 所有，保留）；`~/.claude/artifacts/workflow-audit-fixes/`（2026-08-20 遗留 devflow 运行产物）与随之变空的 `~/.claude/artifacts/` 已删；记忆 `memory/loopforge-cli-usage.md` 先备份至 `memory/recovery/2026-09-21-loopforge-cli-usage.md` 再删除，并移除 `MEMORY.md` 索引行。**DTSF 项目副本同日单独移除 2026-09-21**：用户拍板「全局已经有个会话在清了，就删本项目的」，范围限本项目。删除方式：以 loopforge 包内 `.claude\` 模板（85 文件）与 dtsf 实际文件做集合差集，只删模板有的路径，共 75 个 —— agents 7、commands 12、skills 3（`agent-observability`、`knowledge-distillation`、`tech-design`）、`workflows\devflow.md`、rules 9、checklists 2、runtime 2、assets 3、`README.md`、`.devflow-generated.json` 清单，另删根级 `.devflow\install-state.json`。删除前 `loopforge status claude` 报 `files=85 changed=0 missing=10`（缺的 10 个是同日已删的 `brainstorming`、`writing-plans` 两份 Superpowers 血统 skill）。保留非 loopforge 所有的 `better-harness\`、`scheduled_tasks.lock`、`worktrees\`。残留：`C:\ZYS\Code\dtsf\CLAUDE.md:155` 仍把 `.claude/rules/` 描述为 devflow 规则目录，该文件未被 git 跟踪。恢复方式：`npm install --global loopforge-cli`，再到目标项目执行 `loopforge install claude`
 
 ### FunASR + kaldi-native-fbank（2026-09-20，Python 全局环境）
 - 来源：PyPI `funasr`、`modelscope`、`kaldi-native-fbank`；模型 `iic/SenseVoiceSmall`（ModelScope）
