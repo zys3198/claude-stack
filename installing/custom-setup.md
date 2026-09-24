@@ -47,6 +47,7 @@
 | session-guard.py | 在用 | `hooks/scripts/session-guard.py` → `hooks.SessionStart[1]`、`hooks.SessionEnd[0]` | 自建 | git | `start` / `end` 子命令 |
 | session-status.py | 在用 | `hooks/scripts/session-status.py` | 自建 | git | 由 `/dev-status` 调用，非 hook |
 | selftest.py | 在用 | `hooks/scripts/selftest.py` | 自建 | git | 自检入口，退出码 0 为全过 |
+| protocol_check.py | 在用 | `hooks/scripts/protocol_check.py` | 自建 | git | 校验门禁与记忆两份协议；只读、非 hook，退出码 0 为全过 |
 | settings-degrade-guard.py | 在用 | `hooks/settings-degrade-guard.py` → `hooks.SessionStart[0]` | 自建 | git | matcher `.*`，未设 timeout |
 | settings-sync-auto.py | 在用 | `hooks/settings-sync-auto.py` → `hooks.PostToolUse[0]` | 自建 | git | 只挂 Edit\|Write 类；CLI 改 settings.json 不触发 |
 | claude-notify.ps1 | 在用 | `hooks/claude-notify.ps1` → `hooks.Notification[0]`、`hooks.StopFailure[0]` | 自建 | git | 不挂 PostToolUseFailure，避免工具失败噪声 |

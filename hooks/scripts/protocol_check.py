@@ -1,0 +1,148 @@
+"""校验 docs/protocols.md 里能机械校验的那两份协议。
+
+只读，不挂 hook，不阻断操作。退出码 0 表示全过，1 表示有错。
+判据见 docs/protocols/gate.md 与 docs/protocols/memory.md。
+任务笔记与委派两份的「校验」列是 `—`：前者的产物是项目仓库里自由形态的
+扫描稿，后者是 prompt 模板、磁盘上无待验产物，都不存在可判的固定形态。
+"""
+
+import glob
+import os
+import re
+import sys
+
+CLAUDE = os.path.join(os.path.expanduser("~"), ".claude")
+GATE = os.path.join(CLAUDE, "docs", "protocols", "gate.md")
+SCOPE_PY = os.path.join(CLAUDE, "hooks", "scripts", "authorization_scope.py")
+PROJECTS = os.path.join(CLAUDE, "projects")
+
+MEMORY_TYPES = {"user", "feedback", "project", "reference"}
+
+
+def check_gate():
+    """gate.md 的固定字段表与 authorization_scope.py 的 allowed 集合比对。
+
+    字段的唯一来源是脚本，gate.md 的表是它的投影；两边不等就是漂移。
+    """
+    for p in (GATE, SCOPE_PY):
+        if not os.path.isfile(p):
+            return [f"缺 {p}"], 0
+
+    with open(GATE, encoding="utf-8") as f:
+        gate = f.read()
+    section = re.search(r"^## 固定字段\s*$(.*?)(?=^## )", gate, re.S | re.M)
+    if not section:
+        return ["gate.md 没找到「固定字段」一节"], 0
+    doc_keys = re.findall(r"^\|\s*`(\w+)`\s*\|", section.group(1), re.M)
+
+    with open(SCOPE_PY, encoding="utf-8") as f:
+        src = f.read()
+    allowed = re.search(r"allowed\s*=\s*\{([^}]*)\}", src)
+    if not allowed:
+        return ["authorization_scope.py 没找到 allowed 集合"], 0
+    src_keys = re.findall(r'"(\w+)"', allowed.group(1))
+
+    errors = []
+    if not doc_keys:
+        errors.append("gate.md 固定字段表没解析出任何键")
+    if doc_keys and set(doc_keys) != set(src_keys):
+        errors.append(
+            f"字段表与脚本不一致：gate.md 多 {sorted(set(doc_keys) - set(src_keys))}、"
+            f"少 {sorted(set(src_keys) - set(doc_keys))}"
+        )
+    return errors, len(doc_keys)
+
+
+def frontmatter_problems(path):
+    """一条记忆的 frontmatter 问题：围栏、name、description、metadata.type。"""
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    name = os.path.basename(path)
+    if not text.startswith("---"):
+        return [f"{name} 缺 `---` 围栏开头"]
+    block = re.match(r"---\s*\n(.*?)\n---\s*$", text, re.S | re.M)
+    if not block:
+        return [f"{name} 缺 `---` 围栏结尾"]
+
+    body, errors = block.group(1), []
+    for key in ("name", "description"):
+        if not re.search(rf"^{key}:\s*\S", body, re.M):
+            errors.append(f"{name} 缺 `{key}`")
+    kind = re.search(r"^\s+type:\s*(\S+)", body, re.M)
+    if not kind:
+        errors.append(f"{name} 缺 `metadata.type`")
+    elif kind.group(1) not in MEMORY_TYPES:
+        errors.append(f"{name} 的 type「{kind.group(1)}」不在 {sorted(MEMORY_TYPES)} 内")
+    return errors
+
+
+def check_memory():
+    """每个 projects/*/memory/：frontmatter 齐全，且 MEMORY.md 覆盖全部记忆文件。
+
+    索引是召回的唯一入口，没进索引的记忆等于不存在。
+    """
+    dirs = sorted(glob.glob(os.path.join(PROJECTS, "*", "memory")))
+    if not dirs:
+        return ["没找到任何 projects/*/memory/"], 0, 0
+
+    errors, total = [], 0
+    indexed = 0
+    for d in dirs:
+        files = [
+            f for f in glob.glob(os.path.join(d, "*.md"))
+            if os.path.basename(f) != "MEMORY.md"
+        ]
+        total += len(files)
+        for f in files:
+            errors += frontmatter_problems(f)
+
+        index = os.path.join(d, "MEMORY.md")
+        if not os.path.isfile(index):
+            # 空目录不必有索引；有记忆却没索引才是问题
+            if files:
+                errors.append(f"{os.path.basename(os.path.dirname(d))} 有 {len(files)} 条记忆但没有 MEMORY.md")
+            continue
+        with open(index, encoding="utf-8") as f:
+            links = {
+                os.path.basename(x)
+                for x in re.findall(r"\]\(([^)]*\.md)\)", f.read())
+                if "/" not in x
+            }
+        orphans = sorted(os.path.basename(f) for f in files if os.path.basename(f) not in links)
+        dead = sorted(x for x in links if not os.path.isfile(os.path.join(d, x)))
+        project = os.path.basename(os.path.dirname(d))
+        for o in orphans:
+            errors.append(f"{project}「{o}」没进 MEMORY.md 索引")
+        for x in dead:
+            errors.append(f"{project} 索引指向不存在的「{x}」")
+        indexed += len(files) - len(orphans)
+    return errors, total, indexed
+
+
+def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+    gate_errors, key_count = check_gate()
+    mem_errors, mem_total, mem_indexed = check_memory()
+
+    print(
+        f"{'门禁':<8} 字段表 {key_count} 键比对 authorization_scope.py"
+        + (f"，{len(gate_errors)} 处不符" if gate_errors else "，全相符")
+    )
+    print(
+        f"{'记忆':<8} {mem_total} 条记忆 · 已进索引 {mem_indexed}"
+        + (f" · {len(mem_errors)} 处问题" if mem_errors else " · frontmatter 与索引全相符")
+    )
+
+    errors = gate_errors + mem_errors
+    if errors:
+        print()
+        for e in errors:
+            print("  ✗", e)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

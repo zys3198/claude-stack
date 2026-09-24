@@ -1166,3 +1166,17 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **未纳入**：`~/.claude` 剩 23 条改动全属其他工作流（`article-writer` / `drawio-chart` / `cc-switch-setting-sync` / `content-to-note` / `instruction-engineering` / `skill-auditor` / `local-env-pitfalls/SKILL.md` 与 `references/guards.md`、`hooks/lib/` 三处删除）与运行时状态（`authorization/`、`task-notes-reminder/`）；lab-area 剩 33 条为 headroom / last30days / `.tmp-*` 实验临时文件。
 - **回退**：`git reset --soft HEAD~1` 回到提交前的索引（`--soft` 不丢他人已暂存内容）。文件清单见 `git show --stat 7279ea9`。
 - **验证**：`git diff --cached --check` 返回 2，556 条 trailing whitespace 全在 `installing/archive/mcp-install.md`(81) 与 `installing/archive/tool-install.md`(475)。实测这两份的 `HEAD:` 原件本就带同样 CRLF（81 / 475 条），archive 副本与 HEAD 原件 sha256 逐字节一致（`51340f70` / `855e649e`）——既有内容经纯 move 保留，非本轮引入，未做行尾归一。
+
+### 协议校验脚本：门禁与记忆（2026-09-24）
+
+- **变更**：新建 `hooks/scripts/protocol_check.py`（只读、非 hook、退出码 0 为全过）。`docs/protocols.md` 的 `记忆` 与 `门禁` 两行「校验」列由 `—` 改为该脚本命令，表下加一句说明另两份为何仍是 `—`。本表 hook 表加 `protocol_check.py` 一行。
+- **范围决定（实测，非推断）**：四份待补协议里只有两份存在可判的固定形态。
+  - 门禁：`docs/protocols/gate.md` 固定字段表的 4 个键与 `authorization_scope.py` 的 `allowed` 集合比对。实测一致。
+  - 记忆：`projects/*/memory/` 下每条记忆的 frontmatter（围栏、`name`、`description`、`metadata.type` 落四枚举），以及 `MEMORY.md` 链接覆盖全部 `*.md`。
+  - 任务笔记：本机两个实例（`lab-area/notes/claude-config-standards`、`notes/skill-hook-review`）的产物是自由形态的扫描稿与清单表格，没有「材料/结论/取舍」字段，也没有 `NN-` 编号。硬套字段检查会当场报约 30 条假警。
+  - 委派：`references/dispatch-contract.md` 的契约是 prompt 模板，磁盘上无待验产物；`Isolation` 的取值枚举全机只出现这一处，无第二处可比。
+  按 `docs/protocols.md` 共同要求第 4 条「能写成只读检查的就该有，**没有就写 `—`**」，后两份维持 `—`。
+- **回退**：删 `hooks/scripts/protocol_check.py`；`docs/protocols.md` 用 `backups/protocol-check-20260924/protocols.md.v1`（改前 sha256 `2f9669c4`）覆盖；`custom-setup.md` 删掉那一行。
+- **验证**：真跑 `门禁 全相符`、`记忆 191 条 · 已进索引 189 · 6 处问题`，rc=1。**证伪测试**（夹具，不改脚本本体）4 组全按预期：改坏字段名报 1 处、脚本侧多一个键报 1 处、好数据报 0 处、`无围栏`/`缺 description`/`type 越界` 各报 1 处。测试脚本在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
+- **首跑实测到的既有漂移**（只报未改，均不在本仓库内）：`C--Users-zys31--claude` 的 `isolate-python-mock-patches.md` 与 `C--ZYS-wiki` 的 `learning-route-deduplication.md` 没进各自 `MEMORY.md` 索引；`ai-guided-from-zero.md`、`feedback-teach-before-testing.md`、`feedback-tutorial-repo-freshness.md` 只有 `---` 开围栏、没有闭围栏；`dingtalk-qa-output-redaction.md` 缺 `description`。批次 5 记过「191 条记忆全带 frontmatter」，那条口径更松；本次按围栏口径测得 3 条不合，以本次为准。
+- **未做**：`任务笔记` 与 `委派` 两份的校验仍为 `—`；上述 6 处漂移属别项目名下，本脚本只报不改。

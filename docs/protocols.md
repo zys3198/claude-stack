@@ -9,9 +9,11 @@
 | 台账 | `~/.claude/skills/install-ledger/references/ledger-protocol.md` | `python ~/.claude/skills/install-ledger/scripts/ledger_check.py` | **已落** |
 | 任务笔记 | `~/.claude/skills/task-notes/SKILL.md` | — | **已落** |
 | 执行环境 | `~/.claude/skills/docker-only/SKILL.md` | `~/.claude/hooks/scripts/resource-guard.py`（PreToolUse） | **已落** |
-| 记忆 | `~/.claude/docs/protocols/memory.md` | — | **已落** |
+| 记忆 | `~/.claude/docs/protocols/memory.md` | `python ~/.claude/hooks/scripts/protocol_check.py` | **已落** |
 | 委派 | `~/.claude/skills/parallel-delegation/SKILL.md` + `references/` | — | **已落** |
-| 门禁 | `~/.claude/docs/protocols/gate.md`（操作规则留在 `~/.claude/CLAUDE.md` §1.3） | — | **已落** |
+| 门禁 | `~/.claude/docs/protocols/gate.md`（操作规则留在 `~/.claude/CLAUDE.md` §1.3） | `python ~/.claude/hooks/scripts/protocol_check.py` | **已落** |
+
+门禁与记忆共用一个脚本，两者分开报，退出码 0 才算全过。`任务笔记` 与 `委派` 的校验留 `—`：前者的产物是各项目仓库里自由形态的记录，后者是 prompt 模板，磁盘上都没有可判的固定形态。
 
 ## 共同要求
 
