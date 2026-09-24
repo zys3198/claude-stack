@@ -4,9 +4,15 @@
 判据见 docs/protocols/gate.md 与 docs/protocols/memory.md。
 任务笔记与委派两份的「校验」列是 `—`：前者的产物是项目仓库里自由形态的
 扫描稿，后者是 prompt 模板、磁盘上无待验产物，都不存在可判的固定形态。
+
+源路径已删的项目，其记忆目录不再加载、也不会被召回，只计数不细查。
+判定以 `~/.claude.json` 的 projects 映射为候选路径池：宿主只在目录被打开
+过时登记，且不删条目，所以它是「曾有过的 cwd」的超集；未在其中、或路径
+已不存在的，算已删。
 """
 
 import glob
+import json
 import os
 import re
 import sys
@@ -15,8 +21,27 @@ CLAUDE = os.path.join(os.path.expanduser("~"), ".claude")
 GATE = os.path.join(CLAUDE, "docs", "protocols", "gate.md")
 SCOPE_PY = os.path.join(CLAUDE, "hooks", "scripts", "authorization_scope.py")
 PROJECTS = os.path.join(CLAUDE, "projects")
+CLAUDE_JSON = os.path.join(os.path.expanduser("~"), ".claude.json")
 
 MEMORY_TYPES = {"user", "feedback", "project", "reference"}
+
+
+def encode_cwd(path):
+    """Claude Code 把 cwd 的 : \\ / . 四种字符一律换成 -。
+
+    `~/.claude` -> `C--Users-zys31--claude`（点也变横线，所以是两个横线），
+    这正是纯按分隔符替换会对不上的地方。
+    """
+    return re.sub(r"[:\\/.]", "-", path).lower()
+
+
+def live_project_dirs():
+    """源路径仍在的项目目录名（已小写），用于认出已删项目的记忆。"""
+    if not os.path.isfile(CLAUDE_JSON):
+        return set()
+    with open(CLAUDE_JSON, encoding="utf-8") as f:
+        known = json.load(f).get("projects", {})
+    return {encode_cwd(p) for p in known if os.path.isdir(p)}
 
 
 def check_gate():
@@ -79,19 +104,24 @@ def frontmatter_problems(path):
 def check_memory():
     """每个 projects/*/memory/：frontmatter 齐全，且 MEMORY.md 覆盖全部记忆文件。
 
-    索引是召回的唯一入口，没进索引的记忆等于不存在。
+    索引是召回的唯一入口，没进索引的记忆等于不存在。源路径已删的项目不进
+    这列——那些记忆不会再被加载，挑它的 frontmatter 是白费力气，只计数。
     """
     dirs = sorted(glob.glob(os.path.join(PROJECTS, "*", "memory")))
     if not dirs:
-        return ["没找到任何 projects/*/memory/"], 0, 0
+        return ["没找到任何 projects/*/memory/"], 0, 0, 0, 0
 
-    errors, total = [], 0
-    indexed = 0
+    live = live_project_dirs()
+    errors, total, indexed, gone_dirs, gone_files = [], 0, 0, 0, 0
     for d in dirs:
         files = [
             f for f in glob.glob(os.path.join(d, "*.md"))
             if os.path.basename(f) != "MEMORY.md"
         ]
+        if os.path.basename(os.path.dirname(d)).lower() not in live:
+            gone_dirs += 1
+            gone_files += len(files)
+            continue
         total += len(files)
         for f in files:
             errors += frontmatter_problems(f)
@@ -116,7 +146,7 @@ def check_memory():
         for x in dead:
             errors.append(f"{project} 索引指向不存在的「{x}」")
         indexed += len(files) - len(orphans)
-    return errors, total, indexed
+    return errors, total, indexed, gone_dirs, gone_files
 
 
 def main():
@@ -124,7 +154,7 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
 
     gate_errors, key_count = check_gate()
-    mem_errors, mem_total, mem_indexed = check_memory()
+    mem_errors, mem_total, mem_indexed, gone_dirs, gone_files = check_memory()
 
     print(
         f"{'门禁':<8} 字段表 {key_count} 键比对 authorization_scope.py"
@@ -134,6 +164,9 @@ def main():
         f"{'记忆':<8} {mem_total} 条记忆 · 已进索引 {mem_indexed}"
         + (f" · {len(mem_errors)} 处问题" if mem_errors else " · frontmatter 与索引全相符")
     )
+    if gone_dirs:
+        print(f"{'':<8} 另有已删项目的 {gone_dirs} 个目录 / {gone_files} 条"
+              f"（合计 {mem_total + gone_files} 条），不再被加载，只计数")
 
     errors = gate_errors + mem_errors
     if errors:

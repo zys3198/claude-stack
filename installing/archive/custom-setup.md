@@ -1180,3 +1180,13 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **验证**：真跑 `门禁 全相符`、`记忆 191 条 · 已进索引 189 · 6 处问题`，rc=1。**证伪测试**（夹具，不改脚本本体）4 组全按预期：改坏字段名报 1 处、脚本侧多一个键报 1 处、好数据报 0 处、`无围栏`/`缺 description`/`type 越界` 各报 1 处。测试脚本在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
 - **首跑实测到的既有漂移**（只报未改，均不在本仓库内）：`C--Users-zys31--claude` 的 `isolate-python-mock-patches.md` 与 `C--ZYS-wiki` 的 `learning-route-deduplication.md` 没进各自 `MEMORY.md` 索引；`ai-guided-from-zero.md`、`feedback-teach-before-testing.md`、`feedback-tutorial-repo-freshness.md` 只有 `---` 开围栏、没有闭围栏；`dingtalk-qa-output-redaction.md` 缺 `description`。批次 5 记过「191 条记忆全带 frontmatter」，那条口径更松；本次按围栏口径测得 3 条不合，以本次为准。
 - **未做**：`任务笔记` 与 `委派` 两份的校验仍为 `—`；上述 6 处漂移属别项目名下，本脚本只报不改。
+
+### 协议校验脚本：认出已删项目的记忆（2026-09-24）
+
+- **起因**：用户指出 `C--ZYS-wiki` 已删。查证：源目录 `C:\ZYS\wiki` 确实不在，但 `~/.claude/projects/C--ZYS-wiki/memory/` 仍在，20 条记忆加 `MEMORY.md.before-c6` 与 `recovery/`；`projects/` 不在 git 追踪范围，那是唯一副本。上一版脚本照报它的 3 处 frontmatter 与索引问题，属无意义噪声。
+- **变更**：`hooks/scripts/protocol_check.py` 的记忆一项加「源路径已删」判定——以 `~/.claude.json` 的 `projects` 映射为候选路径池（宿主只在目录被打开过时登记、且不删条目，故为「曾有过的 cwd」的超集），逐条 `os.path.isdir` 过滤得到活路径集；不在其中的项目目录只计数、不进 frontmatter 与索引检查。输出加一行分组。`docs/protocols/memory.md` 补一段孤儿记忆的处置（走协议已有的删除判据，删前进 `recovery/`），`docs/protocols.md` 表下同步说明。
+- **编码规则实测**：cwd 的 `:`、分隔符、`.` 四种字符一律换成 `-`，不是只换分隔符。`C:\Users\zys31\.claude` → `C--Users-zys31--claude`。只按分隔符替换会把 `~/.claude` 与全部 `--claude-worktrees-*` 误判成已删（第一版脚本踩过）。
+- **盘点结果（2026-09-24）**：`projects/` 36 个目录，源路径已不存在 27 个，其中 **16 个带记忆、共 52 条**；活着的 9 个目录 139 条。两条独立算法（`.claude.json` 映射、遍历 `C:\Users\zys31` 与 `C:\ZYS`）在孤儿集上一致，均 16 / 52。已直接核对 `C:\ZYS\Code\{my-code,pi-java,wiki,open-code-review,agent-framework}` 均不存在。
+- **回退**：`git checkout b806c8f -- hooks/scripts/protocol_check.py docs/protocols.md installing/custom-setup.md`；本文件按原文改回；`docs/protocols/memory.md` 删掉新增那段。
+- **验证**：真跑 `门禁 全相符`、`记忆 139 条 · 已进索引 138 · 3 处问题`，另计 `16 个目录 / 52 条（合计 191）`，rc=1。余下 3 处全在活项目里：`C--Users-zys31--claude` 1 处索引缺行、`C--ZYS-Code-dtsf` 1 处缺 `description`、`C--ZYS-Code-interview-guide` 1 处缺闭围栏。证伪测试扩到 11 组全过，含「全部当已删时不细查、只计数」。测试脚本仍在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
+- **未做**：那 16 个目录 / 52 条记忆未删未动。属不可恢复删除，需用户逐项确认，且按记忆协议删前要先进 `recovery/`。
