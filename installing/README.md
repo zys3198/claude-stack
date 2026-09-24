@@ -1,38 +1,25 @@
 # installing/ — 三方工具与自建设施台账
 
-目的：**任何 skill / MCP / 插件 / CLI 工具装完，或自建 skill/hook/配置改完，必须在对应 md 里登记一条**。重装机器、换环境、回滚时，拿着这些 md 就能原样装回。
+目的：**任何 skill / MCP / 插件 / CLI 装完，或自建 skill / hook / 配置改完，必须在对应台账登记一条**。重装机器、换环境、回滚时，拿着这些表就能原样装回。
 
-CLAUDE.md §1 有常驻硬约束要求装后登记；被 Fact-Forcing Gate 拦时按 §5 声明后重试。
+字段含义、流水格式、归档规则见 [`install-ledger/references/ledger-protocol.md`](../skills/install-ledger/references/ledger-protocol.md)；归属判定见 [`verification.md`](../skills/install-ledger/references/verification.md)。本文件只做入口。
 
 ## 文件分工
 
 | 文件 | 记什么 |
-|------|--------|
-| `skill-install.md` | 外部 skill / skill 套件（仓库级记录，套装记仓库一条，内部裁剪记备注） |
-| `mcp-install.md` | MCP server（配置命令原文 = 一键装回） |
-| `tool-install.md` | CLI 工具、桌面软件、插件 marketplace、插件启用清单 |
-| `custom-setup.md` | **自建** skill / hook / statusline / 全局配置的出处与迁移要点 |
+|---|---|
+| `custom-setup.md` | **自建** skill / hook / statusline / 全局配置 |
+| `skill-install.md` | 外部 skill / skill 套件 |
+| `tool-install.md` | 插件 marketplace、插件、CLI 工具、运行环境 |
+| `mcp-install.md` | MCP 服务、二进制与注册命令 |
+| `archive/` | 四本台账的流水，**默认不读**，追溯时按名或日期定位 |
 
-## 条目模板
+每个台账 = 一张现状表（本目录的 `<台账>.md`）+ 一份流水（`archive/<台账>.md`）。改一次登记要同时动这两处。
 
-```markdown
-### <名称>
-- 来源：<github 地址 / npm 包 / 官方文档链接>
-- 安装日期：YYYY-MM-DD
-- 安装方法：<可复制的命令原文>
-- 装到哪：<路径 / 配置文件与字段>
-- 依赖：<前置条件，如 Exa API key、Node、cargo>
-- 备注：<踩坑、本机定制、卸载方法>
+## 校验
+
+```bash
+python ~/.claude/skills/install-ledger/scripts/ledger_check.py
 ```
 
-## 规则
-
-1. 装完**当轮**登记，不攒批。
-2. 命令必须原文可复制，不许写「参考官网」糊弄。
-3. 套装（一个仓库出几十个 skill）记仓库一条 + 内部保留/裁剪清单，不逐个开条目。
-4. 卸载时在条目上标 `~~删除线~~` + 卸载日期，不删条目（留痕防重复踩坑）。
-5. 自建资产记 `custom-setup.md`：出处（哪个会话/哪篇文章）、关键文件清单、迁新机器要做什么。
-6. **新增 skill 先判自建 vs 第三方再登记**（2026-08-07 起）：
-   - **自建**（自己写/深度改过、有演进记录）→ 记 `custom-setup.md` + 进 git（`.gitignore` 白名单加一行 `!skills/<name>/`）
-   - **第三方/插件/官方**（随官方源更新、不用改）→ 记 `skill-install.md`，**不进 git**（白名单不加，git 自动忽略）
-   - 判断依据：磁盘是否 symlink 指外部（=第三方铁证）、有无你的 CHANGELOG/版本演进记录、是否引用你的私有 router/其他自建 skill。存疑先按第三方记，日后查清再调整。
+只读。检查列数与顺序、状态枚举、表内名称唯一、单表体量、`archive/` 是否齐全。

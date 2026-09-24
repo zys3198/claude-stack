@@ -127,7 +127,7 @@ plugins/marketplaces/*/
 ide/
 
 # ----- skills: 默认忽略全部，只追踪自建 -----
-# 新增自建 skill：白名单加一行 !skills/<name>/（判据见 installing/README.md 第 6 条）
+# 新增 skill：白名单加一行 !skills/<name>/（判据见 skills/install-ledger/references/verification.md）
 skills/*
 archive-skills/agent-browser/
 !skills/ai-product-development/
@@ -145,6 +145,7 @@ skills/content-to-note/scripts/wechat/node_modules/
 !skills/improver-skill/
 !skills/install-ledger/
 !skills/instruction-engineering/
+!skills/leader/
 !skills/auto-browser/
 !skills/local-env-pitfalls/
 !skills/parallel-delegation/

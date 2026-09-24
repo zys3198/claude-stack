@@ -56,53 +56,7 @@ Docker 容器内的真实业务写入、数据库写入、验收测试数据、�
 
 ## 新项目接入
 
-### 容器定义集中在一个入口目录
-
-项目下建 `deploy/`，compose 文件、Dockerfile、nginx 配置、监控配置都放这里，仓库根不放容器定义。
-
-代码来源用环境变量指向工作树，变量名按项目已有的前缀约定：
-
-```yaml
-services:
-  backend:
-    build:
-      context: ${APP_CODE_ROOT:-..}/code/backend
-```
-
-一套容器同一时刻只服务一个会话。别人在用就先协商，协商不下来交给用户裁决。
-
-### 每个服务写全资源字段
-
-```yaml
-services:
-  example:
-    mem_limit: ${APP_EXAMPLE_MEMORY_LIMIT:-512m}
-    memswap_limit: ${APP_EXAMPLE_MEMORY_LIMIT:-512m}
-    pids_limit: 256
-    cpus: ${APP_EXAMPLE_CPU_LIMIT:-1.0}
-    security_opt:
-      - "no-new-privileges:true"
-```
-
-- `memswap_limit` 与 `mem_limit` 用同一个变量表达式。两者相等即完全禁用交换，内存超限时容器被终止；不相等时容器可以借交换空间顶着，上限形同虚设。
-- 取值写成 `${VAR:-默认值}`，部署时按机器规格覆盖。
-- 上限走顶层字段，不要写进 `deploy.resources.limits`。同一个服务里两者同时出现时，值必须逐字节相同才不报错；`pids_limit` 更严格，只要 `deploy.resources.limits` 在而里面没有同名项，`docker compose config` 就直接报 `can't set distinct values`。`deploy` 块只留 `reservations`。
-
-### 端口只绑回环
-
-发布到宿主机的端口一律写成 `127.0.0.1:${VAR:-port}:port`。端口配置要显式失败，不要顺延到下一个端口。
-
-### 按需启动的服务用 profiles 分组
-
-可选组件（缓存、消息队列、监控）挂 `profiles`，默认不启动，用到时命令行加 `--profile`。
-
-### 容器内的自设上限要低于容器上限
-
-redis 的 `--maxmemory`、JVM 堆上限这类容器内部的上限必须低于 `mem_limit`，否则容器会被整体终止，内部回收机制来不及起作用。
-
-### 名称与端口登记到本机台账
-
-容器名称、端口、独占资源写进 `~/.claude/session-hygiene.json`（跟着机器走，不进任何仓库）。占用前先看归属。
+容器定义入口目录、资源字段、端口绑定、profiles 分组、容器内上限与台账登记见 [`references/new-project-setup.md`](references/new-project-setup.md)。
 
 ## 机械保证
 
@@ -116,3 +70,11 @@ redis 的 `--maxmemory`、JVM 堆上限这类容器内部的上限必须低于 `
 资源状态或授权状态无法确认时**不静默放行**；普通路径的放行与降级则写进 `~/.claude/resource-guard.log` 备查。
 
 判据细节、边界与已知覆盖不到的情形写在脚本头部注释里，要改判据就看那里。Hook 不代替主模型做 R0-R4 语义分类。
+
+## 维护条款
+
+**一、分界。** 会变的（去处选择、资源上限取值、授权边界、清理流程、「机械保证」所述 hook 行为）整体重写。只增的：本文件没有——依据留在 `resource-guard.py` 的头部注释里，正文不留历史。
+
+**二、删除判据。** 满足其一即删：内容已在 `resource-guard.py` 或项目的 compose 文件里 → 删，它是缓存；被本文件后面条目覆盖 → 删旧条；只在特定情形才用到 → 下沉 `references/`；指向的目标已不存在 → 删引用，或改指向。
+
+**三、触发点。** 每次编辑本文件时顺手做一遍，不设「定期整理」。正文逼近 20 KB 强制复核，先删再加。

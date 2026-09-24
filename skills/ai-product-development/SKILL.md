@@ -47,4 +47,4 @@ flowchart TD
 
 - **第 2、3 步不跳**：没有能点的原型、没有定下来的视觉方向就进第 5 步，返工在第 5 步付，那里最贵。
 - **单点故障不回到本路线**：某处报错、性能回退、偶发失败，走 `mattpocock-skills:diagnosing-bugs`。
-- **代码库形态是后来的事**：模块怎么切、接口放哪里，等第一版跑通再用 `mattpocock-skills:improve-codebase-architecture`，不在第 2、3 步提前做。
+- **代码库形态是后来的事**：模块怎么切、接口放哪里，等第一版跑通再提示用户运行 `/mattpocock-skills:improve-codebase-architecture`，不在第 2、3 步提前做。
