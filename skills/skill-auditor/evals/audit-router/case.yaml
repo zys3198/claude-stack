@@ -1,0 +1,18 @@
+schema_version: "1.0"
+name: audit-router
+description: 目标为 router 型 guide 时命中，运行十查与动态基线，并按 skill 输出格式给出 P0-P2 清单。
+tags: [routing]
+execution:
+  prompt: |
+    请用 skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。
+    请求：帮我审查一下 ai-coding-guide 现在的路由质量
+  max_turns: 10
+  model: claude-sonnet-4-6
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: names-ten-checks
+    target: last_message
+    pattern: 十查
+    match: contains

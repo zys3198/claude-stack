@@ -1,0 +1,23 @@
+schema_version: "1.0"
+name: category-word
+description: description 路由目标列表含范畴词时命中，并将十查第 3 项判为失败。
+tags: [routing]
+execution:
+  prompt: |
+    请用 skill-auditor 审计下面这个 skill description 的路由边界，并指出具体失败检查项。只审计给出的 description，不读取其他文件。
+    description：路由到 deep-learn、cram-engine 等
+  max_turns: 10
+  model: claude-sonnet-4-6
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: identifies-category-word
+    target: last_message
+    pattern: 等
+    match: contains
+  - type: regex
+    name: marks-failure
+    target: last_message
+    pattern: 失败
+    match: contains

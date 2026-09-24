@@ -1,5 +1,5 @@
-# 资源守卫：PreToolUse 阶段拦截三类破坏本机 Docker 使用约定、且可以客观判定的动作。
-# 规则依据见 ~/.claude/CLAUDE.md 第 6.3 节（容器内存上限、独占资源先协商、
+# 资源守卫：PreToolUse 阶段执行客观资源检查、确定性硬阻断与高风险兜底，不代替主模型做 R0-R4 语义分类。
+# 规则依据见 ~/.claude/CLAUDE.md 第 1.3 节与第 6 节（容器内存上限、独占资源先协商、
 # 一律在容器内执行）与第 8 节。
 #
 # 判据一：docker-compose 文件改动后，相对改动前新增的服务必须同时声明 mem_limit 与
@@ -9,11 +9,16 @@
 #   且本机另有活跃 Claude 会话时提请确认。容器与端口属于本机资源，按机器共享，
 #   不按项目隔离，因此别的项目里的会话也计入。docker compose run 起的一次性容器
 #   名字带随机后缀，登记时给不出完整名字，这类条目改填 container_prefix，按前缀认。
-# 判据三：命令要在宿主机上跑构建工具链（pnpm、mvn、java、node 之类）时提请确认。
+# 判据三：命令要在宿主机上跑构建工具链（pnpm、mvn、java、node 之类）时直接阻断，并提示改到容器内。
 #   同一批名字写在容器内执行的命令里（docker compose exec <服务> mvn test）不在起首
 #   位置，不会被拦。
 #
-# 只拦可以客观判定的动作，不做主观推测，其余一律放行。
+# 判据四：远程 Git 普通 push/fetch/pull/clone/remote 在没有精确授权时提请确认；force push
+#   或远程 Git 无法安全解析时直接阻断。
+# 判据五：生产环境或真实数据变更信号在没有精确授权时提请确认；授权状态、资源状态或活跃会话状态
+#   无法确认时不静默放行高风险动作。
+#
+# 只拦可以客观判定的动作，不做主观推测；低风险且明确放行时无输出。
 # 判定方式是把命令拆成词，要求目标命令出现在命令起首位置（行首，或管道与分号、
 # 换行、包装命令、环境变量赋值之后），再逐个取出目标服务名与容器名比对，
 # 不用「命令里是否出现某个子串」来判断。
@@ -31,6 +36,7 @@
 # 本守卫定位是防止误建，不作为安全边界。
 # 异常写入 resource-guard.log，不阻塞工具调用。
 
+import importlib.util
 import json
 import os
 import re
@@ -45,6 +51,16 @@ import yaml
 CLAUDE = Path(os.path.expanduser("~")) / ".claude"
 LOGFILE = CLAUDE / "resource-guard.log"
 HYGIENE = CLAUDE / "session-hygiene.json"
+AUTHORIZATION = None
+AUTH_IMPORT_ERROR = None
+_AUTHORIZATION_PATH = CLAUDE / "hooks" / "scripts" / "authorization_scope.py"
+try:
+    _spec = importlib.util.spec_from_file_location("authorization_scope", _AUTHORIZATION_PATH)
+    AUTHORIZATION = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(AUTHORIZATION)
+except Exception as exc:
+    AUTHORIZATION = None
+    AUTH_IMPORT_ERROR = f"{type(exc).__name__}: {exc}"
 
 COMPOSE_FILE = re.compile(r"^[\w.-]*compose[\w.-]*\.ya?ml$", re.I)
 # heredoc 起始标记：<<EOF、<<'EOF'、<<-EOF。用来把正文从命令里剥掉。
@@ -117,6 +133,19 @@ CONTINUATION = re.compile(r"(?<!\\)\\\n")
 
 DOCKER_TIMEOUT = 10
 AGENTS_TIMEOUT = 20
+GIT_GLOBAL_OPTS_WITH_VALUE = {
+    "-C", "--git-dir", "--work-tree", "--namespace", "--exec-path",
+    "--config-env", "--attr-source",
+}
+REMOTE_GIT_VERBS = {"push", "fetch", "pull", "clone", "remote"}
+FORCE_GIT_FLAGS = {"--force", "-f", "--force-with-lease"}
+PRODUCTION_MARKER = re.compile(r"(?i)(?:^|[\s/_.:=-])(prod|production)(?:$|[\s/_.:=-])")
+PRODUCTION_MUTATION = re.compile(
+    r"(?i)\b(deploy|apply|migrate|migration|delete|drop|truncate|update|insert|write|push)\b"
+)
+REAL_DATA_MUTATION = re.compile(
+    r"(?i)\b(drop\s+(?:database|table)|truncate\s+table|delete\s+from)\b"
+)
 
 
 def log(message):
@@ -128,13 +157,21 @@ def log(message):
         pass
 
 
-REASONS = []
+ASK_REASONS = []
+DENY_REASONS = []
 
 
 def ask(reason):
-    # 三条判据可能同时命中，结论先攒着，最后只输出一个 JSON 对象。
+    # 各判据可能同时命中，结论先攒着，最后只输出一个 JSON 对象。
     # 分两次打印会让钩子的标准输出变成两行 JSON，调用方无法解析。
-    REASONS.append(reason)
+    # 守卫最重要的输出必须留证据，否则事后无法判断它到底拦没拦、按什么理由拦。
+    log(f"ask: {reason}")
+    ASK_REASONS.append(reason)
+
+
+def deny(reason):
+    log(f"deny: {reason}")
+    DENY_REASONS.append(reason)
 
 
 def is_control(token):
@@ -412,7 +449,7 @@ def check_compose(tool, tool_input, cwd):
             problems.append(f"{svc_name} 缺 {'、'.join(gaps)}")
     if not problems:
         return
-    ask(
+    deny(
         f"docker-compose 文件 {name} 里新增的服务没有写全资源限制：{'；'.join(problems)}。"
         f"依据 ~/.claude/CLAUDE.md 第 6.3 节，每个服务都要同时声明 mem_limit"
         f"（内存上限）与 security_opt（禁止容器内进程提权）。补齐后再写入。"
@@ -464,14 +501,14 @@ def compose_write_targets(tokens):
 
 def check_compose_write(command, cwd):
     # 判据一在 Bash 路径上的落地。Write/Edit 能读到改动前后的内容，可以精确比对新增服务；
-    # 这里读不到，只能在命中 compose 文件名时提请确认。
+    # 这里读不到，只能在命中 compose 文件名时直接阻断并提示改用 Edit/Write。
     if not isinstance(command, str):
         return
     for tokens in expand_command(command):
         for target in compose_write_targets(tokens):
             name = os.path.basename(target.replace("\\", "/"))
             if COMPOSE_FILE.match(name):
-                ask(
+                deny(
                     f"该命令要改写 docker-compose 文件 {name}。依据 ~/.claude/CLAUDE.md 第 6.3 节，"
                     f"新增的服务必须同时声明 mem_limit（内存上限）与 security_opt"
                     f"（禁止容器内进程提权），而通过重定向或 sed 这类写法改写时读不到改动前后的"
@@ -524,6 +561,7 @@ def scan_docker(tokens, out):
                 if tokens[i] in DOCKER_VERBS:
                     matched = True
                     verb = tokens[i]
+                    out["verbs"].add(verb)
                     i += 1
                     while i < len(tokens) and not is_control(tokens[i]):
                         t = tokens[i]
@@ -583,6 +621,7 @@ def scan_docker(tokens, out):
             i += 1
         if args and args[0] in COMPOSE_VERBS:
             matched = True
+            out["verbs"].add(args[0])
             out["services"].update(args[1:])
             if len(args) == 1:
                 out["all_services"] = True
@@ -603,7 +642,7 @@ def docker_targets(command, cwd):
     # 之类传进来的载荷一起扫。
     # 返回 None 表示命令里没有这类动作；否则返回 {services, containers, project,
     # compose_dir, cd_dir, cwd, all_services}。
-    out = {"services": set(), "containers": set(), "project": None,
+    out = {"services": set(), "containers": set(), "verbs": set(), "project": None,
            "compose_dir": None, "project_dir": None, "cd_dir": None,
            "cwd": cwd, "all_services": False}
     matched = False
@@ -715,28 +754,203 @@ def other_session_count(self_id):
     ), False
 
 
-def host_toolchain(command):
+def trusted_local_script(tokens, i, cwd):
+    # 工具命令后第一个非选项实参是 ~/.claude 或当前仓库 .claude 下的脚本时，
+    # 属于本机配置/状态维护（hook、statusline、任务临时脚本），不是构建、测试或服务，
+    # 不按工具链拦截。与 HOST_TOOLCHAIN 注释里 python 整体排除的理由一致。
+    j = i + 1
+    while j < len(tokens):
+        t = tokens[j]
+        if is_control(t):
+            return False
+        if t.startswith("-"):
+            j += 1
+            continue
+        arg = t if os.path.isabs(t) else os.path.join(cwd, t)
+        if arg.startswith("~/"):
+            arg = os.path.expanduser(arg)
+        n = norm(arg)
+        home = norm(os.path.join(os.path.expanduser("~"), ".claude"))
+        repo = norm(os.path.join(cwd, ".claude"))
+        return n.startswith(home + os.sep) or n.startswith(repo + os.sep)
+    return False
+
+
+def host_toolchain(command, cwd):
     # 返回命令起首位置出现的宿主工具链命令名，没有则返回 None。提交消息、配置文件正文
     # 以及容器内执行的命令里出现的这些名字不在起首位置，不会被当成要在宿主机上执行。
     # 命令本身与它内部由 sh -c、eval 之类传进来的载荷一起扫。
+    # 例外：执行 ~/.claude 或仓库 .claude 下的脚本不算宿主机上的构建/测试/服务，跳过。
     for tokens in expand_command(command):
         for i, token in enumerate(tokens):
             name = command_name(token)
-            if name in HOST_TOOLCHAIN and starts_command(tokens, i):
-                return name
+            if name not in HOST_TOOLCHAIN or not starts_command(tokens, i):
+                continue
+            if trusted_local_script(tokens, i, cwd):
+                continue
+            return name
     return None
 
 
-def check_host_toolchain(command):
+def check_host_toolchain(command, cwd):
     if not isinstance(command, str):
         return
-    name = host_toolchain(command)
+    name = host_toolchain(command, cwd)
     if name is None:
         return
-    ask(
+    deny(
         f"该命令要在宿主机上执行 {name}。依据 ~/.claude/CLAUDE.md 第 6.3 节，需要在本机"
         f"运行的构建、测试与服务一律在容器内执行，宿主机只保留只读查看、git 与 docker 命令。"
         f"改到容器内执行，或在 compose 里加一个对应服务。"
+    )
+
+
+def authorization_scope_for_docker(targets, busy):
+    verbs = sorted(targets.get("verbs", set()))
+    verb = verbs[0] if len(verbs) == 1 else "multi"
+    return {
+        "targets": sorted({entry["container"] for entry in busy}),
+        "operation_family": f"docker-exclusive.{verb}",
+        "impact_ceiling": 3,
+        "critical_params": {
+            "requested_targets": sorted(targets.get("containers", set())),
+            "services": sorted(targets.get("services", set())),
+            "all_services": bool(targets.get("all_services")),
+            "project": targets.get("project") or "",
+            "compose_dir": targets.get("compose_dir") or "",
+            "project_dir": targets.get("project_dir") or "",
+            "cd_dir": targets.get("cd_dir") or "",
+        },
+    }
+
+
+def authorization_match(session_id, scope):
+    if AUTHORIZATION is None:
+        return {"matched": False, "state_error": f"授权模块不可用: {AUTH_IMPORT_ERROR}"}
+    return AUTHORIZATION.match(session_id, scope)
+
+
+def scope_reason(scope):
+    return json.dumps(scope, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def git_remote_actions(command, cwd):
+    parse_failed = lex(command) is None
+    actions = []
+    for tokens in expand_command(command):
+        i = 0
+        while i < len(tokens):
+            if command_name(tokens[i]) != "git" or not starts_command(tokens, i):
+                i += 1
+                continue
+            j = i + 1
+            while j < len(tokens) and not is_control(tokens[j]):
+                token = tokens[j]
+                key, sep, _ = token.partition("=")
+                if token in GIT_GLOBAL_OPTS_WITH_VALUE and j + 1 < len(tokens):
+                    j += 2
+                elif key in GIT_GLOBAL_OPTS_WITH_VALUE and sep:
+                    j += 1
+                elif token == "-c" and j + 1 < len(tokens):
+                    j += 2
+                else:
+                    break
+            if j >= len(tokens) or is_control(tokens[j]):
+                i += 1
+                continue
+            verb = tokens[j].casefold()
+            if verb not in REMOTE_GIT_VERBS:
+                i = j + 1
+                continue
+            options = []
+            arguments = []
+            k = j + 1
+            while k < len(tokens) and not is_control(tokens[k]):
+                token = tokens[k]
+                if token.startswith("-") and token != "-":
+                    options.append(token.partition("=")[0])
+                else:
+                    arguments.append(token)
+                k += 1
+            safe_arguments = [
+                "<redacted>" if re.search(r"(?:https?|ssh)://|@", item, re.I) else item
+                for item in arguments
+            ]
+            actions.append({
+                "verb": verb,
+                "force": verb == "push" and any(
+                    flag in FORCE_GIT_FLAGS or flag.startswith("--force-with-lease")
+                    for flag in options
+                ),
+                "scope": {
+                    "targets": [f"git:{norm(cwd)}"],
+                    "operation_family": f"remote-git.{verb}",
+                    "impact_ceiling": 3,
+                    "critical_params": {
+                        "arguments": safe_arguments,
+                        "options": sorted(options),
+                    },
+                },
+            })
+            i = k
+    return actions, parse_failed
+
+
+def check_remote_git(command, cwd, self_id):
+    if not isinstance(command, str):
+        return
+    actions, parse_failed = git_remote_actions(command, cwd)
+    if not actions:
+        return
+    if parse_failed:
+        deny("无法安全解析远程 Git 命令；为避免误操作，改写成无歧义的 git 命令后再执行。")
+        return
+    for action in actions:
+        if action["force"]:
+            deny("Hook 拒绝 git push 强制推送；禁止 force push，改用普通推送并明确目标。")
+            continue
+        result = authorization_match(self_id, action["scope"])
+        if result.get("matched"):
+            continue
+        state = result.get("state_error")
+        suffix = f"授权状态无法确认：{state}。" if state else ""
+        ask(
+            f"该命令要执行远程 Git 操作 {action['verb']}，需要用户确认。{suffix}"
+            f"精确授权范围：{scope_reason(action['scope'])}。"
+        )
+
+
+def production_mutation_scope(command, cwd):
+    text = command if isinstance(command, str) else ""
+    markers = sorted(set(PRODUCTION_MARKER.findall(text)))
+    actions = sorted(set(match.group(1).casefold() for match in PRODUCTION_MUTATION.finditer(text)))
+    real_data = sorted(set(match.group(1).casefold() for match in REAL_DATA_MUTATION.finditer(text)))
+    if not markers and not real_data:
+        return None
+    return {
+        "targets": [f"workspace:{norm(cwd)}"],
+        "operation_family": "production-mutation" if markers else "real-data-mutation",
+        "impact_ceiling": 4,
+        "critical_params": {
+            "markers": markers,
+            "actions": actions,
+            "real_data": real_data,
+        },
+    }
+
+
+def check_production_mutation(command, cwd, self_id):
+    scope = production_mutation_scope(command, cwd)
+    if scope is None:
+        return
+    result = authorization_match(self_id, scope)
+    if result.get("matched"):
+        return
+    state = result.get("state_error")
+    suffix = f"授权状态无法确认：{state}。" if state else ""
+    ask(
+        f"命令包含生产环境或真实数据变更信号，需要用户确认。{suffix}"
+        f"精确授权范围：{scope_reason(scope)}。"
     )
 
 
@@ -751,20 +965,37 @@ def check_docker(command, cwd, self_id):
     if not hits:
         return
     running = running_containers()
+    scope = authorization_scope_for_docker(targets, hits)
     if running is None:
+        ask(
+            "无法读取 docker ps，不能确认独占容器当前状态；请先人工核对资源占用。"
+            f"精确授权范围：{scope_reason(scope)}。"
+        )
         return
     busy = [e for e in hits if is_running(e, running)]
     if not busy:
         return
+    scope = authorization_scope_for_docker(targets, busy)
     count, degraded = other_session_count(self_id)
-    if degraded or not count:
+    if degraded:
+        ask(
+            "无法确认本机其他 Claude 会话，不能安全判断独占资源是否串扰。"
+            f"精确授权范围：{scope_reason(scope)}。"
+        )
         return
+    if not count:
+        return
+    result = authorization_match(self_id, scope)
+    if result.get("matched"):
+        return
+    state = result.get("state_error")
+    suffix = f"授权状态无法确认：{state}。" if state else ""
     names = "、".join(e["container"] for e in busy)
     labels = "；".join(f"{e['container']}：{e.get('label', '')}" for e in busy)
     ask(
         f"该命令要变更容器 {names}，它登记在 ~/.claude/session-hygiene.json 的独占清单里，"
-        f"当前正在运行，且本机另有 {count} 个活跃 Claude 会话。{labels}。"
-        f"确认没有别的会话在用它之后继续。"
+        f"当前正在运行，且本机另有 {count} 个活跃 Claude 会话。{labels}。{suffix}"
+        f"精确授权范围：{scope_reason(scope)}。"
     )
 
 
@@ -786,19 +1017,22 @@ def main():
         if tool == "Bash":
             command = tool_input.get("command")
             check_compose_write(command, cwd)
+            check_remote_git(command, cwd, payload.get("session_id"))
+            check_production_mutation(command, cwd, payload.get("session_id"))
             check_docker(command or "", cwd, payload.get("session_id"))
-            check_host_toolchain(command)
+            check_host_toolchain(command, cwd)
         else:
             check_compose(tool, tool_input, cwd)
     except Exception as exc:
         import traceback
         log(f"check failed: {exc}\n{traceback.format_exc()}")
-    if REASONS:
+    reasons = DENY_REASONS + ASK_REASONS
+    if reasons:
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "permissionDecision": "ask",
-                "permissionDecisionReason": "\n".join(REASONS),
+                "permissionDecision": "deny" if DENY_REASONS else "ask",
+                "permissionDecisionReason": "\n".join(reasons),
             },
         }, ensure_ascii=False))
     sys.exit(0)

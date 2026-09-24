@@ -38,6 +38,14 @@ const QUOTA_ENDPOINTS = {
   minimax: 'https://api.minimax.io/v1/api/openplatform/coding_plan/remains'
 };
 
+const CODEX_AUTH_FILE = path.join(CCSWITCH_DIR, 'codex_oauth_auth.json');
+const CODEX_TOKEN_CACHE_FILE = path.join(CACHE_DIR, 'codex-oauth-token.json');
+const CODEX_OAUTH_TOKEN_URL = 'https://auth.openai.com/oauth/token';
+const CODEX_USAGE_ENDPOINT = 'https://chatgpt.com/backend-api/wham/usage';
+const CODEX_CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann';
+const CODEX_USER_AGENT = 'cc-switch-codex-oauth';
+const CODEX_TOKEN_REFRESH_BUFFER_MS = 60_000;
+
 // ── Volcengine (Ark coding plan) ────────────────────────────
 // The usage API is a control-plane OpenAPI behind the unified gateway
 // open.volcengineapi.com, authenticated with Volcengine Signature V4 over the
@@ -290,12 +298,19 @@ function readProvider(providerId) {
 
   const env = readJsonText(row.settings_config).env || {};
   const meta = readJsonText(row.meta);
+  const baseUrl = env.ANTHROPIC_BASE_URL || '';
+  const authBinding = meta.authBinding || {};
+  const isCodexOAuth =
+    meta.providerType === 'codex_oauth' ||
+    authBinding.authProvider === 'codex_oauth' ||
+    /^https:\/\/chatgpt\.com\/backend-api\/codex\/?$/i.test(baseUrl);
   return {
     id: row.id,
     name: row.name,
-    baseUrl: env.ANTHROPIC_BASE_URL || '',
+    baseUrl,
     apiKey: env.ANTHROPIC_API_KEY || '',
-    planProvider: meta.usage_script?.codingPlanProvider || null,
+    planProvider: meta.usage_script?.codingPlanProvider || (isCodexOAuth ? 'codex_oauth' : null),
+    authAccountId: authBinding.accountId || '',
     accessKeyId: meta.usage_script?.accessKeyId || '',
     secretAccessKey: meta.usage_script?.secretAccessKey || ''
   };
@@ -316,6 +331,125 @@ function quotaRequestOptions(apiKey, useApiKeyHeader) {
   };
 }
 
+function resolveCodexAccount(provider) {
+  let auth;
+  try {
+    auth = readJson(CODEX_AUTH_FILE);
+  } catch (err) {
+    throw new Error(`cannot read ${CODEX_AUTH_FILE}: ${err.message}`);
+  }
+  const accountId = provider.authAccountId || auth.default_account_id;
+  if (!accountId) throw new Error(`${CODEX_AUTH_FILE} has no bound or default account`);
+  const account = auth.accounts?.[accountId];
+  if (!account) throw new Error(`${CODEX_AUTH_FILE} has no account ${accountId}`);
+  if (!account.refresh_token) throw new Error(`Codex OAuth account ${accountId} has no refresh token`);
+  if (!account.chatgpt_account_id) throw new Error(`Codex OAuth account ${accountId} has no ChatGPT account ID`);
+  return { auth, accountId, account };
+}
+
+function readCachedCodexAccessToken(accountId) {
+  try {
+    const cached = readJson(CODEX_TOKEN_CACHE_FILE);
+    if (
+      cached.accountId === accountId &&
+      typeof cached.accessToken === 'string' &&
+      cached.accessToken &&
+      Number(cached.expiresAtMs) > Date.now() + CODEX_TOKEN_REFRESH_BUFFER_MS
+    ) {
+      return cached.accessToken;
+    }
+  } catch {
+    // Missing or corrupt token cache is refreshed below.
+  }
+  return null;
+}
+
+async function refreshCodexAccessToken(refreshToken) {
+  const body = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: CODEX_CLIENT_ID,
+    scope: 'openid profile email'
+  });
+  const res = await fetch(CODEX_OAUTH_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': CODEX_USER_AGENT
+    },
+    body,
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`${CODEX_OAUTH_TOKEN_URL} returned HTTP ${res.status}: ${text.slice(0, 300)}`);
+  const tokens = JSON.parse(text);
+  if (!tokens.access_token) throw new Error('Codex OAuth refresh returned no access token');
+  return tokens;
+}
+
+function persistRefreshedCodexTokens(accountId, usedRefreshToken, tokens) {
+  const latest = readJson(CODEX_AUTH_FILE);
+  const account = latest.accounts?.[accountId];
+  if (!account) throw new Error(`Codex OAuth account ${accountId} disappeared during refresh`);
+  if (account.refresh_token !== usedRefreshToken) {
+    throw new Error(`Codex OAuth account ${accountId} changed during refresh; retry on next status update`);
+  }
+  if (tokens.refresh_token) account.refresh_token = tokens.refresh_token;
+  if (tokens.id_token) account.id_token = tokens.id_token;
+  account.token_updated_at_ms = Date.now();
+  writeJsonAtomic(CODEX_AUTH_FILE, latest);
+}
+
+async function codexCredentials(provider, forceRefresh = false) {
+  const { accountId, account } = resolveCodexAccount(provider);
+  if (!forceRefresh) {
+    const accessToken = readCachedCodexAccessToken(accountId);
+    if (accessToken) {
+      return { accountId, chatgptAccountId: account.chatgpt_account_id, accessToken };
+    }
+  }
+
+  const usedRefreshToken = account.refresh_token;
+  const tokens = await refreshCodexAccessToken(usedRefreshToken);
+  persistRefreshedCodexTokens(accountId, usedRefreshToken, tokens);
+  const expiresIn = Number(tokens.expires_in);
+  const expiresAtMs = Date.now() + (Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn : 3600) * 1000;
+  writeJsonAtomic(CODEX_TOKEN_CACHE_FILE, {
+    accountId,
+    accessToken: tokens.access_token,
+    expiresAtMs
+  });
+  return {
+    accountId,
+    chatgptAccountId: account.chatgpt_account_id,
+    accessToken: tokens.access_token
+  };
+}
+
+async function requestCodexQuota(credentials) {
+  return fetch(CODEX_USAGE_ENDPOINT, {
+    headers: {
+      Authorization: `Bearer ${credentials.accessToken}`,
+      'ChatGPT-Account-Id': credentials.chatgptAccountId,
+      'User-Agent': 'codex-cli',
+      Accept: 'application/json'
+    },
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS)
+  });
+}
+
+async function fetchCodexQuota(provider) {
+  let credentials = await codexCredentials(provider);
+  let res = await requestCodexQuota(credentials);
+  if (res.status === 401) {
+    credentials = await codexCredentials(provider, true);
+    res = await requestCodexQuota(credentials);
+  }
+  const body = await res.text();
+  if (!res.ok) throw new Error(`${CODEX_USAGE_ENDPOINT} returned HTTP ${res.status}: ${body.slice(0, 300)}`);
+  return { endpoint: CODEX_USAGE_ENDPOINT, auth: 'oauth', ...parseCodexQuota(JSON.parse(body)) };
+}
+
 /**
  * Query the provider's coding-plan quota. OpenCode Zen answers 401 for a
  * malformed Authorization header, so that one status retries with x-api-key;
@@ -325,6 +459,7 @@ function quotaRequestOptions(apiKey, useApiKeyHeader) {
  */
 async function fetchQuota(provider) {
   if (provider.planProvider === 'volcengine') return fetchVolcengineQuota(provider);
+  if (provider.planProvider === 'codex_oauth') return fetchCodexQuota(provider);
 
   const endpoint = QUOTA_ENDPOINTS[provider.planProvider];
   if (!endpoint) throw new Error(`no quota endpoint mapped for plan provider ${provider.planProvider}`);
@@ -367,6 +502,34 @@ function parseQuota(planProvider, payload) {
     };
   };
   return { rolling: window('rolling'), weekly: window('weekly'), monthly: window('monthly') };
+}
+
+function parseCodexQuota(payload) {
+  const rateLimit = payload?.rate_limit;
+  if (!rateLimit) {
+    throw new Error(`unexpected Codex usage response shape: ${JSON.stringify(payload).slice(0, 300)}`);
+  }
+
+  const windows = { rolling: null, weekly: null, monthly: null };
+  for (const [position, raw] of [
+    ['primary', rateLimit.primary_window],
+    ['secondary', rateLimit.secondary_window]
+  ]) {
+    if (!raw) continue;
+    const seconds = Number(raw.limit_window_seconds);
+    const name = seconds === 18_000 ? 'rolling' : seconds === 604_800 ? 'weekly' : position === 'primary' ? 'rolling' : 'weekly';
+    const usedPct = numberOrNull(raw.used_percent);
+    if (usedPct === null) continue;
+    windows[name] = {
+      status: null,
+      usedPct,
+      resetsAt: raw.reset_at ?? null
+    };
+  }
+  if (!windows.rolling && !windows.weekly) {
+    throw new Error(`Codex usage response has no rate-limit windows: ${JSON.stringify(payload).slice(0, 300)}`);
+  }
+  return windows;
 }
 
 function numberOrNull(value) {
@@ -426,7 +589,7 @@ function isCurrent(cache) {
   }
 }
 
-module.exports = { readCache, isStale, isCurrent, refresh, CACHE_FILE, REFRESH_TTL_MS };
+module.exports = { readCache, isStale, isCurrent, refresh, parseCodexQuota, CACHE_FILE, REFRESH_TTL_MS };
 
 if (require.main === module) {
   refresh()

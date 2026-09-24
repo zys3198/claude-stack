@@ -223,7 +223,7 @@
 | opencode hook 语义与 CC 不同 | verify_gate/turn_counter 行为偏移 | 用 `session.idle`/`message.updated` 近似；阈值可调 |
 | lean-ctx auto 压缩丢失 | token 消耗上升 | 手动 ctx_* + opencode-snip 补 |
 | opencode 模型路由不如 CC 灵活 | env ANTHROPIC_DEFAULT_*_MODEL 等价物 | ccswitch provider meta 处理 model 映射 |
-| GateGuard / Fact-Forcing Gate 无 opencode 版 | 非代码 Edit 拦截丢失 | port `dep_gate.py` 等价 TS hook（Phase 4 已含） |
+| ~~GateGuard / Fact-Forcing Gate 无 opencode 版~~ | **已作废**：该机制连同 `dep_gate.py` 已于 2026-09-08 删除，不再有迁移项 | — |
 
 **回退路径**：任一 Phase 卡住且无法 1-2 轮解决 → 停，回 Claude Code 主力（配置未动，零成本回退）。连续 2-3 轮卡同方向 → §4 止血，复盘再继续。
 

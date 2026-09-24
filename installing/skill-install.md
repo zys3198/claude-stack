@@ -74,6 +74,7 @@
 - 装到哪：`~/.claude/skills/eli5/SKILL.md`
 - 依赖：HTML artifact 能力（源 skill 要求）
 - 备注：替换原 116 行本地版本；当前版本触发 `/eli5 <主题>`，输出大图少文字的 HTML artifact。
+- **状态（2026-09-22）**：已归档至 `~/.claude/backups/skills-before-slim-2026-09-22/eli5/`（用户拍板精简，模型原生能力、零使用）。恢复 = 复制回 `~/.claude/skills/eli5` 或按上列 gh api 命令重装。
 
 ### last30days
 - 来源：https://github.com/mvanhorn/last30days-skill
@@ -102,6 +103,7 @@
 - 备注：上游目录仅含 SKILL.md 与两份 references；已审查，无 scripts、外部命令、远程安装、数据上传、密钥读取或配置修改指令。
 
 ### archify
+- 当前状态：**已归档（2026-09-23）**——整个目录原样移至 `~/.claude/archive-skills/archify/`，退出每会话 skill 清单；恢复 = 移回 `~/.claude/skills/`
 - 来源：https://github.com/tt-a1i/archify（main HEAD `c6519401f7b91b9d43011657880893b0a8955548`；上游 based_on Cocoon-AI/architecture-diagram-generator，MIT）
 - 安装日期：2026-09-06
 - 安装命令原文：`npx -y skills add tt-a1i/archify --skill archify --agent claude-code --global --copy --yes`（skills CLI 自动识别 `claude-code_2-1-263_agent`，非交互）
@@ -123,7 +125,9 @@
 - 装到哪：`C:\Users\zys31\.claude\skills\agent-browser`（junction）→ `C:\Users\zys31\AppData\Roaming\npm\node_modules\agent-browser\skills\agent-browser`
 - 依赖：Node.js / npm；全局 `agent-browser` CLI 0.38.1
 - 用途：浏览器自动化、页面交互、截图、页面读取、测试和 Electron 应用操作
-- 备注：官方 README 的 `npx skills add vercel-labs/agent-browser` 会写回 `~/.agents`，本机 skill 权威源为 `~/.claude/skills`，故改用 junction。junction 指向 npm 包内的 skill 目录，随包升级自动同步，避免 README 警告的「复制 SKILL.md 会过期」。未注册 agent-browser MCP。卸载 = 删 junction + `npm uninstall -g agent-browser`。
+- 当前状态：**已启用**。2026-09-23 曾临时归档到 `C:\Users\zys31\.claude\archive-skills\agent-browser`；2026-09-24 按上述命令重建 junction 恢复。验证：`~/.claude/skills/agent-browser/SKILL.md` 可读，`agent-browser --version` = `0.38.1`，registry `dist-tags.latest` = `0.38.1`（无新版）。归档处残留的旧 junction 已于同日删除（`[System.IO.Directory]::Delete('<路径>', $false)`；PS 5.1 `Remove-Item` 对 junction 报 NullReferenceException，不可用）。
+- 备注：官方 README 的 `npx skills add vercel-labs/agent-browser` 会写回 `~/.agents`，本机 skill 权威源为 `~/.claude/skills`，故改用 junction。junction 指向 npm 包内的 skill 目录，随包升级自动同步，避免 README 警告的「复制 SKILL.md 会过期」。未注册 agent-browser MCP。恢复 = 用「安装命令原文」里的 `New-Item -ItemType Junction` 重建 `C:\Users\zys31\.claude\skills\agent-browser`（勿用 `Move-Item`，junction 是链接不是实体）；完整卸载 = 删 junction + `npm uninstall -g agent-browser`。
+- **2026-09-24 处置：junction 已删除**。命令 `cmd.exe //c "rmdir C:\Users\zys31\.claude\skills\agent-browser"`（非递归，只删链接；Git Bash 下 `/c` 会被 MSYS 改写成路径，必须写 `//c`）。删后核对：`skills/agent-browser` 不存在，**npm 包与 CLI 未动**（`node_modules/agent-browser` 114 MB，包内 `skills/agent-browser/SKILL.md` 完好）。skill 能力已并入自建 `auto-browser`（见 `custom-setup.md`），**不再重建 junction**——用 `agent-browser skills get core` 取用法这一条已写进 auto-browser。恢复 junction = 用上方「安装命令原文」的 `New-Item -ItemType Junction`。
 
 ## 散件来源反查登记（2026-08-11 公网反查确认）
 
@@ -139,9 +143,11 @@
 | alvinunreal/oh-my-opencode-slim | worktrees, codemap, clonedeps, deepwork, simplify, reflect |
 | mattpocock/skills（插件外裸名） | to-prd, to-issues, request-refactor-plan, qa, design-an-interface, zoom-out |
 | abhigyanpatwari/GitNexus（`npx gitnexus analyze` 自动装） | gitnexus-cli, gitnexus-debugging, gitnexus-exploring, gitnexus-guide, gitnexus-impact-analysis, gitnexus-pdg-query, gitnexus-pr-review, gitnexus-refactoring, gitnexus-taint-analysis |
-| 单件 | agent-reach=Panniantong/Agent-Reach（外部，非自建，https://github.com/Panniantong/Agent-Reach/tree/main）, douyin-video-summary=liu-wei-ai, shuorenhua=MrGeDiao/shuorenhua, find-skills=vercel-labs/skills, lean-ctx=yvgude/lean-ctx, hatch-pet=openai/skills, officecli=officecli/officecli, markdown-viewer=markdown-viewer/skills, ~~bili-note~~（用户确认自建，移至 custom-setup.md） |
+| 单件 | ~~agent-reach~~（2026-09-24 归档，来源 Panniantong/Agent-Reach，外部非自建，见下方状态行）, douyin-video-summary=liu-wei-ai, shuorenhua=MrGeDiao/shuorenhua, find-skills=vercel-labs/skills, lean-ctx=yvgude/lean-ctx, hatch-pet=openai/skills, officecli=officecli/officecli, markdown-viewer=markdown-viewer/skills, ~~bili-note~~（用户确认自建，移至 custom-setup.md） |
 
 > 2026-08-18 归档登记（wayfinder ticket 02「coding 域深耕判定」）：`design`（来源待补）、`pick-ui-library`（emilkowalski/skills）移入 `~/.claude/archive/`，可逆；判据=未接 frontend-visual 路由且模型原生可覆盖。**2026-09-21 复查：`~/.claude/archive/` 整个目录已不存在，这两项的归档副本同样不可恢复。**
+
+> **2026-09-24 归档（用户拍板「agent-reach 删了吧」）**：`agent-reach` skill 本体 7 文件 / 18056 B → `~/.claude/backups/skill-archive-agent-reach-20260924/agent-reach`；原路径 `~/.claude/skills/agent-reach` 已不存在，`skills/` 剩 22 项。判据=`agent-reach doctor` 仅 5/15 渠道可用，宣称的小红书/微博未解锁、抖音根本不在渠道列表，「零配置」命令全是对另行安装 CLI 的调用，与 last30days 覆盖重叠。`.gitignore:130 skills/*` → 未跟踪，**无 git 恢复路径，归档是唯一副本**。恢复=移回 `~/.claude/skills/agent-reach`。**同轮连带**：`content-to-note` SKILL.md 抖音路由重写——原引用指向的 `agent-reach` 从未支持抖音渠道；改后指向 2026-09-20 实测跑通的路线（浏览器读页 + CDN 音频轨 + 本地 FunASR，脚本在 `exp/2026-09-20-douyin-content-notes/raw/transcribe.py`）。`mcporter` 的 `douyin` server 虽 `mcporter list` 报 healthy，但 `mcp-install.md` 已记两处失效（`videoInfoRes` KeyError、构造函数强依赖 `DASHSCOPE_API_KEY`），skill 内已标注不可用。
 
 插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
 

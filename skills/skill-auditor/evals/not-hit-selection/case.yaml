@@ -1,0 +1,23 @@
+schema_version: "1.0"
+name: not-hit-selection
+description: 工具选型或了解指南的请求不命中 skill-auditor，应转介处理。
+tags: [routing]
+execution:
+  prompt: |
+    请用 skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。
+    请求：SP 和 Matt Pocock skills 哪个更适合我？
+  max_turns: 10
+  model: claude-sonnet-4-6
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: says-no-hit
+    target: last_message
+    pattern: 不命中
+    match: contains
+  - type: regex
+    name: gives-handoff
+    target: last_message
+    pattern: 转介
+    match: contains

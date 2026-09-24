@@ -8,16 +8,30 @@ SessionStart.additionalContext 告警。
 import json
 import os
 import sqlite3
+import subprocess
+import sys
 from pathlib import Path
 
 SETTINGS = os.path.expanduser("~/.claude/settings.json")
 DB = os.path.expanduser("~/.cc-switch/cc-switch.db")
 KEY = "common_config_claude"
+SYNC = os.path.join(
+    os.path.expanduser("~"), ".claude", "skills",
+    "cc-switch-setting-sync", "scripts", "sync_claude_common.py",
+)
+CHECK_TIMEOUT = 20
 MISSING_HOOK_TOLERANCE = 3  # live 缺失快照 hook 命令数超过此值 → 降级
 CRITICAL_HOOK_MARKERS = (
     "git_guard.py", "secret_guard.py", "dep_gate.py", "verify_recorder.py",
 )
 OBSOLETE_HOOK_MARKERS = ("edited_tracker.py", "verify_gate.py")
+# 期望基线：这些键是用户确认过的优化，缺失即视为被重置。
+# FORBIDDEN_ENV 是已从 common 与 provider 配置删除的键（claude 切换注入会复活它们，
+# 见 ccswitch 的 settings_config env），live 中出现即视为被注入。
+REQUIRED_ENV = ("CLAUDE_CODE_AUTO_COMPACT_WINDOW",)
+FORBIDDEN_ENV = ("CLAUDE_CODE_EFFORT_LEVEL", "CLAUDE_CODE_MAX_CONTEXT_TOKENS")
+REQUIRED_PERMISSIONS = ("allow", "deny")
+REQUIRED_MODELS = ("claude-fable-5", "claude-haiku-4-5", "claude-opus-5", "claude-sonnet-5")
 
 def emit(guard_status, message):
     """SessionStart hook JSON 输出；正常时返回空串。"""
@@ -69,13 +83,29 @@ def missing_critical_hooks(live_cmds, snap_cmds):
 
 def is_degraded(live, snap):
     """live 相对快照是否降级。返回 (degraded: bool, reason: str)"""
+    live_env = live.get("env") if isinstance(live.get("env"), dict) else {}
+    for k in FORBIDDEN_ENV:
+        if k in live_env:
+            return True, f"env 出现不应有的键 {k}（疑似被 provider 切换注入）"
+    for k in REQUIRED_ENV:
+        if k not in live_env:
+            return True, f"env 缺失关键键 {k}"
     for k in ("statusLine", "enabledPlugins", "extraKnownMarketplaces"):
         if k in snap and k not in live:
             return True, f"missing {k!r}"
     live_permissions = live.get("permissions") if isinstance(live.get("permissions"), dict) else {}
     snap_permissions = snap.get("permissions") if isinstance(snap.get("permissions"), dict) else {}
+    for k in REQUIRED_PERMISSIONS:
+        if not live_permissions.get(k):
+            return True, f"missing permissions.{k}"
+    if live_permissions.get("defaultMode") != "auto":
+        return True, f"permissions.defaultMode 不是 auto（当前 {live_permissions.get('defaultMode')!r}）"
     if snap_permissions.get("deny") and not live_permissions.get("deny"):
         return True, "missing permissions.deny"
+    live_model_settings = live.get("modelSettings") if isinstance(live.get("modelSettings"), dict) else {}
+    missing_models = [m for m in REQUIRED_MODELS if m not in live_model_settings]
+    if missing_models:
+        return True, f"modelSettings 缺失: {', '.join(missing_models)}"
     live_cmds = snapshot_hook_commands(live)
     snap_cmds = snapshot_hook_commands(snap)
     critical_missing = missing_critical_hooks(live_cmds, snap_cmds)
@@ -85,6 +115,27 @@ def is_degraded(live, snap):
     if missing > MISSING_HOOK_TOLERANCE:
         return True, f"missing {missing} hooks (snapshot has {len(snap_cmds)})"
     return False, ""
+
+def check_common_config():
+    """启动时只读检查 live 公共视图与 cc-switch 快照。"""
+    try:
+        result = subprocess.run(
+            [sys.executable, SYNC, "--check", "--config", SETTINGS, "--db", DB],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=CHECK_TIMEOUT,
+        )
+    except Exception as exc:
+        return f"common_config 检查失败: {exc}"
+    if result.returncode == 0:
+        return ""
+    if result.returncode == 2:
+        return "common_config 与 settings.json 不一致（运行 sync_claude_common.py --check 查看差异）"
+    detail = (result.stdout or result.stderr or "未知错误").strip().splitlines()
+    return f"common_config 检查失败: {detail[-1] if detail else '未知错误'}"
+
 
 def main():
     try:
@@ -118,10 +169,14 @@ def main():
         return
 
     degraded, reason = is_degraded(live, snap)
-    if not degraded:
+    reasons = [reason] if degraded else []
+    common_reason = check_common_config()
+    if common_reason:
+        reasons.append(common_reason)
+    if not reasons:
         return  # 静默
 
-    print(emit("warn", f"检测到 settings.json 配置降级（{reason}）；只读检测未修改文件，请人工修复并确认后再同步。"))
+    print(emit("warn", "；".join(reasons) + "；只读检测未修改文件，请人工修复并确认后再同步。"))
 
 if __name__ == "__main__":
     main()

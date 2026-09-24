@@ -1,0 +1,18 @@
+schema_version: "1.0"
+name: "3"
+description: 单文件拼写修正应由单代理完成，不启动子代理。
+tags: [delegation, negative]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    把 src/auth/login.ts 里的一个变量名拼写错误改掉，别拆任务，也别启动子代理。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: []
+runs: 1
+graders:
+  - type: llm
+    name: no-delegation
+    criteria: |
+      回复必须明确保持单代理处理，不拆任务，也不启动子代理。
+    focus: last_message

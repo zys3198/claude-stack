@@ -14,6 +14,12 @@ spec = importlib.util.spec_from_file_location("resource_guard", GUARD)
 g = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(g)
 
+_HOST_TOOLCHAIN = g.host_toolchain
+
+
+def host_toolchain(command):
+    return _HOST_TOOLCHAIN(command, str(Path(tempfile.gettempdir()) / "resource-guard-test"))
+
 
 def check(label, got, want):
     ok = got == want
@@ -50,6 +56,10 @@ PATCH = (
     "g.read_exclusive = lambda: [{'container': 'deploy-nginx-1', 'service': 'nginx',"
     " 'project': 'deploy', 'label': 'x'}]\n"
     "g.running_containers = lambda: {'deploy-nginx-1'}\n"
+    "g.other_session_count = lambda sid: (2, False)\n"
+)
+NO_BUSY_PATCH = (
+    "g.running_containers = lambda: set()\n"
     "g.other_session_count = lambda sid: (2, False)\n"
 )
 
@@ -242,8 +252,8 @@ with tempfile.TemporaryDirectory() as tmp:
 
     out, rc = run({"tool_name": "Edit", "cwd": str(TMP), "session_id": "me", "tool_input": {
         "file_path": str(probe), "old_string": BASE, "new_string": GAP}})
-    check("新增服务缺 security_opt 时提问", decision(out), "ask")
-    check("提问点名缺项", "chroma 缺 security_opt" in reason(out), True)
+    check("新增服务缺 security_opt 时阻断", decision(out), "deny")
+    check("阻断点名缺项", "chroma 缺 security_opt" in reason(out), True)
 
     out, rc = run({"tool_name": "Edit", "cwd": str(TMP), "session_id": "me", "tool_input": {
         "file_path": str(probe), "old_string": "image: mysql:8.4",
@@ -252,7 +262,7 @@ with tempfile.TemporaryDirectory() as tmp:
 
     out, rc = run({"tool_name": "Write", "cwd": str(TMP), "session_id": "me", "tool_input": {
         "file_path": str(TMP / "new-compose.yml"), "content": GAP}})
-    check("新建文件全部按新增判定", decision(out), "ask")
+    check("新建文件全部按新增判定", decision(out), "deny")
 
     out, rc = run({"tool_name": "Write", "cwd": str(TMP), "session_id": "me", "tool_input": {
         "file_path": str(TMP / "notes.md"), "content": GAP}})
@@ -264,8 +274,9 @@ with tempfile.TemporaryDirectory() as tmp:
 
 # --- Bash 判据端到端 ---
 with tempfile.TemporaryDirectory() as tmp:
-    out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
-        "command": "docker compose -f deploy/docker-compose.local.yml --profile build run --rm frontend-build"}})
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker compose -f deploy/docker-compose.local.yml --profile build run --rm frontend-build"}},
+        NO_BUSY_PATCH)
     check("未登记的容器不触发", (decision(out), rc), (None, 0))
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
@@ -332,6 +343,7 @@ with tempfile.TemporaryDirectory() as tmp:
     out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "docker compose -f deploy/docker-compose.local.yml up -d nginx && pnpm build"}})
     check("两条判据同时命中时只输出一行", len(out.splitlines()), 1)
+    check("阻断优先于询问", decision(out), "deny")
     check("两条判据的理由都在", ("pnpm" in reason(out), "deploy-nginx-1" in reason(out)), (True, True))
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {}})
@@ -343,24 +355,24 @@ with tempfile.TemporaryDirectory() as tmp:
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "sed -i 's/1024m/512m/' deploy/docker-compose.local.yml"}})
-    check("sed -i 改写 compose 文件时提问", decision(out), "ask")
-    check("提问点名文件", "docker-compose.local.yml" in reason(out), True)
+    check("sed -i 改写 compose 文件时阻断", decision(out), "deny")
+    check("阻断点名文件", "docker-compose.local.yml" in reason(out), True)
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "printf 'services: {}' > deploy/docker-compose.local.yml"}})
-    check("重定向改写 compose 文件时提问", decision(out), "ask")
+    check("重定向改写 compose 文件时阻断", decision(out), "deny")
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "echo 'services: {}' | tee deploy/docker-compose.local.yml"}})
-    check("tee 改写 compose 文件时提问", decision(out), "ask")
+    check("tee 改写 compose 文件时阻断", decision(out), "deny")
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "cat > deploy/docker-compose.local.yml <<'EOF'\nservices: {}\nEOF"}})
-    check("heredoc 改写 compose 文件时提问", decision(out), "ask")
+    check("heredoc 改写 compose 文件时阻断", decision(out), "deny")
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "bash -c \"echo x > deploy/docker-compose.local.yml\""}})
-    check("shell 包装里的改写也提问", decision(out), "ask")
+    check("shell 包装里的改写也阻断", decision(out), "deny")
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "echo x > notes.md"}})
@@ -485,78 +497,79 @@ with tempfile.TemporaryDirectory() as tmp:
     check("compose build 别的服务不提问", decision(out), None)
 
 # --- 宿主工具链判据（拆词层） ---
-check("pnpm 在起首位置", g.host_toolchain("pnpm build"), "pnpm")
-check("控制符之后的 pnpm", g.host_toolchain("cd code/frontend && pnpm install"), "pnpm")
-check("mvn 在起首位置", g.host_toolchain("mvn -pl oa clean test"), "mvn")
-check("带引号的绝对路径 node", g.host_toolchain('"C:/Program Files/nodejs/node.exe" -v'), "node")
-check("node_modules 里的可执行文件", g.host_toolchain("./node_modules/.bin/vite build"), "vite")
-check("包装命令之后的工具链", g.host_toolchain("time pnpm build"), "pnpm")
-check("环境变量赋值之后的工具链", g.host_toolchain("NODE_ENV=test npx vite build"), "npx")
-check("容器内执行的 mvn 不算", g.host_toolchain("docker compose exec backend-java mvn test"), None)
-check("容器内执行的 npm 不算", g.host_toolchain("docker run --rm node:20 npm ci"), None)
-check("提交消息里的工具链不算", g.host_toolchain("git commit -m 'pnpm build 的用法'"), None)
-check("普通实参里的工具链不算", g.host_toolchain("echo time pnpm"), None)
-check("python 不在名单里", g.host_toolchain("python -c 'import psutil'"), None)
-check("是 docker 命令就不拦", g.host_toolchain("docker compose --profile build run --rm frontend-build"), None)
+check("pnpm 在起首位置", host_toolchain("pnpm build"), "pnpm")
+check("控制符之后的 pnpm", host_toolchain("cd code/frontend && pnpm install"), "pnpm")
+check("mvn 在起首位置", host_toolchain("mvn -pl oa clean test"), "mvn")
+check("带引号的绝对路径 node", host_toolchain('"C:/Program Files/nodejs/node.exe" -v'), "node")
+check("node_modules 里的可执行文件", host_toolchain("./node_modules/.bin/vite build"), "vite")
+check("包装命令之后的工具链", host_toolchain("time pnpm build"), "pnpm")
+check("环境变量赋值之后的工具链", host_toolchain("NODE_ENV=test npx vite build"), "npx")
+check("容器内执行的 mvn 不算", host_toolchain("docker compose exec backend-java mvn test"), None)
+check("容器内执行的 npm 不算", host_toolchain("docker run --rm node:20 npm ci"), None)
+check("提交消息里的工具链不算", host_toolchain("git commit -m 'pnpm build 的用法'"), None)
+check("普通实参里的工具链不算", host_toolchain("echo time pnpm"), None)
+check("python 不在名单里", host_toolchain("python -c 'import psutil'"), None)
+check("是 docker 命令就不拦", host_toolchain("docker compose --profile build run --rm frontend-build"), None)
 
 # --- 多行、分号、shell 包装、吃取值的包装命令 ---
-check("多行命令第二行的工具链", g.host_toolchain("cd code/frontend\npnpm build"), "pnpm")
-check("分号紧贴的工具链", g.host_toolchain("cd code/frontend; mvn test"), "mvn")
-check("回车分隔的工具链", g.host_toolchain("cd a\r\npnpm build"), "pnpm")
-check("sh -c 载荷", g.host_toolchain("sh -c 'pnpm build'"), "pnpm")
-check("bash -c 载荷里带控制符", g.host_toolchain('bash -c "cd code/frontend && pnpm build"'), "pnpm")
-check("bash -lc 合并短选项", g.host_toolchain('bash -lc "pnpm install"'), "pnpm")
-check("cmd /c 载荷", g.host_toolchain("cmd /c npm install"), "npm")
-check("powershell -Command 载荷", g.host_toolchain('powershell -Command "pnpm build"'), "pnpm")
-check("pwsh -Command 载荷", g.host_toolchain('pwsh -Command "pnpm build"'), "pnpm")
-check("eval 载荷", g.host_toolchain('eval "pnpm build"'), "pnpm")
-check("两层 shell 包装", g.host_toolchain("bash -c \"sh -c 'pnpm build'\""), "pnpm")
-check("timeout 吃取值", g.host_toolchain("timeout 300 mvn test"), "mvn")
-check("nice 吃选项与取值", g.host_toolchain("nice -n 10 pnpm build"), "pnpm")
-check("wsl 包装", g.host_toolchain("wsl pnpm build"), "pnpm")
-check("普通实参里的 sh 不算", g.host_toolchain("echo sh -c 'pnpm build'"), None)
-check("普通实参里的 timeout 不算", g.host_toolchain("echo timeout 300 mvn test"), None)
-check("引号里的分号不切子句", g.host_toolchain("git commit -m 'a; pnpm build'"), None)
-check("引号不闭合时仍认得出工具链", g.host_toolchain('echo \\" ; pnpm build'), "pnpm")
-check("引号里的换行不切子句", g.host_toolchain("git commit -m 'a\npnpm build'"), None)
-check("sudo 无选项", g.host_toolchain("sudo pnpm build"), "pnpm")
-check("sudo 带选项", g.host_toolchain("sudo -u root pnpm build"), "pnpm")
-check("time 带选项", g.host_toolchain("time -p pnpm build"), "pnpm")
-check("xargs 带选项", g.host_toolchain("xargs -I{} pnpm build"), "pnpm")
-check("管道里的 xargs 带选项", g.host_toolchain("echo x | xargs -I{} pnpm build"), "pnpm")
-check("普通实参里的 sudo 不算", g.host_toolchain("echo sudo -u root pnpm"), None)
-check("cmd //c 载荷", g.host_toolchain("cmd //c npm install"), "npm")
-check("cmd /d /c 载荷", g.host_toolchain("cmd /d /c npm install"), "npm")
+check("多行命令第二行的工具链", host_toolchain("cd code/frontend\npnpm build"), "pnpm")
+check("分号紧贴的工具链", host_toolchain("cd code/frontend; mvn test"), "mvn")
+check("回车分隔的工具链", host_toolchain("cd a\r\npnpm build"), "pnpm")
+check("sh -c 载荷", host_toolchain("sh -c 'pnpm build'"), "pnpm")
+check("bash -c 载荷里带控制符", host_toolchain('bash -c "cd code/frontend && pnpm build"'), "pnpm")
+check("bash -lc 合并短选项", host_toolchain('bash -lc "pnpm install"'), "pnpm")
+check("cmd /c 载荷", host_toolchain("cmd /c npm install"), "npm")
+check("powershell -Command 载荷", host_toolchain('powershell -Command "pnpm build"'), "pnpm")
+check("pwsh -Command 载荷", host_toolchain('pwsh -Command "pnpm build"'), "pnpm")
+check("eval 载荷", host_toolchain('eval "pnpm build"'), "pnpm")
+check("两层 shell 包装", host_toolchain("bash -c \"sh -c 'pnpm build'\""), "pnpm")
+check("timeout 吃取值", host_toolchain("timeout 300 mvn test"), "mvn")
+check("nice 吃选项与取值", host_toolchain("nice -n 10 pnpm build"), "pnpm")
+check("wsl 包装", host_toolchain("wsl pnpm build"), "pnpm")
+check("普通实参里的 sh 不算", host_toolchain("echo sh -c 'pnpm build'"), None)
+check("普通实参里的 timeout 不算", host_toolchain("echo timeout 300 mvn test"), None)
+check("引号里的分号不切子句", host_toolchain("git commit -m 'a; pnpm build'"), None)
+check("引号不闭合时仍认得出工具链", host_toolchain('echo \\" ; pnpm build'), "pnpm")
+check("引号里的换行不切子句", host_toolchain("git commit -m 'a\npnpm build'"), None)
+check("sudo 无选项", host_toolchain("sudo pnpm build"), "pnpm")
+check("sudo 带选项", host_toolchain("sudo -u root pnpm build"), "pnpm")
+check("time 带选项", host_toolchain("time -p pnpm build"), "pnpm")
+check("xargs 带选项", host_toolchain("xargs -I{} pnpm build"), "pnpm")
+check("管道里的 xargs 带选项", host_toolchain("echo x | xargs -I{} pnpm build"), "pnpm")
+check("普通实参里的 sudo 不算", host_toolchain("echo sudo -u root pnpm"), None)
+check("cmd //c 载荷", host_toolchain("cmd //c npm install"), "npm")
+check("cmd /d /c 载荷", host_toolchain("cmd /d /c npm install"), "npm")
 
 # --- heredoc 正文 ---
 check("写文件的 heredoc 正文不算命令",
-      g.host_toolchain("cat > notes.md <<'EOF'\npnpm build\nEOF"), None)
+      host_toolchain("cat > notes.md <<'EOF'\npnpm build\nEOF"), None)
 check("提交信息走 heredoc 时不算命令",
-      g.host_toolchain("git commit -F - <<'EOF'\nfeat: x\npnpm build 说明\nEOF"), None)
+      host_toolchain("git commit -F - <<'EOF'\nfeat: x\npnpm build 说明\nEOF"), None)
 check("无引号标记的 heredoc 正文也剥",
-      g.host_toolchain("cat > notes.md <<EOF\npnpm build\nEOF"), None)
+      host_toolchain("cat > notes.md <<EOF\npnpm build\nEOF"), None)
 check("剥掉正文后后续子句仍在",
-      g.host_toolchain("cat > notes.md <<'EOF'\n随便写点什么\nEOF\npnpm build"), "pnpm")
+      host_toolchain("cat > notes.md <<'EOF'\n随便写点什么\nEOF\npnpm build"), "pnpm")
 check("正文里不是起首位置的工具链不算",
-      g.host_toolchain("cat > notes.md <<'EOF'\n先 pnpm build 再 docker compose up\nEOF"), None)
+      host_toolchain("cat > notes.md <<'EOF'\n先 pnpm build 再 docker compose up\nEOF"), None)
 check("正文交给宿主机 shell 时保留",
-      g.host_toolchain("bash <<'EOF'\npnpm build\nEOF"), "pnpm")
+      host_toolchain("bash <<'EOF'\npnpm build\nEOF"), "pnpm")
 check("sudo 包一层时也保留",
-      g.host_toolchain("sudo bash <<'EOF'\npnpm build\nEOF"), "pnpm")
+      host_toolchain("sudo bash <<'EOF'\npnpm build\nEOF"), "pnpm")
 check("正文交给容器里的 shell 时剥掉",
-      g.host_toolchain("docker compose exec backend-java sh <<'EOF'\nmvn test\nEOF"), None)
+      host_toolchain("docker compose exec backend-java sh <<'EOF'\nmvn test\nEOF"), None)
 check("引号里出现 << 不误判",
-      g.host_toolchain("echo 'a << b' && pnpm build"), "pnpm")
+      host_toolchain("echo 'a << b' && pnpm build"), "pnpm")
 
 # --- 宿主工具链判据端到端 ---
 with tempfile.TemporaryDirectory() as tmp:
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "cd code/frontend && pnpm build"}})
-    check("宿主机跑 pnpm 时提问", decision(out), "ask")
-    check("提问点名命令", "pnpm" in reason(out), True)
+    check("宿主机跑 pnpm 时阻断", decision(out), "deny")
+    check("阻断点名命令", "pnpm" in reason(out), True)
 
-    out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
-        "command": "docker compose --profile build run --rm frontend-build"}})
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker compose --profile build run --rm frontend-build"}},
+        NO_BUSY_PATCH)
     check("容器内构建放行", (decision(out), rc), (None, 0))
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
@@ -565,11 +578,60 @@ with tempfile.TemporaryDirectory() as tmp:
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "mvn -v"}})
-    check("宿主机跑 mvn 时提问", decision(out), "ask")
+    check("宿主机跑 mvn 时阻断", decision(out), "deny")
 
     out, rc = run({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
         "command": "git status --short"}})
     check("git 命令放行", (decision(out), rc), (None, 0))
+
+# --- 语义授权、远程 Git 与高风险状态 ---
+REMOTE_AUTH_PATCH = (
+    "g.authorization_match = lambda sid, scope: {'matched': True, 'state_error': None}\n"
+)
+DOCKER_AUTH_PATCH = (
+    "g.read_exclusive = lambda: ["
+    "{'container': 'deploy-nginx-1', 'service': 'nginx', 'project': 'deploy', 'label': 'x'},"
+    "{'container': 'deploy-backend-java-1', 'service': 'backend-java', 'project': 'deploy', 'label': 'x'}]\n"
+    "g.running_containers = lambda: {'deploy-nginx-1', 'deploy-backend-java-1'}\n"
+    "g.other_session_count = lambda sid: (2, False)\n"
+    "g.authorization_match = lambda sid, scope: {'matched': scope['targets'] == ['deploy-nginx-1'], 'state_error': None}\n"
+)
+with tempfile.TemporaryDirectory() as tmp:
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "git push origin main"}}, NO_BUSY_PATCH)
+    check("远程 Git 默认提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "git push --force origin main"}}, NO_BUSY_PATCH)
+    check("强制推送硬拒绝", decision(out), "deny")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "git push \"origin"}}, NO_BUSY_PATCH)
+    check("远程 Git 解析失败硬拒绝", decision(out), "deny")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "git push origin main"}}, NO_BUSY_PATCH + REMOTE_AUTH_PATCH)
+    check("同范围远程 Git 授权复用", (decision(out), rc), (None, 0))
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker restart deploy-nginx-1"}}, DOCKER_AUTH_PATCH)
+    check("同目标独占容器授权复用", (decision(out), rc), (None, 0))
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker compose -f deploy/docker-compose.local.yml up -d"}}, DOCKER_AUTH_PATCH)
+    check("扩大独占目标范围重新提问", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker restart deploy-nginx-1"}},
+        "g.read_exclusive = lambda: [{'container': 'deploy-nginx-1', 'service': 'nginx', 'project': 'deploy', 'label': 'x'}]\n"
+        "g.running_containers = lambda: {'deploy-nginx-1'}\n"
+        "g.other_session_count = lambda sid: (2, False)\n"
+        "g.authorization_match = lambda sid, scope: {'matched': False, 'state_error': '状态损坏'}\n")
+    check("授权状态损坏时不放行", decision(out), "ask")
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "docker compose -f production-compose.yml up -d"}}, NO_BUSY_PATCH)
+    check("生产变更进入确认线", decision(out), "ask")
 
 print()
 print("失败项:", FAILED if FAILED else "无")

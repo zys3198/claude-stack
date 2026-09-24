@@ -27,6 +27,7 @@
 - 工具面（5 个）：`get_douyin_download_link`、`extract_douyin_text`、`parse_douyin_video_info`、`recognize_audio_file`、`recognize_audio_url`
 - 验证：2026-09-21 复跑 `mcporter list` → `douyin (5 tools, 12.1s)` healthy
 - 备注：shared link 解析依赖 `https://www.iesdouyin.com/share/video/{id}` 页面的 `window._ROUTER_DATA`，2026-09-20 实测该页面已不再返回 `videoInfoRes`，`parse_douyin_video_info` 与 `get_douyin_download_link` 因此报 `'videoInfoRes'` KeyError。另一处缺陷：两个工具理论上不需要密钥，但构造函数仍调用 `create_asr_instance`，未设 `DASHSCOPE_API_KEY` 时直接抛 `未设置 DASHSCOPE_API_KEY`。本次实际提取改走浏览器路线（agent-browser 读取页面 + CDN 音频轨 + 本地 FunASR），详见 `exp/2026-09-20-douyin-content-notes/`
+- **2026-09-24 复测（结论未变）**：`mcporter list` 仍报 `douyin (5 tools)` healthy，但 `mcporter call douyin.parse_douyin_video_info share_link=…` 实测返回 `未设置 DASHSCOPE_API_KEY`；`DASHSCOPE_API_KEY` 在 shell、`HKCU\Environment`、`~/.agent-reach/` 均无。healthy 只代表握手成功，**不代表工具可用**。`content-to-note` SKILL.md 抖音段已按此标注为不可用，未来审计勿据 healthy 反推可用。
 
 ## 已卸载
 

@@ -1,0 +1,20 @@
+schema_version: "1.0"
+name: "6"
+description: 验证范围按风险决定，低风险小改动停止于最小检查，迁移保留关键专项与整体检查。
+tags: [delegation, verification]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    并行完成一个低风险文档小改动后，相关检查已通过，没有新改动或未解决问题。是否必须运行整个仓库测试？如果是数据库迁移又怎样？
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: []
+runs: 1
+graders:
+  - type: llm
+    name: risk-based-validation
+    criteria: |
+      回复必须同时满足：
+      1. 低风险小改动运行直接相关的最小检查，必要检查通过后停止。
+      2. 数据库迁移保留必要专项和整体验证，不能省略关键检查。
+    focus: last_message

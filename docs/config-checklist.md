@@ -11,7 +11,7 @@
 
 | 路径 | 用途 | 状态 / 计数 | 维护要点 |
 |------|------|-------------|----------|
-| `~/.claude/CLAUDE.md` | 全局规则（13 节 + caveman/lean-ctx 段） | 活跃，本会话指令源 | 改前走 §5 GateGuard 声明 |
+| `~/.claude/CLAUDE.md` | 全局规则（13 节 + caveman/lean-ctx 段） | 活跃，本会话指令源 | 改前按 `~/.claude/CLAUDE.md` §1.3 人工确认线（GateGuard 机制已于 2026-09-08 删除，本列原引用的「§5 GateGuard 声明」已不存在） |
 | `~/.claude/settings.json` | 主配置：env/permissions/hooks/statusLine/plugins | 见 §1 | 改完同步 ccswitch（§3）防热切换降级 |
 | `~/.claude/settings.local.json` | 本机覆盖（不入库） | 未扫到独立项 | secrets 放这，别进 `settings.json` |
 | `~/.claude/keybindings.json` | 快捷键绑定 | 存在 | - |

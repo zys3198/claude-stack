@@ -5,7 +5,7 @@ claude-stack 体系中外部的非敏感配置**快照副本**。实际位置在
 ## 为什么是复制副本（2026-08-05 决策）
 
 - **不用 symlink**：Windows 下 symlink 常失败（CLAUDE.md §9），git 追踪 symlink 在 Windows clone 出来也失效。
-- **不给 `~/.cc-switch` 建独立 git**：cc-switch 含 25M 数据库 + 68M repos + 认证凭据，整体版本化代价大；且 cc-switch 自带 `cc-switch-setting-sync-by-user` skill 可能已有同步机制。
+- **不给 `~/.cc-switch` 建独立 git**：cc-switch 含 25M 数据库 + 68M repos + 认证凭据，整体版本化代价大；且 cc-switch 自带 `cc-switch-setting-sync` skill 可能已有同步机制。
 - **选复制副本进 `~/.claude`**：总仓库保留体系全貌，轻量可立即做。代价是**脱节**（见下）。
 
 ## 来源与同步

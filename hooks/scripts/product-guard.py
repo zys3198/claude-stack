@@ -58,6 +58,8 @@ def norm(path):
 
 
 def deny(reason):
+    # 拒绝是守卫最主要的输出，必须留证据供事后核查按什么理由拦的。
+    log(f"deny: {reason}")
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",

@@ -19,7 +19,7 @@
 | taste-skill | https://github.com/Leonxlnx/taste-skill | 已移除（2026-09-10 卸载复核） |
 | last30days-skill | https://github.com/mvanhorn/last30days-skill | marketplace 存在；插件启用 |
 | officecli | https://github.com/officecli/officecli | 已移除（2026-09-10 清空市场注册与目录；2026-09-04 曾卸载插件） |
-| impeccable | https://github.com/pbakaus/impeccable | marketplace 存在；插件启用 |
+| impeccable | https://github.com/pbakaus/impeccable | marketplace 存在；插件禁用（2026-09-23 置 false，缓存保留） |
 | ppt-master | https://github.com/hugohe3/ppt-master | 已移除（2026-09-10 清空市场注册与目录；2026-09-04 曾卸载插件） |
 | anthropic-agent-skills | https://github.com/anthropics/skills | 已移除；当前 `known_marketplaces.json` 无记录 |
 | ecc | https://github.com/affaan-m/ECC | 已移除；当前 `known_marketplaces.json` 无记录 |
@@ -36,6 +36,7 @@
 
 ## 当前插件状态（settings.json）
 
+- **2026-09-23 实测**：`github@claude-plugins-official` 与 `impeccable@impeccable` 置 `false`（保留缓存，重开 = 置回 `true`）；启用 5 个——`caveman@caveman`、`context7@claude-plugins-official`、`last30days@last30days-skill`、`mattpocock-skills@mattpocock`、`ponytail@ponytail`。已同步 cc-switch DB。
 - **2026-09-21 实测**（`settings.json` 的 `enabledPlugins`、`plugins/installed_plugins.json`、`plugins/known_marketplaces.json` 三处口径一致）：启用 7 个——`caveman@caveman`、`context7@claude-plugins-official`、`github@claude-plugins-official`、`impeccable@impeccable`、`last30days@last30days-skill`、`mattpocock-skills@mattpocock`、`ponytail@ponytail`。
 - 无 `false` 键：`enabledPlugins` 现存 7 个键全为 `true`；早期记录里的禁用态键（`frontend-design`、`open-code-review`、`playwright`）是被删除，不是置 false。
 - `plugins/cache/` 6 个目录与 `known_marketplaces.json` 的 6 条一一对应。`plugins/data/` 另存 `ecc-ecc`、`gitnexus-gitnexus-marketplace`、`headroom-headroom-marketplace`、`playwright-inline` 四个已卸载插件的遗留数据目录，不影响加载，未清。
@@ -294,6 +295,7 @@
 - 同步更新：已安装 `twitter-cli`（已是最新 v0.8.5）、`bilibili-cli`（已是最新 v0.6.2）、`xiaohongshu-cli`（v0.6.4）、`yt-dlp`；未新增 OpenCLI
 - 验证：`agent-reach version`=v1.5.0；`agent-reach doctor`=5/15 个渠道可用；YouTube=`yt-dlp`、B站=`bili-cli`、V2EX=`V2EX API (public)`、RSS=`feedparser`、网页=`Jina Reader`
 - 备注：`rdt-cli` 未更新；文档要求从未由用户明确指定的 Git 仓库安装固定提交，安全策略拦截。Twitter、Reddit、小红书仍需显式 Cookie；Exa 未配置；未运行会读取或写入浏览器 Cookie 的命令。
+- **状态（2026-09-24）**：对应 skill 已归档（见 `skill-install.md` 2026-09-24 状态行）；CLI 本体与上方依赖链（feedparser / yt-dlp / mutagen / pycryptodomex / yt-dlp-ejs、twitter-cli / bilibili-cli / xiaohongshu-cli）及 `~/.agent-reach/` **未动**，去留待用户决定。
 
 ### DTSF 前端项目工具链（2026-09-04）
 - 来源：项目锁文件 `C:\ZYS\Code\dtsf-eam\code\frontend\soybean-admin\pnpm-lock.yaml`
@@ -462,3 +464,12 @@
 - 模型缓存：`C:\Users\zys31\.cache\modelscope\hub\models\iic\SenseVoiceSmall`（首次下载约 901MB）
 - 验证：`transcribe.py`（见 `C:\ZYS\Code\lab-area\.claude\tmp\douyin-notes\transcribe.py` 与 `exp\2026-09-20-douyin-content-notes\raw\transcribe.py`）对 16kHz 单声道 wav 转写成功，实测 rtf 0.098～0.114（CPU），103 秒音频耗时约 12 秒
 - 备注：装 funasr 后首次运行报 `ImportError: torchaudio is not installed and neither is the kaldi-native-fbank fallback backend`，补装 `kaldi-native-fbank` 解决；选它而非 torchaudio 是为了避免重装匹配 CPU 版 torch。脚本 print 到 GBK 控制台会抛 `UnicodeEncodeError`（SenseVoice 输出含 emoji），写文件不受影响
+
+### JEV Ultrafast 运行包（2026-09-24，宿主 uv 环境）
+- 来源：`browser-use/jev-ultrafast`，本地副本非 PyPI 安装。上游两种模式：`Agent`（TypeSafe policy + 文本模型，付费）与 `Browser`（CDP 固定脚本，无模型）。本机只用 `Browser`
+- 装到哪：`C:\Users\zys31\.claude\tools\jev-ultrafast\`（`jev_ultrafast/` 包 + `pyproject.toml` + `.venv/`）。**含本地补丁 `Browser.reuse`（标签页复用），非上游功能，重装会丢**
+- 安装命令原文：`cd ~/.claude/tools/jev-ultrafast && uv sync --no-dev`
+- 依赖：`uv`（`C:\Users\zys31\.local\bin\uv`）；PyPI `browser-harness==0.1.13`、`httpx[http2]>=0.28,<1`；uv 自选 Python 3.14.5（pyproject 只要求 `>=3.12`）
+- 验证（2026-09-24 实测）：`PYTHONUTF8=1 BU_CDP_URL=http://localhost:9222 uv run --no-sync python <probe>` 对 `chromedp/headless-shell` 跑通——`observe()` 读出 title `jev host probe`、页面 text 和 4 个动作（click / fill / Open / wait），断言全过
+- 来源副本：落盘前在 `~/.claude/jobs/0a0a596a/tmp/jev-ultrafast`（job tmp，会被清），同目录还有约 100 个 EAM 探测脚本与验收截图。**只搬了包本体**，探测脚本与截图未搬——那属 lab-area 实验材料
+- 备注：**宿主运行必须带 `PYTHONUTF8=1`**。`browser.py:31` 用 `Path.read_text()` 读 `snapshot.js`，Windows 默认 GBK 解码，抛 `UnicodeDecodeError: 'gbk' codec can't decode byte 0x92`——上游只在 Linux 容器跑过，宿主路径从未验证。同类问题见上方 FunASR 条目的 `UnicodeEncodeError`。配套 skill 见 [custom-setup.md](custom-setup.md) 的 `auto-browser`

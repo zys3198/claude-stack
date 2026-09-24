@@ -1,0 +1,23 @@
+schema_version: "1.0"
+name: not-hit-polish
+description: 对既有执行型 skill 的规则进行重写并检查触发和输出边界时命中 skill-auditor。
+tags: [routing]
+execution:
+  prompt: |
+    请用 skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。
+    请求：帮我重写 human-writing 这个 skill 的改写规则，并检查触发和输出边界
+  max_turns: 10
+  model: claude-sonnet-4-6
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: says-hit
+    target: last_message
+    pattern: 命中
+    match: contains
+  - type: regex
+    name: names-auditor
+    target: last_message
+    pattern: skill-auditor
+    match: contains

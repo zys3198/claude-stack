@@ -1,0 +1,21 @@
+schema_version: "1.0"
+name: "7"
+description: 委派按宿主实际暴露能力配置和报告，不绑定模型或供应商。
+tags: [delegation, portability]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    同一套并行委派流程需要兼容不同宿主：一个宿主暴露模型 A，另一个只暴露模型 B，模型名称、effort 字段和并发上限都可能不同。请说明如何调度和报告。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: []
+runs: 1
+graders:
+  - type: llm
+    name: host-neutral-runtime
+    criteria: |
+      回复必须同时满足：
+      1. 不按模型名或供应商分支，不假设固定字段或并发数。
+      2. 使用各宿主实际暴露的模型、路由、effort、并发和隔离能力。
+      3. 无法确认的运行时值标记为未验证。
+    focus: last_message

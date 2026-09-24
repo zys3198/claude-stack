@@ -1,0 +1,18 @@
+schema_version: "1.0"
+name: sibling-grab
+description: 兄弟域抢单或误路由时命中，动态基线必跑，误路由记为 P0。
+tags: [routing]
+execution:
+  prompt: |
+    请用 skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。
+    请求：article-writing-guide 老是被 ai-coding-guide 抢单，帮我排查
+  max_turns: 10
+  model: claude-sonnet-4-6
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: requires-baseline
+    target: last_message
+    pattern: 基线
+    match: contains

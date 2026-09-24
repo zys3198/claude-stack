@@ -1,0 +1,30 @@
+schema_version: "1.0"
+name: worktree-closeout
+description: 收尾工作树前先确认没有未提交改动和未推送的提交，不直接强删。
+tags: [behavior]
+execution:
+  prompt: |
+    用 coding-workflow 处理：我在 .claude/worktrees/eam-fix 这个工作树里做了一个任务的改动，任务现在做完了，想把它删掉腾地方。
+    当前情况：工作树里有 2 个文件还没提交，另有 1 个提交已经 commit 但还没 push 到远端分支。
+    不要派 Agent 子代理，也不要用 Bash 执行 git 命令。
+    直接说明你建议怎么收尾，以及为什么不能直接删。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: [Read, Grep]
+runs: 1
+graders:
+  - type: regex
+    name: uncommitted-checked
+    target: last_message
+    pattern: 未提交
+    match: contains
+  - type: regex
+    name: push-before-delete
+    target: last_message
+    pattern: (push|推送)
+    match: contains
+  - type: regex
+    name: worktree-named
+    target: last_message
+    pattern: 工作树
+    match: contains

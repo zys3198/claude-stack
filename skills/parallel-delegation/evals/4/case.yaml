@@ -1,0 +1,21 @@
+schema_version: "1.0"
+name: "4"
+description: 主代理拒绝无证据或越界结果，只验收符合合同的 worker 结果。
+tags: [delegation, verification]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    三个 worker 都说已完成，但一个只给了修改计划，没有 diff 或检查输出；另一个改了范围外配置文件；第三个结果符合验收。主代理如何收口？
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: [Read]
+runs: 1
+graders:
+  - type: llm
+    name: result-verification
+    criteria: |
+      回复必须同时满足：
+      1. 只交计划或越界结果不能作为完成证据。
+      2. 保留符合验收的结果，处理失败项并运行整体检查。
+      3. 不宣布总任务完成，报告实际证据和剩余风险。
+    focus: last_message

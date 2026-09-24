@@ -1,0 +1,26 @@
+schema_version: "1.0"
+name: create-ai-context
+description: 分析迷你项目并在 docs/ai-context 下创建 CLAUDE.md 知识索引和 AGENTS.md 模块说明。
+tags: [functional]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    /instruction-engineering
+
+    用 instruction-engineering 把这个项目梳理成 AI 可读的。
+    产出 docs/ai-context/ 目录，包含根 CLAUDE.md 知识索引和 AGENTS.md 模块说明。
+    项目很小，直接读 src/ 和 README.md 即可。
+  max_turns: 16
+  model: claude-sonnet-4-6
+  allowed_tools: [Read, Glob, Grep, Write]
+runs: 1
+graders:
+  - type: file_exists
+    name: creates-claude-index
+    path: docs/ai-context/CLAUDE.md
+    exists: true
+  - type: file_exists
+    name: creates-agents-module-guide
+    path: docs/ai-context/AGENTS.md
+    exists: true

@@ -2,16 +2,18 @@
 /**
  * ECC Statusline — statusLine command
  *
- * Displays: model[plan] | $cost Nt Nf Nm | dir | branch | +N *N ?N !N ↑N ↓N |
+ * Displays: model[plan] | dir | branch | +N *N ?N !N ↑N ↓N |
  * Ctx <used>k | Hit N% | plan quota
  *
  * Registered in settings.json under "statusLine", not in hooks.json.
  * Reads bridge file from ecc-metrics-bridge.js and stdin from Claude Code runtime.
  *
- * The context budget is the one Claude Code hands over in the payload as
- * context_window.context_window_size — the window it enforces and reports in
- * /context. cc-switch's coding-plan quota is appended from the usage cache,
- * and only while that cache still describes the provider cc-switch serves.
+ * The context budget is CLAUDE_CODE_AUTO_COMPACT_WINDOW — the point at which
+ * Claude Code compacts, which is also the line the smart zone is measured
+ * against. When that variable is unset the segment falls back to the window
+ * Claude Code reports in the payload. cc-switch's coding-plan quota is
+ * appended from the usage cache, and only while that cache still describes
+ * the provider cc-switch serves.
  */
 
 'use strict';
@@ -27,23 +29,6 @@ const ccSwitchUsage = require('./cc-switch-usage');
 const MAX_STDIN = 1024 * 1024;
 
 /**
- * Format duration from ISO timestamp to now.
- * @param {string} isoTimestamp
- * @returns {string} e.g. "5s", "12m", "1h23m"
- */
-function formatDuration(isoTimestamp) {
-  if (!isoTimestamp) return '?';
-  const elapsed = Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 1000);
-  if (elapsed < 0) return '?';
-  if (elapsed < 60) return `${elapsed}s`;
-  const mins = Math.floor(elapsed / 60);
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  const remMins = mins % 60;
-  return remMins > 0 ? `${hours}h${remMins}m` : `${hours}h`;
-}
-
-/**
  * Render tokens as a whole-k count, e.g. 77406 -> "77k", 1000000 -> "1000k".
  * @param {number} n
  * @returns {string}
@@ -53,10 +38,10 @@ function formatTokens(n) {
 }
 
 /**
- * Build the context segment: used tokens in k, colored by the share of the
- * budget Claude Code reports that they occupy.
+ * Build the context segment: used tokens in k against the auto-compact
+ * threshold, colored by the share of that threshold they occupy.
  * @param {number} usedTokens - Current context occupancy
- * @param {number} limitTokens - Context budget reported by Claude Code
+ * @param {number} limitTokens - Auto-compact threshold
  * @returns {string} Colored segment, or empty when data is missing
  */
 function buildContextBar(usedTokens, limitTokens) {
@@ -328,6 +313,7 @@ function refreshUsageInBackground() {
   const log = fs.openSync(path.join(dir, 'ccswitch-usage.log'), 'w');
   const child = spawn(process.execPath, [path.join(__dirname, 'cc-switch-usage.js'), '--refresh'], {
     detached: true,
+    env: { ...process.env, NODE_USE_SYSTEM_CA: '1' },
     stdio: ['ignore', log, log],
     windowsHide: true
   });
@@ -393,7 +379,8 @@ function runStatusline() {
       const usageCache = ccSwitchUsage.readCache();
       const usageIsCurrent = ccSwitchUsage.isCurrent(usageCache);
       if (ccSwitchUsage.isStale(usageCache)) refreshUsageInBackground();
-      const contextLimit = cw.context_window_size;
+      const compactWindow = Number(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW);
+      const contextLimit = compactWindow > 0 ? compactWindow : cw.context_window_size;
 
       const sessionId = sanitizeSessionId(session);
       const bridge = sessionId ? readBridge(sessionId) : null;
@@ -420,32 +407,6 @@ function runStatusline() {
           writeBridgeAtomic(sessionId, bridge);
         } catch {
           /* best effort */
-        }
-      }
-
-      // Metrics from bridge; cost from live harness report, bridge as fallback
-      // (gateway doesn't relay usage, so metrics-bridge cost can be 0)
-      let metricsStr = '';
-      const costUsd = data.cost?.total_cost_usd > 0 ? data.cost.total_cost_usd : (bridge?.total_cost_usd || 0);
-      if (bridge || costUsd > 0) {
-        const parts = [];
-        if (costUsd > 0) {
-          parts.push(`$${costUsd.toFixed(2)}`);
-        }
-        if (bridge) {
-          if (bridge.tool_count > 0) {
-            parts.push(`${bridge.tool_count}t`);
-          }
-          if (bridge.files_modified_count > 0) {
-            parts.push(`${bridge.files_modified_count}f`);
-          }
-          const dur = formatDuration(bridge.first_timestamp);
-          if (dur !== '?') {
-            parts.push(dur);
-          }
-        }
-        if (parts.length > 0) {
-          metricsStr = `\x1b[38;5;117m${parts.join(' ')}\x1b[0m`;
         }
       }
 
@@ -496,9 +457,6 @@ function runStatusline() {
       const effort = data.effort?.level;
       const segments = [`\x1b[2m${model}${effort ? ` [${effort}]` : ''}\x1b[0m`];
 
-      if (metricsStr) {
-        segments.push(metricsStr);
-      }
       segments.push(`\x1b[2m${dirname}\x1b[0m`);
 
       const branch = getGitBranch(dir);
@@ -526,7 +484,6 @@ function runStatusline() {
 }
 
 module.exports = {
-  formatDuration,
   formatTokens,
   buildContextBar,
   buildQuotaSegment,

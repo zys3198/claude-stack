@@ -1,0 +1,22 @@
+schema_version: "1.0"
+name: "2"
+description: 主代理保留架构和整合职责，worker 按范围隔离执行并处理失败。
+tags: [delegation, ownership]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    我想让主代理负责架构和最终答复，几个 worker 分别审查前端、后端和测试目录。请设计一次模型无关的委派方案：只读任务可以并行，任何写入必须隔离，并说明 worker 失败时怎么处理。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: [Read]
+runs: 1
+graders:
+  - type: llm
+    name: ownership-and-failure-contract
+    criteria: |
+      回复必须同时满足：
+      1. 主代理保留架构、取舍、整合和最终答复。
+      2. 只读且范围不重叠、宿主支持并发的任务可以并行，写入必须隔离。
+      3. worker 有唯一范围和验收条件；失败不算完成，必要时针对阻塞原因降级或重新委派。
+      4. 不绑定供应商、模型名或固定并发数。
+    focus: last_message

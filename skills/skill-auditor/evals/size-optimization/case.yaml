@@ -1,0 +1,33 @@
+schema_version: "1.0"
+name: size-optimization
+description: 用户要求缩小单个 Skill 且保持效果时，命中减量审计并给出信息层级与行为等效门禁。
+tags: [optimization, context]
+execution:
+  prompt: |
+    请用 skill-auditor 判断是否命中，并给出将采用的减量框架。只做模式判断和框架说明，不修改文件。
+    请求：这个自建 skill 的 SKILL.md 太大了，帮我缩小体积，但触发、权限门禁和输出效果都要保持。
+  max_turns: 10
+  model: claude-sonnet-4-6
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: routes-size-audit
+    target: last_message
+    pattern: 减量审计
+    match: contains
+  - type: regex
+    name: names-information-hierarchy
+    target: last_message
+    pattern: 信息层级
+    match: contains
+  - type: regex
+    name: names-baseline
+    target: last_message
+    pattern: baseline
+    match: contains
+  - type: regex
+    name: names-holdout
+    target: last_message
+    pattern: holdout
+    match: contains

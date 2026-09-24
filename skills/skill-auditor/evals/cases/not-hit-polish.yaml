@@ -1,0 +1,13 @@
+id: not-hit-polish
+title: 命中-执行型 skill 规则改写
+description: 对既有执行型 skill 的改写规则进行重写并可能改变行为约束 → 命中，进入 skill-auditor，不直接执行改写。
+tag: routing
+input:
+  prompt: |
+    请用 skill-auditor 做开工路由判断：是否命中本 skill？命中则给出将执行的检查框架（十查/基线），不命中则给出转介路径。只做判断，不要执行审计本身。
+    请求：帮我重写 human-writing 这个 skill 的改写规则，并检查触发和输出边界
+judge:
+  type: rule_based
+  success:
+    - output_contains:
+        all: ["命中", "skill-auditor"]

@@ -111,6 +111,11 @@ def lock_release(token):
 
 
 def git(args, cwd):
+    # 已登记但目录已被删除的工作树：Windows 上拿这种路径当 cwd 起进程会报
+    # WinError 267。这类路径本来就执行不了 git，直接按失败返回且不写日志，
+    # 否则每次启动都会刷一批同样的噪声。
+    if cwd and not os.path.isdir(cwd):
+        return 1, ""
     try:
         r = subprocess.run(
             ["git", *args],

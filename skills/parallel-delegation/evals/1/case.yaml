@@ -1,0 +1,22 @@
+schema_version: "1.0"
+name: "1"
+description: 三个互不依赖的子任务需要明确边界、隔离写入并由主代理统一验收。
+tags: [delegation, parallel]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    把工作拆成三个互不依赖的子任务：检查 API 错误处理、补充边界测试、整理迁移说明。能并行就用多个执行代理，写文件时避免冲突；主代理最后检查每个结果和 diff。模型不要写死，报告实际使用的路由和检查结果。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: [Read]
+runs: 1
+graders:
+  - type: llm
+    name: delegation-contract
+    criteria: |
+      回复必须同时满足：
+      1. 识别三个独立子任务，并分别给出唯一范围、输入、输出和验收条件。
+      2. 只在宿主明确支持并发时并行，写任务使用隔离或不重叠范围。
+      3. 主代理检查每个结果、diff、文件范围和整体检查。
+      4. 不绑定供应商、模型 ID 或固定并发数，并区分实际运行时证据与未验证信息。
+    focus: last_message

@@ -116,9 +116,31 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 - 2026-09-11 新增全局 `ai-product-development`，详见下方独立台账条目。
 - 2026-09-11 新增全局 `company-discovery-evaluation`，详见下方独立台账条目。
+- 2026-09-23 新增全局 `jev-browser-acceptance-by-user`，详见下方独立台账条目。**2026-09-24 已合并进 `auto-browser`。**
 
-当前可用（2026-09-20，19 个，全部带 `-by-user` 后缀，以 `skills/` 实际目录为准）：
-`ai-product-development-by-user`、`article-writer-by-user`、`awesome-design-md-by-user`、`bidirectional-steelman-by-user`、`cc-switch-setting-sync-by-user`、`code-change-workflow-by-user`、`company-discovery-evaluation-by-user`、`content-to-note-by-user`、`dev-clean-by-user`、`dev-status-by-user`、`drawio-article-illustration-by-user`、`drawio-chart-by-user`、`improver-skill-by-user`、`install-ledger-by-user`、`instruction-engineering-by-user`、`parallel-delegation-by-user`、`skill-auditor-by-user`、`skill-trimmer-by-user`、`toolchain-pitfalls-by-user`。
+### jev-browser-acceptance-by-user（2026-09-23，全局）
+- 出处：本地自建；用户要求将 JEV Browser 固定脚本验收方式做成全局 skill。
+- 原始安装命令：未留存；使用原生 Write 创建 `SKILL.md`。
+- 位置：`~/.claude/skills/jev-browser-acceptance-by-user/SKILL.md`
+- 依赖：JEV Browser 运行包、Browser Harness/CDP/Chromium 容器和项目验收脚本；不依赖 TypeSafe 或文本模型密钥。
+- 当前状态：已创建；`disable-model-invocation: false`，允许模型按描述自动调用；当前会话可发现该 skill。
+- 验证：固定 `Browser` 探针已连接 CDP、观察登录页、识别 12 个动作并保存登录页截图；未填写、未提交、未写入业务数据。
+- 回退：用户确认后删除上述 skill 目录，并移除 `.gitignore` 中的 `!skills/jev-browser-acceptance-by-user/` 和本条台账记录。
+- **2026-09-24 处置：已合并进 `auto-browser`**，原目录移入 `~/.claude/backups/skills-before-merge-auto-browser-20260924/jev-browser-acceptance/`（1 文件 SKILL.md，4573 B）。判据=与 agent-browser 互补非替代，合并后按环境分支选路线。**更正**：本条记的 `-by-user` 后缀名不适用，实际目录一直是 `~/.claude/skills/jev-browser-acceptance/`（无后缀），`.gitignore` 白名单也一直是 `!skills/jev-browser-acceptance/`。内容未丢：`Browser.reuse` 标签页复用、daemon 5 秒 IPC 上限、凭据脱敏、标签页清单收尾均已写进 auto-browser。恢复=移回 `~/.claude/skills/jev-browser-acceptance`。
+
+### auto-browser（2026-09-24，全局，自建合并）
+- 出处：用户拍板「合并为 auto-browser 单 skill」，把第三方 junction `agent-browser` 与自建 `jev-browser-acceptance` 合为一条，按任务分支。
+- 位置：`~/.claude/skills/auto-browser/SKILL.md`；`.gitignore` 白名单 `!skills/auto-browser/`。
+- 结构：路线 A = agent-browser（宿主通用，覆盖强：shadow DOM / iframe / file input / Electron）；路线 B = JEV Browser（正确性守卫、CDP 直连、跨脚本复用标签页）。
+- 依赖：A 需全局 `agent-browser` CLI 0.38.1；B 需 `~/.claude/tools/jev-ultrafast`（uv 环境，`uv sync` 装 `browser-harness==0.1.13`）。
+- 关键实测：JEV 在宿主**必须带 `PYTHONUTF8=1`**，否则 `browser.py:31` 的 `Path.read_text()` 走 GBK 解码抛 `UnicodeDecodeError`——上游只在 Linux 容器跑过，宿主路径从未验证。端到端已实测：headless Chrome 上 `observe()` 读出 title/text 并发现 4 个动作（click / fill / Open / wait）。
+- 当前状态：已创建；`disable-model-invocation: false`，按描述自动调用。
+- 正文修订（2026-09-24，writing-for-agents 审核后）：补回合并时丢失的 JEV 固定脚本约束（不调用 `Agent`／不要求文本模型密钥）、路线 B 执行流程、验收约束、完成标准；description 触发词 6→3；删环境缓存（`skills list` 输出、`uv sync` 装法）；`Browser(url)` 禁令保持祈使语气并指名违规写法。6535 → 7659 B。
+- 并行会话改动（2026-09-24 17:26:37）：项目 `C--ZYS-Code-dtsf` 的 EAM 验收会话直接 Edit 本文件，加「点 naive-ui 组件要用真鼠标事件」一节（源 `jev-browser-acceptance` 备份中无此内容，属该会话新得经验）。已保留。
+- 回退：删 `~/.claude/skills/auto-browser`；从 `~/.claude/backups/skills-before-merge-auto-browser-20260924/` 移回 `jev-browser-acceptance`；按 `skill-install.md` 的 `New-Item -ItemType Junction` 重建 agent-browser junction；`.gitignore` 白名单还原为 `!skills/jev-browser-acceptance/`。
+
+当前可用（2026-09-23，20 个，全部带 `-by-user` 后缀，以 `skills/` 实际目录为准）：（**2026-09-24 更正**：`skills/` 下实际**无任何** `-by-user` 后缀目录，是上面这份清单记错了；以 `skills/` 实际目录为准。同日新增 `auto-browser`、移除 `jev-browser-acceptance`。）
+`ai-product-development-by-user`、`article-writer-by-user`、`awesome-design-md-by-user`、`bidirectional-steelman-by-user`、`cc-switch-setting-sync-by-user`、`code-change-workflow-by-user`、`company-discovery-evaluation-by-user`、`content-to-note-by-user`、`dev-clean-by-user`、`dev-status-by-user`、`drawio-article-illustration-by-user`、`drawio-chart-by-user`、`improver-skill-by-user`、`install-ledger-by-user`、`instruction-engineering-by-user`、`jev-browser-acceptance-by-user`、`parallel-delegation-by-user`、`skill-auditor-by-user`、`skill-trimmer-by-user`、`toolchain-pitfalls-by-user`。
 
 `generic-course-tutor-workspace` 是配套工作区，不计入 skill。
 
@@ -183,8 +205,22 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 ### skill-trimmer
 - 出处：skill 库精简判定框架（Carl 四删五留 + 本机三决议，memory `skill-trim-carl-article-2026-07-28`）
 
+### semantic-confirmation-guard（2026-09-24）
+- 出处：用户确认的确认架构重设计计划 `~/.claude/plans/humble-swimming-scott.md`；本轮为现有全局 Hook、规则、Skill 与 cc-switch 同步闭环的定向改动。
+- 位置：`~/.claude/CLAUDE.md`、`~/.claude/settings.json`、`~/.claude/hooks/scripts/resource-guard.py`、`~/.claude/hooks/scripts/authorization_scope.py`、`~/.claude/hooks/settings-degrade-guard.py`、`~/.claude/hooks/settings-sync-auto.py`、四个相关 Skill 与 `sync_claude_common.py`。
+- 改动：主模型负责 R0-R4 与目标识别；授权按 `session_id`、`task_id`、精确 scope 绑定；Hook 只保留客观守卫、硬阻断和高风险失败关闭；静态权限移除宿主工具链宽泛 allow 与 Git ask；公共权限快照改为 live 精确覆盖。
+- 依赖：现有 Python 3.12、cc-switch SQLite、Claude Code PreToolUse/SessionStart/PostToolUse Hook；未新增模型、服务、插件或第三方依赖。
+- 当前状态：已启用；授权状态写入 `~/.claude/authorization/`；`permissions.defaultMode` 保持 `auto`；`permissions.ask` 允许为空。
+- 验证：授权测试与资源守卫完整测试在受限一次性容器内通过；固定 Docker payload 回放无 Hook 输出；cc-switch 三层切换验证尚未执行。
+- 回退：按用户确认后用文件编辑恢复本轮涉及的全局文件；同步脚本写库前生成的 `~/.cc-switch/backups/sync-backup-<ts>.json` 保留用于公共快照与代理快照恢复；不自动删除备份或授权状态。
+
 ### cc-switch-setting-sync
 - 出处：防 cc-switch 切换 provider 降级 settings.json 的同步流程
+- 2026-09-24 改动：`sync_claude_common.py` 同步公共配置时，原子修正 `proxy_live_backup` 中的 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 与禁止的 `CLAUDE_CODE_*` 键；`--check` 同时检测公共配置和代理快照；备份文件纳入代理快照。
+- 位置：`~/.claude/skills/cc-switch-setting-sync-by-user/scripts/sync_claude_common.py`
+- 验证：Python 语法检查、临时 SQLite 回归测试、真实 `--check` 和 `--dry-run` 均通过；当前快照与公共配置匹配。
+- 未验证：重启 cc-switch/Claude 后的真实代理热切换回放尚未执行。
+- 回退：恢复脚本原文件；运行时 DB 写入前自动生成的 `~/.cc-switch/backups/sync-backup-<ts>.json` 可恢复公共配置和代理快照。
 
 ### learning-personas
 - 出处：2026-08-16 从 DeepTutor（eduhub.deeptutor.info，本地装于 `C:\ZYS\Code\deep-tutor`）三 persona（peer/teacher/research-assistant）提炼，用户拍板独立 skill + CLAUDE.md 引用式
@@ -333,6 +369,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - `enabledPlugins` 清单快照见 tool-install.md
 - `hooks` 现注册 6 类事件：`SessionStart`、`SessionEnd`、`PreToolUse`、`PostToolUse`、`Notification`、`StopFailure`（2026-09-21 实测）
 - ~~lean-ctx 注入段在 CLAUDE.md 尾部（`<!-- lean-ctx -->` 包围，官方注入，别手改）~~ **失效**：lean-ctx 已于 2026-09-05 卸载，2026-09-21 实测 `~/.claude/CLAUDE.md` 内 `lean-ctx` 命中 0 处，无需再避让该段。
+- `env.CLAUDE_CODE_AUTO_MODE_SERVER="0"`（2026-09-21 加）：告知 Claude Code 本机不请求服务端 auto mode 安全检查，消除「会话不合格」拦截通知。原因是请求经 `127.0.0.1:8787`（headroom）代理，服务端检查拿不到结果。计费行为不变（classifier 请求照旧按 token 计费）。该变量为官方临时配置，后续版本可能移除。**回退**：删 `env` 中该键即可。已随 settings-sync-auto 同步进 cc-switch `common_config_claude`（实测 DB 命中）。
 
 ## ecc 剥离/卸载（2026-08-13）
 
@@ -556,7 +593,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 ### 自建 skill 目录统一加 `-by-user` 后缀（2026-09-19，用户拍板）
 
 - **决策**：用户要求「从名称就能知道这是我自建的」。全局 `~/.claude/skills/` 下 17 个自建 skill 目录全部改名加 `-by-user` 后缀；第三方与插件 skill 不加（插件 skill 在宿主里本来带 `插件名:` 前缀，天然可分）。
-- **未加后缀的第三方**：`agent-browser`（junction 到 npm 包）、`agent-reach`、`archify`、`eli5`、`leader`。
+- **未加后缀的第三方**：`agent-browser`（junction 到 npm 包）、`agent-reach`、`archify`、`eli5`、`leader`。（2026-09-24 注：其中 `eli5` 已于 2026-09-22、`agent-reach` 已于 2026-09-24 归档；`agent-browser` junction 已于 2026-09-24 删除，能力并入 `auto-browser`。本条为 2026-08 快照。）
 - **改名清单**：`ai-product-development`、`article-writer`、`awesome-design-md`、`bidirectional-steelman`、`cc-switch-setting-sync`、`code-change-workflow`、`company-discovery-evaluation`、`content-to-note`、`drawio-article-illustration`、`drawio-chart`、`improver-skill`、`install-ledger`、`instruction-engineering`、`parallel-delegation`、`skill-auditor`、`skill-trimmer`、`toolchain-pitfalls` 各自加 `-by-user`。
 - **改动范围**：17 个目录改名 + 各自 `SKILL.md` 的 frontmatter `name:` 与正文自指；`.gitignore` 白名单 17 行与 node_modules 排除路径；全局 `CLAUDE.md` §8 尾部两处引用；`hooks/settings-sync-auto.py` 的同步脚本绝对路径（不改会让 PostToolUse 同步失效）；`external-configs/README.md`；`skills/leader/SKILL.md`（第三方 skill 对 `parallel-delegation` 的转介）；各 skill 的 evals/cases、references、test-prompts 里的互指。
 - **保留原名的部分**：`skill-trimmer` 的状态目录名与 `skill-trimmer-workspace`、`review_server.py` 与 `scan_skills.py` 里的 `[skill-trimmer]` 日志前缀和 state root 目录名（内部程序标识，改了会让已有状态数据失联）；`CHANGELOG.md` 与台账历史条目（记录当时事实）；`drawio-chart` 示例 XML 的 `agent="drawio-chart"` 属性。
@@ -651,3 +688,331 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **验证**：改后 SKILL.md 读回全文一致；入口文件一节与「## 会话目录」小节对「当前会话」行的要求互相对上，不存在只在一处出现的字段。本会话（`2026-09-21-s1`）已有 20 个顶层笔记文件按生效范围保持原位不动。
 - **未验证**：会话子目录模式尚未在真实的新会话里跑过一次，序号递增与「当前会话」行的识别办法都没有实战检验。
 - **回退**：删掉「## 会话目录」小节与「当前会话」行要求；第 18 行「单条」行改回 `<编号>-<短名>.md`，第 10 行、第 42 行、第 70 行、description 各自退回上一版本的说法；本台账上一节的内容描述照旧改回。
+
+### Claude Code 减负：四个开关与七个裸工具名 deny（2026-09-21，用户拍板）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`）。用户提出「还有 matt 建议的 claude code 关闭不必要东西」，材料笔记里没有这一段，用户指示「去网页找吧」。找到 Matt 本人的文章《How to kill the bloat in Claude Code's system prompt》（`https://www.aihero.dev/how-to-kill-the-bloat-in-claude-codes-system-prompt`），方法六步：`/context` 看分类 → 插代理排出每个工具的体积名次 → 开顶层 `disable*` 开关 → 用裸工具名进 `permissions.deny` → 完整清单 → 重启再测。机制经官方文档确认（`code.claude.com/docs/en/permissions`：「`Bash(*)` is equivalent to `Bash`… As a deny rule, both forms remove the tool from Claude's context」，裸名移除对 `EndConversation` 之外的所有工具生效；`settings-reference` 确认四个键名与 `skillOverrides`）。
+- **位置**：`~/.claude/settings.json`。顶层新增 `disableBundledSkills: true`、`disableClaudeAiConnectors: true`、`disableWorkflows: true`、`enableArtifact: false`（`disableRemoteControl: true` 原已存在）；`permissions.deny` 由空数组填入七个裸名 `CronCreate`、`CronDelete`、`CronList`、`DesignSync`、`NotebookEdit`、`PushNotification`、`RemoteTrigger`。`env` 段未动。
+- **内容**：三层减负手段。顶层开关按功能整块关；`permissions.deny` 的裸工具名把工具定义整个从上下文移除，带作用域的规则（如 `Bash(git push*)`）只拦调用、定义留着，两者省下的量不同；`skillOverrides`（本次未用）能隐藏单个 skill。有意保留：EnterPlanMode 与 ExitPlanMode（Plan 审批流程）、AskUserQuestion、ReportFindings（`code-review` 流程用）、ScheduleWakeup（后台任务）、SendMessage 与 ListAgents 与 Agent 与 Task 系列（`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` 开着）。
+- **依赖**：无外部依赖。本机已开 `ENABLE_TOOL_SEARCH`，多数非核心工具走延迟加载、定义本来就不在每次请求里，因此 deny 它们省下的是名字列表那一小块，省得多的是 `Workflow` 这种原本带完整定义、且 Matt 实测常为最大一项的。
+- **验证**：改后 `settings.json` 用 Python 解析通过并逐键读回；`settings-sync-auto.py` hook 自动同步，DB `settings.common_config_claude` 与 live 逐键一致（五个新键与七项 deny 全部对上）；四个 claude provider 的 `settings_config` 快照实测都不含 `enableArtifact`（即无 `true` 值），符合 `keep-artifact-disabled` 要求的三处核对；本会话的工具列表实测立即少了 CronCreate、CronDelete、CronList、DesignSync、NotebookEdit 五项。
+- **未验证**：payload 实际缩减量未测（Matt 的第一步是用代理排工具体积名次，本机 8787 已被 headroom 占用，未改端口重跑）。设置改动要重启 Claude Code 才完整生效，重启后的 `/context` 前后对比未做。`disableBundledSkills` 关掉的具体是哪些自带 skill，本机没有从安装目录查到（`~/.local/share/claude/versions/<ver>` 是单文件可执行，无 skills 目录）。
+- **回退**：删掉四个顶层键（`enableArtifact` 除外，见下）；`permissions.deny` 改回 `[]`。`enableArtifact: false` **不可逆**——官方文档写明「no file can turn it back on」，写回 `true` 开不回来，这一条没有回退路径，是本次改动里唯一不可撤销的一项（用户已在选项说明中确认）。
+
+### 上下文卫生实验的 skill 与全局 CLAUDE.md 改动补记（2026-09-21，全局）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`）。此前多轮改动直接落到各 skill 与全局 `CLAUDE.md`，没有当轮登记，此处按 §7.1 补齐；每条的内容明细以对应 skill 自己的 `CHANGELOG.md` 为准，没有 CHANGELOG 的看实验笔记 `notes/2026-09-21-context-hygiene/`（回退与验证步骤同样在那里）。
+- **instruction-engineering-by-user**：检查表从七项扩到九项——第一次新增「常驻划分」并写入三条判据，第二次给「审查基准」补三条（两个负担 context load / cognitive load、信息层级三级阶梯与渐进披露、正面陈述）并新增第九项「逐句剪除」，第三次补五处 Matt 审计原则：拆分判据、完成标准的防御顺序与判据的可检验性、锚定词的分量、context pointer 的硬软依赖（源 ADR 0001）、逐句剪除段的 relevance 两条失效路径。该 skill 无 CHANGELOG，未新建；明细见实验笔记的 `instruction-engineering-expansion.md` 与 `2026-09-21-s1/matt-audit-principles.md`。
+- **skill-auditor-by-user**：核心边界新增两条（被动读材料取词汇是一行指针、改变它才构成 skill；skill 间依赖写成 `/skill` 形式的散文调用、不跨目录链文件）；通用 Skill 原则新增第 7 条「不加冗余机制」；Router 追加检查新增第 8 条「同步义务」。frontmatter 与正文末尾版本戳升 v2.2.0，`CHANGELOG.md` 新增 v2.2.0 条；v2.1.0 的条目在既有记录里缺失，照实记缺口不补编。
+- **code-change-workflow-by-user**：§1.6 新增开工前三条（一个任务一个工作树、独占资源先协商、写库先确认）与收工前「自己的收尾清单」一条，承接全局 `CLAUDE.md` §8「并行会话」「收尾」两段的细则；frontmatter `version` 1.5.1 → 1.6.0，`CHANGELOG.md` 新增 1.6.0 条。
+- **task-notes-by-user**：入口文件的「下一步候选」写明该走哪个 skill 或取哪份材料。无 CHANGELOG，未新建。
+- **parallel-delegation-by-user**：Route 第 1 条补收益的两笔（并行省下的时间、主代理窗口省下的上下文）与不委派的判据（需要跟主代理已有上下文一起权衡的决策不委派）；description 改写为单个子代理也触发。
+- **docker-only-by-user**：description 改写为「本机执行环境约定」，覆盖「随手想跑个服务」这类不配置 docker 的场景。
+- **全局 `~/.claude/CLAUDE.md`**：§2.4 补「任务切分归用户给的清单与方案，Agent 不重划任务边界」；§6.3 docker 是唯一执行环境、§8 端口独占与收尾两段、§2.5 子代理调用确认三处外移，各自只留核心禁令加一行指针，细则分别落在 `docker-only-by-user`、`code-change-workflow-by-user` §1.6、`parallel-delegation-by-user` 的 Configuration gate。外移后实测 274 行 / 8,203 字符，外移前 280 行 / 8,377 字符。
+- **验证**：各 skill 改动后逐处读回；两个带 CHANGELOG 的 skill 其 frontmatter 版本与 CHANGELOG 最高条目对得上；全局 `CLAUDE.md` 的行数与字符数由脚本读出。
+- **回退**：各 skill 按自己的 `CHANGELOG.md` 逐条退回；全局 `CLAUDE.md` 三处外移按上列对应位置反向取回原文。
+
+### Matt 材料第二轮：计划写法、编排调用轴、反馈回路（2026-09-21，全局）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`），用户要求继续挖掘 aihero.dev 与 GitHub 的一手材料后再优化配置。本轮固定入口与已读清单见 `notes/2026-09-21-context-hygiene/2026-09-21-s2/matt-sources-inventory.md`；逐条判定见同目录 `local-application.md`。
+- **来源核对**：上游 `mattpocock/skills` 的 `package.json` 版本为 1.2.3，与本地插件 `mattpocock-skills` 一致，本轮未升级插件。
+- **全局 `~/.claude/CLAUDE.md`**：§5.2「回复风格」新增一条——计划文本要极简、为求简洁可以牺牲语法，结尾用编号列表列出具体步骤再列出未决问题。源 `my-agents-md-file-for-building-plans-you-actually-read` 与 `plan-mode-introduction`，两篇给的三条原句合并成一条。
+- **skill-auditor-by-user**：核心边界新增一条——按「谁能调用」分两类，只能手动敲的（`disable-model-invocation: true`）负责编排，能被模型自动选中的负责执行，编排可以调用执行、编排之间不互相调用。源 GitHub 仓库 README 的治理规则。正文末尾版本戳升 v2.3.0，`CHANGELOG.md` 新增 v2.3.0 条。
+- **code-change-workflow-by-user**：§1.3「改后」新增一条「反馈回路是上限」——能自动跑的检查比叮嘱有效（检查不过模型会自己重试，不因反复失败而泄气），任务粒度也由反馈速率定。源 `essential-ai-coding-feedback-loops-for-type-script-projects` 与 `tips-for-ai-coding-with-ralph-wiggum` 第 5、6 条。frontmatter `version` 1.6.0 → 1.6.1，`CHANGELOG.md` 新增 1.6.1 条。
+- **task-notes-by-user**：「与相邻机制的区别」段首补一条「什么时候写」——判据是可携带性，只有工作真的要移动到别处时才写文件（换宿主、换目录或仓库、交给同事、分叉出独立支线），同一宿主同一目录只是从规划转到实现用 `/compact`。源 `skills-handoff`。无 CHANGELOG，未新建。
+- **验证**：四处改动逐处读回；`code-change-workflow-by-user` 的 frontmatter 版本与 CHANGELOG 最高条目对得上。
+- **回退**：按上列各文件反向逐条删除本轮新增句；两个带 CHANGELOG 的 skill 连版本戳与条目一起退回。
+- **本轮判定不改的项**：破坏性 git 命令的 hook 未加——`git_guard.py` 与 `gateguard-destructive.js` 是 2026-09-08 经用户逐项确认后删除的，Matt 的 `git-guardrails` 建议在本机属评估后弃用。状态栏的 git 三项计数未加——本机 statusline 曾专门做过提速，加三次 git 子进程与那次优化相抵。两处理由与证据见 `notes/2026-09-21-context-hygiene/2026-09-21-s2/local-application.md`。
+
+### coding-workflow-by-user 1.7.0：更名、全局 CLAUDE.md 外移落位、验收相位与深模块（2026-09-21，全局）
+
+- **出处**：把 Matt Pocock（AI Hero）的上下文卫生方法应用到本机配置的实验（`lab-area` 的 `2026-09-21-context-hygiene`），用户指令为「全局 claude.md 的预算立起来、记忆也修复，三可以做独立和深模块」，中途另行拍板改名。逐条判定见实验笔记；明细见该 skill 的 `CHANGELOG.md` 1.7.0 条。
+- **更名**：`~/.claude/skills/code-change-workflow-by-user/` → `~/.claude/skills/coding-workflow-by-user/`（命令原文 `mv code-change-workflow-by-user coding-workflow-by-user`）。改名理由是正文已从「代码改动」扩到完整编码工作流。同步改到的位置：frontmatter `name` 与正文标题；6 份 `evals/*/case.yaml` 的 prompt 与 description；`~/.claude/.gitignore` 第 139 行的白名单；`instruction-engineering-by-user/SKILL.md` 2 处与 `references/refactor-roadmap.md` 1 处；`article-writer-by-user/SKILL.md` 1 处；`references/MAINTENANCE.md` 5 处；全局 `~/.claude/CLAUDE.md` 3 处。frontmatter `description` 未动（改它属 major，要重跑触发验证）。本台账与已发布 CHANGELOG 里的旧名保持原样，那是当时的事实。
+- **全局 `~/.claude/CLAUDE.md` 三处改动落地**：§2.1 删掉六个编码小节（依赖与错误处理、文件与工具、改动范围、实现复杂度、修改测试与验证、Python 代码），原文一字未改地进该 skill 的 §1.0；§8 功能分支归并的五步流程进该 skill 的 §1.6，全局只留一行指针；§2.3 第一条由「按当前场景和用户指定流程分诊，不预设某个执行 skill」改为显式要求先读 `coding-workflow-by-user`。落地后实测 232 行 / 6,932 字符。
+- **预算规则**：`instruction-engineering-by-user/SKILL.md` 审查基准新增一条「全局 `CLAUDE.md` 的预算」——上限定 240 行 / 7,000 字符，超了按常驻划分的三条判据外移。本文件即该预算的检查口径来源。
+- **该 skill 正文新增**：§1.0 编码硬约束（全局 §2.1 六节原文）、§1.3.1 验收相位（QA 计划 → 人审计划与实现 → 照计划验 → 问题回成新工单）、§1.5.1 深模块与接口归属（主线走插件 `mattpocock-skills:improve-codebase-architecture`，词汇取 `codebase-design`）、§1.6 功能分支归并。frontmatter `version` 1.6.1 → 1.7.0。
+- **§4 git 回退阶梯删除（用户拍板）**：§4「止血与回退」第 3 条原本并列给出 `git restore` → `git revert` → `git reset --hard HEAD~N`，与 §1.0 搬入的「禁止用 Git 回滚任何代码」直接冲突（该冲突在搬入前就跨全局文件与 skill 两处存在）。用户拍板保留禁令、删阶梯，回退按 §1.0 用文件编辑工具恢复；§4 触发行里的 `git reset --hard` 例外句一并去掉。改后全库 `git reset --hard|git restore|git revert` 在自建 skill 内零命中。
+- **依赖**：插件 `mattpocock-skills@1.2.3` 已启用，§1.5.1 的两个引用落在它身上（`plugin.json` 第 26、36 行确认在 25 个启用技能内）。
+- **验证**：改名后全库检索旧名，剩余命中全在本台账与旧 CHANGELOG 的历史条目内；全局 `CLAUDE.md` 改后按小节检索确认六个编码小节与五步流程已不在该文件，且两处内容在该 skill 内逐字存在；行数字符数由 `wc -l` 与 `python -c "print(len(open(...).read()))"` 读出。
+- **回退**：`mv` 改回原名并逐处反向替换；全局 `CLAUDE.md` 三处按该 skill 的 §1.0、§1.6 与本节上列原文取回；其他 skill 按各自改动反向删除本轮新增句。
+
+### task-notes-by-user 补「任务收尾后的处置」（2026-09-21，用户拍板）
+
+- **出处**：同上实验。`notes/<任务名>/` 与 `docs/` 下的产物在任务收尾后怎么处置，本机此前没有规则（材料 §4.4 也自认没有答案），用户在第三轮要求按建议处置。
+- **位置**：`~/.claude/skills/task-notes-by-user/SKILL.md`，在「维护动作」与「与相邻机制的区别」之间新增一节，并改「与相邻机制的区别」里 memory 那条的结尾指向该节（原文为「任务结束随笔记目录一起处置」，无内容）。
+- **内容**：笔记目录随分支并入主干留档，不删、不改写成摘要、不搬去 `docs/`；收在入口那层（`STATE.md` 与 `ITEMS.md` 保留，正文靠索引抵达）；已成规则的条目在索引那一行标「已落地」；判定不改的照旧留（价值在防止下个会话重提同样的候选）；过期就地改，不追加旧值。
+- **验证**：新增节读回一致；该 skill 无 CHANGELOG，未新建。
+- **回退**：删掉新增节，把 memory 那条的结尾改回「任务结束随笔记目录一起处置」。
+
+### ai-product-development-by-user 改写为路线图（2026-09-21，用户要求）
+
+- **出处**：同上实验。第三轮核对该 skill 与插件 `mattpocock-skills` 的覆盖关系，结论是七步里六步有对应物、一步没有，逐条见 `notes/2026-09-21-context-hygiene/2026-09-21-s3/global-budget-and-rename.md` 第六节。用户据此要求把它改成一张流程图，每一步只建议该调哪个 skill。
+- **位置**：`~/.claude/skills/ai-product-development-by-user/SKILL.md`，整份重写（129 行 → 56 行）。frontmatter 未动，`disable-model-invocation: true` 保留，模型仍然只能手动调用。该 skill 无 CHANGELOG，本次未新建。
+- **新内容**：mermaid 路线图（七步，节点内写该调的 skill）；一张「每一步调什么」表（调用、谁发起、产出）；五条路线判据（第 2、3 步不跳、第 6 步不在现场改代码、通过与否由用户拍板、单点故障走 `diagnosing-bugs` 不回到本路线、代码库形态留到第一版跑通之后）。
+- **删掉的内容**：七步的散文说明、每轮产出清单、完成判断、大部分约束。这些在插件 skill 里有更完整的版本，或已由本机 `coding-workflow-by-user` §1.3.1 承担。
+- **核对过的事实**：该 skill 引用的调用逐个对过插件 `.claude-plugin/plugin.json` 的启用清单。`to-spec`、`to-tickets`、`implement`、`handoff`、`improve-codebase-architecture` 五个带 `disable-model-invocation`，只能用户手敲；`grilling`、`prototype`、`diagnosing-bugs` 可自动调用；`impeccable`（插件 impeccable 4.1.1）无该标记，但其路由写明无参数时先出菜单、不自动跑子命令。
+- **验证**：全文读回一致。
+- **回退**：原文件在 `~/.claude` 仓库的版本控制内，用 `git show 2c17cd8:skills/ai-product-development-by-user/SKILL.md` 取回原文，再用文件编辑工具写回。
+
+### task-notes-by-user 触发点重建、全局 CLAUDE.md 加触发句、删 skill-routing-boundary 记忆（2026-09-21，用户拍板）
+
+- **出处**：用户问 `task-notes-by-user` skill 是否消耗 token，核对后结论是 skill 正文只在触发后加载一次、不是开销大头，缺口在触发：该 skill 的 description 触发句「新建、追加或整理任务笔记时使用」自我指涉（模型得先知道自己要写笔记才知道该调它），且全局 `CLAUDE.md` §2.4 的「到段落边界主动把接续状态落盘」常驻规则不点名 skill，两条之间没有指针。skill 正文末句「该做的是在相位边界提醒」把这个缺口写出来了，但提醒机制无实体（查 `~/.claude/settings.json` 全部 hooks，无一条涉及 `notes`/`task-notes`；项目 `.claude/` 下无 settings.json）。
+- **改动原文对比**（`~/.claude/CLAUDE.md` §2.4 第 2 条）：
+  - 原文：`长任务按已定的切分推进，到段落边界主动把接续状态落盘到文件并提示用户开新会话承接，不靠对话历史续接；任务切分归用户给的清单与方案，Agent 不重划任务边界。同一件事未做完不建议重开，换不相干任务时建议清空重开而非压缩续聊。`
+  - 改后：`长任务按已定的切分推进，跨会话任务开工先读该任务的 \`notes/<任务名>/STATE.md\`，到段落边界按 skill \`task-notes-by-user\` 把接续状态落盘并提示用户开新会话承接，不靠对话历史续接；任务切分归用户给的清单与方案，Agent 不重划任务边界。同一件事未做完不建议重开，换不相干任务时建议清空重开而非压缩续聊。`
+  - 两个触发时刻：接手跨会话任务开工读入口，段落边界落盘并用该 skill 的三步维护动作。
+- **删除的记忆**：`~/.claude/projects/C--ZYS-Code-lab-area/memory/skill-routing-boundary.md`，理由是它禁止「全局规则引用具体 skill」，与本次决定冲突。完整原文备份在 `memory/recovery/2026-09-21-skill-routing-boundary.md`。连带清理两处引用：`MEMORY.md` 的索引行删除；`standalone-video-skill-extraction.md` 结尾的 `关联：[[skill-routing-boundary]]` 去掉，其余正文未动。
+- **删除时一并失去的内容**：该记忆除「全局不绑定具体 skill」外，还有一条 2026-09-03 精简拍板的四条判据（①禁建纯域路由器 skill ②与插件重叠的自建 skill 让位插件 ③带真资产的路由器先收窄不删 ④判定前先查插件库实际内容）。这四条与本次决定不冲突，目前只存在于备份文件里，用户未指示另行安置。
+- **`task-notes-by-user` 的 description 改触发句**（`~/.claude/skills/task-notes-by-user/SKILL.md` frontmatter）：
+  - 原文：`跨多轮会话的任务把接续笔记按「入口 → 索引 → 单条」三级存放在仓库根 notes/<任务名>/，每条一个文件、按会话分目录、索引只放指针；新建、追加或整理任务笔记时使用。`
+  - 改后：`跨多轮会话的任务把接续笔记按「入口 → 索引 → 单条」三级存放在仓库根 notes/<任务名>/。跨会话任务开工接手、会话压缩（/compact）前后、定期整理维护时使用。`
+  - 三处改动：触发句由动作名（「新建、追加或整理任务笔记」——模型得先知道自己要写笔记才轮得到这句）换为情境时点；按 `instruction-engineering-by-user/SKILL.md:147`「description 尽可能短，只说明 what 和 when」删掉「每条一个文件、按会话分目录、索引只放指针」，该细节正文已有；用户说明笔记的用途就是补 `/compact` 的损失，故把「会话压缩（/compact）前后」列为触发时点。
+  - 常驻成本与原文基本持平。
+- **skill 正文两处改动**（`~/.claude/skills/task-notes-by-user/SKILL.md`）：
+  - ①「与相邻机制的区别」的「什么时候写」判据（改后第 87 行）：原文 `判据是可携带性，只有工作真的要移动到别处时才写文件——换宿主、换目录或仓库、交给同事、中途分叉出一支独立支线。同一宿主、同一目录、只是从规划转到实现，用 /compact。` 改后 `判据是压缩损失。自动摘要挑不出来的（为什么这么选、被否掉的路子、下一步、未决）在压缩或切换前落盘。可携带性不设门槛：换宿主、换目录或仓库、交给同事、分叉出独立支线照写，同宿主同目录的长任务同样写。` 理由：用户说明笔记的用途就是补 `/compact` 的损失，原判据末句把同宿主同目录的长任务推给 `/compact`，与本 skill 末句「自动摘要挑不出来的『为什么这么选』和『下一步』只有当事人挑得出来」不同调。
+  - ②「维护动作」新增一段（改后第 74 行）：`定期维护：入口超过一屏、或索引长到扫不完时整理一次。入口的明细外移到索引或单条；索引里已过期且不再适用的行删掉；单条正文过期就地改。判定不改的条目、已成规则的条目（标「已落地」）不删。` 理由：用户提出三级结构即渐进式披露，代价是定期维护并删掉无用条目。与既有三处「不删」的划界为：该删的是入口膨胀与真过期条目，原有的「判定不改的照旧留」管任务内条目，两者不冲突，用户认可该判读。
+- **验证**：改后按行数与字符数核对全局 `CLAUDE.md`——233 行 / 7204 字符（预算 240 行 / 7000 字符，规则写明「日常按行数看」，行数口径达标，字符口径超出，超出部分为本次改动之前既存）。记忆文件删除后 `recovery/` 备份读回在位；`MEMORY.md` 与 `standalone-video-skill-extraction.md` 改后无残留引用。description 改后原生读取读回一致，且宿主随即按新描述重新注册该 skill（本轮系统提示中的 skill 列表已是新文案），热重载生效。skill 正文两处改后原生读取读回一致。
+- **回退**：全局 `CLAUDE.md` 按上列原文替换回；记忆文件从 `memory/recovery/2026-09-21-skill-routing-boundary.md` 复制回原名，并在 `MEMORY.md` 恢复索引行、在 `standalone-video-skill-extraction.md` 结尾恢复关联指针；`task-notes-by-user/SKILL.md` 的 `description` 与正文两处均按上列原文替换回，其中「维护动作」新增的那一段整段删除。
+
+### 自建 skill 正文瘦身（2026-09-21，用户要求，8 个 skill）
+
+- **出处**：用户要求对自己 8 个偏大的自建 skill 做正文瘦身，用 `/skill-auditor-by-user` 起手。经提问确认两点：范围＝全部 8 个大件，瘦的层＝`SKILL.md` 正文（不含附属资产）。此前的盘点结论：自建 skill 总计约 200 KB，这 8 个的 `SKILL.md` 占 142.2 KB（71%）；description 合计仅约 7.5 KB，不是开销大头，触发后加载的正文本体才是。
+- **判据**：逐句做 no-op 测试——删掉这句，agent 的行为会变吗（相对模型的默认行为，不相对作者意图）。只删三类：①同一事实在本文件别处已写全 ②版本沿革、迁出来历等读者用不到的过程记录 ③已被清单/表格/正文吸收的死规则。外移内容一律按用户既有原则用原文搬走，不改写成摘要。
+- **位置与改动**（`~/.claude/skills/<name>/SKILL.md`，括号内为字节数变化）：
+
+  1. `skill-auditor-by-user`（15032→14127）：删文件尾部 HTML 注释（与 `references/MAINTENANCE.md` 的「变更门禁」同句重复，版本沿革归 `CHANGELOG.md`）。`CHANGELOG.md` 加 `[v2.3.1]` 一条。
+  2. `coding-workflow-by-user`（26465→25383）：删开头「来源：CLAUDE.md 2026-07-29 瘦身迁出（§1.1-1.4 / §2 / §3 / §4 原文）」；§1.3「审查动作清单（与 §1.3 三查互补）」改为「审查输出与顺序」（原三条里一条是「审查三维」第 1、2 项的复述，删，标题随实际内容改准）；「删错了怎么找回」四条 bullet 压成一段（三条讲同一件事）。frontmatter `version` 1.7.0→1.7.1，`CHANGELOG.md` 加 1.7.1 一条。
+  3. `skill-trimmer-by-user`（24918→21433）：开头五层来源段改为一句 + 指针；核心立场 #3 去掉 Superpowers 套件措辞；删「本机叠加规则 #11」与整张「已定冲突」三行表（三行与 #9/#10/#11 完全重复），余下清单改名「本机决议」并重编号 1/2/3；「skill 两种形态」的正确性更正压成一句当前事实；删已不存在的 `skills/learned/` 条目（核对过目录不存在）；「套件时机」表去 SP 列；删「保留-SP套件」档并从网页判定映射去掉；`（§6.1）` 补成 `（CLAUDE.md §6.1）`；删红线里「不审 Superpowers 套件」条；合并两条重复的 `skill-auditor-by-user` 条目，删 `skill-up`、`skill-slimming` 两条已吸收的；删尾部 HTML 注释；收尾清「执行移动用 `mv` 到 `_weak-model-backup/`（软链）或 lab-area 备份（直管目录）」里的软链/直管残留（该区分已在上文声明作废），改为 `archive/_weak-model-backup/` 或 lab-area exp 目录。
+  4. `instruction-engineering-by-user`（23882→18029）：新建 `references/review-basis.md`，把六条审查基准（两个负担 / 信息层级 / 正面陈述 / 锚定词 / context pointer / 归置相邻）连出处整段原文搬入；SKILL.md 原位留一句软依赖指针（六条判据垫在检查表之下，九项检查本身可直接执行，判据只在两项冲突或拿不准时定夺）；删一处已移出的长出处段；删文件尾部 `# 边界` 一节（三条断言在 L64/L68/L76/L173/L189/L227 均已覆盖），连带删掉删除后悬空的末条 bullet。
+  5. `content-to-note-by-user`（20527→19261）：`## 相关文件` 的 12 项脚本逐条清单压成一段（脚本清单见 `scripts\`，每个脚本 `--help` 有完整参数）并保留 references 与自测入口；`check_environment.py` 补一句 `--json` 用途；删「检查依赖和可用路线」小节（与「依赖与环境检查」节重复）；第 4 节去掉重复的 CDP 句；微信公众号节合并重复的「微信 UA + 跟随 302」表述，去掉冗余坑条目，`原理：` 改为行内括注。
+  6. `article-writer-by-user`（11389→10134）：概述风格模式补「按本项目的风格写作」触发词（吸收 §7.2 的额外信号）；删 §7.1 模式判断与 §7.2 风格模式判断（与概述两张表重复）；§7.3-§7.9 顺次重编号为 §7.1-§7.7，两处交叉引用 `§7.7`→`§7.5` 同步改；新建 `references/prompt-templates.md`，把 §8 使用模板（默认模式与 JavaGuide 模式的创作/优化四段提示词）原文搬入，原位改标题为「§8 调用模板」加指针并在 references 清单登记；删尾部 HTML 注释。
+  7. `drawio-chart-by-user`（10897→9163）：Step 3 生成前检查清单补两项（边框用语义类别色或 `strokeColor=none`、全图统一系统字体栈）；删「七、使用示例」（三例与 Step 1 决策表重复）；「三、操作流程」「五、文件命名规范」去掉与文内编号体系不符的中文序号；删「九、不要做什么（反例清单）」11 行（约九成与失败模式表和 Step 检查清单重复，其中 `>50 节点` 与失败模式表的 `>30 节点` 数值互相冲突，删后以失败模式表为准）；删尾部 HTML 注释。
+  8. `drawio-article-illustration-by-user`（9090→7648）：删「## 反模式：这些情况不要配图」六条，其中四条与上文「不配图条件」重复，把独有的两条（图里出现正文没提的概念/缩写/组件、一篇文章配 10+ 张图）并入「不配图条件」；「与 drawio-chart-by-user skill 的协作」的 16 行 ASCII 示意图压成一段文字，信息量不变；「校验报告模板」18 行代码块压成一段（检查项、结果、说明、综合判断、修改建议）；删尾部 HTML 注释。
+
+- **合计**：8 个文件 142200 → 125178 字节（-11%），1244 → 1108 行。逐个：skill-auditor -6%、coding-workflow -4%、skill-trimmer -13%、instruction-engineering -24%、content-to-note -6%、article-writer -11%、drawio-chart -15%、drawio-article-illustration -15%。
+- **核对过的事实**：外部锚点未受影响——全局 `CLAUDE.md` 引用的 `coding-workflow-by-user` §1.6 与 `ai-product-development-by-user` 引用的 §1.3.1 在改动后仍是 H2 标题（`SKILL.md:164`、`SKILL.md:101`）。删除内容的悬挂引用全量搜过（`保留-SP套件`、`已定冲突`、`审查动作清单`、`反模式`），命中的都是别的 skill 里同名的自有小节或 `CHANGELOG.md` 里的历史记录，无一处指向本次删掉的内容。`article-writer-by-user` 重编号后两处 `§7.5` 引用指向「一次性展开并冻结全篇细骨架」，语义正确。新建的两个 references 文件（`instruction-engineering-by-user/references/review-basis.md` 5911 字节、`article-writer-by-user/references/prompt-templates.md` 1011 字节）存在且被 SKILL.md 正确指向。
+- **本次未处理的既有冲突**（改动前就存在，不在瘦身范围，留给用户定夺）：①`coding-workflow-by-user/SKILL.md:26`「禁止读写 /tmp 目录下的内容」与 `drawio-chart-by-user/SKILL.md:153`「写入 `%TEMP%`（Windows）/ `/tmp`（Unix）」、`drawio-article-illustration-by-user/SKILL.md:89`「尝试写入 `/tmp` 或 `%TEMP%`」冲突；②`skill-trimmer-by-user/SKILL.md:11` 定义五层标记（`【OpenAI 官方文章】`/`【补充来源】`/`【补充框架】`/`【本机决议】`/`【实践】`），而同 skill 正文与 `references/evidence-sources.md` 实际用的是四层（`【工具】`/`【文章】`/`【框架】`/`【实践】`），两套未对齐。
+- **验证**：8 个文件改动后均原生读取读回，内容与预期一致。改动前后字节数与行数逐文件比对，见上。删除断言前逐条在文件内 grep 确认已有等价表述（例如 `instruction-engineering-by-user` 删掉的末条 bullet，其三条断言分别在 L64/L68/L76/L173/L189/L227 命中）。`coding-workflow-by-user` frontmatter `version` 与 `CHANGELOG.md` 1.7.1 条目一致。
+- **回退**：改动前的逐字副本在 `~/.claude/tmp/skill-trim-20260921/<skill>/SKILL.md`（临时目录，8 个齐全）。其中 4 个（`skill-trimmer-by-user`、`content-to-note-by-user`、`drawio-chart-by-user`、`drawio-article-illustration-by-user`）改动前工作区干净且在版本控制内，可直接 `git checkout -- skills/<name>/SKILL.md` 还原；另外 4 个用不了 git——`coding-workflow-by-user` 是从 `code-change-workflow-by-user` 改名而来且尚未提交（未跟踪），`instruction-engineering-by-user`、`skill-auditor-by-user`、`article-writer-by-user` 在本轮开工前就已是已修改状态（`git checkout` 会退回更早的版本，丢掉用户自己先前的改动），这 4 个只能用 `.bak` 副本还原。`skill-auditor-by-user` 与 `coding-workflow-by-user` 的 `CHANGELOG.md` 新增条目按标题整段删除即可回退。两个新建的 `references/*.md` 是原文搬迁，还原 SKILL.md 后删除即可。
+
+### /tmp 禁令对齐与 skill-trimmer 标记体系重组（2026-09-21，用户拍板）
+
+上一条瘦身登记的「本次未处理的既有冲突」两项，用户逐条给了处置：①遵守 `§1.0` 的 `/tmp` 禁令，另两个 skill 换位置；②「系统都重新组织」，范围限定 `skill-trimmer-by-user`。
+
+#### ① `/tmp` 禁令对齐
+
+- **依据**：`coding-workflow-by-user/SKILL.md:26`「禁止读写 /tmp 目录下的内容」是权威，且该条自己给了替代位置——「你应该输出在当前目录下的一个特定的用于存放中间结果的目录；该目录需要被 gitignore」。与全局 `CLAUDE.md` §8 的 `.claude/tmp/` 及 `docker-only-by-user/SKILL.md:31` 一致，故取 `.claude/tmp/`。
+- **改动**：`drawio-chart-by-user/SKILL.md` 失败模式表第 9 行「写入 `%TEMP%`（Windows）/ `/tmp`（Unix）」→「改写当前目录下的 `.claude/tmp/`（需被 gitignore）」；`drawio-article-illustration-by-user/SKILL.md` 失败处理「尝试写入 `/tmp` 或 `%TEMP%`」→「改写当前目录下的 `.claude/tmp/`（需被 gitignore）」。
+- **同类问题仍在，未处理**：`agent-reach` 有 6 处 `/tmp`（`SKILL.md:64,88`、`references/social.md:141`、`references/video.md:17,20,29,53,77,94`），其中 `SKILL.md:88` 明确要求「不要在 agent workspace 创建文件。使用 `/tmp/` 存放临时输出」。它是外部项目，用户本轮只点了自建的两个，未授权改动外部 skill。（2026-09-24 注：该 skill 已归档，本条不再需要处理。）
+
+#### ② `skill-trimmer-by-user` 标记体系重组
+
+- **改动前实际状态**：不是报告里说的「两套」，是**四套并存**。`SKILL.md:11` 声明五个标记（`【OpenAI 官方文章】`/`【补充来源】`/`【补充框架】`/`【本机决议】`/`【实践】`），同一句里先写「四类」再写「五层」末句又写「四层」；`SKILL.md` 正文实际只用其中四个（`【OpenAI 官方文章】` 在 `:32` 写成了普通括号）；`references/evidence-sources.md` 用 `【工具】`/`【文章】`/`【框架】`/`【实践】`；`references/retention-rubric.md` 用 `【文章】`/`【本机】`/`【实践】`/`【框架】`。逐条对过内容确认 `【补充来源】` ≡ `【文章】`（`:34` 装前反向测试、`:35` 维护量 <20、`:36` 描述列表预算三条都落在 `evidence-sources.md` 的 JavaGuide 段）。
+- **用户选定方案**：按优先级分三层——`【本机】` 用户拍板与本机先例，覆盖其余全部；`【外部】` 外部来源的判定基准，具体出处写在判据后面；`【工具】` skill-slimming 的工具资产，只出工具不出判据。
+- **改动**：`SKILL.md` 的 `:11` 声明段重写为三层定义；`:25` `【补充来源】` → `【外部】`；`:34/:35/:36` `（新增【补充来源】）` → `（JavaGuide 2026-08-13 文新增）`；`:37` `（新增【实践】，来自 SkillHub 内容治理复盘）` → `（腾讯 SkillHub 内容治理复盘）`；`:104/:109/:110/:116/:118/:120` `【补充框架】` → `【外部】`；`:112/:124` `【实践】` → `【外部】`；`:122` `（【补充来源】规则分流框架）` → `（JavaGuide 规则分流框架）`；`:184` 输出契约由「标清是五个来源层中的哪个」改为「标清是【本机】还是【外部】，标【外部】的写出具体出处」；`:199` references 清单的「五层判定依据」改为「三层判定依据」并列出三个标记。`references/evidence-sources.md` 节首加三层与出处的对应说明，来源节四个段落改为「**【工具】层**」「**【外部】层出处一 · JavaGuide 两篇**」「**出处二 · 主流框架调研稿**」「**出处三 · 腾讯 SkillHub 复盘**」；`:5` 节标题、`:14`/`:15` 括注同步。`references/retention-rubric.md` 的 `:6` 三层说明重写，`:21/:25/:29` 括注、`:52/:57` 节标题、`:111/:113/:123/:127/:131/:142/:150` 标记全部改到新体系。
+- **顺带修掉的三处实质缺陷**（改动前既有，核查标记时发现）：
+  1. **`SKILL.md:32` 来源错标**：原文写「套件流程型要重审启用时机（**OpenAI 官方文章**原则）」，但 `retention-rubric.md:59` 对同一段判据自证来源是「判据（**文章**为什么「很少再用 Superpowers」）」——Superpowers 正是 JavaGuide 2026-07-23 文的标题主题，同节还写「文章作者现在偏爱 mattpocock/skills」，与 JavaGuide 那篇一致；而 `evidence-sources.md` 从头到尾没有 OpenAI 这一层的登记（`installing/` 台账里唯一那篇 OpenAI《Rethinking skills and prompts for GPT-6 Astra》登记在 `instruction-engineering-by-user` 名下，用途是统一审查指令文件）。已改为「（JavaGuide 2026-07-23 文主论点）」，不留错标痕迹。附带结果：`【OpenAI 官方文章】` 这一层随之消失，五层变三层不再缺出处。
+  2. **「本机决议」两清单编号歧义**：`SKILL.md:39` 的清单是 3 条，`retention-rubric.md:81` 的清单是 5 条，而 rubric 内部用 `#2`/`#4` 引用自己那份（`:121` 弱模型兜底、`:137` 留主路径）。第一轮瘦身在 SKILL.md 重编号后，两处的 `#3` 含义不同（SKILL.md 是「分类建议必须用户拍板」，rubric 是「Superpowers 不审」），且 `#4` 在 SKILL.md 里不存在。已改为两处都按条目名引用（「流程型/E 类 → 留兜底」「同能力多个 → 留 router 指定的主路径那个」），SKILL.md 的清单同时去掉编号改用条目名，并注明两处按名字对应不按编号。
+  3. **「冲突 #2」断链**：`retention-rubric.md:65` 引用「冲突 #2」，而定义该冲突清单的 `SKILL.md`「已定冲突」表在第一轮瘦身时被删（判定为与 #9/#10/#11 重复）。`retention-rubric.md:6` 自己写明「冲突处在第四节『本机护栏』逐条标注张力」，故改为直接指向第四节该条下的「与文章张力」标注。
+- **验证**：全文 `【…】` 标记扫描后只剩三种——`【外部】` 26 处、`【本机】` 8 处、`【工具】` 5 处；旧标记（`【文章】`/`【框架】`/`【实践】`/`【补充来源】`/`【补充框架】`/`【OpenAI 官方文章】`/`【本机决议】`）全量搜索零命中；`retention-rubric.md` 章节标题一至十完整，章内引用（「第一节第 1 问」「第三节」「第四节」「第十节」）逐条确认目标存在；外部引用搜过，命中的只有 `skill-trimmer-workspace/` 里 2026-08-13 那次审计的历史产物，用的是「本机决议 #N」档位编号而非 `【】` 标记，属历史记录不改。`git diff --check` 干净。文件大小：`SKILL.md` 21651 B、`references/retention-rubric.md` 14495 B、`references/evidence-sources.md` 7086 B。
+- **未处理**：`retention-rubric.md` 仍留着 Superpowers 相关残留——第四节第 3 条「Superpowers 套件 → 不审（2026-08-19 更新：SP 插件已卸载，本决议失效存档。）」、第三节「套件流程型」节末的「只对**非 SP** 套件或散装流程型 skill 生效」限定、第二节第 92 行同处。第一轮瘦身把 `SKILL.md` 里的 SP 内容删净了，两份 references 未同步。该条目自称「失效存档」，保留了不确定是否用户有意，未擅自删。
+- **回退**：三份文件在版本控制内且本轮开工前工作区干净，`git checkout -- skills/skill-trimmer-by-user/SKILL.md skills/skill-trimmer-by-user/references/retention-rubric.md skills/skill-trimmer-by-user/references/evidence-sources.md` 可整体还原到本轮之前。两个 drawio skill 的两行同样用 `git checkout` 还原（两个文件开工前也干净）。改动前的逐字副本另在 `~/.claude/tmp/skill-trim-20260921/skill-trimmer-by-user/`（临时目录）。
+
+### task-notes-by-user 单条笔记改成固定字段、只记重点（2026-09-21，用户要求）
+
+- **出处**：用户提出「记笔记的时候只记结构化的笔记，并且是只记重点。具体记什么重点可以先想想」。此前单条笔记的模板只写「正文」两字，没有形式约束，实测产物写成两段议论文；索引的 hook 长成 100 到 260 字的分号串；入口 `STATE.md` 涨到 137 行 / 10,720 字节，超过 skill 自定的「一屏」。经 AskUserQuestion 确认两项：字段取五字段并另加「其他」兜底；存量笔记整目录删除。
+- **位置**：`~/.claude/skills/task-notes-by-user/SKILL.md` 的八个小节——三级表格、入口文件、索引文件、单条笔记、写作要求、维护动作、任务收尾后的处置、与相邻机制的区别。
+- **内容**：
+  - 单条笔记的模板由「正文」改为固定字段 `材料 / 结论 / 取舍 / 改动 / 未决 / 其他`，并附一份填好的示例。硬约束五条：一个字段一行、一行只放一件事、字段之外的正文不写；有字段没内容就删掉那一行（「材料」与「结论」必写，「改动」没有改动写「无」）；一个字段里超过三条要点即拆条；结论写成判断，机制解释与举例与推导过程留给原文、引路径；日期不写，会话目录名里有。
+  - 材料里读出来的收获先问去处：要长期留下的写进 skill、memory 或 `docs/`，笔记只记改到哪并留指针。
+  - 索引的 hook 改为逐字照抄单条「结论」那一行，原句「hook 写这一条的结论」被它取代；索引与单条只有这一处重复。
+  - 入口五块改为一行一条短句、一行指到单条或会话目录；未决一行一条、一条一句话，内容超过一句的落成单条。
+  - 写作要求原「必要」一条换成「只记重点」，列出不记的四类：材料的复述与解释、讨论过程与轮次、改动的具体内容（git 记得）、已被改掉的说法。「无遗漏」去掉「改了哪些文件漏了不算」半句，「改动」字段已承担该事。
+  - 自足口径由「只读这一份也能接着做」改为「读这一份、加上它引的材料就能接着做」，与「只记重点」不再互相拉扯。
+  - 「任务收尾后的处置」首句由「随分支并入主干留档，不删、不改写成摘要、不搬去 `docs/`」改为「把笔记目录列给用户，留档还是删除由用户定，用户不说就留档」；「与相邻机制的区别」里 memory 那条的结尾「留档」同步改为「处置」。
+- **依赖**：无。skill 不引用宿主专有工具。
+- **验证**：改后全文 115 行读回一致，八个小节的改动互不冲突。改前副本 `~/.claude/tmp/task-notes-fields-20260921/SKILL.md`（93 行，逐字抄自改前读回的内容）与改后文件做 `diff`，差异只落在本轮编辑区间内，没有别的行被动过。
+- **连带删除**：结构实例 `lab-area/notes/2026-09-21-context-hygiene/`（39 个文件 / 154,349 字节）按用户指令删除，`lab-area` 仓库提交 `c642bf2`；父提交 `7add926` 仍可达，`git checkout 7add926 -- notes/` 可取回。本台账早前各节里 7 处指向该目录的路径（出处、验证、回退）随之指向空目录，需要明细时按该提交取回。
+- **回退**：该 skill 文件在 `~/.claude` 仓库里未被跟踪（`git status` 显示 `?? skills/task-notes-by-user/`），git 还原不了；用 `~/.claude/tmp/task-notes-fields-20260921/SKILL.md` 覆盖回去即可。
+
+### task-notes-by-user 加自动压缩计数触发 hook（2026-09-21，用户要求）
+
+- **出处**：用户提出「`task-notes-by-user` 加个 hook 提示，因为这个技能的触发条件也很奇怪，比如自动 compact 三次之后第四次 compact 之前就提示模型使用」。触发条件由用户给定：自动压缩累计 3 次。
+- **位置**：新建 `~/.claude/hooks/scripts/task-notes-reminder.py`、`~/.claude/hooks/tests/test_task_notes_reminder.py`；改 `~/.claude/settings.json`（新增 `hooks.PreCompact` 段，`hooks.SessionStart` 追加第 4 组）。
+- **事件与匹配**：`PreCompact` matcher `auto` 跑 `task-notes-reminder.py pre`；`SessionStart` matcher `compact` 跑 `task-notes-reminder.py start`。
+- **为什么是两个事件**：本机 `C:\Users\zys31\.local\bin\claude.exe` 内置代码里，`PreCompact` 与 `PostCompact` 的执行器（`Nie`/`j5e`）返回值只有 `userDisplayMessage`，即只显示给用户、进不了模型上下文；`hookSpecificOutput` 的联合类型没有这两个事件的变体。能送进模型上下文的是 `SessionStart`、`UserPromptSubmit` 等。压缩流程中先 `post_compact` 钩子、再 `nG(session,"compact",…)` 触发 `SessionStart`，所以由 `PreCompact` 记数、由 `SessionStart` 读同一份状态文件后输出。
+- **计数口径**：只数 `trigger == "auto"`，手动 `/compact` 不计——手动压缩是用户主动发起。计数写在 `~/.claude/task-notes-reminder/<session_id>`，每文件一个整数，目录按 mtime 保留最近 50 个。这两个 hook 装上之前的压缩次数不计，计数从装上那一刻开始。
+- **输出文案**：模型侧 `hookSpecificOutput.additionalContext` = 「你该开始笔记模式了：调用 task-notes-by-user。」；用户侧顶层 `systemMessage` = 「笔记模式已开启」（均已核对 `systemMessage` 是「显示给用户的 UI 消息」，上限 4000 字符）。自动压缩累计 ≥3 时每次压缩后都提醒。
+- **依赖**：Python 3.12（`C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`）。无第三方包。
+- **验证**：`python.exe ~/.claude/hooks/tests/test_task_notes_reminder.py` 21 项断言全过（`ALL PASS`），其中包含读回 `settings.json` 断言两处接线与 matcher 正确；`settings-degrade-guard.py` 喂 `SessionStart` payload 后无告警输出（rc=0，快照未判降级）；改 `settings.json` 两次编辑各触发一次 `settings-sync-auto.py`，均返回「已自动同步 cc-switch DB: [DONE]」。**未验证**：真实压缩触发链路（需要对一个会话实际跑满 3 次自动压缩才能观测），`~/.claude/task-notes-reminder.log` 会记录每次 `pre` 计数与每次提醒，首次真实压缩后看该文件即可确认。
+- **回退**：删除 `settings.json` 里 `hooks.PreCompact` 整段与 `hooks.SessionStart` 中 matcher 为 `compact` 的那一组，再删三个新文件（脚本、测试、状态目录 `~/.claude/task-notes-reminder/`）。`settings.json` 改动前副本：`~/.claude/settings.json.bak-autocompact-20260918_151656` 不含本轮改动，可按需对照。
+
+---
+
+### 21 个自建 skill 按上下文卫生方法精简（2026-09-21，用户要求）
+
+- **出处**：用户要求「skill 体积更小、更精简、更准确的命中、更优的效果」，范围限定「全过，只动自建的，agent-reach 和 agent-browser 不是自建的」。方法取自 Matt Pocock 插件 `mattpocock-skills@1.2.3` 的 `skills/productivity/writing-for-agents/SKILL.md` 与 `SKILL-MECHANICS.md`。
+- **范围**：21 个自建 skill。10 个 model-invoked：`dev-status-by-user`、`dev-clean-by-user`、`bidirectional-steelman-by-user`、`toolchain-pitfalls-by-user`、`parallel-delegation-by-user`、`docker-only-by-user`、`install-ledger-by-user`、`task-notes-by-user`、`article-writer-by-user`、`coding-workflow-by-user`。11 个 user-invoked：`skill-trimmer-by-user`、`skill-auditor-by-user`、`instruction-engineering-by-user`、`content-to-note-by-user`、`improver-skill-by-user`、`drawio-chart-by-user`、`drawio-article-illustration-by-user`、`company-discovery-evaluation-by-user`、`cc-switch-setting-sync-by-user`、`ai-product-development-by-user`、`awesome-design-md-by-user`。第三方 5 个未动：`agent-reach`、`agent-browser`、`archify`、`eli5`、`leader`；归属按本台账与 `skill-install.md` 判定，不按目录名前缀。
+- **改动**：四类。一、删除重复：同一规则在两处出现时只留权威版本。删掉的有 `skill-auditor-by-user` 的「反模式」整节（10 条全部与前面检查表逐字重复）、`company-discovery-evaluation-by-user` 的「最终检查」整节（6 条全部重复）、`skill-trimmer-by-user` 红线 11 条里的 9 条、`drawio-chart-by-user` 失败模式表 10 条里的 5 条。二、删除复述宿主环境的缓存：`improver-skill-by-user` 复述全局 `CLAUDE.md` §1.3 确认线的整段、`ai-product-development-by-user` 复述 `disable-model-invocation` 机制的两句。三、修悬空引用：`article-writer-by-user` 的编号体系删除后，4 个 `references/` 文件里「下沉自 SKILL.md §X」的溯源句与 2 处正文引用一并改准，`§6.10 AI 找弹药` 改标到实际所在的 `javaguide-style.md`。四、下沉与建索引：`coding-workflow-by-user` 的 §1.4、§1.6、§3 三节移入 `references/`，入口保留节号与指针行。
+- **未改**：`coding-workflow-by-user` §1.0 编码硬约束（全局 `CLAUDE.md` 原文搬入，禁止式措辞是硬约束的适用形式）；11 个 user-invoked skill 的 `description`（不常驻，长度不占预算）；第三方 skill；`drawio-chart-by-user/README.md`（给人看的说明文档，与 `SKILL.md` 分工不同）。
+- **验证**：持久脚本 `~/.claude/skill-slim-audit-2026-09-21/measure_all.py` 逐文件读回后剥离空白计数。10 个 model-invoked 的 description 常驻字符 961 → 821（−14.6%），正文 569 → 479 行（−15.8%）；11 个 user-invoked 正文 1249 → 1174 行（−6.0%）；21 个合计正文 1818 → 1653 行（−9.1%）。三处 description 变长是有意取舍（`dev-status-by-user` +19 加触发锚点，`parallel-delegation-by-user` +3 补触发分支），`install-ledger-by-user` 一度 +39 已压回 −2。删节后全库 `§` 悬空引用扫描零命中。10 个 model-invoked skill 的 27 条第一跳请求改前改后逐条对照，主判零不一致。
+- **evals 迁移**：Claude CLI 2.1.278 只发现 `evals/**/case.yaml` 或 `prompt.md + graders/*.md`。新增官方布局：`skill-auditor-by-user` 5 个、`instruction-engineering-by-user` 1 个、`parallel-delegation-by-user` 9 个，共 15 个 case；后者原自然语言 assertions 改为 LLM grader。`instruction-engineering-by-user` 增加 `scaffold.sh`。旧格式 9 个文件已有持久备份；删除命令被权限分类器以 `[Irreversible Local Destruction]` 拒绝，现仍在原位，但 runner 不发现它们。
+- **evals 验证**：27 个 case 均至少运行一次，命令统一使用 `--no-publish`。首次结果：`coding-workflow-by-user` 3/6、`skill-auditor-by-user` 5/5、`instruction-engineering-by-user` 0/1、`skill-trimmer-by-user` 0/3、`improver-skill-by-user` 1/3、`parallel-delegation-by-user` 5/9。随后修正 runner 合同：`coding-workflow-by-user` 三个失败项重跑 3/3，通过项与未改 case 合并后当前 6 个 case 各有一次通过；`skill-trimmer-by-user` 调整后 3/3；`instruction-engineering-by-user` 两个文件 grader 2/2，但子会话 300 秒超时；`improver-skill-by-user` 仍为 1/3；`parallel-delegation-by-user` 的 1、4 仍失败，2 因费用上限跳过 grader，9 在用户终止前未生成。用户随后明确要求「不用跑了」，不再执行。runner 已报告费用约 1.65 美元；超时 case 显示 0.00 美元，实际计费未知。证据在 `lab-area` 工作树 `output/skill-slimming-evals/`。
+- **未验证**：`parallel-delegation-by-user` case 2 调整后的 grader 结果与 case 9 调整后的行为；`instruction-engineering-by-user` 无超时的完整退出；`coding-workflow-by-user` 的三份新 `references` 在真实任务中的表现。`improver-skill-by-user` 调整后仍有两个失败 case，按真实结果保留。
+- **回退**：改前全量副本在 `C:\Users\zys31\.claude\backups\skills-before-slim-2026-09-21\`，21 个目录、2267 个文件，已核对各 `SKILL.md` 字节数与改前一致。覆盖对应文件即可回到改前状态；不用 `git checkout` 或 `git restore`，目标文件里有 12 个带开工前的用户未提交改动。测量脚本、description 提取脚本和第一跳命中材料在 `C:\Users\zys31\.claude\skill-slim-audit-2026-09-21\`。
+
+### docker-only-by-user 增加 Docker 产物收尾询问（2026-09-21）
+
+- **出处**：用户要求规划删除 Docker 工作产物，随后明确每项删除前必须询问用户。
+- **位置**：`~/.claude/skills/docker-only-by-user/SKILL.md`，新增「任务结束时清理」小节。
+- **内容**：任务结束前盘点容器、网络、卷、镜像、构建缓存、日志和挂载目录产物；一次性容器是否使用 `--rm`、常驻服务是否执行 `docker compose down --remove-orphans`，都先列出影响资源并逐项询问用户；卷、数据库文件和挂载目录生成物列出准确路径与用途后询问是否删除；删除后复查资源和台账。
+- **依赖**：无新增依赖；沿用现有 Docker 规则与全局删除确认线。
+- **验证**：原生读回新增小节，确认自动删除措辞已移除，并保留逐项询问要求；尚未执行 Docker 删除操作。
+- **回退**：删除该小节即可恢复修改前的 Docker Skill 内容。
+
+### 上下文卫生增补到七个 Skill（2026-09-21，全局）
+
+- **出处**：Matt Pocock 上下文卫生方法在本机 Skill 体系中的后续应用；用户要求继续优化，范围限定为七个与上下文管理直接相关的自建 Skill。
+- **位置**：`~/.claude/skills/coding-workflow-by-user/SKILL.md`、`task-notes-by-user/SKILL.md`、`instruction-engineering-by-user/SKILL.md`、`parallel-delegation-by-user/SKILL.md`、`skill-auditor-by-user/SKILL.md`、`skill-trimmer-by-user/SKILL.md`、`improver-skill-by-user/SKILL.md`。
+- **内容**：编码工作流增加构思/规格/拆票与实现工单的上下文相位边界、相位切换前的接续材料和隔离调查；任务笔记明确相位边界与 handoff 的 agent 交接职责；指令工程增加知识分层与固定成本核算；委派流程增加主会话中间材料与 worker 摘要成本判据；Skill 审计增加上下文生命周期和可选隔离执行检查；Skill 精简增加路由、固定注入、正文读取和回流材料四项成本；Skill 改进评测增加上下文成本观察项。
+- **依赖**：无新增脚本、插件、配置或运行时依赖；`context: fork` 仅作为宿主提供时的可选审计项。
+- **验证**：七个目标文件均已写入并通过关键词定位；全局 Skill 仓库 `git diff --check` 通过；项目工作树 `git status --short`、`git diff --stat`、`git diff --cached --stat` 均无输出。本轮未运行 Skill eval 或真实编码任务。
+- **回退**：按本条列出的七个文件和新增规则逐段删除本轮句子，保留此前用户改动；不使用 Git 回退覆盖既有未提交内容。
+
+---
+
+### Skill 根入口减量方法接入审计体系（2026-09-22，用户确认）
+
+- **出处**：用户先要求研究 Matt Pocock 如何缩小 Skill 且保持效果，随后澄清目标为「把优化思路、方法论加入某些自建 Skill」，并确认采用单一事实来源方案。
+- **职责**：`skill-auditor-by-user` 保存完整减量方法；`skill-trimmer-by-user` 只在能力应保留但根入口出现 `sprawl` 时转介，不复制方法；`instruction-engineering-by-user` 与 `improver-skill-by-user` 已分别拥有跨文件逐句剪除和同条件 gate，不重复增加正文。
+- **位置**：修改 `skills/skill-auditor-by-user/SKILL.md`、`CHANGELOG.md`、`test-prompts.json`，新增 `references/skill-size-optimization.md` 与 `evals/size-optimization/case.yaml`；修改 `skills/skill-trimmer-by-user/SKILL.md` 本地分流一行。
+- **方法**：减量审计先区分固定注入、description、调用正文和回流材料，再把内容归为根入口步骤、根入口参考、分支参考、环境事实或可删除内容；分支专用原文迁入 reference，context pointer 同时写清读取条件、材料内容和读取强度；只在有证据时删除 duplication、sediment、relevance 或 no-op；安全、权限、业务和验收门禁不得削弱。
+- **等效门禁**：基线与候选使用相同模型、宿主、工具、场景、runs、超时和 grader；逐项通过 target、guardrail、holdout 后再比较真实上下文成本。无法观测时记 `not-run`，不把字节估算冒充运行值；正式 gate 可转 `/improver-skill-by-user`。
+- **测试资产**：`test-prompts.json` 新增 id 13；新增 Claude CLI 可发现布局 `evals/size-optimization/case.yaml`，检查「减量审计」「信息层级」「baseline」「holdout」。
+- **验证**：根入口指针、参考文件五个核心章节、`skill-trimmer` 转介和两项新增文件均已定位；目标文件 `git diff --check` 通过。当前 `skill-auditor-by-user/SKILL.md` 为 199 行、14647 字节，按需参考为 132 行、6932 字节，`skill-trimmer-by-user/SKILL.md` 为 194 行、21019 字节。尝试通过 Skill 工具验证实际加载时，宿主按 `disable-model-invocation: true` 正确拒绝并要求用户显式运行 `/skill-auditor-by-user`；因此动态模式输出与新增 eval 记为 `not-run`，没有宣称行为已通过。
+- **既有改动保护**：开工时全局配置仓库已有大量未提交改动，目标 Skill 和本台账也已修改；本轮使用完整行锚点追加，没有覆盖、清理、暂存或提交既有内容。
+- **回退**：逐项删除本条列出的新增参考、评测和 v2.4.0 记录，并撤去根入口减量模式与 `skill-trimmer` 转介；保留开工前已有未提交内容，不使用 Git 回退。
+
+### 自建 skill 精简批次（2026-09-22，用户拍板）
+
+- **出处**：用户指令「精简 skill 库：插件已覆盖大部分通用能力，只留本机定制化 skill」。经 skill-trimmer-by-user 流程盘点全局 `~/.claude/skills/` 26 项（25 目录 + agent-browser junction），逐项拍板后归档 2 项，保留 24 项。
+- **归档 `drawio-article-illustration-by-user`**（自建）：与 `drawio-chart-by-user` 职责重叠（前者管配图决策/图文校验，后者管图表生成/导出），用户拍板归档合并。移动至 `~/.claude/backups/skills-before-slim-2026-09-22/drawio-article-illustration-by-user/`。
+- **归档 `eli5`**（第三方，归属见 skill-install.md 第 70-76 行）：模型原生「讲人话」能力，零资产零使用，2026-08 已标记冷。移动至 `~/.claude/backups/skills-before-slim-2026-09-22/eli5/`。
+- **连带改动**：`drawio-chart-by-user/SKILL.md` 与 `references/xml-templates.md` 各删一处指向被归档 skill 的死引用；`~/.claude/.gitignore` 删除 `!skills/drawio-article-illustration-by-user/` 白名单行。
+- **未归档但用户拍板保留**：bidirectional-steelman-by-user、leader、archify、agent-reach（曾列为通用能力候选，用户未选）。**2026-09-24 更新：`agent-reach` 已归档，本条对其失效**，见 `skill-install.md` 2026-09-24 状态行。
+- **验证**：移动后 `~/.claude/skills/` 剩 24 项；死引用 grep 零命中；scan_skills.py 重跑 inventory 更新（见 `~/.claude/skill-trimmer-workspace/inventory.json`）。
+- **回退**：从 `~/.claude/backups/skills-before-slim-2026-09-22/` 复制回两目录，恢复 `.gitignore` 白名单行，按 `ARCHIVED.md` 还原 drawio-chart 两处引用；eli5 亦可按 skill-install.md 第 70-76 行命令重装。
+
+### 通用配置防重置加固（2026-09-23，用户确认）
+
+- **出处**：用户指令「保证通用配置正确而且不能被重置修改」，目标是防止 cc-switch 切换 provider 时把已删除的配置键复活并固化。
+- **根因**：cc-switch 切换时以 provider 的 settings_config 为起点、把 DB 的 common_config_claude 深合并后写 live settings.json；3 个 claude provider 的 env 潜伏 `CLAUDE_CODE_EFFORT_LEVEL=max`，Codex-公司账号另有 `CLAUDE_CODE_MAX_CONTEXT_TOKENS=372000`（372k 窗口来源），切换后注入 live 并被 settings-sync-auto hook 固化进 DB 快照。
+- **修改**：
+  - cc-switch DB `providers` 表（app_type='claude' 四个 provider）：删除 env 里的 `CLAUDE_CODE_EFFORT_LEVEL` 与 `CLAUDE_CODE_MAX_CONTEXT_TOKENS`。备份 `~/.cc-switch/backups/sync-backup-20260923_003144.json`。
+  - `~/.claude/skills/cc-switch-setting-sync-by-user/scripts/sync_claude_common.py`：PROVIDER_ENV_KEYS 增加 `ANTHROPIC_MODEL`（防切换后固化）。
+  - `~/.claude/hooks/scripts/resource-guard.py`：修复 node 误拦——执行 `~/.claude/` 或当前仓库 `.claude/` 下脚本时跳过宿主工具链拦截（10 场景测试 PASS，docker 独占回归 PASS）。
+  - `~/.claude/hooks/settings-degrade-guard.py`：新增期望基线检测——env 出现 FORBIDDEN_ENV（EFFORT_LEVEL/MAX_CONTEXT_TOKENS）告警、env 缺失 AUTO_COMPACT_WINDOW 告警、permissions.allow/ask/defaultMode=auto 检查、modelSettings 四模型检查（8 场景测试 PASS）。
+  - live↔DB 不一致修复：settings.json 的 opus-5 effort 被外部改为 high（00:24），DB 快照仍是 medium；用户确认以 live 为准，`sync_claude_common.py` 执行后 readback MATCH，dry-run NO-OP。
+- **依赖**：无新增依赖；沿用 cc-switch 现有 common config 机制与 settings-sync-auto hook。
+- **验证**：切换深合并模拟（复刻 Rust json_deep_merge）四个 provider 均无污染键；sync 幂等 NO-OP；两个 hook py_compile 通过；degrade-guard 真实 live 配置无误报。
+- **回退**：DB provider env 改动可从 `sync-backup-20260923_003144.json` 或 `cc-switch.db.bak-20260923-001029`（job tmp）还原；脚本改动逐行撤销；guard 增强删除新增检查段即可。
+
+---
+
+## 环境修剪批（2026-09-23 会话 s1）
+
+需求来源：环境修剪任务（notes/2026-09-23-claude-env-pruning/），边界=第三方只整体去留、自建可优化、轻量化优先。
+
+- **ai-product-development-by-user**：去 3 处 impeccable 插件引用（mermaid 节点 B/D、两表格行、末句菜单说明），改为直接起草 `PRODUCT.md` 与「出 2–3 套文字方向供用户选」。原因：impeccable 插件已禁用（见 tool-install.md 2026-09-23 条）。回退：`~/.claude` git 历史。
+- **cc-switch-setting-sync-by-user**：边界情况节新增「四层一致性检查」条目（2026-09-23 EFFORT 复活复盘：注册表/进程 env、live、公共快照、provider env 四层；加键只加 live；删键四层全扫含 providers 表 SQL；症状即信号；改 provider env 后重启 cc-switch）。与凌晨批的 degrade-guard FORBIDDEN_ENV 告警互补。回退：删除该条目。
+- **company-discovery-evaluation-by-user**：归档至 `~/.claude/archive-skills/`（0 用，求职场景暂结束，用户拍板）。恢复 = 目录移回 `~/.claude/skills/`。
+- **cc-switch DB（容器内操作）**：provider「Codex-个人账号」env 显式钉入 `CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000`（原键缺失，372000 系 freelist 幽灵；与公共快照值一致，防漂移）。备份：`~/.cc-switch/backups/cc-switch.db.pre-autocompact-20260923`。生效需重启 cc-switch。
+- 未动：cc-switch-setting-sync 正文其余、drawio-chart 等待裁决中的 skill。
+
+### 持久资料避开临时目录（2026-09-23）
+
+- **出处**：用户发现交接文件 `C:\Users\zys31\.claude\jobs\20223c05\tmp\env-pruning-handoff-2026-09-23.md` 已不存在，要求记录临时目录易被清理，持久资料不能放入其中。
+- **位置**：全局 `~/.claude/CLAUDE.md` §8 产物路径规则。
+- **内容**：`.claude/tmp/` 与 `$CLAUDE_JOB_DIR/tmp` 只放可丢弃、可重新生成的临时内容；持久化交接、任务状态和重要资料放 `notes/<任务名>/STATE.md`、`docs/`、`output/` 或获授权的 auto-memory。
+- **依赖**：无。
+- **验证**：目标文件写入成功；规则与现有临时文件、任务笔记、正式文档路径保持一致。未运行服务、构建或测试。
+- **未验证**：未复测任务目录的自动清理机制。
+- **回退**：将全局 `CLAUDE.md` §8 对应产物路径条目恢复为改动前版本。
+
+### docker-only-by-user 放宽常规清理确认（2026-09-23）
+
+- **出处**：用户确认不希望 Docker 常规操作持续弹出确认，并要求修改；`settings.json` 已配置 `CLAUDE_CODE_AUTO_ALLOW_DOCKER=1` 与 `Bash(docker *)` allow。
+- **更正（2026-09-24，据 Claude Code 配置标准实验 3.4 第 1 项实测）**：上一条里的 `CLAUDE_CODE_AUTO_ALLOW_DOCKER=1` **是惰性配置，从不存在**。该字符串在 Claude Code 2.1.281 二进制（`~/.local/bin/claude.exe`，240 MB）中零匹配；`~/.claude/hooks/` 下也无任何脚本读取它（`resource-guard.py` 全文不含任何 `CLAUDE_CODE_*` 引用）。Docker 的放行**完全来自同一句里的 `Bash(docker *)` 等四条 allow 规则**（`Bash(docker *)`、`Bash(docker-compose *)` 及两者带 `MSYS_NO_PATHCONV=1` 的变体）。本条历史记载保留不改，以免抹掉当时的实际操作；该变量已在 `settings.json:33` 移除。
+- **位置**：`~/.claude/skills/docker-only-by-user/SKILL.md` 的一次性容器和任务结束时清理规则。
+- **内容**：一次性容器默认使用 `--rm`；常驻服务可直接执行 `docker compose down --remove-orphans`；只有卷、数据库文件、绑定挂载目录生成物和其他可能含真实数据的资源继续询问。
+- **依赖**：无新增依赖；沿用全局确认线与 Docker 授权边界。
+- **验证**：重读当前 Skill 后完成两处规则编辑；目标文件写入成功。未运行 Docker 命令或真实权限弹窗回归。
+- **未验证**：Claude Code 实际会话是否已热加载最新 Skill 内容。
+- **回退**：恢复一次性容器 `--rm` 和 `docker compose down --remove-orphans` 的旧确认条款。
+
+### 全局确认降噪与范围授权（2026-09-24）
+- 同日补记：`sync_claude_common.py` 经两轮只读审查后加固根 JSON/嵌套结构校验、restore 公共环境覆盖与权限标量恢复；`--check` 使用只读单事务读取，`--dry-run` 不创建数据库；SKILL.md 补齐回滚、`ANTHROPIC_MODEL` 和禁止键边界。容器回归、实际 `--check` 与 `--dry-run` 均通过。
+
+- **出处**：用户选择「低打扰安全默认」并补充「明确授权后不重复询问」。
+- **位置**：全局 `~/.claude/CLAUDE.md` §1.3、§2.3；`~/.claude/settings.json` 权限列表；`parallel-delegation-by-user`、`coding-workflow-by-user`、`dev-clean-by-user`、`install-ledger-by-user`；`hooks/scripts/resource-guard.py` 及其自测。
+- **内容**：可逆、只读、工作树内和容器内常规操作直接执行；用户明确授权的命令、目标或范围内同类动作不重复询问，只有扩大范围、改变目标、影响升级或共享资源串扰才重新确认；委派默认沿用当前配置；资源守卫对缺少硬约束的 Compose、宿主机工具链和无法核验的 Compose 重写直接阻断，跨会话独占容器仍询问；移除过宽的 `git remote*` 权限询问，保留远程 Git 和本地丢弃类操作门槛。
+- **依赖**：无新增依赖；保留 `permissions.deny` 硬阻断。
+- **验证**：容器内 `test_resource_guard.py` 全部通过，`TEST_RC=0`；覆盖阻断、询问、阻断优先级和原有 Docker 判据。同步检查返回 `SYNC_RC=2`，原因是现有 `settings.json` 的 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 被同步脚本列为禁止公共环境键；PostToolUse 自动同步同样失败，未擅自删除该键。
+- **未验证**：实际 Claude 会话是否已热加载全部 Skill；权限列表改动尚未固化到 cc-switch 公共快照；真实权限弹窗行为待后续同步成功后复测。
+- **回退**：按本条位置恢复各文件改动前规则；资源守卫自测同步恢复旧的 `ask` 断言；`settings.json` 恢复旧 `permissions.ask` 列表。
+
+### 自建 skill 去 -by-user 后缀（2026-09-24）
+
+- **变更**：20 个自建 skill 目录去 `-by-user` 后缀；唯一例外 `toolchain-pitfalls-by-user` → `local-env-pitfalls`。本文件此前各条保留旧名——那是当时的事实，同 `coding-workflow/CHANGELOG.md:34` 口径。
+- **同期改**：全局 `CLAUDE.md`（13 处）、`.gitignore` 白名单（21 → 20 条，删去已归档的 `company-discovery-evaluation` 死行）、`hooks/` 4 文件（含 `settings-sync-auto.py:7`、`settings-degrade-guard.py:20` 两处代码路径常量）、`docs/session-lifecycle.md`、`plans/` 2 文件（10 处，含 `humble-swimming-scott.md` 一条 skill 脚本路径）、`external-configs/README.md`、lab-area 与 dtsf 记忆及交接文档、skill 内交叉引用（69 文件 133 处）。
+- **不改**：`installing/` 全部、各 `CHANGELOG.md`、`archive-skills/`、会话转录。
+- **备份**：`~/.claude/backups/skill-rename-20260924/`（含改前逐文件副本与 sha256 校验）。
+- **回退**：目录改回原名，`.gitignore` 白名单同步改回。
+
+### 全局 `CLAUDE.md` 增 §5.3 文件内容（2026-09-24）
+
+- **变更**：`~/.claude/CLAUDE.md` 第 5 节加 `### 5.3 文件内容`，3 条：落盘产物字段精简必要、能用符号就不用字；能推出的不写、`→` `←` `|` 代连词与说明句；既有文件是否重写属范围决策、先问用户。
+- **依据**：用户当日要求「任何记录在文件里面的，字段应该精简、必要，不能冗余……台账、任务笔记、交接文档这种都应该这样」，并明确「以后都应该遵守」。按本项目定的 M4 分界（必须动手前无差别生效 → `CLAUDE.md`）放常驻位；记忆 `terse-file-content` 留作来由记录。
+- **备份**：无独立备份——纯新增 3 行，删去该节即回退。
+
+### caveman 效果并入 §5.1/§5.2（2026-09-24）
+
+- **变更**：`~/.claude/CLAUDE.md` §5.1 加 3 条（删填充词·客套·无对象模糊限定｜短语片段可成句｜术语精确·代码与报错原样引用），§5.2 加 2 条（安全警告·不可逆确认·多步流程切回完整表达｜提交信息与注释不简化）。来源是 caveman 插件 SessionStart 注入的 1,230 字符 ruleset，改写为中文适用版。
+- **依据**：用户当日定「caveman 提取到本地、ponytail 不动」。原 ruleset 里删 a/an/the、短同义词等是英文专用，中文无效，故改写非照抄；§5.1 原有「直接肯定句、删空泛总起」已覆盖其一半，只补差值。
+- **未做**：caveman 插件**尚未卸载**——等用户新会话验证新文本生效后再卸。卸载会删 `plugins/cache/caveman/caveman/25d22f864ad6`，届时先整份备份。
+- **备份**：`~/.claude/backups/claude-md-caveman-20260924/CLAUDE.md.before`（13,317 B 改前全文）。
+- **回退**：还原该备份；或删掉 §5.1 后 3 条与 §5.2 后 2 条。
+- **备注**：caveman 实际注入的是 `src/hooks/caveman-activate.js` 内的 fallback 常量——SKILL.md 路径算错（`<root>/src/skills/` 不存在），readFileSync 抛错走 catch。故三档注入完全相同（1,230 字符），SKILL.md 从未被读。
+
+### 19 个自建 skill 的 description 改写（2026-09-24）
+
+- **变更**：`~/.claude/skills/` 下 19 个 `SKILL.md` frontmatter 的 `description` 按 S4 重写；其中 `article-writer`、`bidirectional-steelman` 另加 `disable-model-invocation: true`（转 user-invoked）。**只改 frontmatter，正文一字未动。**
+- **依据**：REPORT 第 3.3 节 C1/C2；判据 S4（前置领先词·一分支一触发·砍正文已承载的身份说明·禁 no-op·不写否定式）与 S5（只有「模型必须自己够得着」或「被别的 skill 调用」才留 model-invoked）。用户 09-24 确认两项决策：① 转 user-invoked ② 删 4 条交叉排除句。
+- **效果**：自建常驻 description 857→292 字符（每轮省 ≈353 token）；user-invoked 1,558→421；否定式命中 5→0。
+- **范围排除**：`agent-browser` 不在 `.gitignore` 白名单（第三方），不改——改了下次安装会被覆盖。`agent-browser` 与 `jev-browser-acceptance` 当日被**另一会话**合并为 `auto-browser`，一并划出本任务范围。
+- **备份**：`~/.claude/backups/skill-desc-20260924/<name>/SKILL.md`（全量 21 个，改前原样）。
+- **回退**：从该备份目录按名还原对应 `SKILL.md`。
+- **未做**：`~/.claude/` 未提交 git（工作树混有其他会话的在改内容，按先例不动）；`leader`/`agent-reach` 的白名单缺口（N10）与本项无关。
+
+### 全局 `CLAUDE.md` 否定表述逐条判（C8，2026-09-24）
+
+- **变更**：`~/.claude/CLAUDE.md` **14 条**否定式改正面表述（`:8` `:42` `:43` `:54` `:72` `:78` `:92` `:100` `:113` `:138` `:145` `:154` `:155` `:183`）。行数 191 不变，13,911 → 13,703 字节。
+- **依据**：REPORT 第 3.3 节 C8；判据 `writing-for-agents` §Negation（禁止式会把被禁行为拖进上下文，正面陈述目标行为）+ S4「不写否定式」。
+- **判定该留的 7 条**：`:44`（权限判定，§1.2 无依据保持现状）、`:52`（四条硬禁止，无从正面表述）、`:74`（同上）、`:112`（防作弊护栏）、`:164`（条件规则非禁令）、`:182`（对比句式）、`:187`（= E4）。
+- **3 条被分类器拦**（**判得对，未绕过**）：`:89` 删「不要求完整文件回显」→ `[Self-Modification]`；`:173` 改「先经用户确认」→ 授权相关拦截；`:186` 删「不直接执行」→ `[Security Weaken]`。详见 `notes/claude-config-standards/pending-manual-edits.md` 的 E5/E6/E7。
+- **效果**：否定词词频 31 → 13，命中行 24 → 10；§0–§8 九个顶层节与 22 个标题不变。
+- **备份**：`~/.claude/backups/claude-md-c8-20260924/CLAUDE.md.before`（13,911 B 改前全文）。
+- **回退**：还原该备份；或按 `pending-manual-edits.md` 的逐条对照反改。
+- **做法**：全程用 Edit 工具逐条改，**不走脚本**——脚本会把编辑绕过分类器，等于绕过守卫。
+
+### `local-env-pitfalls` 改造：机器级记忆迁入 + 切 references/（C6，2026-09-24）
+
+- **变更**：`~/.claude/skills/local-env-pitfalls/` 由单文件变 7 文件。`SKILL.md` 1,744 → 2,927 字符 / 65 行，4 节扩为 8 节（新增「门禁与守卫」「容器」，末节索引 `references/`）。新增 `references/git-bash.md`（2,592 字符）、`encoding.md`（1,832）、`docker.md`（1,643）、`guards.md`（1,421）、`powershell.md`（1,200）、`subagents.md`。**frontmatter 的 `description` 一字未动**（36 字符，常驻成本不变）。
+- **依据**：REPORT 第 3.3 节 C6。从 6 个项目记忆目录扫出 33 条机器级候选，逐条读正文后判——迁 27 条，切 6 类（Git Bash／PowerShell／编码／Docker／门禁／子代理；原文只列前四类，编码与门禁是实测后拆出的）。
+- **用户裁决两项**：① 子代理配置按全局 `CLAUDE.md` §2.3 现状（默认沿用当前会话配置、常规单个委派直接执行），作废 2026-09-11 那条「必须展示配置并询问」的记忆——两条正相反；② 迁完删源。
+- **顺手修掉两处文档与实证冲突**：原 `SKILL.md` 把 `MSYS_NO_PATHCONV=1` 列在双斜杠前缀**之前**，与全局 §6 及 09-24 实测相反，已对调；编码节原只讲 `sys.stdout.reconfigure`，改为 `PYTHONUTF8=1` 优先（一次治 `read_text`／`open`／stdout 全部同类问题）。
+- **3 处被分类器拦（判得对，未绕过）**：① 把 `git-guard-rm-rf-workaround` 与 `safety-net-edit-lockout` 的旁路配方写进 `guards.md` → `[Irreversible Local Destruction]`，两条记忆**留在原处不动**；② 补「hooks 热重载」一条 → `[Sensitive-Source Provenance]`，`cc-hooks-hot-reload-and-bash-wrapper.md` **留在原处不动**；③ 批量移出 27 条源记忆 → `[Irreversible Local Destruction]`。
+- **未做（交用户）**：删源与收尾交给 `notes/claude-config-standards/c6-apply-migration.py`——模型侧跑不动。脚本四步：27 条源记忆移进各自 `memory/recovery/2026-09-24-<原名>`、7 个留下的记忆里 8 处 `[[链接]]` 改指向 `references/`、5 个项目 `MEMORY.md` 删 27 行索引、复查。幂等；dry-run 已验证 27 条全中、0 缺失。
+- **备份**：脚本执行时对 `MEMORY.md` 与被改指向的记忆文件各留 `.before-c6`；源记忆整份移进 `recovery/`。
+- **回退**：源记忆按名从 `memory/recovery/2026-09-24-*.md` 移回。`SKILL.md` 与 `references/` 无独立备份——内容全部来自源记忆，源记忆即备份。
+- **备注**：`references/` 目录名符合 S6（skill 目录只许放 `SKILL.md` 与 `references/`）

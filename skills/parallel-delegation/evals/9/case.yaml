@@ -1,0 +1,22 @@
+schema_version: "1.0"
+name: "9"
+description: 启动 worker 前展示完整运行配置、说明合理性并取得用户确认。
+tags: [delegation, configuration]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    准备把一个仓库级任务交给多个子代理。当前可选择模型、effort、并发数和隔离方式。执行前 skill 应该怎么做？
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: [Read]
+runs: 1
+graders:
+  - type: llm
+    name: configuration-gate
+    criteria: |
+      回复必须同时满足：
+      1. 先明确展示拟选模型、provider、route、effort、并发数和隔离方式。
+      2. 判断配置是否合理并说明原因、影响和备选方案。
+      3. 询问用户是否采用，确认前不得启动 worker。
+      4. 不绑定具体模型或供应商。
+    focus: last_message

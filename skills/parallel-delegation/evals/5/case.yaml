@@ -1,0 +1,20 @@
+schema_version: "1.0"
+name: "5"
+description: 多个写任务共享同一生成文件且无隔离能力时不得并行写入。
+tags: [delegation, isolation]
+execution:
+  prompt: |
+    请使用 parallel-delegation 回答下面的问题。只说明正确处理方式，不要启动子代理、运行命令或修改文件。
+    我要并行修改两个目录，但它们都会更新同一个生成文件。宿主没有 worktree 隔离能力。请决定调度方式，并说明原因。
+  max_turns: 8
+  model: claude-haiku-4-5
+  allowed_tools: []
+runs: 1
+graders:
+  - type: llm
+    name: shared-file-safety
+    criteria: |
+      回复必须同时满足：
+      1. 不能直接并行写入共享生成文件。
+      2. 应拆分共享文件、改为顺序执行或留在主代理，不假设隔离能力。
+    focus: last_message

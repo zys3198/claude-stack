@@ -16,8 +16,6 @@ import tempfile
 import time
 from pathlib import Path
 
-sys.stdout.reconfigure(encoding="utf-8")
-
 SCRIPTS = Path(__file__).resolve().parent
 SANDBOX = SCRIPTS / "selftest-sandbox"
 REPO = SANDBOX / "repo"
@@ -103,10 +101,14 @@ def build_sandbox():
     return handoff
 
 
-def load(name):
+def load(name, log_to=None):
     spec = importlib.util.spec_from_file_location(name, SCRIPTS / f"{name}.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    if log_to is not None and hasattr(mod, "LOGFILE"):
+        # 自检会故意构造被拒命令来验判据，这些拒绝会被守卫照常写进日志。
+        # 不重定向就会污染产品日志，事后分不清哪些拒绝是真发生的。
+        mod.LOGFILE = str(log_to)
     return mod
 
 
@@ -133,7 +135,7 @@ def read_jsonl(path):
 
 
 def test_product_guard():
-    pg = load("product-guard")
+    pg = load("product-guard", SANDBOX / "product-guard.log")
     for gone in ("add_target", "check_new_file", "ROOT_DOC_EXT", "repo_root_old",
                  "unquoted", "WORKTREE_ADD", "WORKTREE_PATH"):
         check(f"product-guard 已移除 {gone}", not hasattr(pg, gone))
@@ -554,7 +556,7 @@ def test_handoff_ts_guard():
 
 def test_guard_global_options():
     # git 的全局选项里吃下一个词的项，取值不能被当成子命令位置
-    pg = load("product-guard")
+    pg = load("product-guard", SANDBOX / "product-guard.log")
     root = git(["rev-parse", "--show-toplevel"], REPO).strip()
     outside = str(Path(SANDBOX) / "outside-wt")
 
@@ -612,19 +614,34 @@ def cleanup():
     force_rmtree(SANDBOX)
 
 
-try:
-    build_sandbox()
-    test_product_guard()
-    test_session_guard()
-    test_session_status()
-    test_handoff_ts_guard()
-    test_guard_global_options()
-finally:
-    cleanup()
+def _conserve_utf8():
+    # 被 import 时 stdout 可能已被调用方替换成没有 reconfigure 的对象，
+    # 放在 main() 内并有 hasattr 兜底，保证 import 本模块不产生副作用。
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if reconfigure is not None:
+        reconfigure(encoding="utf-8")
 
-print()
-print(f"通过 {len(PASS)} 项，失败 {len(FAIL)} 项")
-if FAIL:
-    for f in FAIL:
-        print(f"  失败：{f}")
-    sys.exit(1)
+
+def main():
+    _conserve_utf8()
+    try:
+        build_sandbox()
+        test_product_guard()
+        test_session_guard()
+        test_session_status()
+        test_handoff_ts_guard()
+        test_guard_global_options()
+    finally:
+        cleanup()
+
+    print()
+    print(f"通过 {len(PASS)} 项，失败 {len(FAIL)} 项")
+    if FAIL:
+        for f in FAIL:
+            print(f"  失败：{f}")
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -32,7 +32,14 @@ const PROVIDERS = {
     name: 'Codex-公司账号',
     baseUrl: 'https://chatgpt.com/backend-api/codex',
     apiFormat: 'openai_responses',
-    meta: {}
+    meta: {
+      providerType: 'codex_oauth',
+      authBinding: {
+        source: 'managed_account',
+        authProvider: 'codex_oauth',
+        accountId: 'account-company'
+      }
+    }
   }
 };
 
@@ -87,7 +94,8 @@ function makeSandbox(currentProvider, seededCache) {
     env: {
       ...process.env,
       CC_SWITCH_DIR: root,
-      CLAUDE_CONFIG_DIR: claudeDir
+      CLAUDE_CONFIG_DIR: claudeDir,
+      CLAUDE_CODE_AUTO_COMPACT_WINDOW: '200000'
     },
     readCache() {
       return JSON.parse(fs.readFileSync(path.join(cacheDir, 'ccswitch-usage.json'), 'utf8'));
@@ -126,7 +134,7 @@ test('refresh keeps the served identity and drops the previous provider quota', 
   }
 });
 
-test('refresh drops the previous provider quota when the provider has no usage script', () => {
+test('refresh recognizes a managed Codex OAuth provider and reports missing account storage', () => {
   const sandbox = makeSandbox(PROVIDERS.codex, seededFromOpencode());
   try {
     const result = spawnSync(process.execPath, [BRIDGE], { env: sandbox.env, encoding: 'utf8' });
@@ -134,11 +142,42 @@ test('refresh drops the previous provider quota when the provider has no usage s
 
     const cache = sandbox.readCache();
     assert.strictEqual(cache.providerId, PROVIDERS.codex.id);
+    assert.strictEqual(cache.planProvider, 'codex_oauth');
     assert.strictEqual(cache.quota, null);
-    assert.strictEqual(cache.quotaError, null);
+    assert.match(cache.quotaError, /codex_oauth_auth\.json/);
   } finally {
     sandbox.cleanup();
   }
+});
+
+test('Codex quota parser maps five-hour and seven-day windows', () => {
+  const { parseCodexQuota } = require(BRIDGE);
+  const quota = parseCodexQuota({
+    rate_limit: {
+      primary_window: {
+        used_percent: 12,
+        limit_window_seconds: 18_000,
+        reset_at: 1_790_010_000
+      },
+      secondary_window: {
+        used_percent: 34,
+        limit_window_seconds: 604_800,
+        reset_at: 1_790_020_000
+      }
+    }
+  });
+
+  assert.deepStrictEqual(quota.rolling, {
+    status: null,
+    usedPct: 12,
+    resetsAt: 1_790_010_000
+  });
+  assert.deepStrictEqual(quota.weekly, {
+    status: null,
+    usedPct: 34,
+    resetsAt: 1_790_020_000
+  });
+  assert.strictEqual(quota.monthly, null);
 });
 
 function renderStatusline(env) {
@@ -166,10 +205,12 @@ test('statusline renders the quota of the served provider', () => {
   }
 });
 
-test('statusline takes the context budget from the payload', () => {
+test('statusline shows only context usage', () => {
   const sandbox = makeSandbox(PROVIDERS.opencode, seededFromOpencode());
   try {
-    assert.match(renderStatusline(sandbox.env), /Ctx 100k .*27%/);
+    const output = renderStatusline(sandbox.env);
+    assert.match(output, /100k/);
+    assert.doesNotMatch(output, /200k/);
   } finally {
     sandbox.cleanup();
   }

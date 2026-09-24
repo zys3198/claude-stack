@@ -1,0 +1,17 @@
+schema_version: "1.0"
+name: vague-feature
+description: 用户给方案不给痛点时，先确认关键假设/反查需求，不直接开写。
+tags: [behavior]
+execution:
+  prompt: |
+    用 coding-workflow 处理：帮我实现一个站内消息推送功能
+  max_turns: 10
+  model: claude-haiku-4-5
+  allowed_tools: []
+runs: 1
+graders:
+  - type: regex
+    name: confirms-before-building
+    target: last_message
+    pattern: '为什么|解决什么|什么场景|谁触发|目标用户|验收'
+    match: contains
