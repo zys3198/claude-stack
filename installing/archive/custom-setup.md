@@ -1158,3 +1158,11 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **验证**：改后 sha256 —— `task-notes/SKILL.md a7eb2bc9…`（HEAD `33afef5f…`）、`docker-only/SKILL.md 59374627…`、`parallel-delegation/SKILL.md 57eab437…`。`ledger_check.py` rc=0，现状表 97 行。
 - **未做**：记忆、任务笔记、委派三份的「校验」列仍写 `—`。三份都有可做的只读校验（记忆：索引条数与 `*.md` 条数相符、frontmatter 的 `name` 与文件名一致、`type` 落在四枚举内；任务笔记：单条必填字段齐全；委派：任务书七字段齐全），但都是新增脚本，超出「补齐协议」的授权范围。
 - **过程记录**：本轮改 `docker-only`、`parallel-delegation`、`task-notes` 三份 skill 时**改前未留副本**，违反全局 §2.1「改前备份、先写回归测试」。事后从 `git HEAD` 补了三份快照，但如上所述其中两份不等于改前状态。如实登记。
+
+### 提交入库（2026-09-24）
+
+- **变更**：本任务 31 个文件提交为 `7279ea9`。此前四份现状表「恢复」列写 `git` 的几份新落文件（`docs/protocols.md`、`docs/protocols/gate.md`、`docs/protocols/memory.md`、`skills/install-ledger/references/ledger-protocol.md`、`references/verification.md`、`scripts/ledger_check.py`）只存在于工作区、不在 git 里，「恢复」路径当时不成立；提交后成立。
+- **依据**：§4.2——提交前确认暂存区第一列没有与自己无关的条目，有则用 `git commit -m <消息> -- <自己的路径>` 限定路径提交，保留他人已暂存内容。
+- **未纳入**：`~/.claude` 剩 23 条改动全属其他工作流（`article-writer` / `drawio-chart` / `cc-switch-setting-sync` / `content-to-note` / `instruction-engineering` / `skill-auditor` / `local-env-pitfalls/SKILL.md` 与 `references/guards.md`、`hooks/lib/` 三处删除）与运行时状态（`authorization/`、`task-notes-reminder/`）；lab-area 剩 33 条为 headroom / last30days / `.tmp-*` 实验临时文件。
+- **回退**：`git reset --soft HEAD~1` 回到提交前的索引（`--soft` 不丢他人已暂存内容）。文件清单见 `git show --stat 7279ea9`。
+- **验证**：`git diff --cached --check` 返回 2，556 条 trailing whitespace 全在 `installing/archive/mcp-install.md`(81) 与 `installing/archive/tool-install.md`(475)。实测这两份的 `HEAD:` 原件本就带同样 CRLF（81 / 475 条），archive 副本与 HEAD 原件 sha256 逐字节一致（`51340f70` / `855e649e`）——既有内容经纯 move 保留，非本轮引入，未做行尾归一。
