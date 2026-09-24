@@ -1190,3 +1190,23 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：`git checkout b806c8f -- hooks/scripts/protocol_check.py docs/protocols.md installing/custom-setup.md`；本文件按原文改回；`docs/protocols/memory.md` 删掉新增那段。
 - **验证**：真跑 `门禁 全相符`、`记忆 139 条 · 已进索引 138 · 3 处问题`，另计 `16 个目录 / 52 条（合计 191）`，rc=1。余下 3 处全在活项目里：`C--Users-zys31--claude` 1 处索引缺行、`C--ZYS-Code-dtsf` 1 处缺 `description`、`C--ZYS-Code-interview-guide` 1 处缺闭围栏。证伪测试扩到 11 组全过，含「全部当已删时不细查、只计数」。测试脚本仍在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
 - **未做**：那 16 个目录 / 52 条记忆未删未动。属不可恢复删除，需用户逐项确认，且按记忆协议删前要先进 `recovery/`。
+
+### 孤儿记忆清理：52 条备份后删除（2026-09-25）
+
+- **起因**：用户说「没用的就删了吧」。
+- **口径纠正**：那 52 条孤儿记忆不加载、不召回，**占 0 token**。删它们是卫生（`~/.claude` 少 16 个查不到的死目录），不是 (a) 收益。（b）同类的还有 `.claude.json` 里 27 条死 cwd 注册，那是宿主的活状态文件，本次未动。
+- **判定**：逐条读全文再判，不看文件名。52 条中——被活记忆同名覆盖 1 条（`eam-fill-existing-demo-minimal-architecture`，`C--ZYS-Code-dtsf` 下的同名条是它的超集）；被活 skill 覆盖 5 条；文章写作类已由 `article-writer` 覆盖 6 条；项目消失且内容不可迁移 39 条；过期 1 条。
+- **变更**：备份到 `backups/orphan-memories-20260925/`（79 个文件 = 52 条 + 16 个 `MEMORY.md` + 9 个 `recovery/` + 3 个 `.before-c6`），逐字节核对通过后删 `projects/<16 个目录>/memory/` 整棵子树。只删 `memory/`，同目录的会话记录不动——实测这 16 个目录除 `memory/` 外本来就是空的（无 `.jsonl`），删完留 16 个空壳目录未清。
+- **核对缺口（如实登记）**：71 个顶层文件逐字节核对；9 个 `recovery/` 与 3 个 `.before-c6` 在子目录里，由 `shutil.copytree` 原样带过、未单独核对。
+- **回退**：`projects/` 不在 git 追踪范围，回退靠 `backups/orphan-memories-20260925/<项目目录名>/` 手工拷回。脚本 `purge-orphan-memories.py` 只在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
+- **验证**：真跑 `protocol_check.py`，「另有已删项目的 16 个目录 / 52 条」一行消失，余下 3 处漂移全在活项目，rc=1。
+- **遗留风险**：`my-code-deepseek-key-exposed` 记的是 2026-07-15 有真实 DeepSeek key 进过会话上下文、要求轮换。记忆已删，轮换做过没有需用户确认。
+
+### 六组未覆盖教训迁入活的位置（2026-09-25）
+
+- **起因**：上一条里查出的 6 组教训在 `CLAUDE.md`、`skills/`、`.claude.json` 里都没有副本，删掉会真的丢。用户「按你建议的来」。
+- **变更**：4 组进 `skills/local-env-pitfalls/SKILL.md` 的要点行——Read `offset` 只照抄工具返回行号（扩写既有的「短文件读取偏移量」一条）、Grep `glob` 禁嵌套花括号替代组、会话主目录非目标仓库时命令显式绑定路径、隔离工作树不继承 `node_modules`、`getpass` 脚本不交后台（并入同次事故的「异常报告留脱敏定位信息」）。2 组进 `projects/C--Users-zys31--claude/memory/`——`one-question-per-turn.md`、`critique-needs-full-constraint-read.md`，并补进该目录 `MEMORY.md` 索引。
+- **顺带修**：同一份 `MEMORY.md` 漏掉 `isolate-python-mock-patches.md` 的索引行（`protocol_check.py` 报过的既有漂移之一），一并补上。该目录现 7 条、索引全覆盖。
+- **回退**：`backups/orphan-salvage-20260925/`（改前 `SKILL.md` `b10b7582…`、`MEMORY.md` `ba104688…`）。改后 `SKILL.md` `c2671693…`（6,968 → 8,430 B）、`MEMORY.md` `fff9225a…`。
+- **验证**：真跑 `protocol_check.py` → `141 条记忆 · 已进索引 141 · 2 处问题`（余下 2 处在别的活项目）。
+- **未做**：`dev-clean` / `dev-status` 两条自家 skill 是否改 `disable-model-invocation: true` 未定，见任务笔记。

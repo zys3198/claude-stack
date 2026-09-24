@@ -24,7 +24,7 @@
 | mattpocock-skills | 在用 | `plugins/cache/mattpocock/mattpocock-skills/` | mattpocock | `/plugin install mattpocock-skills@mattpocock` | 见 [skill-install.md](skill-install.md) |
 | ponytail | 在用 | `plugins/cache/ponytail/ponytail/` | ponytail | `/plugin install ponytail@ponytail` | SessionStart 注入 5,299 字符 |
 | context7 | 在用 | `plugins/cache/claude-plugins-official/context7/` | claude-plugins-official | `/plugin install context7@claude-plugins-official` | 提供 context7 MCP 工具 |
-| last30days | 在用 | `plugins/cache/last30days-skill/last30days/` | last30days-skill | `/plugin install last30days@last30days-skill` | SessionStart 注入约 300 字符 |
+| last30days | 停用 | `plugins/cache/last30days-skill/last30days/` | last30days-skill | `/plugin install last30days@last30days-skill` | 2026-09-25 停用。装了一个月只有 1 次调用记录（2026-09-24 由 deepseek-v4.1-flash 会话发起）。成本：listing 272 B/轮 + SessionStart 注入 221 B/会话 |
 | caveman | 停用 | `plugins/cache/caveman/caveman/` | caveman | `/plugin install caveman@caveman` | `enabledPlugins` 为 false，效果已并入 `CLAUDE.md` §5.1/§5.2 |
 | github | 停用 | `plugins/cache/claude-plugins-official/github/` | claude-plugins-official | `/plugin install github@claude-plugins-official` | `enabledPlugins` 为 false |
 | impeccable | 停用 | `plugins/cache/impeccable/impeccable/` | impeccable | `/plugin install impeccable@impeccable` | `enabledPlugins` 为 false |

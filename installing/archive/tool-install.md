@@ -473,3 +473,29 @@
 - 验证（2026-09-24 实测）：`PYTHONUTF8=1 BU_CDP_URL=http://localhost:9222 uv run --no-sync python <probe>` 对 `chromedp/headless-shell` 跑通——`observe()` 读出 title `jev host probe`、页面 text 和 4 个动作（click / fill / Open / wait），断言全过
 - 来源副本：落盘前在 `~/.claude/jobs/0a0a596a/tmp/jev-ultrafast`（job tmp，会被清），同目录还有约 100 个 EAM 探测脚本与验收截图。**只搬了包本体**，探测脚本与截图未搬——那属 lab-area 实验材料
 - 备注：**宿主运行必须带 `PYTHONUTF8=1`**。`browser.py:31` 用 `Path.read_text()` 读 `snapshot.js`，Windows 默认 GBK 解码，抛 `UnicodeDecodeError: 'gbk' codec can't decode byte 0x92`——上游只在 Linux 容器跑过，宿主路径从未验证。同类问题见上方 FunASR 条目的 `UnicodeEncodeError`。配套 skill 见 [custom-setup.md](custom-setup.md) 的 `auto-browser`
+
+### 插件 token 成本实测（2026-09-25）
+- 方法：从 `~/.claude/projects/*/*.jsonl` 的 `skill_listing` 附件取真值（310 个快照 / 82 个不同版本），不用官方估算。统计脚本在 `~/.claude/jobs/340210f7/tmp/`（split-listing.py、hook-cost.py）
+- 基线（2026-09-24T13:58 lab-area 会话）：27 个 skill / 6,665 B
+  - mattpocock-skills 2,647 B（11 个；另 29 个自带 `disable-model-invocation: true`，不进 listing）
+  - ponytail 2,510 B（6 个）
+  - last30days 272 B
+  - 自有 9 个 skill 合计 1,237 B
+- `plugin details` 的官方估算普遍偏低约 30%：mattpocock 报 ~1,164 tok、ponytail 报 ~622 tok
+- 注入实测：ponytail SessionStart 固定 5,321 B，共 208 次（startup 65 / compact 118 / clear 25）。`plugin details` 却把它标成「harness-only — no model context cost」，该标注不成立
+- **已排除的路径**：`skillOverrides` 对插件 skill 零效果。实测给 `ponytail:ponytail-help` 设 `off`、`ponytail:ponytail-gain` 设 `name-only`、`mattpocock-skills:wizard` 设 `off`，新会话 listing 仍 27 个 / 6,665 B，一字未变；二进制 2.1.281 的 `locked_by` 帮助文本含 "it comes from a plugin"。只能整包 `enabledPlugins` 开关
+- 顺带核实：caveman 确已停用（settings.json 于 2026-09-24 20:02 改动，最后一次注入 17:17，2026-09-25 会话无注入）
+- context7 保留：46 次工具调用记录 + 786 B/会话 `mcp_instructions`
+
+### last30days 插件停用（2026-09-25）
+- 起因：用户「精简插件，删除或提取功能到本地」；随后明确「不能动 ponytail 和 matt」
+- 用量依据：装了一个月仅 1 条调用记录（2026-09-24T16:29，deepseek-v4.1-flash 会话经 cc-switch 代理发起）；无任何自有文件按名引用
+- 变更：`claude plugin disable last30days@last30days-skill --json` → `settings.json.enabledPlugins["last30days@last30days-skill"] = false`（文件 11277 → 11278 B）
+- 回退：`claude plugin enable last30days@last30days-skill`，或把 `enabledPlugins` 该键改回 `true`
+- 验证（2026-09-25 两次 `claude -p` 实跑对照）：
+  - listing 27 个 / 6,665 B → **26 个 / 6,393 B**（−272 B），`last30days` 行消失
+  - SessionStart 的 `check-config.sh` 注入消失
+  - `input_tokens` 18,410 → 18,215 → 18,172
+- 同步：CLI 改动绕过 `settings-sync-auto.py`（该 hook 只挂 PostToolUse `Edit|Write`），首轮探测报 `settings-degrade-guard warn: common_config 与 settings.json 不一致`。手工跑 `sync_claude_common.py` 修复，差异仅 `enabledPlugins.last30days@last30days-skill` 一处；`common readback: MATCH`，`--check` 转 `[MATCH]`。回滚点 `~/.cc-switch/backups/sync-backup-20260925_003126_607810.json`
+- 未动（用户明确要求）：ponytail（2,510 B/轮 + 5,321 B/次注入）、mattpocock-skills（2,647 B/轮）
+- marketplace 与 37 MB cache 仍在盘上，未删
