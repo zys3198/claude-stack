@@ -14,6 +14,8 @@ disable-model-invocation: true
 
 机制详解见 [references/ccswitch-architecture.md](references/ccswitch-architecture.md)。
 
+切换时按 `build_effective_settings_with_common_config`（cc-switch 源码 `services/provider/live.rs`）处理：以 provider 的 `settings_config` 为起点，把 DB 的 `common_config_claude` **深合并**进去（source 覆盖 target），再写 live `settings.json`。所以 provider env 里非 ANTHROPIC 的 `CLAUDE_CODE_*` 键（实测有 `CLAUDE_CODE_EFFORT_LEVEL`、`CLAUDE_CODE_MAX_CONTEXT_TOKENS`）不在 `PROVIDER_ENV_KEYS` 剥离清单里，切换时会被注入 live，随后 `settings-sync-auto.py` 的 PostToolUse hook 又把它当 common 内容同步固化进 DB 快照——配置「被重置修改」的确定性路径。排查窗口异常时先查 `providers` 表 `app_type='claude'` 的 `settings_config` env（改前备份 DB）。live `settings.json` 是权威，DB 快照只是镜像。
+
 ## 前置确认
 
 1. 路径默认 `~/.claude/settings.json` 与 `~/.cc-switch/cc-switch.db`，非默认时问用户。
@@ -130,4 +132,3 @@ statusLine、attribution、effortLevel、includeCoAuthoredBy，以及 env 中既
 - `scripts/sync_claude_common.py`：主同步脚本（备份+提取+写库+校验；`--restore` 修复模式）。
 - `references/ccswitch-architecture.md`：ccswitch 组装 settings.json 的机制、DB schema、
   切割边界、WAL 热改安全、回滚说明。
-- `~/.claude/hooks/settings-degrade-guard.py`：SessionStart 自动降级检测与恢复 hook。

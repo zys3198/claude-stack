@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 # Skill Trimmer — Skill 库精简判定
 
-本 Skill 只做**库级**存在性、留删、收窄、归档和生命周期评估，不先假定候选应保留，也不自动移动或删除。判据来源分为 `【本机】`、`【外部】`、`【工具】`，出处与轻量数据证据见 [references/evidence-sources.md](references/evidence-sources.md)；详细留存分类见 [references/retention-rubric.md](references/retention-rubric.md)。
+本 Skill 只做**库级**存在性、留删、收窄、归档和生命周期评估，不先假定候选应保留。判据来源分为 `【本机】`、`【外部】`、`【工具】`，出处与轻量数据证据见 [references/evidence-sources.md](references/evidence-sources.md)；详细留存分类见 [references/retention-rubric.md](references/retention-rubric.md)。
 
 ## 1. 存在性门禁
 
@@ -15,11 +15,11 @@ disable-model-invocation: true
 2. **增量证据**：只有反复出现且代价高的失误，或模型稳定猜不到的判断、脚本、模板、资料、固定偏好，才支持独立保留。
 3. **替代与生命周期**：检查模型、宿主文件、hook/CI/linter 和其他 Skill 是否已覆盖，以及近期使用和复现问题信号。
 
-存在性结论只有：**保留独立 Skill**、**不需要独立 Skill**、**证据不足待验证**。静态规范、文件存在或成功加载不等于收益；拿不准必须补运行验证。保留分类、D/E 边界、同能力主路径和十一档动作见 `references/retention-rubric.md`。
+存在性结论只有：**保留独立 Skill**、**不需要独立 Skill**、**证据不足待验证**。静态规范、文件存在或成功加载不等于收益；拿不准必须补运行验证。
 
 ## 本机边界
 
-安装根目录由本 Skill 自身所在的 `skills/skill-trimmer/scripts/` 推导，脱离标准目录时用 `SKILL_TRIMMER_HOME`；`skills/` 下的候选都是实际目录，移动到 `_weak-model-backup/` 是可恢复归档而非假装删除；插件 Skill 由插件控制面管理，不在本 Skill 的逐个判定范围内。
+安装根目录由本 Skill 自身所在的 `skills/skill-trimmer/scripts/` 推导，脱离标准目录时用 `SKILL_TRIMMER_HOME`；`skills/` 下的候选都是实际目录；插件 Skill 由插件控制面管理，不在本 Skill 的逐个判定范围内。
 
 ## 1.1 用户确认与安全门禁
 
@@ -64,4 +64,4 @@ python skill-trimmer/scripts/review_server.py read --require-complete
 
 ## 数据驱动
 
-当前没有遥测时只使用可核的 mtime、引用方、台账、用户实测和运行输出；状态标为 `active`、`stale` 或 `archived`，完整来源、自动化三件套和三维上下文成本见 `references/evidence-sources.md`。单个 Skill 的设计/运行审计转 `skill-auditor`；跨指令文件审查转 `instruction-engineering`。
+当前没有遥测时只使用可核的 mtime、引用方、台账、用户实测和运行输出；状态标为 `active`、`stale` 或 `archived`。单个 Skill 的设计/运行审计转 `skill-auditor`；跨指令文件审查转 `instruction-engineering`。

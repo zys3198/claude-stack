@@ -31,9 +31,7 @@ disable-model-invocation: true
 | 状态、转换、生命周期、 CLOSED/OPEN | 状态机图 | 水平 → 或径向 |
 | 实体、关系、数据库、ER、表结构 | ER图 | 水平 → |
 | 知识、脑图、思维导图、概念 | 思维导图 | 径向 |
-| 不确定或混合信号 | 🔴 STOP | 列出候选类型，等用户确认 |
-
-**失败处理**：用户描述模糊（"画个图"无具体内容）→ 列出上表 6 种类型及各 1 个典型场景，等用户选择后再继续。
+| 不确定、混合信号，或描述笼统（如只说“画个图”） | 🔴 STOP | 列出 6 种类型各 1 个典型场景，等用户确认 |
 
 #### Step 2: 确定布局参数
 
@@ -54,8 +52,6 @@ disable-model-invocation: true
 #### Step 3: 生成 XML
 
 按 `references/xml-templates.md` 模板 + `references/color-tokens.md` 配色 + `references/layout-principles.md` 布局原则生成 draw.io XML。
-
-节点文字规则：每节点 `value` ≤ 2 行，每行 ≤ 8 个中文字符。放不下就缩短或拆节点，不写完整句子。
 
 #### 🔴 STOP — 生成前检查清单
 
@@ -142,6 +138,7 @@ open "path/to/file.drawio"
 - XML 结构规范（文本标签/连线标签规则、基础模板、多页结构、标题/节点/连线/状态机/时序模板）与 XML 注意事项 → `references/xml-templates.md`
 - draw.io CLI 检测、PNG/SVG/PDF 导出、打开文件命令 → `references/cli-export.md`
 - 布局设计原则（紧凑不留白/方向一致/文字极简/无重叠）与布局速查表 → `references/layout-principles.md`
+- 历史产出的文章配图样例（5 个 `.drawio`，可作结构与配色参考）→ `examples/`
 
 ## 完成条件
 

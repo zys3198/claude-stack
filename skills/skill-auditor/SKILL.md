@@ -30,7 +30,7 @@ disable-model-invocation: true
 
 ## 第 0 步：定靶与取证
 
-确认目标路径、名称、宿主、用户目标和是否允许修改；读目标 `SKILL.md` 全文及 frontmatter，仅按目标读取配套测试、引用它的 router 和维护文件；记录类型、来源证据、现有改动与目标外文件，不覆盖、删除或提交。候选根入口减量必须读取 [`references/skill-size-optimization.md`](references/skill-size-optimization.md)。
+确认目标路径、名称、宿主、用户目标和是否允许修改；读目标 `SKILL.md` 全文及 frontmatter，仅按目标读取配套测试、引用它的 router 和维护文件；记录类型、来源证据、现有改动与目标外文件，不覆盖、删除或提交。候选根入口减量必须读取 [`references/skill-size-optimization.md`](references/skill-size-optimization.md)；审计本 skill 自身，或改其检查项、变更门禁与同步文件清单时，读 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
 
 ## 第 1 步：通用十查
 
@@ -65,6 +65,8 @@ description、触发词、负向边界、路由、输入输出、宿主接线或
 ## 第 3 步：新 Skill 设计
 
 先不用候选 Skill 裸跑；已能稳定完成就不新建。再写设计卡（问题、用户、宿主事实、非目标、触发、输入输出、风险、验收），把项目约定/机械约束/静态知识/库级治理分流到宿主文件、hook/CI、reference 或 `skill-trimmer`。只写模型猜不到且会复用的核心，长资料入 `references/`，机械动作入 `scripts/`；定义可重跑、失败状态和维护入口。宿主迁移先查官方能力、原生包和真实源码，第三方优先插件化。
+
+把外部内容（视频、文章、他人 skill）提炼成新 Skill 时，只保留来源中的方法、流程、边界和可复用原则：触发条件写通用主题、不写单个案例（案例只放正文作可选说明）；新 Skill 独立可跑，**不添加 skill 路由、组合调用或跨 skill 依赖**，除非用户明确要求。
 
 ## 第 4 步：组合审查
 

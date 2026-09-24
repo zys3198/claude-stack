@@ -6,21 +6,15 @@ disable-model-invocation: true
 
 # Improver Skill
 
-手动触发 Skill 演进闭环。只调用 Skill 根目录中的 `wikiskill.py`；不自动调用模型或外部演进服务，只写入用户明确指定的 workspace。
+手动触发 Skill 演进闭环。只调用 Skill 根目录中的 `wikiskill.py`；不自动调用模型或外部演进服务，只写入用户明确指定的 workspace，不默认写入固定项目或宿主目录。
 
 ## 引擎
-
-```text
-wikiskill.py 位于当前 Skill 根目录
-```
 
 以下命令以 `python` 表示宿主或用户已配置的 Python 解释器；命令在 Skill 根目录执行。
 
 ```powershell
 python wikiskill.py
 ```
-
-Workspace 必须由用户明确指定，不默认写入固定项目或宿主目录。
 
 ## 触发分流
 

@@ -1,6 +1,7 @@
 ---
 name: install-ledger
 description: 安装台账：登记、核对、追溯 skill／插件／MCP／CLI／桌面工具的来源与安装状态。
+disable-model-invocation: true
 ---
 
 # 安装台账治理
@@ -31,7 +32,7 @@ description: 安装台账：登记、核对、追溯 skill／插件／MCP／CLI�
 - **状态** 只用 `在用` / `停用` / `已归档` / `待核`。已卸载和已删除的整行删掉，只在流水留痕。`待核` 是位置没能当场核实的落点，下次触发必须消解。
 - **恢复** 写 `git`（在 `.gitignore` 白名单内）、`手工拷贝`（不在 git，迁移会丢）、或安装命令原文。出现 `手工拷贝` 就是有人要为迁移负责。
 
-同表内名称不重复，一行一个资产。流水条目格式、归档规则、组织规则见 [`references/ledger-protocol.md`](references/ledger-protocol.md)。
+同表内一行一个资产，名称不重复。流水条目格式、归档规则、组织规则见 [`references/ledger-protocol.md`](references/ledger-protocol.md)。
 
 ## 执行流程
 

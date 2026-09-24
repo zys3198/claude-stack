@@ -1210,3 +1210,11 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：`backups/orphan-salvage-20260925/`（改前 `SKILL.md` `b10b7582…`、`MEMORY.md` `ba104688…`）。改后 `SKILL.md` `c2671693…`（6,968 → 8,430 B）、`MEMORY.md` `fff9225a…`。
 - **验证**：真跑 `protocol_check.py` → `141 条记忆 · 已进索引 141 · 2 处问题`（余下 2 处在别的活项目）。
 - **未做**：`dev-clean` / `dev-status` 两条自家 skill 是否改 `disable-model-invocation: true` 未定，见任务笔记。
+
+### 自建 skill 正文逐条优化（2026-09-25）
+
+- **变更**：21 个自建 skill 的 `SKILL.md` 正文按 `writing-for-agents` 的尺子逐条过，17 份有改动、4 份判定已是最紧。5 份补 `disable-model-invocation: true`（`coding-workflow`、`docker-only`、`install-ledger`、`parallel-delegation`、`local-env-pitfalls`）。改动集中在删无操作句、合并重复、否定改正面、删正文已承载的身份信息。
+- **依据**：用户裁定「skill 正文逐条优化交给子代理去做」，配置 opus、并发 1。范围只含 (a) token 成本；输出质量与系统稳定性是禁改线，未触碰。
+- **回退**：`cp backups/skill-optimize-20260925/<名>/SKILL.md skills/<名>/SKILL.md` 覆盖回去。`references/`、`scripts/`、`evals/`、`assets/` 全部未动。
+- **验证**：逐份 `diff` 备份与当前文件——17 份有差异、4 份逐字节相同（`awesome-design-md`、`dev-clean`、`leader`、`local-env-pitfalls`）；21 份字节合计 122,484 → 119,597（−2,887）。改动时间戳分两段（01:13–01:19、01:35–01:40），无目标之外的写入。逐条理由与「拿不准但没动」的 10 处见 `C:\ZYS\Code\lab-area\notes\skill-hook-review\SKILL-REVIEW.md`。
+- **未做**：① `local-env-pitfalls` 另有 3 处待改（未翻译英文「拒绝 applies to the outcome」、未定义术语「四件套声明」、一条里塞两个无关教训）。② `article-writer` 的 `SKILL.md:144` 指向的 `examples/good-samples/` 不存在，6 篇范文可从 `5505dfa^` 取回，去向待定。③ 台账分层重构与路径命名规约已议定未执行。

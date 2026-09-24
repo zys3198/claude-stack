@@ -6,8 +6,6 @@ disable-model-invocation: true
 
 # AI 产品开发路线
 
-本 skill 仅在用户显式调用时执行。
-
 本文件只给路线和每一步的入口，每一步具体怎么做由它指定的 skill 承担，不在这里复述。
 
 ## 路线图

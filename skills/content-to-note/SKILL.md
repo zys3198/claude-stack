@@ -5,8 +5,6 @@ disable-model-invocation: true
 ---
 # content-to-note
 
-把公众号、B站或抖音内容提取成可学习、可检索、可回查证据的 Markdown 笔记，并落盘到调用时指定的目录。
-
 ## 入口契约
 
 - 笔记目录由调用者指定；未指定先问，仍未指定则只输出对话，不落盘。
@@ -15,8 +13,6 @@ disable-model-invocation: true
 - `$skill` 是本目录绝对路径；脚本、归档目录和输出路径都使用实际绝对路径。
 
 ## 路由
-
-按域名识别来源，选择提取引擎，再按统一笔记契约整理并落盘。
 
 | 来源 | URL | 默认引擎 |
 |---|---|---|
@@ -32,7 +28,7 @@ disable-model-invocation: true
 2. 选择上表引擎；首次使用、依赖不明、提取失败或请求 ASR 时，先运行相应环境检查。
 3. 读取当前分支需要的参考文件：通用骨架必须读 `references/note-template.md`；B站接口、字幕、评论和图文结构读 `references/bilibili-api-notes.md`。
 4. 提取并归档允许保留的原始材料，写前读取 B站 `metadata\note_budget.json`，按预算组织学习型笔记。
-5. 写后运行已有评分或测试脚本；报告覆盖范围、证据位置、局限和 `passed`、`failed`、`blocked` 或 `not-run` 状态。
+5. 写后运行评分脚本验收（现只有 B站 `score_bili_note.py`）；报告覆盖范围、证据位置、局限和 `passed`、`failed`、`blocked` 或 `not-run` 状态。
 
 ## 微信公众号
 
@@ -55,7 +51,7 @@ node "$skill\scripts\wechat\run.js" "<mp-url>" "<笔记目录>\YYYY-MM-DD-标题
 
 可用路线无专用脚本，按步骤手工执行（2026-09-20 在 `C:\ZYS\Code\lab-area\exp\2026-09-20-douyin-content-notes\` 实际跑通）：
 
-1. 用浏览器工具（`agent-browser` 或 JEV）打开分享页，读正文与作者信息存 `-page-text.txt`。
+1. 用 `auto-browser` 打开分享页，读正文与作者信息存 `-page-text.txt`。
 2. 从页面取 CDN 音频轨，用 `ffmpeg` 抽成 16kHz 单声道 wav。
 3. 本地 FunASR 转写：`python transcribe.py <wav> <out.txt>`；脚本在 `exp\2026-09-20-douyin-content-notes\raw\transcribe.py`（SenseVoiceSmall + fsmn-vad，CPU，rtf≈0.1），模型缓存在 `~/.cache/modelscope/hub/models/iic/SenseVoiceSmall`。
 

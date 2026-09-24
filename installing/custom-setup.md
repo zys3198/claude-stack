@@ -16,21 +16,23 @@
 | awesome-design-md | 在用 | `~/.claude/skills/awesome-design-md/` | 自建 | git | — |
 | bidirectional-steelman | 在用 | `~/.claude/skills/bidirectional-steelman/` | 自建 | git | — |
 | cc-switch-setting-sync | 在用 | `~/.claude/skills/cc-switch-setting-sync/` | 自建 | git | 含 scripts/sync_claude_common.py |
-| coding-workflow | 在用 | `~/.claude/skills/coding-workflow/` | 自建 | git | 含 references/ |
+| coding-workflow | 在用 | `~/.claude/skills/coding-workflow/` | 自建 | git | 含 references/；2026-09-25 加 `disable-model-invocation: true` |
 | content-to-note | 在用 | `~/.claude/skills/content-to-note/` | 自建 | git | 2026-09-20 起仅手动调用 |
 | dev-clean | 在用 | `~/.claude/skills/dev-clean/` | 自建 | git | 由 `commands/dev-clean.md` 迁入 |
 | dev-status | 在用 | `~/.claude/skills/dev-status/` | 自建 | git | 由 `commands/dev-status.md` 迁入 |
-| docker-only | 在用 | `~/.claude/skills/docker-only/` | 自建 | git | 含 references/ |
+| docker-only | 在用 | `~/.claude/skills/docker-only/` | 自建 | git | 含 references/；2026-09-25 加 `disable-model-invocation: true` |
 | drawio-chart | 在用 | `~/.claude/skills/drawio-chart/` | 自建 | git | 含 examples/ |
 | improver-skill | 在用 | `~/.claude/skills/improver-skill/` | 自建 | git | 原名 wiki-skill |
-| install-ledger | 在用 | `~/.claude/skills/install-ledger/` | 自建 | git | 含 references/、scripts/ |
+| install-ledger | 在用 | `~/.claude/skills/install-ledger/` | 自建 | git | 含 references/、scripts/；2026-09-25 加 `disable-model-invocation: true` |
 | instruction-engineering | 在用 | `~/.claude/skills/instruction-engineering/` | 自建 | git | — |
 | leader | 在用 | `~/.claude/skills/leader/` | 自建 | git | 2026-09-24 补进 `.gitignore` 白名单，此前一直被忽略 |
-| local-env-pitfalls | 在用 | `~/.claude/skills/local-env-pitfalls/` | 自建 | git | 含 references/ |
-| parallel-delegation | 在用 | `~/.claude/skills/parallel-delegation/` | 自建 | git | — |
+| local-env-pitfalls | 在用 | `~/.claude/skills/local-env-pitfalls/` | 自建 | git | 含 references/；2026-09-25 加 `disable-model-invocation: true` |
+| parallel-delegation | 在用 | `~/.claude/skills/parallel-delegation/` | 自建 | git | 2026-09-25 加 `disable-model-invocation: true` |
 | skill-auditor | 在用 | `~/.claude/skills/skill-auditor/` | 自建 | git | — |
 | skill-trimmer | 在用 | `~/.claude/skills/skill-trimmer/` | 自建 | git | 含 references/ |
-| task-notes | 在用 | `~/.claude/skills/task-notes/` | 自建 | git | 含 references/ |
+| task-notes | 在用 | `~/.claude/skills/task-notes/` | 自建 | git | 含 references/；**保持模型可见**（SessionStart hook 按名调用它） |
+
+2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-20260925/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Code\lab-area\notes\skill-hook-review\SKILL-REVIEW.md`。
 
 ## hook
 

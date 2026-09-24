@@ -1,10 +1,8 @@
 ---
 name: auto-browser
 description: >-
-  浏览器自动化与页面验收。用户要求操作网页（填表、点击、截图）、抓取页面数据、
-  跑页面验收或 EAM 验收时触发。宿主通用任务走 agent-browser；需要正确性守卫、
-  CDP 直连已有浏览器或跨脚本复用标签页时走 JEV Browser。
-disable-model-invocation: false
+  浏览器自动化与页面验收：操作网页、抓取页面数据、跑页面验收或 EAM 验收。
+  宿主通用任务走 agent-browser；需要正确性守卫、接管已有浏览器或复用标签页时走 JEV Browser。
 ---
 
 # auto-browser

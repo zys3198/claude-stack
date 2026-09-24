@@ -25,7 +25,6 @@ disable-model-invocation: true
 - **理解后重讲**：句子和结构都换成自己的，不许直接摘抄或轻度替换原句。
 - **内容有来源支撑**：经历、数据、路径、报错、实验结果都要有出处。
 - **文体自然、细节真实**：开头、结尾、口头禅每篇不同，不套固定格式。
-- **准确、具体、有节奏。**
 - **形容技术栈时写具体构成**，不用「朴素」（尤其「技术栈比较朴素」）。
 - **写作过程只产出文字、表格、代码示例**：生成 Mermaid、Draw.io、SVG、图片链接或配图占位都算越界。
 - **caveman 输出纪律**：分析、讨论、规划阶段保持 caveman 模式（省 token）；写文章正文（写入 .md 文件）时关闭 caveman，用完整自然中文。
@@ -40,7 +39,7 @@ disable-model-invocation: true
 
 ### 协作模式与细骨架闸门
 
-用户说“先讨论结构”“你给我几个选项”“我补充想法”“逐节设计”“设计完再生成”“生成后我审查给建议” → **协作式写作模式**。
+用户说“先讨论结构”“你给我几个选项”“我补充想法”“逐节设计”“设计完再生成”“生成后我审查给建议” → **协作模式**。
 
 **从零创作和深度改写默认都经过全篇细骨架闸门**：方向确定后，一次性展示完整 H2/H3 细骨架；用户讨论并明确冻结后，才写正文。协作模式决定讨论深度和反馈节奏，不决定是否需要骨架。只有用户明确说“直接写”“跳过大纲/骨架”时才可绕过。
 
@@ -56,7 +55,7 @@ disable-model-invocation: true
 
 ### 结构方案与方向确认
 
-协作式写作模式：先给 2-4 个高层结构方案，每个说明适用场景、主线和取舍；用户可选择、混搭、增删章节。
+协作模式：先给 2-4 个高层结构方案，每个说明适用场景、主线和取舍；用户可选择、混搭、增删章节。
 
 非协作模式：给 1 个推荐结构并说明选择理由；用户未明确要求跳过骨架时，仍需进入「一次性展开并冻结全篇细骨架」。
 
@@ -99,13 +98,14 @@ disable-model-invocation: true
 
 ## 后处理与验证闭环
 
-去 AI 味分两层：写作过程中的活人感纪律（完整规则见 `references/human-writing.md`，2026-08-26 并入原 human-writing）与写入后的扫描（见下）。长稿（非虚构）建议写作前先过 human-writing 的材料门槛，避免产出后用假材料撑篇幅。
+去 AI 味分两层：写作过程中的活人感纪律（完整规则见 `references/human-writing.md`）与写入后的扫描（见下）。长稿（非虚构）建议写作前先过 human-writing 的材料门槛，避免产出后用假材料撑篇幅。
 
 文章写入完成后依次执行：
 
 1. **AI 味扫描**（骨架→句式→词汇→活人感终审，见下）
-2. 执行 `/humanizer`
-3. 执行 `/chinese-markdown-normalizer`
+2. **标点与中英混排复核**（全角/半角标点、中英文之间空格、破折号）。
+
+`humanizer` 与 `chinese-markdown-normalizer` 两个 skill 已退役、目录不存在，不得调用。
 
 ### AI 味扫描（骨架→句式→词汇→活人感终审）
 
@@ -141,3 +141,4 @@ disable-model-invocation: true
 - AI 写作协作纪律（常识区原理、搭骨架五步法、上下文管理、跨模型评估）与待实跑占位节 → `references/ai-writing-discipline.md`
 - AI 味词汇黑名单完整清单 → `references/ai-taste-blacklist.md`
 - 知乎/论坛/公众号长帖、真人/历史/新闻/评测、小说/剧本、特殊形式、审稿规则 → `references/forum-prose.md`、`references/reality.md`、`references/fiction.md`、`references/formats.md`、`references/revision.md`（各自的路由条件见 human-writing.md「按任务读取 references」）
+- 库内低 AI 味范文（文体索引、单篇/多篇/整目录的引用写法）→ `examples/README.md`；具体范文在 `examples/good-samples/`
