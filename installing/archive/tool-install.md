@@ -518,3 +518,10 @@
 - 处置二 `proxy_live_backup.original_config`：手工 JSON 手术删 6 个叶子路径，0 新增，readback MATCH（8,361 → 8,016 B）。长度上涨是重新序列化加缩进所致。
 - 验证：两处与 `settings.json` 逐键一致，无空壳。
 - 回滚点：`~/.claude/backups/plugin-removal-2026-09-25/proxy-snapshot.before.json`、`~/.cc-switch/backups/sync-backup-20260925_141846_905720.json`。
+
+### Motrix 桌面端 + @motrix/cli 登记（2026-09-25）
+- **变更**：`installing/tool-install.md` CLI 工具表加 Motrix、@motrix/cli 两行（此前安装台账各表均无 motrix 记录）。
+- **依据**：用户「我在本地也下载了这个软件和cli」。全局 §7 要求 CLI 与桌面工具在当轮登记。
+- **回退**：`git checkout -- installing/tool-install.md installing/archive/tool-install.md`。
+- **验证**：`winget list` → Motrix 2.0.0-beta.40；`motrix --version` → 0.5.0；`motrix open` → `alreadyRunning:false, launched:true`，bridge ready 1841 ms @ `http://127.0.0.1:16802`；`motrix add` → `status:completed`、`bytesDone:2000000`；磁盘核对 2,000,000 B、`finalPath` 正确；`motrix remove <id> --delete-files` → `{"ok":true}`，任务表回空、文件已删。
+- **未做**：未登记 `AppData/Local/motrix-turbo-updater/`（自更新残留，未核实）；编辑时 `installing/tool-install.md` 正被并行会话改动（last30days/impeccable 清理），本次基于该会话已落盘的内容追加。
