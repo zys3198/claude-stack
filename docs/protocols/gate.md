@@ -71,11 +71,9 @@ python ~/.claude/hooks/scripts/authorization_scope.py match --session-id <id> --
 
 ## 维护条款
 
-**一、分界。** 落点表、字段表、子命令列表、hook 分工与结论会变，整体重写。「被 auto mode 拦下时」一节与「历史」只追加，写完不改。
+**分界。** 落点表、字段表、子命令列表、hook 分工与结论会变，整体重写。「被 auto mode 拦下时」一节与「历史」只追加，写完不改。
 
-**二、删除判据。** 满足其一即删：内容已在 `authorization_scope.py` 或 hook 代码里 → 删（是缓存，会过期）；被本文件后面条目覆盖 → 删旧条；只在特定情形用到 → 下沉 `references/`；指向的目标已不存在 → 删引用，或改指向。
-
-**三、触发点。** 每次编辑本文件时顺手做一遍，不设「定期整理」。正文逼近 20 KB 强制复核，先删再加。
+删除判据与整理触发点各协议通用，见 `~/.claude/docs/protocols-index.md` 的「维护条款」。
 
 ## 历史
 

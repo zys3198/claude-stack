@@ -78,7 +78,7 @@
 | settings.json | 在用 | `~/.claude/settings.json` | 自建 | git | 与 cc-switch common_config 双向同步 |
 | .gitignore skills 白名单 | 在用 | `~/.claude/.gitignore` | 自建 | git | 20 条 `!skills/<name>/` |
 | session-hygiene.json | 在用 | `~/.claude/session-hygiene.json` | 自建 | git | 独占容器清单 |
-| docs/protocols-index.md | 在用 | `~/.claude/docs/protocols-index.md` | 自建 | git | 协议总表；含「落点与命名」规约（原 `docs/protocols.md`） |
+| docs/protocols-index.md | 在用 | `~/.claude/docs/protocols-index.md` | 自建 | git | 协议总表；含「落点与命名」规约（原 `docs/protocols.md`）；2026-09-25 起是「删除判据」「触发点」两条维护条款的唯一来源，各协议正文只留分界 + 指针 |
 | docs/protocols/gate.md | 在用 | `~/.claude/docs/protocols/gate.md` | 自建 | git | 门禁协议；操作规则仍在 `CLAUDE.md` §1.3 |
 | docs/protocols/memory.md | 在用 | `~/.claude/docs/protocols/memory.md` | 自建 | git | 记忆协议；合并宿主格式说明与各项目 MEMORY.md 头部的约定 |
 | installing/ | 在用 | `~/.claude/installing/` | 自建 | git | 四张现状表 + `archive/` |

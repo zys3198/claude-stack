@@ -40,8 +40,6 @@ disable-model-invocation: true
 
 ## 维护条款
 
-**一、分界。** 会变的（Route、Keep in main agent、Boundaries、Configuration gate）整体重写。只增的：本文件没有——判据的依据留在 `references/` 与 `evals/` 里，正文不留历史。
+**分界。** 会变的（Route、Keep in main agent、Boundaries、Configuration gate）整体重写。只增的：本文件没有——判据的依据留在 `references/` 与 `evals/` 里，正文不留历史。
 
-**二、删除判据。** 满足其一即删：内容已在 `references/` 或 `evals/` 里 → 删，它是缓存；被本文件后面条目覆盖 → 删旧条；只在特定情形才用到 → 下沉 `references/`；指向的目标已不存在 → 删引用，或改指向。
-
-**三、触发点。** 每次编辑本文件时顺手做一遍，不设「定期整理」。正文逼近 20 KB 强制复核，先删再加。
+删除判据与整理触发点各协议通用，见 `~/.claude/docs/protocols-index.md` 的「维护条款」。
