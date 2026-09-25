@@ -32,7 +32,7 @@
 | skill-trimmer | 在用 | `~/.claude/skills/skill-trimmer/` | 自建 | git | 含 references/ |
 | task-notes | 在用 | `~/.claude/skills/task-notes/` | 自建 | git | 含 references/；**保持模型可见**（SessionStart hook 按名调用它） |
 
-2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-20260925/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Code\lab-area\notes\skill-hook-review\SKILL-REVIEW.md`。
+2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-2026-09-25/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Code\lab-area\notes\skill-hook-review\SKILL-REVIEW.md`。
 
 ## hook
 
@@ -78,10 +78,12 @@
 | settings.json | 在用 | `~/.claude/settings.json` | 自建 | git | 与 cc-switch common_config 双向同步 |
 | .gitignore skills 白名单 | 在用 | `~/.claude/.gitignore` | 自建 | git | 20 条 `!skills/<name>/` |
 | session-hygiene.json | 在用 | `~/.claude/session-hygiene.json` | 自建 | git | 独占容器清单 |
-| docs/protocols.md | 在用 | `~/.claude/docs/protocols.md` | 自建 | git | 协议总表 |
+| docs/protocols-index.md | 在用 | `~/.claude/docs/protocols-index.md` | 自建 | git | 协议总表；含「落点与命名」规约（原 `docs/protocols.md`） |
 | docs/protocols/gate.md | 在用 | `~/.claude/docs/protocols/gate.md` | 自建 | git | 门禁协议；操作规则仍在 `CLAUDE.md` §1.3 |
 | docs/protocols/memory.md | 在用 | `~/.claude/docs/protocols/memory.md` | 自建 | git | 记忆协议；合并宿主格式说明与各项目 MEMORY.md 头部的约定 |
 | installing/ | 在用 | `~/.claude/installing/` | 自建 | git | 四张现状表 + `archive/` |
+| docs/archive/ | 在用 | `~/.claude/docs/archive/` | 自建 | git | 4 份已废弃的时点产物，文件名 `<日期>-<主题>.md`，日期取内容反映的最新时点 |
+| codex-home-2026-09-09 | 已归档 | `~/.claude/backups/codex-home-2026-09-09/` | 自建（快照） | **无 git 路径** | Codex home 快照，90 文件 / 3,400,308 B；`~/.codex/` 已不存在，**这是唯一副本**；`backups/` 在 `.gitignore` 内，只有一份 |
 | ~/.claude/statusline/ 目录名 | 在用 | `~/.claude/statusline/` | 自建 | git | 与空的 `hooks/statusline/` 不是一处 |
 
 ## 已归档

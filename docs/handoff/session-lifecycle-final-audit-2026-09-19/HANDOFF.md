@@ -19,7 +19,7 @@
 | 用例与预期行为 | `~/.claude/hooks/scripts/selftest.py`，142 个用例 |
 | 第二轮改了什么 | 提交 `622a09a`；合并 `eaa9752` |
 | 第二轮审计的完整清单 | 上一轮对话记录；沉淀在本文第三节与 `622a09a` 的提交信息 |
-| 第一轮审计发现与修复 | 提交 `ad386cc`；修复前基线 `ee3c520`；接手文档 `~/.claude/docs/handoff/session-lifecycle-reaudit/HANDOFF.md` |
+| 第一轮审计发现与修复 | 提交 `ad386cc`；修复前基线 `ee3c520`；接手文档 `~/.claude/docs/handoff/session-lifecycle-reaudit-2026-09-18/HANDOFF.md` |
 
 ```bash
 cd ~/.claude
@@ -147,8 +147,8 @@ git show 8296627:hooks/scripts/session-guard.py    # 第二轮修复前的基线
 
 ## 十、这份文档
 
-位于 `C:\Users\zys31\.claude\docs\handoff\session-lifecycle-final-audit\HANDOFF.md`，在被审计的仓库里，随 `claude-stack` 进版本库。
+位于 `C:\Users\zys31\.claude\docs\handoff\session-lifecycle-final-audit-2026-09-19\HANDOFF.md`，在被审计的仓库里，随 `claude-stack` 进版本库。
 
-上一轮的接手文档在 `~/.claude/docs/handoff/session-lifecycle-reaudit/HANDOFF.md`，内容描述的是第二轮修复之前的状态，只作历史证据读。
+上一轮的接手文档在 `~/.claude/docs/handoff/session-lifecycle-reaudit-2026-09-18/HANDOFF.md`，内容描述的是第二轮修复之前的状态，只作历史证据读。
 
 写完审计、或用户叫停之后，这两份文档都可以直接删。

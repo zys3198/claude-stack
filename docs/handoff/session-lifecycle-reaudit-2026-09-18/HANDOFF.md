@@ -132,7 +132,7 @@ git show ee3c520:hooks/scripts/session-guard.py    # 修复前基线
 
 ## 十、这份文档
 
-位于 `C:\Users\zys31\.claude\docs\handoff\session-lifecycle-reaudit\HANDOFF.md`，在被审计的仓库里，随 `claude-stack` 进版本库。
+位于 `C:\Users\zys31\.claude\docs\handoff\session-lifecycle-reaudit-2026-09-18\HANDOFF.md`，在被审计的仓库里，随 `claude-stack` 进版本库。
 
 原先选定的是 `C:\ZYS\Code\dtsf\.claude\docs\handoff\session-lifecycle-reaudit\HANDOFF.md`，后台任务的隔离保护拒绝了该路径（改动必须落在工作树里，而 dtsf 的 `.claude/` 属于共享检出）。需要挪到那里时，把它复制过去即可。
 

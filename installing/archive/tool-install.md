@@ -1,6 +1,8 @@
 # 工具 / 插件安装台账
 
-记录 CLI 工具、桌面软件、Claude Code 插件 marketplace 与插件启用状态。模板见 [README.md](README.md)。
+> 已归档（2026-09-24 现状表与流水分家）：本文件是**流水**，默认不读，追溯时按名或日期定位；现状表见 [`../tool-install.md`](../tool-install.md)。文中 `[X.md](X.md)` 形式的链接指向本目录内的同名流水。
+
+记录 CLI 工具、桌面软件、Claude Code 插件 marketplace 与插件启用状态。模板见 [`../README.md`](../README.md)。
 
 ---
 
@@ -424,7 +426,7 @@
 - 已删目录：`C:\Users\zys31\.claude\plugins\cache\better-harness\`（插件本体 0.7.0-alpha1）、`C:\Users\zys31\.claude\plugins\marketplaces\better-harness\`（git 克隆，35M）、`C:\Users\zys31\.claude\better-harness\`（空目录）
 - 注册清除：`settings.json` enabledPlugins、`installed_plugins.json`、`known_marketplaces.json` 三处均由上述两条命令自动清除；卸载后 cache 残留 0.7.0-alpha1（带 `.orphaned_at`）由 `Remove-Item -Recurse -Force` 手工补删
 - 引用清理：`skills/code-change-workflow/SKILL.md` 删「Harness 审计触发」规则（指向已不存在的 `/better-harness`）；`docs/config-checklist.md` 删插件行与 marketplace 行并同步计数（启用 23→22、marketplace 13→12）；`installing/plugin-drift-baseline.json` 删基线条目；`.gitignore` 删 `better-harness/` 忽略规则；记忆 `projects/C--Users-zys31/memory/better-harness-diffimpact-overcount.md` 备份到 `memory/recovery/2026-09-19-better-harness-diffimpact-overcount.md` 后删除，并去除 `grill-firstprinciples-claudemd-2026-08-07.md` 中的指向链接
-- 保留未动：`installing/config-slimming-snapshot-20260910.json`（历史快照）、`skills/code-change-workflow/CHANGELOG.md` 两处历史记述、`C:\ZYS\Code\lab-area\exp\2026-09-11-claude-workflow-harness\`（code-change-workflow 的来源实验证据，用户确认保留）
+- 保留未动：`installing/config-slimming-snapshot-2026-09-10.json`（历史快照）、`skills/code-change-workflow/CHANGELOG.md` 两处历史记述、`C:\ZYS\Code\lab-area\exp\2026-09-11-claude-workflow-harness\`（code-change-workflow 的来源实验证据，用户确认保留）
 - 恢复方式：`claude plugin marketplace add QoderAI/better-harness` → `claude plugin install better-harness@better-harness --scope user`
 - 依赖：Node.js，无其他依赖
 - 备注：gitCommitSha 卸载前为 `e084d2c3e3984c7df7ec1fd08f88f05f18270193`；恢复后需重跑证据包 `agentCustomize` 截断验证

@@ -1,10 +1,12 @@
 # Skill 安装台账（外部来源）
 
+> 已归档（2026-09-24 现状表与流水分家）：本文件是**流水**，默认不读，追溯时按名或日期定位；现状表见 [`../skill-install.md`](../skill-install.md)。文中 `[X.md](X.md)` 形式的链接指向本目录内的同名流水。
+
 记录从外部装入的 skill / skill 套件。第三方优先记录 Claude Code 插件；无兼容插件时才记录 `~/.claude/skills/<name>/` 裸 skill。**2026-08-13 起 cc-switch 不再管理 skills**（镜像/skill-backups/repos 已全清，见 memory `skill-mgmt-cc-switch-only`）。不用 agent-skills CLI 跨工具同步。
 
 套装按**仓库级**记一条，内部保留/裁剪写备注，不逐个开条目。自建 skill 不在这里，见 [custom-setup.md](custom-setup.md)。
 
-模板见 [README.md](README.md)。
+模板见 [`../README.md`](../README.md)。
 
 ---
 
@@ -147,7 +149,7 @@
 
 > 2026-08-18 归档登记（wayfinder ticket 02「coding 域深耕判定」）：`design`（来源待补）、`pick-ui-library`（emilkowalski/skills）移入 `~/.claude/archive/`，可逆；判据=未接 frontend-visual 路由且模型原生可覆盖。**2026-09-21 复查：`~/.claude/archive/` 整个目录已不存在，这两项的归档副本同样不可恢复。**
 
-> **2026-09-24 归档（用户拍板「agent-reach 删了吧」）**：`agent-reach` skill 本体 7 文件 / 18056 B → `~/.claude/backups/skill-archive-agent-reach-20260924/agent-reach`；原路径 `~/.claude/skills/agent-reach` 已不存在，`skills/` 剩 22 项。判据=`agent-reach doctor` 仅 5/15 渠道可用，宣称的小红书/微博未解锁、抖音根本不在渠道列表，「零配置」命令全是对另行安装 CLI 的调用，与 last30days 覆盖重叠。`.gitignore:130 skills/*` → 未跟踪，**无 git 恢复路径，归档是唯一副本**。恢复=移回 `~/.claude/skills/agent-reach`。**同轮连带**：`content-to-note` SKILL.md 抖音路由重写——原引用指向的 `agent-reach` 从未支持抖音渠道；改后指向 2026-09-20 实测跑通的路线（浏览器读页 + CDN 音频轨 + 本地 FunASR，脚本在 `exp/2026-09-20-douyin-content-notes/raw/transcribe.py`）。`mcporter` 的 `douyin` server 虽 `mcporter list` 报 healthy，但 `mcp-install.md` 已记两处失效（`videoInfoRes` KeyError、构造函数强依赖 `DASHSCOPE_API_KEY`），skill 内已标注不可用。
+> **2026-09-24 归档（用户拍板「agent-reach 删了吧」）**：`agent-reach` skill 本体 7 文件 / 18056 B → `~/.claude/backups/skill-archive-agent-reach-2026-09-24/agent-reach`；原路径 `~/.claude/skills/agent-reach` 已不存在，`skills/` 剩 22 项。判据=`agent-reach doctor` 仅 5/15 渠道可用，宣称的小红书/微博未解锁、抖音根本不在渠道列表，「零配置」命令全是对另行安装 CLI 的调用，与 last30days 覆盖重叠。`.gitignore:130 skills/*` → 未跟踪，**无 git 恢复路径，归档是唯一副本**。恢复=移回 `~/.claude/skills/agent-reach`。**同轮连带**：`content-to-note` SKILL.md 抖音路由重写——原引用指向的 `agent-reach` 从未支持抖音渠道；改后指向 2026-09-20 实测跑通的路线（浏览器读页 + CDN 音频轨 + 本地 FunASR，脚本在 `exp/2026-09-20-douyin-content-notes/raw/transcribe.py`）。`mcporter` 的 `douyin` server 虽 `mcporter list` 报 healthy，但 `mcp-install.md` 已记两处失效（`videoInfoRes` KeyError、构造函数强依赖 `DASHSCOPE_API_KEY`），skill 内已标注不可用。
 
 插件匹配直接定第三方（不再逐个验证）：Matt 插件 25 裸名、test-driven-development（superpowers）、caveman 套件 7、understand-anything 8。
 
@@ -212,7 +214,7 @@
 
 ### Skill 库精简（2026-09-03，skill-trimmer 流程 + 用户逐项拍板）
 - **卸载（移入备份，非真删）**：learning-guide、article-writing-guide（纯域路由器砍除，下游直达）、lean-ctx、learning-personas、deep-learn、tech-learning-roadmap、expose-unknowns、preflight-check（预检清单并入 code-change-workflow §1.1）、tutorial-maker、ai-coding-coach（学习域收敛用户拍板）、hallmark（与插件 impeccable 重叠，归档 60 天观察至 2026-11-02）、generic-course-tutor-workspace（产物目录挪出）、wiki-skill（lab-area 项目级，与全局 improver-skill 重复）
-- **备份位置**：`~/.claude/backups/skill-trim-20260903/`（含 README.md 判定理由+恢复方式，恢复 = `mv` 回 `~/.claude/skills/`）。**2026-09-21 实测该备份目录已不存在，本批次所有「移入备份」项的恢复路径失效**；`~/.claude/backups/` 现只剩 `claude-md-slim-20260919/`、`drawio-chart-embedded-git-20260919/`、`skill-prune-20260919/` 三项。
+- **备份位置**：`~/.claude/backups/skill-trim-20260903/`（含 README.md 判定理由+恢复方式，恢复 = `mv` 回 `~/.claude/skills/`）。**2026-09-21 实测该备份目录已不存在，本批次所有「移入备份」项的恢复路径失效**；`~/.claude/backups/` 现只剩 `claude-md-slim-2026-09-19/`、`drawio-chart-embedded-git-2026-09-19/`、`skill-prune-2026-09-19/` 三项。
 - **改写**：generic-course-tutor / article-writer / bili-note / content-to-note / wiki-sediment 描述去路由转介自包含；parallel-delegation / bidirectional-steelman / leader 触发面收窄；code-change-workflow 并入 5 项环境预检清单
 - **插件**：`enabledPlugins.open-code-review → false`（review 三重撞车，留 official code-review + matt code-review + ponytail-review），已同步 cc-switch DB common_config_claude（backup: sync-backup-20260903_235738.json），providers commonConfigEnabled 均 True
 - **库规模**：32 目录 → 20 skill
@@ -258,7 +260,7 @@
 - 原安装位置：`~/.claude/plugins/cache/taste-skill/taste-skill/1.0.0`；marketplace：`~/.claude/plugins/marketplaces/taste-skill`。
 - 卸载命令原文：`claude plugin uninstall taste-skill@taste-skill --scope user --yes`；marketplace 清理：`claude plugin marketplace remove taste-skill`；cache 残留清理：`cmd.exe /d /c "rmdir /s /q C:\\Users\\zys31\\.claude\\plugins\\cache\\taste-skill"`。
 - 处置：已从 `settings.json`、`installed_plugins.json`、插件列表移除；marketplace 注册与目录已移除；cache 已删除；cc-switch `common_config_claude` 已由 `settings-sync-auto.py` 同步为 8 个插件。
-- 恢复：重新添加 `Leonxlnx/taste-skill` marketplace 后安装；本轮保留脱敏配置快照 `~/.claude/installing/config-slimming-snapshot-20260910.json`。
+- 恢复：重新添加 `Leonxlnx/taste-skill` marketplace 后安装；本轮保留脱敏配置快照 `~/.claude/installing/config-slimming-snapshot-2026-09-10.json`。
 
 ### wiki 系 skill 迁入 Wiki 项目（2026-09-13，用户拍板「全局只留引用」）
 - 决策：wiki 专属 skill 实体全部归属 `C:\ZYS\Wiki\.claude\`，全局 `~/.claude` 只保留名指针壳（要求先 Read 项目实体再执行；项目外拒绝落盘）。

@@ -32,9 +32,7 @@ claude -w eam-qr-code
 
 `-w` 后面是任务名。会话会在 `<仓库>/.claude/worktrees/eam-qr-code` 里跑，和主检出、和其他会话完全隔离。
 
-任务名要求 kebab-case、2～4 个词、能看懂在做什么。`eam-qr-code`、`oa-dingtalk-sync` 合格，`test`、`tmp`、`fix2`、`agent-a1b0f1bcd643d3066` 不合格。
-
-拦截按 kebab-case 与禁用名单判定，词数不校验。任务是两词或五词的照常放行，`test`、`tmp`、纯日期、`agent-` 与 `worktree-` 开头的名字会被拒绝。
+命名规则见 `~/.claude/docs/protocols-index.md` 的「落点与命名」。名字不合规时命令会被拒绝；词数不校验，两词或五词的照常放行。
 
 ### 已经开着的会话要改代码
 
@@ -176,9 +174,9 @@ git 自己的全局选项里也有吃下一个词的，按同一台机器上 git
 
 heredoc 的正文是喂给命令的数据，拆词前先剥掉，所以提交消息、脚本正文里出现命令字样时不会被当成执行。剥的时候按结束标记定位，找不到标记就原样判定，宁可保守。代价是把正文交给解释器执行的那种写法看不见了，归入下面的已知边界。
 
-判定基准是主检出的 `.claude/worktrees/`。在链接工作树里开会话时 `git rev-parse --show-toplevel` 返回工作树自身，所以改取 `git rev-parse --git-common-dir` 的上一级。命名格式按第 8 节执行：kebab-case，禁用 hash、纯日期和保留名；词数不做校验。
+判定基准是主检出的 `.claude/worktrees/`。在链接工作树里开会话时 `git rev-parse --show-toplevel` 返回工作树自身，所以改取 `git rev-parse --git-common-dir` 的上一级。命名格式见 `~/.claude/docs/protocols-index.md` 的「落点与命名」：kebab-case，禁用 hash、纯日期和保留名；词数不做校验。
 
-拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件由 `/dev-status` 报告；产物放错目录没有自动检查，靠第 8 节的文本约定。
+拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件由 `/dev-status` 报告；产物放错目录没有自动检查，靠 `~/.claude/CLAUDE.md` §8 的文本约定。
 
 非 git 目录里确定不了仓库根，此时对 `git worktree add` 一律拒绝并说明原因，不做猜测。
 
@@ -218,7 +216,7 @@ EOF
 
 **删掉的工作树里有被忽略的文件** —— 分支还在，但被 `.gitignore` 覆盖的内容（构建产物、本地数据库、`.env`）没有其他副本，找不回来。`/dev-status` 会在可清理项上标注「另有 N 项被忽略内容」，看到这行先确认那些文件可以不要，再同意删除。
 
-**拦截太严** —— 检查 `~/.claude/product-guard.log` 看拦了什么。规则本身在 `~/.claude/CLAUDE.md` 第 8 节。
+**拦截太严** —— 检查 `~/.claude/product-guard.log` 看拦了什么。规则本身在 `~/.claude/docs/protocols-index.md` 的「落点与命名」。
 
 **涉及的文件**：
 

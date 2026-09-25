@@ -1,5 +1,7 @@
 # MCP 安装台账
 
+> 已归档（2026-09-24 现状表与流水分家）：本文件是**流水**，默认不读，追溯时按名或日期定位；现状表见 [`../mcp-install.md`](../mcp-install.md)。文中 `[X.md](X.md)` 形式的链接指向本目录内的同名流水。
+
 记录所有 MCP server 的安装信息。配置写在 `C:\Users\zys31\.claude.json` 顶层 `mcpServers` 字段（user scope，全项目生效）。settings.json/settings.local.json 无 MCP 配置。
 
 模板见 [README.md](README.md)。

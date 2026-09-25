@@ -1,7 +1,8 @@
-"""校验 docs/protocols.md 里能机械校验的那两份协议。
+"""校验协议文档里能机械校验的几项：门禁、记忆、命名。
 
 只读，不挂 hook，不阻断操作。退出码 0 表示全过，1 表示有错。
-判据见 docs/protocols/gate.md 与 docs/protocols/memory.md。
+判据见 docs/protocols/gate.md、docs/protocols/memory.md，
+命名一项见 docs/protocols-index.md 的「落点与命名」一节。
 任务笔记与委派两份的「校验」列是 `—`：前者的产物是项目仓库里自由形态的
 扫描稿，后者是 prompt 模板、磁盘上无待验产物，都不存在可判的固定形态。
 
@@ -149,12 +150,52 @@ def check_memory():
     return errors, total, indexed, gone_dirs, gone_files
 
 
+NAMING_ROOTS = ("docs", "installing")
+DATE8 = re.compile(r"(?<!\d)(\d{8})(?!\d)")
+DATE_OTHER = re.compile(r"(?<!\d)(\d{4})[-_](\d{2})[-_](\d{2})(?!\d)")
+
+
+def name_problems(name):
+    """名字里的问题：非 ASCII，或日期词不是 YYYY-MM-DD。"""
+    problems = []
+    if any(ord(c) > 127 for c in name):
+        problems.append("含非 ASCII 字符")
+    for m in DATE8.finditer(name):
+        problems.append(f"日期「{m.group(1)}」不是 YYYY-MM-DD")
+    for m in DATE_OTHER.finditer(name):
+        if m.group(0) != "-".join(m.groups()):
+            problems.append(f"日期「{m.group(0)}」不是 YYYY-MM-DD")
+    return problems
+
+
+def check_naming():
+    """我们自己命名的目录与文件：名字 ASCII，日期词写成 YYYY-MM-DD。
+
+    backups/ 只查顶层——里面装的是被备份内容的快照，名字不由我们定；
+    由我们命名的只有那一个个备份目录本身。
+    """
+    targets = []
+    for rel in NAMING_ROOTS:
+        for dirpath, dirnames, filenames in os.walk(os.path.join(CLAUDE, rel)):
+            targets += [os.path.join(dirpath, n) for n in dirnames + filenames]
+    backups = os.path.join(CLAUDE, "backups")
+    if os.path.isdir(backups):
+        targets += [os.path.join(backups, n) for n in os.listdir(backups)]
+
+    errors = []
+    for p in sorted(targets):
+        for problem in name_problems(os.path.basename(p)):
+            errors.append(f"{os.path.relpath(p, CLAUDE).replace(os.sep, '/')} {problem}")
+    return errors, len(targets)
+
+
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
     gate_errors, key_count = check_gate()
     mem_errors, mem_total, mem_indexed, gone_dirs, gone_files = check_memory()
+    name_errors, name_total = check_naming()
 
     print(
         f"{'门禁':<8} 字段表 {key_count} 键比对 authorization_scope.py"
@@ -167,8 +208,12 @@ def main():
     if gone_dirs:
         print(f"{'':<8} 另有已删项目的 {gone_dirs} 个目录 / {gone_files} 条"
               f"（合计 {mem_total + gone_files} 条），不再被加载，只计数")
+    print(
+        f"{'命名':<8} {name_total} 个名字（backups/ 顶层 · docs/ · installing/）"
+        + (f"，{len(name_errors)} 处不符" if name_errors else "，全相符")
+    )
 
-    errors = gate_errors + mem_errors
+    errors = gate_errors + mem_errors + name_errors
     if errors:
         print()
         for e in errors:

@@ -1,5 +1,7 @@
 # 自建设施台账（非外部安装，自己造的）
 
+> 已归档（2026-09-24 现状表与流水分家）：本文件是**流水**，默认不读，追溯时按名或日期定位；现状表见 [`../custom-setup.md`](../custom-setup.md)。文中 `[X.md](X.md)` 形式的链接指向本目录内的同名流水。
+
 记录自建 skill / hook / statusline / 全局配置的出处与迁移要点。外部装的见 skill-install.md / mcp-install.md / tool-install.md。
 
 自建资产迁移原则：**git 仓库应追踪全部自建 skill**（新增自建 skill 必须在 `.gitignore` 的 skills/ 白名单登记）；`git clone` 即迁；memory 目录（`projects/*/memory/`）需单独拷贝（git 未追踪）。第三方/插件 skill 不在 git，靠 skill-install.md / tool-install.md 记录的地址与命令重装。
@@ -126,7 +128,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 当前状态：已创建；`disable-model-invocation: false`，允许模型按描述自动调用；当前会话可发现该 skill。
 - 验证：固定 `Browser` 探针已连接 CDP、观察登录页、识别 12 个动作并保存登录页截图；未填写、未提交、未写入业务数据。
 - 回退：用户确认后删除上述 skill 目录，并移除 `.gitignore` 中的 `!skills/jev-browser-acceptance-by-user/` 和本条台账记录。
-- **2026-09-24 处置：已合并进 `auto-browser`**，原目录移入 `~/.claude/backups/skills-before-merge-auto-browser-20260924/jev-browser-acceptance/`（1 文件 SKILL.md，4573 B）。判据=与 agent-browser 互补非替代，合并后按环境分支选路线。**更正**：本条记的 `-by-user` 后缀名不适用，实际目录一直是 `~/.claude/skills/jev-browser-acceptance/`（无后缀），`.gitignore` 白名单也一直是 `!skills/jev-browser-acceptance/`。内容未丢：`Browser.reuse` 标签页复用、daemon 5 秒 IPC 上限、凭据脱敏、标签页清单收尾均已写进 auto-browser。恢复=移回 `~/.claude/skills/jev-browser-acceptance`。
+- **2026-09-24 处置：已合并进 `auto-browser`**，原目录移入 `~/.claude/backups/skills-before-merge-auto-browser-2026-09-24/jev-browser-acceptance/`（1 文件 SKILL.md，4573 B）。判据=与 agent-browser 互补非替代，合并后按环境分支选路线。**更正**：本条记的 `-by-user` 后缀名不适用，实际目录一直是 `~/.claude/skills/jev-browser-acceptance/`（无后缀），`.gitignore` 白名单也一直是 `!skills/jev-browser-acceptance/`。内容未丢：`Browser.reuse` 标签页复用、daemon 5 秒 IPC 上限、凭据脱敏、标签页清单收尾均已写进 auto-browser。恢复=移回 `~/.claude/skills/jev-browser-acceptance`。
 
 ### auto-browser（2026-09-24，全局，自建合并）
 - 出处：用户拍板「合并为 auto-browser 单 skill」，把第三方 junction `agent-browser` 与自建 `jev-browser-acceptance` 合为一条，按任务分支。
@@ -137,7 +139,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 当前状态：已创建；`disable-model-invocation: false`，按描述自动调用。
 - 正文修订（2026-09-24，writing-for-agents 审核后）：补回合并时丢失的 JEV 固定脚本约束（不调用 `Agent`／不要求文本模型密钥）、路线 B 执行流程、验收约束、完成标准；description 触发词 6→3；删环境缓存（`skills list` 输出、`uv sync` 装法）；`Browser(url)` 禁令保持祈使语气并指名违规写法。6535 → 7659 B。
 - 并行会话改动（2026-09-24 17:26:37）：项目 `C--ZYS-Code-dtsf` 的 EAM 验收会话直接 Edit 本文件，加「点 naive-ui 组件要用真鼠标事件」一节（源 `jev-browser-acceptance` 备份中无此内容，属该会话新得经验）。已保留。
-- 回退：删 `~/.claude/skills/auto-browser`；从 `~/.claude/backups/skills-before-merge-auto-browser-20260924/` 移回 `jev-browser-acceptance`；按 `skill-install.md` 的 `New-Item -ItemType Junction` 重建 agent-browser junction；`.gitignore` 白名单还原为 `!skills/jev-browser-acceptance/`。
+- 回退：删 `~/.claude/skills/auto-browser`；从 `~/.claude/backups/skills-before-merge-auto-browser-2026-09-24/` 移回 `jev-browser-acceptance`；按 `skill-install.md` 的 `New-Item -ItemType Junction` 重建 agent-browser junction；`.gitignore` 白名单还原为 `!skills/jev-browser-acceptance/`。
 
 当前可用（2026-09-23，20 个，全部带 `-by-user` 后缀，以 `skills/` 实际目录为准）：（**2026-09-24 更正**：`skills/` 下实际**无任何** `-by-user` 后缀目录，是上面这份清单记错了；以 `skills/` 实际目录为准。同日新增 `auto-browser`、移除 `jev-browser-acceptance`。）
 `ai-product-development-by-user`、`article-writer-by-user`、`awesome-design-md-by-user`、`bidirectional-steelman-by-user`、`cc-switch-setting-sync-by-user`、`code-change-workflow-by-user`、`company-discovery-evaluation-by-user`、`content-to-note-by-user`、`dev-clean-by-user`、`dev-status-by-user`、`drawio-article-illustration-by-user`、`drawio-chart-by-user`、`improver-skill-by-user`、`install-ledger-by-user`、`instruction-engineering-by-user`、`jev-browser-acceptance-by-user`、`parallel-delegation-by-user`、`skill-auditor-by-user`、`skill-trimmer-by-user`、`toolchain-pitfalls-by-user`。
@@ -330,7 +332,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 配置：原生 Edit 移除六条注册及相应无内容的事件组；现有五个本地入口、七条注册保留，enabledPlugins 未改。每次配置 Edit 后 settings-sync-auto 回报 `[DONE]`。
 - 执行：`python312 -` 接收 PowerShell here-string 脚本；删除语句为 `(root/'hooks'/name).unlink()`，`root=Path('C:/Users/zys31/.claude')`，name 遍历上述六个文件。删除前断言 settings 与 cc-switch common_config_claude 无对应注册，且脚本与备份逐字节一致。
 - 脚本备份：`C:/ZYS/Code/lab-area/exp/2026-09-08-hook-repair/pruned-six/`；同目录 `hook-baseline.json` 保存卸载前注册及插件开关，不含 provider 凭据。
-- 配置备份：`~/.claude/backups/settings-before-six-hook-prune-20260908-112215.json`。**2026-09-21 实测该文件已不存在，本条的恢复路径失效**；`~/.claude/backups/` 现只剩 `claude-md-slim-20260919/`、`drawio-chart-embedded-git-20260919/`、`skill-prune-20260919/` 三项。同条目引用的 `~/.claude/hooks/HOOKS_BACKUP.md` 与 `hook-baseline.json` 亦需按上表复查。
+- 配置备份：`~/.claude/backups/settings-before-six-hook-prune-20260908-112215.json`。**2026-09-21 实测该文件已不存在，本条的恢复路径失效**；`~/.claude/backups/` 现只剩 `claude-md-slim-2026-09-19/`、`drawio-chart-embedded-git-2026-09-19/`、`skill-prune-2026-09-19/` 三项。同条目引用的 `~/.claude/hooks/HOOKS_BACKUP.md` 与 `hook-baseline.json` 亦需按上表复查。
 - 保留：`git_guard.py`、`secret_guard.py`、`ecc-metrics-bridge.js`、`settings-sync-auto.py`、`settings-degrade-guard.py`；全部插件 hook、共享库、历史日志及状态数据。Python／Node 未卸载，权限规则未改。
 - 验证：卸载回归 6/6 通过；本地与 cc-switch hooks、enabledPlugins 读回一致，剩 5 个入口、7 条本地注册。退休 recorder 的 6 个专属测试已移除，保留 4 个 Git／密钥守卫测试；后者实跑 3 通过、1 错误（组合 Git 命令授权预期与现行返回不一致，JSONDecodeError）。原测试备份也复现该问题，本轮未修改守卫实现或断言。
 - 恢复：仅经用户授权后从备份复制脚本、按 hook-baseline.json 恢复相应注册并同步 cc-switch；不要整体覆盖当前 settings，以免回滚其他后续变更。
@@ -581,14 +583,14 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 ### 自建 skill 精简批次（2026-09-19，用户逐项拍板）
 
-- **删除 `generic-course-tutor`**：`~/.claude/skills/generic-course-tutor/SKILL.md`（单文件），同步移除 `.gitignore` 白名单行 `!skills/generic-course-tutor/`。备份：`~/.claude/backups/skill-prune-20260919/skills/generic-course-tutor/`。
-- **删除 `ai-readable-project`，思想并入 `instruction-auditor`**：原 8 个文件（SKILL.md、evals ×2、references/DESIGN.md 与 refactor-roadmap.md、templates ×3）。并入内容为上下文工程四类上下文、产物结构、六步执行流程、完成条件、债务观察清单、`@AGENTS.md` 单源双生态文件策略、维护规则；三个模板移到 `instruction-auditor/references/templates/`。未并入：`references/refactor-roadmap.md`（重构五步路线属 code-change-workflow 域）。备份：`~/.claude/backups/skill-prune-20260919/skills/ai-readable-project/`。
-- **删除 `wiki-sediment`**：全局 `~/.claude/skills/wiki-sediment/` 是悬空指针，它指向的 `C:\ZYS\Wiki\.claude\skills\wiki-sediment\SKILL.md` 在此之前已不存在（Wiki 仓库 git status 记为未提交删除）。同时删除全局 `~/.claude/commands/wiki-save.md`；用户同日删除整个 `C:\ZYS\Wiki` 目录，Wiki 侧 `wiki-save` 命令随之消失。两份命令文件备份：`~/.claude/backups/skill-prune-20260919/commands/` 与 `wiki-commands/`。
+- **删除 `generic-course-tutor`**：`~/.claude/skills/generic-course-tutor/SKILL.md`（单文件），同步移除 `.gitignore` 白名单行 `!skills/generic-course-tutor/`。备份：`~/.claude/backups/skill-prune-2026-09-19/skills/generic-course-tutor/`。
+- **删除 `ai-readable-project`，思想并入 `instruction-auditor`**：原 8 个文件（SKILL.md、evals ×2、references/DESIGN.md 与 refactor-roadmap.md、templates ×3）。并入内容为上下文工程四类上下文、产物结构、六步执行流程、完成条件、债务观察清单、`@AGENTS.md` 单源双生态文件策略、维护规则；三个模板移到 `instruction-auditor/references/templates/`。未并入：`references/refactor-roadmap.md`（重构五步路线属 code-change-workflow 域）。备份：`~/.claude/backups/skill-prune-2026-09-19/skills/ai-readable-project/`。
+- **删除 `wiki-sediment`**：全局 `~/.claude/skills/wiki-sediment/` 是悬空指针，它指向的 `C:\ZYS\Wiki\.claude\skills\wiki-sediment\SKILL.md` 在此之前已不存在（Wiki 仓库 git status 记为未提交删除）。同时删除全局 `~/.claude/commands/wiki-save.md`；用户同日删除整个 `C:\ZYS\Wiki` 目录，Wiki 侧 `wiki-save` 命令随之消失。两份命令文件备份：`~/.claude/backups/skill-prune-2026-09-19/commands/` 与 `wiki-commands/`。
 - **`content-to-note` 移回全局**：实体从 `C:\ZYS\Wiki\.claude\skills\content-to-note\` 移回 `~/.claude/skills/content-to-note\`（16 个源码文件 + `scripts/wechat/node_modules`，合计 12M），覆盖原指针 SKILL.md。SKILL.md 与 `references/note-template.md` 改写落盘约定：删除 wiki 固定目录（`71-公众号文章/`、`70-视频笔记/`）与仓库根 `.archive/`，改为**调用时由用户指定笔记目录**，未指定就不落盘、只输出到对话；归档目录默认取笔记目录下的 `.archive/<slug>/`。`.gitignore` 保留 `!skills/content-to-note/`，新增 `skills/content-to-note/scripts/wechat/node_modules/` 排除，12M 依赖不入 git。
 - **`bidirectional-steelman` 触发条件重写**：原 description 只暴露「用户明确要求方案对比」一条路径，并写着「普通『该不该/哪个好』问答不触发」，与正文触发范围（「该不该」「值不值得」「哪个好」「怎么办」问句触发）直接矛盾，这是它在真实决策场景从不触发的直接原因。description 改为把三类未决取舍纳入触发，负向边界收为「只有唯一可验证答案的事实问题、方案已定的执行任务、用户要求直接给结论」。版本标记 v1.1.0 → v1.2.0。正文未改。
 - **验证**：`content-to-note` 的 `python -m pytest tests` → 26 passed；`check_environment.py --json` 核心路线 OK（Python 3.12.10、脚本齐全、ffmpeg 与 yt-dlp 在位；funasr 缺失属增强路线）；wechat 依赖 `node -e require('cheerio'/'dayjs'/'qs')` 加载正常。`git status -- skills/` 确认三处删除、三处修改、新增文件目录正确，无 node_modules 泄漏。`instruction-auditor` 与 `bidirectional-steelman` 的新 description 已被宿主热加载（会话内实证）。
 - **未验证**：`content-to-note` 新落盘约定的真实执行（需要一次真实链接提取）；`instruction-auditor` 第一部分未在真实项目上跑过；`bidirectional-steelman` 新触发条件是否在真实决策场景命中，需后续观察。
-- **回退**：三个删除项从 `~/.claude/backups/skill-prune-20260919/` 复制回原位，并恢复 `.gitignore` 白名单行；`content-to-note` 的项目实体可从 Wiki git 仓库历史取回；`bidirectional-steelman` 的 description 恢复为 v1.1.0 文本。
+- **回退**：三个删除项从 `~/.claude/backups/skill-prune-2026-09-19/` 复制回原位，并恢复 `.gitignore` 白名单行；`content-to-note` 的项目实体可从 Wiki git 仓库历史取回；`bidirectional-steelman` 的 description 恢复为 v1.1.0 文本。
 
 ### 自建 skill 目录统一加 `-by-user` 后缀（2026-09-19，用户拍板）
 
@@ -966,7 +968,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **变更**：20 个自建 skill 目录去 `-by-user` 后缀；唯一例外 `toolchain-pitfalls-by-user` → `local-env-pitfalls`。本文件此前各条保留旧名——那是当时的事实，同 `coding-workflow/CHANGELOG.md:34` 口径。
 - **同期改**：全局 `CLAUDE.md`（13 处）、`.gitignore` 白名单（21 → 20 条，删去已归档的 `company-discovery-evaluation` 死行）、`hooks/` 4 文件（含 `settings-sync-auto.py:7`、`settings-degrade-guard.py:20` 两处代码路径常量）、`docs/session-lifecycle.md`、`plans/` 2 文件（10 处，含 `humble-swimming-scott.md` 一条 skill 脚本路径）、`external-configs/README.md`、lab-area 与 dtsf 记忆及交接文档、skill 内交叉引用（69 文件 133 处）。
 - **不改**：`installing/` 全部、各 `CHANGELOG.md`、`archive-skills/`、会话转录。
-- **备份**：`~/.claude/backups/skill-rename-20260924/`（含改前逐文件副本与 sha256 校验）。
+- **备份**：`~/.claude/backups/skill-rename-2026-09-24/`（含改前逐文件副本与 sha256 校验）。
 - **回退**：目录改回原名，`.gitignore` 白名单同步改回。
 
 ### 全局 `CLAUDE.md` 增 §5.3 文件内容（2026-09-24）
@@ -980,7 +982,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **变更**：`~/.claude/CLAUDE.md` §5.1 加 3 条（删填充词·客套·无对象模糊限定｜短语片段可成句｜术语精确·代码与报错原样引用），§5.2 加 2 条（安全警告·不可逆确认·多步流程切回完整表达｜提交信息与注释不简化）。来源是 caveman 插件 SessionStart 注入的 1,230 字符 ruleset，改写为中文适用版。
 - **依据**：用户当日定「caveman 提取到本地、ponytail 不动」。原 ruleset 里删 a/an/the、短同义词等是英文专用，中文无效，故改写非照抄；§5.1 原有「直接肯定句、删空泛总起」已覆盖其一半，只补差值。
 - **未做**：caveman 插件**尚未卸载**——等用户新会话验证新文本生效后再卸。卸载会删 `plugins/cache/caveman/caveman/25d22f864ad6`，届时先整份备份。
-- **备份**：`~/.claude/backups/claude-md-caveman-20260924/CLAUDE.md.before`（13,317 B 改前全文）。
+- **备份**：`~/.claude/backups/claude-md-caveman-2026-09-24/CLAUDE.md.before`（13,317 B 改前全文）。
 - **回退**：还原该备份；或删掉 §5.1 后 3 条与 §5.2 后 2 条。
 - **备注**：caveman 实际注入的是 `src/hooks/caveman-activate.js` 内的 fallback 常量——SKILL.md 路径算错（`<root>/src/skills/` 不存在），readFileSync 抛错走 catch。故三档注入完全相同（1,230 字符），SKILL.md 从未被读。
 
@@ -990,7 +992,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **依据**：REPORT 第 3.3 节 C1/C2；判据 S4（前置领先词·一分支一触发·砍正文已承载的身份说明·禁 no-op·不写否定式）与 S5（只有「模型必须自己够得着」或「被别的 skill 调用」才留 model-invoked）。用户 09-24 确认两项决策：① 转 user-invoked ② 删 4 条交叉排除句。
 - **效果**：自建常驻 description 857→292 字符（每轮省 ≈353 token）；user-invoked 1,558→421；否定式命中 5→0。
 - **范围排除**：`agent-browser` 不在 `.gitignore` 白名单（第三方），不改——改了下次安装会被覆盖。`agent-browser` 与 `jev-browser-acceptance` 当日被**另一会话**合并为 `auto-browser`，一并划出本任务范围。
-- **备份**：`~/.claude/backups/skill-desc-20260924/<name>/SKILL.md`（全量 21 个，改前原样）。
+- **备份**：`~/.claude/backups/skill-desc-2026-09-24/<name>/SKILL.md`（全量 21 个，改前原样）。
 - **回退**：从该备份目录按名还原对应 `SKILL.md`。
 - **未做**：`~/.claude/` 未提交 git（工作树混有其他会话的在改内容，按先例不动）；`leader`/`agent-reach` 的白名单缺口（N10）与本项无关。
 
@@ -1001,7 +1003,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **判定该留的 7 条**：`:44`（权限判定，§1.2 无依据保持现状）、`:52`（四条硬禁止，无从正面表述）、`:74`（同上）、`:112`（防作弊护栏）、`:164`（条件规则非禁令）、`:182`（对比句式）、`:187`（= E4）。
 - **3 条被分类器拦**（**判得对，未绕过**）：`:89` 删「不要求完整文件回显」→ `[Self-Modification]`；`:173` 改「先经用户确认」→ 授权相关拦截；`:186` 删「不直接执行」→ `[Security Weaken]`。详见 `notes/claude-config-standards/pending-manual-edits.md` 的 E5/E6/E7。
 - **效果**：否定词词频 31 → 13，命中行 24 → 10；§0–§8 九个顶层节与 22 个标题不变。
-- **备份**：`~/.claude/backups/claude-md-c8-20260924/CLAUDE.md.before`（13,911 B 改前全文）。
+- **备份**：`~/.claude/backups/claude-md-c8-2026-09-24/CLAUDE.md.before`（13,911 B 改前全文）。
 - **回退**：还原该备份；或按 `pending-manual-edits.md` 的逐条对照反改。
 - **做法**：全程用 Edit 工具逐条改，**不走脚本**——脚本会把编辑绕过分类器，等于绕过守卫。
 
@@ -1023,7 +1025,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **依据**：S6 原第二句「skill 目录只许放 `SKILL.md` 和 `references/`」**无出处**——`writing-for-agents:35` 明文允许 references「lives anywhere and any document can point at」，第 39 行只支撑第一句「按分支切」。**反证**：4 个 skill 靠同目录脚本自包含，搬迁即断——`skill-trimmer:22`（安装根由自身 `scripts/` 路径推导）、`cc-switch-setting-sync:36/49/77`（`python scripts/sync_claude_common.py`）、`content-to-note:24`（`$skill\scripts\run_bili_note.py`）、`improver-skill:9`（「只调用 Skill 根目录中的 `wikiskill.py`」）。`find ~/.claude/skills -mindepth 3 -name SKILL.md` **零结果**，原句想防的「子目录 SKILL.md 被注册成独立 skill」本机不存在。`scripts/` `tests/` `evals/` `examples/` `assets/` `LICENSE` **恒不注入上下文**，是结构与正确性问题、不是 token 成本问题。
 - **用户裁决 2026-09-24**：① S6「收窄」，11 个 skill 目录一律不动；② 三处实缺「三步都清」。
 - **做法**：清扫全程 **move、零 remove**——`.DS_Store` 也是移出而非删除。首版含 `os.remove` 被 `[Irreversible Local Destruction]` 整批拦下，改纯 move 后通过。
-- **备份**：`~/.claude/backups/skill-archive-20260924/`——`DS_Store-article-writer-examples`（6,148 B）、`archive/sync_codex_common.py.codex.bak`（4,879 B），sha256 与移出前一致。
+- **备份**：`~/.claude/backups/skill-archive-2026-09-24/`——`DS_Store-article-writer-examples`（6,148 B）、`archive/sync_codex_common.py.codex.bak`（4,879 B），sha256 与移出前一致。
 - **回退**：两份按原路径移回。文件名反改：`step-模型推广商务合作.md` 经 `encode('gbk').decode('utf-8')` 即回原名。
 - **验证**：独立复查（不复用脚本自报）三项残留全 0；`~/.claude` 全量 grep 对 `.archive`、`codex.bak`、乱码名 **零活引用**；`article-writer/examples/` 余下 `README.md`/`tool.md` 未动。
 - **未做**：`~/.claude/` 未提交 git（工作树混有其他会话在改内容，按先例不动）。
@@ -1033,7 +1035,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **变更**：① `skills/skill-auditor/SKILL.md` 第 0 步补一句指针，指向其 `references/MAINTENANCE.md`；② `skills/instruction-engineering/references/DESIGN.md`（3,639 B）移出到 `docs/skills/instruction-engineering/DESIGN.md`；③ `skills/article-writer/SKILL.md`「按需读取」列表补一条指向 `examples/README.md` 与 `examples/good-samples/`；④ `article-writer` 删掉对 `/humanizer`、`/chinese-markdown-normalizer` 的调用，并留一句点名禁令；⑤ `skills/drawio-chart/SKILL.md` 补一条指针指向 `examples/`（5 个 `.drawio`），`skills/article-writer/examples/README.md` 点名根下两篇范文，`docs/skills/drawio-chart/README.md` 删掉 6 个不存在的 `examples/*.md` 文件名、改列真实 5 个 `.drawio`；⑥ `notes/claude-config-standards/orphans.py` 可达性规则修正。
 - **依据**：两条客观扫描。**孤儿扫描**（文件在 skill 目录里但 `SKILL.md` 及其引用的 md 从不提，模型够不到）：`skill-auditor/references/MAINTENANCE.md` 是其自身十查第 10 项要求的「维护入口」，`coding-workflow:74` 有同款指针，此处漏；`instruction-engineering/references/DESIGN.md` 内容是设计来源（原文链接）+决策表+YAGNI 边界，属历史档案非运行正文，落点与 C4 同房规；`article-writer` 全文无 `examples` 字样，而 `examples/README.md` 是整棵范文树的索引；`drawio-chart` 同样全文无 `examples` 字样。**死引用扫描**（`/skill`、`plugin:skill` 与已知 71 个 skill 名单全量比对，扫面 327 个文件）：`/humanizer` 与 `/chinese-markdown-normalizer` 都不存在——台账 234 行记后者「已退役」，前者属 2026-08-13 消失且不恢复的 7 个之一（`humanizer-zh`），`~/.codex/skills` 整个不存在。
 - **做法**：`DESIGN.md` 用 `shutil.move` 单文件搬迁、零 remove；其余为文件编辑。扫描器 v1 只按文件名精确匹配，把目录指针（`examples/`）与模式指针（`references/design-md/<brand>/DESIGN.md`）下的文件全判成孤儿（`awesome-design-md` 74 个、`drawio-chart` 5 个都是误报）。v2 加两条规则：目录 token 命中带边界判定（`references/x.md` 不算点名 `references/`，否则一个文件名前缀就把整目录放过）、S6 已定恒不注入的 `scripts/` `tests/` `evals/` `assets/` `LICENSE*` 单列豁免不计孤儿。
-- **备份**：`~/.claude/backups/skill-opt-20260924/`——`skill-auditor-SKILL.md`、`instruction-engineering-DESIGN.md`、`article-writer-SKILL.md`、`article-writer-human-writing.md`、`article-writer-examples-README.md`、`article-writer-examples-README-2.md`、`drawio-chart-SKILL.md`、`drawio-chart-docs-README.md`。
+- **备份**：`~/.claude/backups/skill-opt-2026-09-24/`——`skill-auditor-SKILL.md`、`instruction-engineering-DESIGN.md`、`article-writer-SKILL.md`、`article-writer-human-writing.md`、`article-writer-examples-README.md`、`article-writer-examples-README-2.md`、`drawio-chart-SKILL.md`、`drawio-chart-docs-README.md`。
 - **回退**：`DESIGN.md` 按原路径移回；各 md 用备份覆盖。
 - **验证**：`DESIGN.md` 搬迁前后 sha256 一致（`f73b3f33…`）、3,639 B。扫描器修正后**真孤儿 0**（豁免单列 41 个）。O1–O5 各自另有直接 Grep 独立确认——改前对应 `SKILL.md` 对该文件名零命中——不依赖扫描器数字。`orphans-dirprobe.py` 可复跑，用于检查目录规则是否过宽（当前只有 `awesome-design-md` 73 个与 `drawio-chart` 5 个靠目录命中，两处都是真目录指针）。
 - **未做**：`drawio-chart/examples/` 与 `article-writer/examples/` 根下两篇范文**按用户裁决留原位、只补指针**，未搬移、未删除。
@@ -1055,17 +1057,17 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **依据**：C8 否定表述逐条判的收尾项，清单 [notes/claude-config-standards/pending-manual-edits.md](file:///C:/ZYS/Code/lab-area/.claude/worktrees/claude-config-standards/notes/claude-config-standards/pending-manual-edits.md)。E8 内容来自 C5 的 B 类记忆 `classifier-blocks-confirmation-line-edits`，**只落第 1 层（判定分层）**；第 2 层解锁路径（临时切 acceptEdits / bypassPermissions）**不进 `CLAUDE.md`**，留在 `~/.claude/docs/` 的会话与权限说明里。
 - **做法**：全部为 Edit 工具单条编辑，无脚本、无 sed、无子代理。E4/E5/E6/E8 首次提交均被分类器拦下并记录在案；用户 2026-09-24 明确指示后，用**同一工具、同一文本**原样再提交，由分类器自行判定放行。**未换工具、未改写、未改道**——分类器逐次独立判定，不是一次否决就永久否决。
 - **记忆**：`classifier-blocks-confirmation-line-edits` 的内容已被 `CLAUDE.md:48` 完全覆盖，按 C5 的 M4 判据（落地即删源）处理。`mv` 进 `projects/C--ZYS-Code-lab-area/memory/recovery/2026-09-24-2-classifier-blocks-confirmation-line-edits.md`——**纯移动、零删除**；`mv -n` 因目录内已有同日 3 份历史备份而挡住覆盖，故按该目录既有的 `-2` 去重惯例另起名。`MEMORY.md` 索引行同步清除。
-- **备份**：`backups/claude-md-e4e8-20260924/CLAUDE.md.before`（改前快照，sha256 `5e07edfc05dec78771aaf5261ad4213be7547eb8aeddcd66a1a2ecc3f6b48fbd`）。
-- **回退**：`cp ~/.claude/backups/claude-md-e4e8-20260924/CLAUDE.md.before ~/.claude/CLAUDE.md`。记忆回退：把 `recovery/2026-09-24-2-classifier-blocks-confirmation-line-edits.md` 移回 `memory/` 并去掉文件名日期前缀，再把索引行加回 `MEMORY.md` 的「记忆操作约定」节。
+- **备份**：`backups/claude-md-e4e8-2026-09-24/CLAUDE.md.before`（改前快照，sha256 `5e07edfc05dec78771aaf5261ad4213be7547eb8aeddcd66a1a2ecc3f6b48fbd`）。
+- **回退**：`cp ~/.claude/backups/claude-md-e4e8-2026-09-24/CLAUDE.md.before ~/.claude/CLAUDE.md`。记忆回退：把 `recovery/2026-09-24-2-classifier-blocks-confirmation-line-edits.md` 移回 `memory/` 并去掉文件名日期前缀，再把索引行加回 `MEMORY.md` 的「记忆操作约定」节。
 - **验证**：`CLAUDE.md` 199 行 / 16,819 B，§0–§8 九个标题完整；`grep -n "不要求完整文件回显"` 与 `grep -n "不自动把实验内容同步"` 均零命中；`grep -n "禁止 force push"` 只剩 §1.3 那一处。记忆目录 22 个 `.md` / 索引 22 条链接 = feedback 1 · project 7 · reference 14，悬挂 0、未收录 0、重复 0、五个分节完整。
 - **未做**：E7 保留（共享容器的 fail-safe，删掉是真减一层保护）。`~/.claude` 仓库未提交——该仓库有 27 处其他会话的未提交改动，按路径限定提交仍会混入，沿用先例不动。
 
 ### hooks/lib 三个 JS 移出（2026-09-24）
 
-- **变更**：`hooks/lib/` 下 `agent-data-home.js`（6,661 B）、`session-bridge.js`（5,029 B）、`utils.js`（18,952 B）共 30,642 B → `backups/hook-orphans-20260924/lib/`。
+- **变更**：`hooks/lib/` 下 `agent-data-home.js`（6,661 B）、`session-bridge.js`（5,029 B）、`utils.js`（18,952 B）共 30,642 B → `backups/hook-orphans-2026-09-24/lib/`。
 - **依据**：全盘 `require` 搜不到任何加载方，两个 `.ps1` hook 不调 node。三个原消费者（`ecc-metrics-bridge.js`、`check-console-log.js`、`gateguard-destructive`）今天已全部移出或本就消失。台账 346 行有用户 2026-09-21「不删除 hooks/lib 共享库」的决定，该决定仍立但依据已空，**2026-09-24 交用户重判，用户裁「移出到 backups」**。
 - **做法**：`shutil.move`，零 remove。移动前断言目标不存在、`hooks/**` 内已无 `./lib/` 或 `hooks/lib` 引用。
-- **备份**：即移出目标 `backups/hook-orphans-20260924/lib/`（移动即备份）。
+- **备份**：即移出目标 `backups/hook-orphans-2026-09-24/lib/`（移动即备份）。
 - **回退**：按原路径移回。
 - **验证**：三个文件移前移后 sha256 一致（`e4ce80aa…`、`afbf65ff…`、`f0ad3484…`）；`hooks/lib/` 现为空目录；`statusline/lib/` 同名三份未动（其 `utils.js` 是另一份 1,540 B）。
 
@@ -1075,16 +1077,16 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **依据**：用户 2026-09-24 质询裁定——协议按领域**各配一份**（不是一份通用文件协议），台账取「现状表 + 流水分家」，存量纯 move，并要求全程贯彻渐进式披露。二分判据定为「现状表只放会变的，流水只放不变的」，据此安装日期 / 命令原文 / 验证输出进流水，状态 / 位置 / 恢复进现状表。
 - **新增字段**：现状表固定 6 列 `名称｜状态｜位置｜出处｜恢复｜备注`，状态枚举 `在用／停用／已归档／待核`。`待核` 是本轮新增的值——位置未能当场核实的条目需要一个不说谎的落点，且规定下次触发时必须消解成另外三个之一。
 - **顺带修**：`skills/leader/`（当日 17:15 生成，全部台账零记录）不在 `.gitignore` 白名单，一直被 git 忽略；内容为自建方法论、无上游仓库、无 LICENSE，删了无处重装 → 补 `!skills/leader/`。白名单 21 条 = 磁盘 21 个目录。
-- **备份**：`backups/ledger-protocol-20260924/`——四份流水 + `README.md` + `install-ledger-SKILL.md`，sha256 与改前逐条一致（`custom-setup 459bd31f…`、`skill-install 1d45b3c0…`、`tool-install 855e649e…`、`mcp-install 51340f70…`）。
-- **回退**：`mv installing/archive/*.md installing/`；`cp backups/ledger-protocol-20260924/* .`；SKILL.md 与 README 用备份覆盖；`.gitignore` 删 `!skills/leader/` 一行、注释指回旧路径。
+- **备份**：`backups/ledger-protocol-2026-09-24/`——四份流水 + `README.md` + `install-ledger-SKILL.md`，sha256 与改前逐条一致（`custom-setup 459bd31f…`、`skill-install 1d45b3c0…`、`tool-install 855e649e…`、`mcp-install 51340f70…`）。
+- **回退**：`mv installing/archive/*.md installing/`；`cp backups/ledger-protocol-2026-09-24/* .`；SKILL.md 与 README 用备份覆盖；`.gitignore` 删 `!skills/leader/` 一行、注释指回旧路径。
 - **验证**：搬运前后 sha256 逐条一致（纯 move，内容零改动）；`ledger_check.py` 退出码 0，四表 96 行 / 15.9 KB / 待核 9；`git check-ignore skills/leader/SKILL.md` 不再命中。
-- **未做**：`auto-log.jsonl`、`config-slimming-snapshot-20260910.json`、`plugin-drift-baseline.json` 三个数据文件留在原处未动——它们不是流水，是运行时数据。`statusline/` 里发现的 5 文件死代码簇（`context-monitor.js` / `cost-tracker.js` / `metrics-bridge.js` / `lib/utils.js` / `lib/agent-data-home.js`，约 30 KB）只登记为 `停用`，未删未移，等用户处置。`tool-install.md` 6 条 + `mcp-install.md` 3 条 `待核` 未消解。
+- **未做**：`auto-log.jsonl`、`config-slimming-snapshot-2026-09-10.json`、`plugin-drift-baseline.json` 三个数据文件留在原处未动——它们不是流水，是运行时数据。`statusline/` 里发现的 5 文件死代码簇（`context-monitor.js` / `cost-tracker.js` / `metrics-bridge.js` / `lib/utils.js` / `lib/agent-data-home.js`，约 30 KB）只登记为 `停用`，未删未移，等用户处置。`tool-install.md` 6 条 + `mcp-install.md` 3 条 `待核` 未消解。
 
 ### 台账协议按 writing-for-agents 复核改造（2026-09-24）
 
 - **变更**：`install-ledger` 二次改造。① 6 列定义从 `references/ledger-protocol.md` 收回 `SKILL.md`（登记与核对两个分支都要用，属每次触发），`ledger-protocol.md` 只留二分判据 / 流水格式 / 归档规则 / 组织规则。② `ledger-protocol.md` 加一句指针回指 `../SKILL.md`，不再重述列定义。③ `references/verification.md` 的禁止式表述改写成正面目标（「不猜来源、日期、版本」→「只填实测到的值」等 5 处）。④ `scripts/ledger_check.py` 新增 `plugin_state_check()`：`tool-install.md` 插件表（位置前缀 `plugins/cache/`）的 `在用`/`停用` 与 `settings.json → enabledPlugins` 逐项比对，键按 `名字@marketplace` 取名字段。
 - **依据**：用户 2026-09-24 指示参考 `mattpocock-skills:writing-for-agents`。对着它自审出三处真问题——状态枚举与「已卸载不进现状表」在两份文件里各写一遍（违反单一事实源）；执行流程第 3 步「核对运行时状态与台账一致」无法一眼判定做没做（完成判据模糊）；`tool-install.md` 把 `enabledPlugins` 抄成 7 行状态却没有防漂移机制（缓存会过期）。三点按同一份文档的渐进式披露判据修：**每个分支都要用的内联，只有部分分支才到的下沉**——先前放反了。
-- **回退**：`cp backups/ledger-protocol-20260924/install-ledger-SKILL.v1.md skills/install-ledger/SKILL.md`、`install-ledger-ledger-protocol.v1.md → references/ledger-protocol.md`、`install-ledger-verification.v1.md → references/verification.md`；`ledger_check.py` 删除 `plugin_state_check()` 函数及其在 `main()` 里的调用两段。
+- **回退**：`cp backups/ledger-protocol-2026-09-24/install-ledger-SKILL.v1.md skills/install-ledger/SKILL.md`、`install-ledger-ledger-protocol.v1.md → references/ledger-protocol.md`、`install-ledger-verification.v1.md → references/verification.md`；`ledger_check.py` 删除 `plugin_state_check()` 函数及其在 `main()` 里的调用两段。
 - **验证**：改后 sha256 —— `SKILL.md 8158b9c2…`、`ledger-protocol.md cb3d123b…`、`verification.md e26abdcd…`、`ledger_check.py 9b9de333…`；改前（`.v1`）`SKILL.md 72db403a…`、`ledger-protocol 11a83020…`、`verification 78e9d4b8…`。`ledger_check.py` 退出码 0：四表 96 行 / 15.9 KB / 待核 9，插件状态 7 行全相符，`archive/` 四份齐。**证伪测试**用临时夹具跑 5 个用例（全相符 / 表写在用而实际停用 / 表写停用而实际启用 / 表里缺一条 / 表里多一条）全部按预期报错或通过，并验证同名 marketplace 行（`plugins/marketplaces/`）不计入插件行——校验非空转。
 - **未做**：证伪测试脚本留在 `$CLAUDE_JOB_DIR/tmp/`，未落进 `skills/install-ledger/scripts/`，避免再造孤立测试（`hooks/tests/test_install_ledger_reminder.py` 即前例），待用户裁。上一段「台账协议改造」条目写在本格式定型之前，字段是 8 个（含 新增字段/顺带修/备份），按「存量条目搬家时一字不动」未改。`statusline/` 死代码簇、`hooks/tests/` 孤立测试、`hooks/lib/` 与 `hooks/statusline/` 空目录、9 条 `待核` 均维持原状。
 
@@ -1092,7 +1094,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 - **变更**：① `settings.json` 摘除 `herdr-agent-state.ps1` 的 SessionStart 注册（原 `hooks.SessionStart[1]`，matcher `*`，timeout 10）——该组整块删除。② 删 `hooks/lib/`、`hooks/statusline/` 两个空目录。③ 删 `hooks/tests/test_install_ledger_reminder.py`。④ 因 ① 使 SessionStart 分组下标前移，同步订正 `custom-setup.md` 两处位置列：`task-notes-reminder.py` 的 `SessionStart[3]`→`[2]`，`session-guard.py` 的 `SessionStart[2]`→`[1]`。
 - **依据**：hooks 层评审实测。herdr 那条——`HERDR_ENV` 未设、PATH 与 `~/.local/bin` 均无 herdr 二进制、台账记「实测已不在本机」；脚本自身第 1–2 行声明「installed by herdr / managed by herdr」，第 10 行 `if ($env:HERDR_ENV -ne "1") { exit 0 }`，故每次会话只白起一个 PowerShell。**文件保留不动**——它归 herdr 管，重装会覆盖，该删的是注册。孤儿子测试——全机无对应脚本、无接线、无引用，只有台账在记它。两个空目录无内容。
-- **回退**：`cp backups/settings-herdr-wiring-20260924/settings.json settings.json`（改前 sha256 `7f0e6746…`，改后 `2122d6ff…`）。**`settings.json` 被 `.gitignore:56` 忽略，git 不是它的回退路径，只能靠这份文件备份**。脚本回退：`git checkout HEAD -- hooks/tests/test_install_ledger_reminder.py`（HEAD 版本 sha256 `2bb3e468…`，与删除前工作区逐字节一致）。空目录 git 本就不追踪，无需恢复。位置列订正的回退是同两处下标改回。
+- **回退**：`cp backups/settings-herdr-wiring-2026-09-24/settings.json settings.json`（改前 sha256 `7f0e6746…`，改后 `2122d6ff…`）。**`settings.json` 被 `.gitignore:56` 忽略，git 不是它的回退路径，只能靠这份文件备份**。脚本回退：`git checkout HEAD -- hooks/tests/test_install_ledger_reminder.py`（HEAD 版本 sha256 `2bb3e468…`，与删除前工作区逐字节一致）。空目录 git 本就不追踪，无需恢复。位置列订正的回退是同两处下标改回。
 - **验证**：`settings.json` 可被 JSON 解析；`hooks.SessionStart` 组数 5 → 4；事件组总数仍 15；全文件搜 `herdr` 无命中。删除前对孤儿子测试核过三项——`git status` 无未提交改动、HEAD 版本 sha256 与工作区一致、目录名语义为「tests」。`rmdir` 在两个目录上都成功，即证明为空（非空会拒绝）。`sync_claude_common.py --check` 两次 `[MATCH]` rc=0。
 - **未做**：`__pycache__` 里 cpython-312 与 cpython-314 两套字节码（约 250 KB）按用户选择保留。`custom-setup.md` 里 `test_install_ledger_reminder.py` 那一行**未能删掉**——分类器以 `[Credential Exploration]` 拒绝，未换工具绕行，现状表因此仍留一行指向已不存在的文件。位置列仍用 `hooks.<事件>[<下标>]`，下标会随每次 settings.json 编辑漂移，本次即为实例；是否改成不带下标的写法待用户裁。
 
@@ -1108,7 +1110,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 - **变更**：① `docs/protocols.md` 的「共同要求」加第 6 条「有维护条款」，并新增「维护条款」一节（分界 / 删除判据 4 类 / 触发点）。② `skills/install-ledger/references/ledger-protocol.md` 在「组织规则」前插入「删除」一节，与「二分判据」并列。
 - **依据**：用户指出协议不能只追加不整理——文档只增不删会沉积，沉积到最后不敢删，因为分不清哪条还活着。协议族此前只定义「写什么」，没定义「什么时候删」，五份待落协议会把这个缺口复制五遍。台账协议是唯一已落的一份，先补齐，同时给其余 5 份立模板。
-- **回退**：删掉两处新增即可，均为纯追加、位置明确。`ledger-protocol.md` 另有改前完整版本 `backups/ledger-protocol-20260924/install-ledger-ledger-protocol.v1.md`（sha256 `11a83020…`）。**`docs/protocols.md` 改前无备份**——本轮编辑前未留档，如实登记。
+- **回退**：删掉两处新增即可，均为纯追加、位置明确。`ledger-protocol.md` 另有改前完整版本 `backups/ledger-protocol-2026-09-24/install-ledger-ledger-protocol.v1.md`（sha256 `11a83020…`）。**`docs/protocols.md` 改前无备份**——本轮编辑前未留档，如实登记。
 - **验证**：改后 sha256 —— `docs/protocols.md ec5b7c2c…`、`ledger-protocol.md e74c1e6b…`（改前 `cb3d123b…`）。
 - **未做**：其余 5 份协议未动。**新发现**：`git -C ~/.claude status --short` 显示 `docs/protocols.md` 与 `skills/install-ledger/references/ledger-protocol.md` 均为 `??` 未跟踪——`custom-setup.md` 现状表里这两行的恢复列写的是「git」，而当前 git 并不能恢复它们，要等提交后才成立。
 
@@ -1118,7 +1120,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 - **变更**：① `~/.claude/CLAUDE.md` 按 `instruction-engineering` 的六条判据逐节比对，7 处「规则已在 skill 里有权威位置、全局留的是旧副本」按「删句留指针」处置——§2.3 子代理段改指 `parallel-delegation`；§6 MSYS 段改指 `local-env-pitfalls` 的 git-bash 一节；§6 容器句压词；§7 台账句改指 `install-ledger`；§8 工作树两句合一并加「有未提交改动的工作树不删」；§8 删 `/dev-status`、`/dev-clean` 那行（两条 description 已逐字覆盖）；§8 删 exclusive 清单里写死的容器名（`session-hygiene.json` 是权威）。② `installing/custom-setup.md` 的 CLAUDE.md 行备注补字符预算。③ `C:\ZYS\Code\lab-area\CLAUDE.md` 的子代理规则由「一律先展示并询问确认」改为按全局 §2.3 与 `parallel-delegation`——原句与 §2.3 冲突，质询阶段已定以 §2.3 为准。
 - **依据**：`instruction-engineering/references/review-basis.md` 六条判据与九项检查的「常驻划分」「逐句剪除」「时效核对」。硬依赖（子代理授权、容器执行、台账登记）保留一句显式要求加指针，不下沉——同文件第 19 行：硬依赖挂弱指针属稳定性缺陷。逐条字节数与处置清单落在 lab-area `notes/skill-hook-review/CLAUDE-MD-REVIEW.md`。
-- **回退**：`backups/claude-md-review-20260924/CLAUDE.md.v1`（sha256 `77110c7f…`）覆盖回 `~/.claude/CLAUDE.md`；同目录 `lab-area-CLAUDE.md.v1`（`352e4ab4…`）覆盖回项目文件。项目文件在 git 内且改前工作区干净，`git checkout -- CLAUDE.md` 同样可用。
+- **回退**：`backups/claude-md-review-2026-09-24/CLAUDE.md.v1`（sha256 `77110c7f…`）覆盖回 `~/.claude/CLAUDE.md`；同目录 `lab-area-CLAUDE.md.v1`（`352e4ab4…`）覆盖回项目文件。项目文件在 git 内且改前工作区干净，`git checkout -- CLAUDE.md` 同样可用。
 - **验证**：全局 16,819 B → **16,153 B**（省 666 B），字符 7,234 → **6,930**，行 199 → 197；sha256 `77110c7f…` → `1d89600f…`。对备份逐行 diff，只有这 7 处，无越界改动。改后落回 7,000 字符预算内（改前超 234）。项目文件 4,698 → 4,736 B，`d138d2b9…`。
 - **未做**：① **A1 被分类器拒**——删 §1.3 的「子代理只能继承主模型明确传递的精确范围」一行，首次返回「无法评估（瞬时）」，原样重试后返回判定性拒绝且未给分类名；该行仍在，内容与 `parallel-delegation/SKILL.md:27` 重复。② 三处冲突未裁：§1.2 三档表与 §1.3 R0-R4 表并存（两条授权标尺）；§6「失败两次后停止」与 `git-bash.md:5`「失败先自纠换形式重试」（作用域不同，可能不冲突）；`instruction-engineering/SKILL.md:73` 仍锁着「子代理启动前…等待确认」这条与运行时相反的约束。③ §1.3 机制段（1,624 B）与高影响动作清单（1,207 B）未下沉——`docs/protocols.md:14` 把门禁协议的家定在 §1.3，动它要先定门禁协议的落点。
 
@@ -1126,7 +1128,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 - **变更**：`~/.claude/CLAUDE.md` §1.3 第 46 行「子代理只能继承主模型明确传递的精确范围，不能扩大目标、操作族、关键参数或影响上限，也不能跨会话复用授权。」改为「子代理授权只在派发时当场传递，不得跨会话复用；继承边界见 `parallel-delegation`。」
 - **依据**：用户裁定「改 A1」。前一段流水记的**裸删被判定性拒绝**；改走 A 类标准处置（删复述、留显式指针）后放行。差别在实质：裸删没有替代指针，指针版保留了门禁位置的显式触发，同时删掉与 `parallel-delegation/SKILL.md:27` 重复的规则正文——正是 `review-basis.md:19` 对硬依赖的要求（授权继承挂在弱指针后面是稳定性缺陷）。
-- **回退**：`backups/claude-md-review-20260924/CLAUDE.md.v1`（`77110c7f…`）覆盖回改前状态；只回退本行就把上面那句原文写回第 46 行。
+- **回退**：`backups/claude-md-review-2026-09-24/CLAUDE.md.v1`（`77110c7f…`）覆盖回改前状态；只回退本行就把上面那句原文写回第 46 行。
 - **验证**：16,153 B → **16,106 B**，字符 6,930 → **6,929**，行 197 不变；sha256 `1d89600f…` → `ba529e91…`。相对改前基线累计 16,819 → 16,106 B（省 713 B，-4.2%），7,234 → 6,929 字符。
 - **未做**：无。
 
@@ -1135,7 +1137,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **变更**：① `~/.claude/CLAUDE.md` §1.2 的三档表（自主/询问/必须）删除，改成「档内按决定权分」两句；**R0-R4 成为唯一分档标尺**（定义在 §1.3）。`技术栈变更 / 数据结构调整 / 关键业务分支 / 权限或角色判定修改` 移进 §1.3「必须确认」清单成首项，并带上「先查设计文档或角色矩阵，没有依据时保持现状」的前置。② §2.3 子代理句改为「**启动前展示实际模型、provider、route、effort、并发和隔离并取得确认**；同一配置已确认过的不重复询问」。③ `skills/parallel-delegation/SKILL.md:34` 去掉按**任务类型**的豁免（原「常规单个委派沿用当前会话默认配置直接执行，不重复询问」），保留按**配置身份**的豁免。④ `skills/parallel-delegation/references/runtime-and-failure.md:12` 触发条件由「准备选择或调整配置时」改为「**每次启动子代理前**」，加「常规单个委派不豁免」。⑤ `skills/local-env-pitfalls/references/subagents.md:5` 同步改写；同文件 :7 后**追加**一段（不覆盖）记录本次再翻转的理由与保留的豁免口径。⑥ `C:\ZYS\Code\lab-area\CLAUDE.md` 子代理行去掉「常规单个委派直接执行」，改为按全局 §2.3 与 `parallel-delegation`。
 - **依据**：用户裁定「合并、以 instruction-engineering 为准」（B1）与「可以」（B6 推荐方案：留门禁、去掉按任务类型的豁免、保留按配置身份的豁免）。权威在位——`instruction-engineering/SKILL.md:73` 的「不得删除或改成模型自行决定」清单锁着「子代理启动前展示实际模型、provider、route、effort、并发和隔离并等待确认」，而运行时四处写的是与它相反的按任务类型豁免。B1 侧：R0-R4 被 §4、hook 层、`docs/protocols.md:14` 三处引用，§1.2 的档位表只此一处，故以 R0-R4 为准一标尺。
 - **本次推翻的既有裁决**：`skills/local-env-pitfalls/references/subagents.md:7` 记着同日（2026-09-24）刚把同一条严格门禁作废，理由原文是「与 §2.3 正相反，且会导致每次委派都多一轮往返」。该次作废的判据本身是当时的 §2.3；用户改判后以 `instruction-engineering` 为准，故再翻转一次。**如实记录两次翻转**，不删先前那条。
-- **回退**：`backups/claude-md-review-20260924/CLAUDE.md.v1`（`77110c7f…`）覆盖回 `~/.claude/CLAUDE.md`——**该副本早于 A1/B1/B6 三次改动，整套回退会一并撤销 A1 与 B1**；只退本次就把 §1.2 的表、§1.3 首项、§2.3 那句按流水原文写回。三份 skill 文件用 `backups/subagent-gate-20260924/`（`SKILL.md 6f3d3171…` / `runtime-and-failure.md 3b7f8e95…` / `subagents.md e8b22d9f…`）。项目文件 `backups/claude-md-review-20260924/lab-area-CLAUDE.md.v1`（`352e4ab4…`）或在 git 内 `git checkout -- CLAUDE.md`。
+- **回退**：`backups/claude-md-review-2026-09-24/CLAUDE.md.v1`（`77110c7f…`）覆盖回 `~/.claude/CLAUDE.md`——**该副本早于 A1/B1/B6 三次改动，整套回退会一并撤销 A1 与 B1**；只退本次就把 §1.2 的表、§1.3 首项、§2.3 那句按流水原文写回。三份 skill 文件用 `backups/subagent-gate-2026-09-24/`（`SKILL.md 6f3d3171…` / `runtime-and-failure.md 3b7f8e95…` / `subagents.md e8b22d9f…`）。项目文件 `backups/claude-md-review-2026-09-24/lab-area-CLAUDE.md.v1`（`352e4ab4…`）或在 git 内 `git checkout -- CLAUDE.md`。
 - **验证**：`~/.claude/CLAUDE.md` 16,106 → **16,299 B**（+193），字符 6,929 → **6,992**（预算 7,000，余 8），行 197 → **192**；sha256 `ba529e91…` → `415b65f8…`。三份 skill 文件改后 sha256 `746db8e5…` / `e0e369b6…` / `346c3da7…`。项目文件 4,736 → **4,712 B**，`d138d2b9…` → `1082d3f1…`。
 - **未做**：§1.3 机制段（1,624 B）与高影响动作清单（1,207 B）未下沉；`docs/protocols.md:14` 把门禁协议的家定在 §1.3，动它要先定门禁协议的落点。
 
@@ -1144,17 +1146,17 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **变更**：① 新建 `~/.claude/docs/protocols/gate.md`（4,505 B），含落点表、固定字段表、授权登记命令、hook 分工、被 auto mode 拦下时的四步处置、校验命令、维护条款、历史。② `~/.claude/CLAUDE.md` §1.3 删 5 条机制段（hook 分工 / 授权来源 / 授权登记 / hook 结论 / 分类器自改规则），换一行指名指针；保留 R0-R4 表、必须确认清单、确认前说明、低打扰默认、子代理授权句。③ `docs/protocols.md` 门禁行的落点由「`CLAUDE.md` §1.3 + `authorization_scope.py`」改为 `docs/protocols/gate.md`，状态 `待落`→`已落`。④ `installing/custom-setup.md` 现状表加 `docs/protocols/gate.md` 一行。
 - **依据**：用户裁定「机制段下沉，操作规则留 §1.3」。那五条只在「接 hook」或「被 hook 求授权」时用到，属 `docs/protocols.md` 共同要求第 5 条（渐进式披露：每次触发都要用的留在主文件，只在特定情形用的下沉）判定该下沉的部分。下沉前 §1.3 是全局最大单节（3,558 B / 21.2%），也是 `CLAUDE.md` 继续压缩的唯一通路。
 - **内容来源**：gate.md 的机制段文字逐句取自 §1.3 原文，**未新立门禁规则**——这是搬迁不是重设计。新增的只有共同要求规定的框架部分（落点表、固定字段表、校验、维护条款）与一段历史。固定字段表的四个键 `targets` / `operation_family` / `critical_params` / `impact_ceiling` 从 `authorization_scope.py:100` 的 `allowed` 集合实测抄出；复用授权的相等判据取自同文件 `authorization_match()`。
-- **回退**：`cp backups/gate-protocol-20260924/CLAUDE.md.v1 CLAUDE.md`（sha256 `415b65f8…`）、`cp backups/gate-protocol-20260924/protocols.md.v1 docs/protocols.md`（`ec5b7c2c…`）。`docs/protocols/gate.md` 本轮新建，删掉即回到改前；`custom-setup.md` 现状表那行同删。
+- **回退**：`cp backups/gate-protocol-2026-09-24/CLAUDE.md.v1 CLAUDE.md`（sha256 `415b65f8…`）、`cp backups/gate-protocol-2026-09-24/protocols.md.v1 docs/protocols.md`（`ec5b7c2c…`）。`docs/protocols/gate.md` 本轮新建，删掉即回到改前；`custom-setup.md` 现状表那行同删。
 - **验证**：`CLAUDE.md` 16,299 → **14,841 B**（省 1,458），字符 6,992 → **6,336**（省 656，预算 7,000，余 664），行 192 → **188**；sha256 `415b65f8…` → `dbf638ab…`。§1.3 本节 3,558 → **2,254 B**（省 1,304）。`docs/protocols.md` 2,445 → 2,457 B，`0ebddde1…`。`docs/protocols/gate.md` `859ccbdb…`。
 - **未做**：`docs/protocols.md` 里门禁的「校验」列仍写 `—`。可机械校验是有可能的——写个只读脚本比对本协议字段表与 `authorization_scope.py:100` 的 `allowed` 集合即可防漂移，形同台账协议的 `plugin_state_check()`。本轮未做：那是新增脚本，超出「下沉机制段」的授权范围。
-- **既有风险重述**：`docs/` 下 `protocols.md` 与本轮新增的 `protocols/gate.md`，现状表「恢复」列都写 `git`，而两者在 `~/.claude` 仓库里均为未提交状态——**提交前 git 恢复不了**，回退只能靠上面那份 `backups/gate-protocol-20260924/`。
+- **既有风险重述**：`docs/` 下 `protocols.md` 与本轮新增的 `protocols/gate.md`，现状表「恢复」列都写 `git`，而两者在 `~/.claude` 仓库里均为未提交状态——**提交前 git 恢复不了**，回退只能靠上面那份 `backups/gate-protocol-2026-09-24/`。
 
 ### 协议族补齐：任务笔记 / 执行环境 / 记忆 / 委派（2026-09-24）
 
 - **变更**：① `skills/task-notes/SKILL.md` 加「维护条款」一节（分界 / 删除判据 / 触发点），并注明该节管本文件自身、笔记的维护另见上一节。② `skills/docker-only/SKILL.md` 加同名一节。③ `skills/parallel-delegation/SKILL.md` 加同名一节。④ 新建 `~/.claude/docs/protocols/memory.md`（记忆协议），把宿主自带的格式说明与各项目 `MEMORY.md` 头部各自写的「记忆操作约定」合并成一份。⑤ `docs/protocols.md` 四行状态 `待落`→`已落`，落点与校验列补齐（执行环境的校验用既有的 `resource-guard.py`，不是新写的）。⑥ `installing/custom-setup.md` 现状表加 `docs/protocols/memory.md` 一行。
 - **依据**：`docs/protocols.md` 共同要求第 6 条，以及批次 2c 记下的约束——「其余 5 份协议动笔时必须直接带上维护条款，不事后补」。三份 skill 的既有正文已满足要求 1–3（落点 / 字段 / 判据分别是：任务笔记的单条六字段、docker-only 的「路径落不落在挂载点之下」、parallel-delegation 的 `dispatch-contract.md` 任务书七字段与 worker 结果八字段），缺的只是第 6 条。记忆那份此前没有独立落点，约定散在宿主提示与 23 个项目各自的 `MEMORY.md` 头部。
 - **记忆协议的实测依据**：191 条记忆全部带 frontmatter；`type` 分布 feedback 87 / project 69 / reference 24 / user 11；`metadata` 下 `node_type`、`originSessionId`、`modified` 三个字段由宿主写入（抽样 `projects/C--ZYS-Code-lab-area/memory/avoid-over-asking.md`）。全机 23 个 `projects/*/memory/`，其中 6 个已有 `recovery/`。**无**记忆校验脚本。
-- **回退**：三份 skill 的改动都只是**追加一节**，删掉那一节即回退，不必整文件覆盖。`backups/protocols-4-20260924/` 存了三份 `git show HEAD:` 快照——**`docker-only` 与 `parallel-delegation` 的 HEAD 不等于改前状态**（改前工作区已有未提交改动，`docker-only` 的「新项目接入」一节此前已被下沉到 `references/new-project-setup.md`），拿它们整体覆盖会连那批改动一起回退。`task-notes` 的 HEAD 快照可用：`git diff HEAD -- skills/task-notes/SKILL.md` 只有本轮追加的那一节。`docs/protocols/memory.md` 本轮新建，删掉即回退；`docs/protocols.md` 与 `custom-setup.md` 按原文改回。
+- **回退**：三份 skill 的改动都只是**追加一节**，删掉那一节即回退，不必整文件覆盖。`backups/protocols-4-2026-09-24/` 存了三份 `git show HEAD:` 快照——**`docker-only` 与 `parallel-delegation` 的 HEAD 不等于改前状态**（改前工作区已有未提交改动，`docker-only` 的「新项目接入」一节此前已被下沉到 `references/new-project-setup.md`），拿它们整体覆盖会连那批改动一起回退。`task-notes` 的 HEAD 快照可用：`git diff HEAD -- skills/task-notes/SKILL.md` 只有本轮追加的那一节。`docs/protocols/memory.md` 本轮新建，删掉即回退；`docs/protocols.md` 与 `custom-setup.md` 按原文改回。
 - **验证**：改后 sha256 —— `task-notes/SKILL.md a7eb2bc9…`（HEAD `33afef5f…`）、`docker-only/SKILL.md 59374627…`、`parallel-delegation/SKILL.md 57eab437…`。`ledger_check.py` rc=0，现状表 97 行。
 - **未做**：记忆、任务笔记、委派三份的「校验」列仍写 `—`。三份都有可做的只读校验（记忆：索引条数与 `*.md` 条数相符、frontmatter 的 `name` 与文件名一致、`type` 落在四枚举内；任务笔记：单条必填字段齐全；委派：任务书七字段齐全），但都是新增脚本，超出「补齐协议」的授权范围。
 - **过程记录**：本轮改 `docker-only`、`parallel-delegation`、`task-notes` 三份 skill 时**改前未留副本**，违反全局 §2.1「改前备份、先写回归测试」。事后从 `git HEAD` 补了三份快照，但如上所述其中两份不等于改前状态。如实登记。
@@ -1176,7 +1178,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
   - 任务笔记：本机两个实例（`lab-area/notes/claude-config-standards`、`notes/skill-hook-review`）的产物是自由形态的扫描稿与清单表格，没有「材料/结论/取舍」字段，也没有 `NN-` 编号。硬套字段检查会当场报约 30 条假警。
   - 委派：`references/dispatch-contract.md` 的契约是 prompt 模板，磁盘上无待验产物；`Isolation` 的取值枚举全机只出现这一处，无第二处可比。
   按 `docs/protocols.md` 共同要求第 4 条「能写成只读检查的就该有，**没有就写 `—`**」，后两份维持 `—`。
-- **回退**：删 `hooks/scripts/protocol_check.py`；`docs/protocols.md` 用 `backups/protocol-check-20260924/protocols.md.v1`（改前 sha256 `2f9669c4`）覆盖；`custom-setup.md` 删掉那一行。
+- **回退**：删 `hooks/scripts/protocol_check.py`；`docs/protocols.md` 用 `backups/protocol-check-2026-09-24/protocols.md.v1`（改前 sha256 `2f9669c4`）覆盖；`custom-setup.md` 删掉那一行。
 - **验证**：真跑 `门禁 全相符`、`记忆 191 条 · 已进索引 189 · 6 处问题`，rc=1。**证伪测试**（夹具，不改脚本本体）4 组全按预期：改坏字段名报 1 处、脚本侧多一个键报 1 处、好数据报 0 处、`无围栏`/`缺 description`/`type 越界` 各报 1 处。测试脚本在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
 - **首跑实测到的既有漂移**（只报未改，均不在本仓库内）：`C--Users-zys31--claude` 的 `isolate-python-mock-patches.md` 与 `C--ZYS-wiki` 的 `learning-route-deduplication.md` 没进各自 `MEMORY.md` 索引；`ai-guided-from-zero.md`、`feedback-teach-before-testing.md`、`feedback-tutorial-repo-freshness.md` 只有 `---` 开围栏、没有闭围栏；`dingtalk-qa-output-redaction.md` 缺 `description`。批次 5 记过「191 条记忆全带 frontmatter」，那条口径更松；本次按围栏口径测得 3 条不合，以本次为准。
 - **未做**：`任务笔记` 与 `委派` 两份的校验仍为 `—`；上述 6 处漂移属别项目名下，本脚本只报不改。
@@ -1196,9 +1198,9 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **起因**：用户说「没用的就删了吧」。
 - **口径纠正**：那 52 条孤儿记忆不加载、不召回，**占 0 token**。删它们是卫生（`~/.claude` 少 16 个查不到的死目录），不是 (a) 收益。（b）同类的还有 `.claude.json` 里 27 条死 cwd 注册，那是宿主的活状态文件，本次未动。
 - **判定**：逐条读全文再判，不看文件名。52 条中——被活记忆同名覆盖 1 条（`eam-fill-existing-demo-minimal-architecture`，`C--ZYS-Code-dtsf` 下的同名条是它的超集）；被活 skill 覆盖 5 条；文章写作类已由 `article-writer` 覆盖 6 条；项目消失且内容不可迁移 39 条；过期 1 条。
-- **变更**：备份到 `backups/orphan-memories-20260925/`（79 个文件 = 52 条 + 16 个 `MEMORY.md` + 9 个 `recovery/` + 3 个 `.before-c6`），逐字节核对通过后删 `projects/<16 个目录>/memory/` 整棵子树。只删 `memory/`，同目录的会话记录不动——实测这 16 个目录除 `memory/` 外本来就是空的（无 `.jsonl`），删完留 16 个空壳目录未清。
+- **变更**：备份到 `backups/orphan-memories-2026-09-25/`（79 个文件 = 52 条 + 16 个 `MEMORY.md` + 9 个 `recovery/` + 3 个 `.before-c6`），逐字节核对通过后删 `projects/<16 个目录>/memory/` 整棵子树。只删 `memory/`，同目录的会话记录不动——实测这 16 个目录除 `memory/` 外本来就是空的（无 `.jsonl`），删完留 16 个空壳目录未清。
 - **核对缺口（如实登记）**：71 个顶层文件逐字节核对；9 个 `recovery/` 与 3 个 `.before-c6` 在子目录里，由 `shutil.copytree` 原样带过、未单独核对。
-- **回退**：`projects/` 不在 git 追踪范围，回退靠 `backups/orphan-memories-20260925/<项目目录名>/` 手工拷回。脚本 `purge-orphan-memories.py` 只在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
+- **回退**：`projects/` 不在 git 追踪范围，回退靠 `backups/orphan-memories-2026-09-25/<项目目录名>/` 手工拷回。脚本 `purge-orphan-memories.py` 只在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
 - **验证**：真跑 `protocol_check.py`，「另有已删项目的 16 个目录 / 52 条」一行消失，余下 3 处漂移全在活项目，rc=1。
 - **遗留风险**：`my-code-deepseek-key-exposed` 记的是 2026-07-15 有真实 DeepSeek key 进过会话上下文、要求轮换。记忆已删，轮换做过没有需用户确认。
 
@@ -1207,7 +1209,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **起因**：上一条里查出的 6 组教训在 `CLAUDE.md`、`skills/`、`.claude.json` 里都没有副本，删掉会真的丢。用户「按你建议的来」。
 - **变更**：4 组进 `skills/local-env-pitfalls/SKILL.md` 的要点行——Read `offset` 只照抄工具返回行号（扩写既有的「短文件读取偏移量」一条）、Grep `glob` 禁嵌套花括号替代组、会话主目录非目标仓库时命令显式绑定路径、隔离工作树不继承 `node_modules`、`getpass` 脚本不交后台（并入同次事故的「异常报告留脱敏定位信息」）。2 组进 `projects/C--Users-zys31--claude/memory/`——`one-question-per-turn.md`、`critique-needs-full-constraint-read.md`，并补进该目录 `MEMORY.md` 索引。
 - **顺带修**：同一份 `MEMORY.md` 漏掉 `isolate-python-mock-patches.md` 的索引行（`protocol_check.py` 报过的既有漂移之一），一并补上。该目录现 7 条、索引全覆盖。
-- **回退**：`backups/orphan-salvage-20260925/`（改前 `SKILL.md` `b10b7582…`、`MEMORY.md` `ba104688…`）。改后 `SKILL.md` `c2671693…`（6,968 → 8,430 B）、`MEMORY.md` `fff9225a…`。
+- **回退**：`backups/orphan-salvage-2026-09-25/`（改前 `SKILL.md` `b10b7582…`、`MEMORY.md` `ba104688…`）。改后 `SKILL.md` `c2671693…`（6,968 → 8,430 B）、`MEMORY.md` `fff9225a…`。
 - **验证**：真跑 `protocol_check.py` → `141 条记忆 · 已进索引 141 · 2 处问题`（余下 2 处在别的活项目）。
 - **未做**：`dev-clean` / `dev-status` 两条自家 skill 是否改 `disable-model-invocation: true` 未定，见任务笔记。
 
@@ -1215,6 +1217,34 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 
 - **变更**：21 个自建 skill 的 `SKILL.md` 正文按 `writing-for-agents` 的尺子逐条过，17 份有改动、4 份判定已是最紧。5 份补 `disable-model-invocation: true`（`coding-workflow`、`docker-only`、`install-ledger`、`parallel-delegation`、`local-env-pitfalls`）。改动集中在删无操作句、合并重复、否定改正面、删正文已承载的身份信息。
 - **依据**：用户裁定「skill 正文逐条优化交给子代理去做」，配置 opus、并发 1。范围只含 (a) token 成本；输出质量与系统稳定性是禁改线，未触碰。
-- **回退**：`cp backups/skill-optimize-20260925/<名>/SKILL.md skills/<名>/SKILL.md` 覆盖回去。`references/`、`scripts/`、`evals/`、`assets/` 全部未动。
+- **回退**：`cp backups/skill-optimize-2026-09-25/<名>/SKILL.md skills/<名>/SKILL.md` 覆盖回去。`references/`、`scripts/`、`evals/`、`assets/` 全部未动。
 - **验证**：逐份 `diff` 备份与当前文件——17 份有差异、4 份逐字节相同（`awesome-design-md`、`dev-clean`、`leader`、`local-env-pitfalls`）；21 份字节合计 122,484 → 119,597（−2,887）。改动时间戳分两段（01:13–01:19、01:35–01:40），无目标之外的写入。逐条理由与「拿不准但没动」的 10 处见 `C:\ZYS\Code\lab-area\notes\skill-hook-review\SKILL-REVIEW.md`。
 - **未做**：① `local-env-pitfalls` 另有 3 处待改（未翻译英文「拒绝 applies to the outcome」、未定义术语「四件套声明」、一条里塞两个无关教训）。② `article-writer` 的 `SKILL.md:144` 指向的 `examples/good-samples/` 不存在，6 篇范文可从 `5505dfa^` 取回，去向待定。③ 台账分层重构与路径命名规约已议定未执行。
+
+### 落点与命名规约落盘 + 全库改名归位（2026-09-25）
+
+- **起因**：交接文档九项队列的第 1/3/4/5/8/9 项。用户裁定：工作树命名并进规约、写只读校验器、范文库从 JavaGuide 公众号文章里选（旧 6 篇 + 新 2 篇，不用笔记只留原文）、72 MB 的 `.tmp-ccswitch-bak.db` 删、九项按序做完。
+- **规约落盘**：`docs/protocols.md` → `docs/protocols-index.md`；「共同要求」加第 7 条与新增「落点与命名」一节（目录载分类 / 文件名载身份 / 日期或状态词载时间与状态；分类取类别轴；日期一律 `YYYY-MM-DD`；名字一律 ASCII；只管自建对象；工作树名同属本节）。`CLAUDE.md` §8、`docs/session-lifecycle.md` 的 §二 · §七 · §九 共 5 处改指规约，**解开 `CLAUDE.md` §8 ↔ `session-lifecycle.md` 的循环引用**。
+- **校验器**：`hooks/scripts/protocol_check.py` 加「命名」一项，扫 `docs/`、`installing/` 全树与 `backups/` 顶层。改前实测报 32 处，全部是真问题、无假阳性。
+- **backups 改名**：30 项 `YYYYMMDD` → `YYYY-MM-DD`（已合规 2 项与 CLI 写的 5 个 `.claude.json.backup.*` 未动）；全库改写 79 处引用 / 13 文件。脚本 `rename-backups.py` 在 `$CLAUDE_JOB_DIR/tmp`，未落盘。
+- **docs 归档**：4 份时点产物 → `docs/archive/<日期>-<主题>.md`。日期取**内容反映的最新时点**：`config-checklist` 2026-08-11（口径头注）、`config-inventory` 2026-06-30（生成）、`opencode-migration-plan` 2026-07-03（生成）、`wsl2-sandbox-migration` 2026-09-21（评估）。四份各加一行归档头注（原路径 + 「文内路径是当时实况」），文内散文路径未改写；两份文档间的相对链接已改指新名。
+- **其他改名**：`docs/handoff/` 3 个子目录补日期（`session-lifecycle-final-audit-2026-09-19`、`session-lifecycle-reaudit-2026-09-18`、`oa-dingtalk-2026-09-18`），5 处内引同步；`installing/config-slimming-snapshot-2026-09-10.json` 改名，`installing/archive/` 3 处恢复路径同步。`reaudit-2026-09-18/HANDOFF.md:137` 里的 dtsf 路径**故意未改**（另一个仓库，当时并未落地）。
+- **孤本迁移**：`lab-area/.tmp-header-check/`（Codex home 快照，90 文件 / 3,400,308 B，`~/.codex/` 已不存在故为唯一副本）→ `backups/codex-home-2026-09-09/`。**未删**。注意 `backups/` 在 `.gitignore` 内，该副本仍不受 git 保护，只有一份。
+- **lab-area 归位**：根目录 22 份散件 → `.claude/tmp/2026-09-25-root-cleanup/`（headroom 抓取页 12 份、last30days 运行文件 3 份、ccswitch 审计脚本 7 份、classifier-probe、4 个 `.tmp_*.js`、`.tools/`、`.impeccable/`）。两个 headroom 路由脚本**未按临时件处理**——`tool-install.md:443` 记着是用户决定保留的——移到 `exp/2026-09-09-headroom-routing/` 并配 README。`.gitignore` 加 `.claude/tmp/` 与 `.claude/worktrees/`。**这两个脚本现在跑不通 config.toml 分支**：`~/.codex/config.toml` 已于 2026-09-10 随 Codex 清除。
+- **删除（不可逆，用户确认）**：`lab-area/.tmp-ccswitch-bak.db`，72,105,984 B，mtime 2026-09-09 22:12，sha256 `5d186fc4c9fe0927…`。删前复核非孤本：活库 `~/.cc-switch/cc-switch.db` 93,245,440 B（当日 09:58）+ `~/.cc-switch/backups/` 7 份库备份（2026-09-19…24，86–93 MB）全部比它新。
+- **article-writer 范文库**：`examples/good-samples/` 重建 8 篇 / 181,419 B。6 篇取自 `C:\ZYS\Study\JavaGuide` clone `d76264cb`，2 篇取自 JavaGuide 公众号（`claude-code-to-pi.md`、`better-harness-health-check.md`）。加工只有三件：去 VitePress frontmatter 与 `@include` 广告指令、去纯图片行（`SKILL.md:29` 明令不产图片链接）、去提取器分节（摘要段是正文开头的截断副本、`## 提取元信息` 是工具产物）；正文逐字保留，每篇加一行出处（JavaGuide 为 Apache-2.0，署名是许可义务）。`examples/README.md` 索引分「面试／技术问答类」「AI Coding 类」两组。
+- **回退**：规约与 CLAUDE.md 用 `backups/naming-protocol-2026-09-25/`（`CLAUDE.md.v1` `dbf638ab…`、`session-lifecycle.md.v1` `e79b2a91…`、`protocols.md.v1` `cb77a58c…`、`protocol_check.py.v1` `e9fc38b0…`、`custom-setup.md.v1` `fd72597c…`）；范文库索引用 `backups/article-writer-samples-2026-09-25/examples-README.md.v1`，8 篇范文删掉即可回到断裂态；改名类全部是 `git mv`，`git mv` 反向 + 引用同法改回；`codex-home-2026-09-09/` 移回 `lab-area/.tmp-header-check/`；`.tmp-ccswitch-bak.db` **无回退**。
+- **验证**：`protocol_check.py` 真跑，「命名 90 个名字（backups/ 顶层 · docs/ · installing/），**全相符**」，问题数由 32 归 0；门禁 4 键全相符、记忆 142 条全进索引。改名后逐项目核对文件数与字节（`codex-home` 迁前迁后均 90 文件 / 3,400,308 B）。范文库核对：图片行与 `@include` 残留均为 0。
+- **未做**：① 队列第 6 项（`skill-install` 台账分层重构）**未执行**——议定形状是 `installing/<账本>/<资产>/<日期>.md`，但 `skill-install` 的流水里除资产条目外还有大量**跨资产的事件批次**（2026-08-25/26 插件化清理、2026-09-03 库精简、2026-09-10 插件全量精简、ArkCLI 卸载、wiki 系迁移），没有对象轴可挂；硬按资产拆就是议定里明令避免的「造假拆分」。设计取舍待用户裁。② 队列第 7 项（`local-env-pitfalls` 3 处）未动。
+
+### 队列第 7 项 + 流水归档头（2026-09-25）
+
+- **起因**：队列第 7 项，以及第 6 项勘察中发现的流水文件缺归档标识。
+- **local-env-pitfalls 三处**（`skills/local-env-pitfalls/SKILL.md`，8,461 → 8,846 B，sha256 `d3b8e5415b2eb5f0…`）：① 「拒绝 applies to the outcome」改为中文并去掉否定式引导——「分类器拒了就停手报告：拒绝针对的是**结果**（这个产出能不能落地），不是这一条命令的写法」；② 「四件套声明」补出四项内容（调用者／无重复／数据文件性质／用户指令原文引用）并留 `references/guards.md` 指针；③ 原「`getpass` 脚本不交后台」一条里塞的第二件事（验收脚本异常报告要留脱敏后的失败阶段、目标路径与异常类型）拆出，独立成条移入「验证与统计」。
+- **流水归档头**：`installing/archive/` 四份流水各在 H1 后加一行——标「已归档（2026-09-24 现状表与流水分家）／默认不读／现状表见 `../<台账>.md`／文中 `[X.md](X.md)` 指向本目录同名流水」。搬迁时保留了旧现状表头（「记录自建 skill / hook / statusline / 全局配置…」），读起来像现役索引。
+- **断链修复**：`archive/` 三份的 `模板见 [README.md](README.md)` → `../README.md`（`archive/README.md` 不存在）。其余 `[tool-install.md](tool-install.md)` 类链接**故意未动**——目标存在且部分确实意指本目录同名流水（如 `custom-setup.md:239` 引的「Skill 库精简（2026-09-03）」只在流水里有），意图逐条不同，不能批量改。
+- **记忆 frontmatter 修复**（两个活项目，`protocol_check.py` 长期报的既有缺陷）：`projects/C--ZYS-Code-interview-guide/memory/ai-guided-from-zero.md` 补 `---` 围栏结尾（sha256 `2594939aef9424870fda…`）；`projects/C--ZYS-Code-dtsf/memory/dingtalk-qa-output-redaction.md` 把 `description` 从 `metadata:` 下提到顶层（`docs/protocols/memory.md` 的固定字段如此规定；宿主的 `node_type`/`originSessionId`/`modified` 原样留在 `metadata` 下），sha256 `1fffe8d08b2a7433c88b…`。
+- **行尾与 diff 可读性**：改 `archive/tool-install.md` 时编辑工具把整文件 CRLF 翻成 LF，`git diff` 一度涨到 1,004 行；已转回 CRLF，diff 收回 4+/2−。该库四份流水里 `tool-install`／`mcp-install` 是 CRLF、其余是 LF（`git ls-files --eol` 可查），`git diff --check` 会把 CRLF 的新增行一律报成 trailing whitespace。已在**本库** `~/.claude/.git/config`（非追踪文件）设 `core.whitespace cr-at-eol`，`--check` 由 6 条假阳性归 rc=0。
+- **回退**：两份记忆改前副本在各自 `memory/recovery/2026-09-25-<原名>.md`；`local-env-pitfalls` 用 `backups/local-env-pitfalls-2026-09-25/SKILL.md.v1`（`f9d131d7a38c316a…`）；流水头与断链去掉那几行即可；`git config --unset core.whitespace`。
+- **验证**：`ledger_check.py` rc=0（101 行 · 待核 9 · 17.8 KB，插件 7 行相符，archive 四份齐）；`protocol_check.py` **rc=0**——「记忆 142 条 · 已进索引 142 · frontmatter 与索引全相符」「命名 93 个名字，全相符」「门禁 4 键全相符」。
+- **未做**：队列第 6 项（台账分层重构）仍未动。本轮补充勘察：`installing/README.md:15` 明写 `archive/` **默认不读**，重构流水不省任何 token；`archive/skill-install.md` 的 6 条单件登记里 `eli5`／`modlens`／`archify`／`agent-browser`／`cangjie-skill` 已不在盘上，`last30days` 在 `plugins/cache/`、`leader` 归自建台账管——**现状表（2 行）与实际在用集合相符**，「两处真相」的实用风险不成立。取舍待用户裁。
