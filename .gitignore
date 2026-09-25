@@ -90,6 +90,7 @@ lib/awesome-design-md/
 # ----- 会话/任务运行时目录 (2026-08-16 补) -----
 task-queue/
 worktrees/
+task-notes-reminder/
 
 # ----- skills (cc-switch links resolved to real files, tracked) -----
 skill-trimmer-workspace/
@@ -148,5 +149,6 @@ skills/content-to-note/scripts/wechat/node_modules/
 !skills/local-env-pitfalls/
 !skills/parallel-delegation/
 !skills/skill-auditor/
-!skills/skill-trimmer/
+!skills/asset-auditor/
+!skills/asset-guide/
 !skills/task-notes/

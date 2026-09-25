@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "session_id": "c9819d64-811b-4fd4-8124-6058af98b154",
+  "active_task_id": "eam-perm-migration-hotfix",
+  "updated_at": 1790250416.769092,
+  "grants": [
+    {
+      "grant_id": "g-1790250416769-a11918f4d929",
+      "task_id": "eam-perm-migration-hotfix",
+      "scope": {
+        "targets": [
+          "db:develop.flyway_schema_history:version=20260924100000,success=0",
+          "merge-request:eam-ems->develop",
+          "origin/eam-ems"
+        ],
+        "operation_family": "remote-git",
+        "impact_ceiling": 4,
+        "critical_params": {
+          "actions": [
+            "push",
+            "merge-request-create"
+          ],
+          "ci_effect": "deploy_develop 清理失败记录后重跑 Flyway 并重启后端",
+          "no_force": true,
+          "no_self_merge": true
+        }
+      },
+      "granted_at": 1790250416.769092
+    }
+  ]
+}
