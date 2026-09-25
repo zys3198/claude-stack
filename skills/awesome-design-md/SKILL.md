@@ -1,6 +1,6 @@
 ---
 name: awesome-design-md
-description: 从本地 Awesome DESIGN.md 库取品牌与网站视觉规则，落到网页实现。
+description: 当你要从本地 Awesome DESIGN.md 资料中提炼品牌或视觉方向，并将其转成当前网页项目的设计约束或实现时调用。
 disable-model-invocation: true
 ---
 

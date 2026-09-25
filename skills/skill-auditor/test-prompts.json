@@ -50,7 +50,7 @@
   {
     "id": 9,
     "prompt": "盘点整个 skill 库，哪些该删、哪些该冷冻？",
-    "expected": "不由 skill-auditor 承接库级留删；转交 skill-trimmer。",
+    "expected": "不由 skill-auditor 承接库级留删；转交 asset-auditor。",
     "scenario": "负向触发：skill 库生命周期治理"
   },
   {

@@ -1,6 +1,6 @@
 # 活人感写作（原 human-writing，2026-08-26 并入 article-writer）
 
-> 下沉自 SKILL.md（2026-09-08 渐进披露改造）。长稿（非虚构）动笔前先读本文件的材料门槛；成稿后回入口 SKILL.md 跑扫描与 /humanizer、/chinese-markdown-normalizer。
+> 下沉自 SKILL.md（2026-09-08 渐进披露改造）。长稿（非虚构）动笔前先读本文件的材料门槛；成稿后回入口 SKILL.md 跑扫描与标点复核。
 
 ### 活人感写作
 

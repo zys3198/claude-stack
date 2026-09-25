@@ -1,6 +1,6 @@
 schema_version: "1.0"
 name: route-library-trim
-description: 整个 Skill 库的留删和生命周期治理应转交 skill-trimmer，不应进入 improver-skill 的单个候选迭代流程。
+description: 整个 Skill 库的留删和生命周期治理应转交 asset-auditor，不应进入 improver-skill 的单个候选迭代流程。
 tags: [negative, routing, boundary]
 execution:
   prompt: |
@@ -16,7 +16,7 @@ graders:
   - type: regex
     name: trim-route
     target: last_message
-    pattern: skill-trimmer
+    pattern: asset-auditor
     match: contains
   - type: regex
     name: improver-boundary

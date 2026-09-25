@@ -17,13 +17,15 @@
 
 ## 支持的图表类型
 
-| 类型 | 适用场景 | 参考示例 |
-|-----|---------|---------|
-| 流程图 | 业务流程、算法逻辑、决策树 | `examples/basic-flow.md` |
-| 架构图 | 系统架构、模块关系、分层容器 | `examples/architecture.md`、`examples/microservice-arch.md` |
-| 时序图 | 服务调用、消息传递、链路追踪 | `examples/sequence.md` |
-| ER 图 | 数据库设计、实体关系 | `examples/er-diagram.md` |
-| 状态机图 | 状态转换、生命周期 | `examples/state-machine.md` |
+| 类型 | 适用场景 |
+|-----|---------|
+| 流程图 | 业务流程、算法逻辑、决策树 |
+| 架构图 | 系统架构、模块关系、分层容器 |
+| 时序图 | 服务调用、消息传递、链路追踪 |
+| ER 图 | 数据库设计、实体关系 |
+| 状态机图 | 状态转换、生命周期 |
+
+历史产出样例在 skill 目录的 `examples/`：`context-engineering.drawio`、`llm.drawio`、`mcp.drawio`、`skills.drawio`、`spec-coding.drawio`，可作结构与配色参考。
 
 ## 使用方法
 
