@@ -208,12 +208,6 @@ function resolveModelName(modelInfo) {
 
 const MODE_STATUS = [
   {
-    file: '.caveman-active',
-    label: 'CAVEMAN',
-    color: 172,
-    valid: new Set(['', 'off', 'lite', 'full', 'ultra', 'wenyan-lite', 'wenyan', 'wenyan-full', 'wenyan-ultra', 'commit', 'review', 'compress'])
-  },
-  {
     file: '.ponytail-active',
     label: 'PONYTAIL',
     color: 108,
@@ -251,14 +245,7 @@ function readModeStatus() {
       }
 
       const suffix = !mode ? '' : `:${mode.toUpperCase()}`;
-      let rendered = `\x1b[38;5;${config.color}m[${config.label}${suffix}]\x1b[0m`;
-
-      if (config.label === 'CAVEMAN' && process.env.CAVEMAN_STATUSLINE_SAVINGS !== '0') {
-        const savings = readSmallStatusFile(path.join(claudeDir, '.caveman-statusline-suffix'))
-          ?.replace(/[\x00-\x1F\x7F]/g, '')
-          .trimEnd();
-        if (savings) rendered += ` \x1b[38;5;${config.color}m${savings}\x1b[0m`;
-      }
+      const rendered = `\x1b[38;5;${config.color}m[${config.label}${suffix}]\x1b[0m`;
 
       segments.push(rendered);
     } catch {

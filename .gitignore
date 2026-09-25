@@ -38,8 +38,6 @@ daemon/
 /tmp/
 /daemon.*
 *.log
-.caveman-active
-.caveman-active.*
 .ponytail-active
 hooks/*_state.json
 .last-cleanup
