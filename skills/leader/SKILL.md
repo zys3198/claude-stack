@@ -1,6 +1,6 @@
 ---
 name: leader
-description: 把一句话想法拆成 agent 能独立跑完的任务书。
+description: 把一句话目标调研并拆成可独立执行、可验收的任务书，供目标模式 agent 一次粘贴执行。
 disable-model-invocation: true
 ---
 

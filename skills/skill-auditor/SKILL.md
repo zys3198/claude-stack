@@ -1,6 +1,6 @@
 ---
 name: skill-auditor
-description: 审计或设计单个 Skill 的触发契约与运行行为。
+description: 审计或设计 Skill：检查单个 Skill 的触发契约、运行行为与体量，或检查多个 Skill 的组合边界与来源重复；输出证据和最小建议。
 disable-model-invocation: true
 ---
 # Skill 审计与设计器
@@ -10,7 +10,7 @@ disable-model-invocation: true
 ## 核心边界
 
 - Skill 提供通用方法、约束和执行接口；`CLAUDE.md`/`AGENTS.md` 提供项目事实、路线、状态和完成证据；Runtime 才证明实际加载和行为。
-- 跨多个 `SKILL.md`、`CLAUDE.md`、`AGENTS.md` 的指令质量审查或项目上下文草稿，转交 `instruction-engineering`；库级留删转交 `skill-trimmer`。
+- 跨多个 `SKILL.md`、`CLAUDE.md`、`AGENTS.md` 的指令质量审查或项目上下文草稿，转交 `instruction-engineering`；库级留删转交 `asset-auditor`。
 - 每轮机械约束放 hook、CI 或 linter；特定流程、模型难猜的判断和可复用检查表才放 Skill。被动读取宿主材料只需一行指针，改变宿主材料才构成额外职责。
 - Skill 之间用 `/skill` 形式调用，不跨目录链文件；编排 Skill 可调用执行 Skill，编排之间不互调；核心规则保持模型、供应商和宿主无关，适配放 adapter。
 
@@ -64,7 +64,7 @@ description、触发词、负向边界、路由、输入输出、宿主接线或
 
 ## 第 3 步：新 Skill 设计
 
-先不用候选 Skill 裸跑；已能稳定完成就不新建。再写设计卡（问题、用户、宿主事实、非目标、触发、输入输出、风险、验收），把项目约定/机械约束/静态知识/库级治理分流到宿主文件、hook/CI、reference 或 `skill-trimmer`。只写模型猜不到且会复用的核心，长资料入 `references/`，机械动作入 `scripts/`；定义可重跑、失败状态和维护入口。宿主迁移先查官方能力、原生包和真实源码，第三方优先插件化。
+先不用候选 Skill 裸跑；已能稳定完成就不新建。再写设计卡（问题、用户、宿主事实、非目标、触发、输入输出、风险、验收），把项目约定/机械约束/静态知识/库级治理分流到宿主文件、hook/CI、reference 或 `asset-auditor`。只写模型猜不到且会复用的核心，长资料入 `references/`，机械动作入 `scripts/`；定义可重跑、失败状态和维护入口。宿主迁移先查官方能力、原生包和真实源码，第三方优先插件化。
 
 把外部内容（视频、文章、他人 skill）提炼成新 Skill 时，只保留来源中的方法、流程、边界和可复用原则：触发条件写通用主题、不写单个案例（案例只放正文作可选说明）；新 Skill 独立可跑，**不添加 skill 路由、组合调用或跨 skill 依赖**，除非用户明确要求。
 

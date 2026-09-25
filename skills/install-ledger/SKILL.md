@@ -1,6 +1,6 @@
 ---
 name: install-ledger
-description: 安装台账：登记、核对、追溯 skill／插件／MCP／CLI／桌面工具的来源与安装状态。
+description: 安装、恢复、卸载或修改全局资产后，登记并核对 skill、插件、MCP、CLI、桌面工具及自建配置的来源、位置、状态与恢复路径；本 Skill 只写台账，不执行安装或删除。
 disable-model-invocation: true
 ---
 

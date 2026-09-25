@@ -1,7 +1,6 @@
 ---
 name: local-env-pitfalls
-description: >-
-  本机命令行、脚本和子代理反复踩到的坑。写脚本、跑命令、派子代理前查一次。
+description: 写脚本、运行命令或派子代理前，查阅本机路径、编码、解析、门禁、工作树与容器坑位。
 disable-model-invocation: true
 ---
 # 工具链坑位清单

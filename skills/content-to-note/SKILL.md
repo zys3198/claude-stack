@@ -1,6 +1,6 @@
 ---
 name: content-to-note
-description: 把公众号／B站／抖音链接提取成结构化 Markdown 笔记。
+description: 把公众号、B站或抖音链接提取为学习型 Markdown 笔记时使用。
 disable-model-invocation: true
 ---
 # content-to-note

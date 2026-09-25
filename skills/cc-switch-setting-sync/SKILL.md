@@ -1,6 +1,6 @@
 ---
 name: cc-switch-setting-sync
-description: 修复 cc-switch 切换 provider 后 settings.json 的配置降级。
+description: 用户明确要求诊断或修复 cc-switch 切换 Claude provider 后的 settings.json 配置降级，或将 live 公共配置同步到 cc-switch DB 时使用；范围限于 Claude app_type。
 disable-model-invocation: true
 ---
 # cc-switch 设置同步（Claude）

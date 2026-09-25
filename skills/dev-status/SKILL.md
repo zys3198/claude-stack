@@ -1,6 +1,6 @@
 ---
 name: dev-status
-description: 仓库状态：活跃会话、工作树、stash、端口与容器占用。
+description: 查看指定仓库的活跃会话、工作树、stash、端口和容器占用，并原样返回状态脚本输出。
 argument-hint: "[仓库路径，留空取当前目录]"
 ---
 

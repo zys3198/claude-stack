@@ -1,6 +1,6 @@
 ---
 name: docker-only
-description: 本机命令进容器：构建、测试、装依赖、跑脚本、起服务。宿主机只做只读查看、git 与 docker 命令。
+description: 构建、测试、安装依赖、运行脚本或启动服务时，使用受限容器流程；宿主机仅做只读查看、Git 和 Docker 管理。
 disable-model-invocation: true
 ---
 

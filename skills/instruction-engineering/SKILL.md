@@ -1,6 +1,6 @@
 ---
 name: instruction-engineering
-description: 建立或审查项目的 AI 指令资产（CLAUDE.md / AGENTS.md / SKILL.md），只出草稿与 diff，不改项目文件。
+description: 建立项目 AI 上下文，或审查指定的 CLAUDE.md、AGENTS.md、SKILL.md，并产出草稿、报告或最小 diff；不直接修改项目文件。
 disable-model-invocation: true
 ---
 # Instruction Engineering — 项目指令资产

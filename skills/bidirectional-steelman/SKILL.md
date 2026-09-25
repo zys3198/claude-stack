@@ -1,6 +1,6 @@
 ---
 name: bidirectional-steelman
-description: 对存在方案取舍的决策、选型或「怎么办」类问题做双向钢人论证。
+description: 在两个或多个可行方案之间取舍、做技术选型或分析“怎么办”时，进行双向钢人论证并给出条件化判断。
 disable-model-invocation: true
 ---
 # 双向钢人论证

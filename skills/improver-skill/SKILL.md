@@ -1,6 +1,6 @@
 ---
 name: improver-skill
-description: 记录 Trace／Pattern／候选 Skill，按门禁决定是否应用。
+description: 推进 Skill 演进时，记录 Trace、沉淀 Pattern、提出候选 Skill，或对候选执行 gate 评估。
 disable-model-invocation: true
 ---
 

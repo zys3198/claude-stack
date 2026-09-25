@@ -1,8 +1,6 @@
 ---
 name: auto-browser
-description: >-
-  浏览器自动化与页面验收：操作网页、抓取页面数据、跑页面验收或 EAM 验收。
-  宿主通用任务走 agent-browser；需要正确性守卫、接管已有浏览器或复用标签页时走 JEV Browser。
+description: 操作网页、抓取页面数据或执行页面／EAM 验收时使用；通用任务走 agent-browser，需要正确性断言、接管已有浏览器或复用标签页时走 JEV Browser。
 ---
 
 # auto-browser

@@ -301,3 +301,18 @@
 - 验证：`settings.json`、`plugins/installed_plugins.json`、`plugins/known_marketplaces.json` 三处 grep 0 命中；`plugins/{cache,marketplaces,data}/` 无对应目录；两个 skill 在会话内 skill 列表实测出现。
 - 恢复：`claude plugin marketplace add mvanhorn/last30days-skill` 后 `claude plugin install last30days@last30days-skill -s user`（impeccable 同理）；裸 skill 形态也可直接从上游 clone 对应版本。
 - 备注：清 cache 残留用 `find <path> -depth -delete`（`rm -r*` 在 settings.json deny 列表）；clone 的中间副本在 `~/.claude/jobs/340210f7/tmp/{l30d,imp}`，随 job 删除，勿依赖。
+
+### motrix 裸 skill 装入（2026-09-25）
+- **变更**：新建 `~/.claude/skills/motrix/SKILL.md`（4,390 B）。`installing/skill-install.md` 现状表加 motrix 行；说明行目录数 23 → 24、第三方裸 skill 2 → 3。
+- **依据**：用户「我在本地也下载了这个软件和cli」+ 拍板「装 CLI 自带的那份」。用户原贴的 skill 是 Motrix 1.x / macOS 版（`/Applications/Motrix.app`、aria2 JSON-RPC `127.0.0.1:16800`、固定 `token:motrix`），与本机 Motrix 2.0.0-beta.40 不兼容，故不采用改写路线。
+- **回退**：`find ~/.claude/skills/motrix -depth -delete`；台账 `git checkout -- installing/skill-install.md installing/archive/skill-install.md`。
+- **验证**：`motrix skill install "C:/Users/zys31/.claude/skills"` → exit 0，输出 `Installed Motrix agent skill → C:\Users\zys31\.claude\skills\motrix\SKILL.md`；md5 与 `@motrix/cli/SKILL.md` 一致（`970a1f706b1b98bd4ad834819bbcc4e2`）；本会话运行时已把 motrix 列入可用 skill 清单。
+- **未做**：未加 `.gitignore` 白名单（第三方，`skills/*` 默认忽略，恢复靠重跑安装命令）；未跑 `motrix pair`（本地桌面端免配对）；未做重启会话后的二次生效验证。
+
+### 第三方裸 Skill 触发描述二次收窄（2026-09-26）
+
+- **变更**：按 `/writing-for-agents` 收窄三个第三方裸 Skill 的 frontmatter `description`：`last30days` 改为近 30 天多来源社区与网页研究入口；`impeccable` 改为网页和 App 界面设计、评审与迭代入口；`motrix` 改为下载任务查看、添加、控制、监控与配对入口。
+- **依据**：本次 25 个 Skill 触发条件复审；第三方裸 Skill 按 `installing/skill-install.md` 归档，不写入自建台账；用户确认将正确归属台账纳入本轮同步。
+- **回退**：按本条记录的改前 frontmatter 值，逐个用文件编辑恢复 `~/.claude/skills/{last30days,impeccable,motrix}/SKILL.md` 的 `description`；不使用 Git 回退覆盖其他未提交改动。
+- **验证**：逐文件复读 frontmatter；使用 `grep -rn` 复核 Skill 描述；目标文件 `git diff --check` 通过；三个 Skill 的权限字段保持原值。
+- **未做**：未安装、卸载、更新或重新注册任何第三方 Skill、插件或 Motrix 工具；未修改 `tool-install.md`。

@@ -1,6 +1,6 @@
 ---
 name: article-writer
-description: 创作或深度改写单篇中文技术内容：文章、博客、技术方案、知识库、面试题、教程。
+description: 创作或深度改写一篇中文技术内容（文章、博客、方案、教程、面试题或知识库条目）时使用。
 disable-model-invocation: true
 ---
 # Article Writer — 深度文章创作与优化

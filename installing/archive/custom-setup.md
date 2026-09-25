@@ -1256,3 +1256,97 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：原件在 `~/.claude/backups/skill-body-trim-2026-09-25/`（8 份，sha256：`ccf3190f…`(index) `859ccbdb…`(gate) `eac1a560…`(memory) `53cc7255…`(article-writer) `acb6f5b4…`(cc-switch) `1a0768e8…`(docker-only) `fa4e7c19…`(parallel-delegation) `2d4d6af5…`(task-notes)）；或 `git -C ~/.claude checkout -- <路径>`。
 - **验证**：`git diff --stat` 14+/28−，与改动规模相称、无整份翻写；`git diff --check` rc=0；`git ls-files --eol` 七份仍 `i/lf w/lf`；`protocol_check.py` rc=0（门禁字段表 4 键相符、记忆 143 条全进索引且 frontmatter 相符、命名 94 个全相符）；指针目标 `docs/protocols-index.md` 的 `## 维护条款` 节存在。
 - **未做**：① 三处估过、勘察后不成立的削减——`docker-only`「机械保证」列的是「会拦什么」，删了要白试一轮；「可销毁边界」三条做法是事故换来的；`cc-switch-setting-sync:17` 的深合并语义在 `references/ccswitch-architecture.md` 里 grep 无（`build_effective_settings_with_common_config`、`PROVIDER_ENV_KEYS`、`live.rs` 全无），删了就丢事实。② `install-ledger/references/ledger-protocol.md` 没有「维护条款」——共同要求第 6 条对台账这本协议本就未满足，本轮未补。③ 插件侧未动：ponytail 6 条描述 2,350 B/轮 + 人设注入 5,464 B/次（jsonl 窗口内 397 次），mattpocock 15 条 3,116 B/轮；按范围属 (c) 风格变更，待用户裁。
+
+### 资产判据接进 hook（2026-09-25）
+- **变更**：新增 `hooks/scripts/protocol-report.py` → `settings.json` 的 `hooks.PostToolUse[0]`（Edit|Write 那组，timeout 30）；`hooks/scripts/protocol_check.py` 加 `--file <路径>` 收窄模式与 `relevant_checks()` 路径→判据对照表。判据仍只在检查器一处实现，hook 只转达、不含判据、不阻断（退出码恒 0，从不输出 permissionDecision）。改动前副本 `backups/protocol-report-hook-2026-09-25/settings.json`。
+- **依据**：`C:\ZYS\Workspace\notes\asset-principles-verdict\` 裁决 + `.scratch/asset-principles/issues/03-checker-into-hook.md`（票 03，前置票 02）。
+- **回退**：删 `settings.json` 里那条 `protocol-report.py` 的 command 即回到无 hook 状态；`hooks/scripts/protocol-report.py` 与 `hooks/tests/test_protocol_report.py` 可直接删；`protocol_check.py` 的 `--file` 分支是纯增量，不回退不影响全量跑法。
+- **验证**：`hooks/tests/test_protocol_check.py` 40 项断言 rc=0；`hooks/tests/test_protocol_report.py` 15 项 rc=0。真树活体：写 `docs/protocols/20260925-naming-probe.md` 时 hook 出手，把「命名」等六类结论送进上下文；写干净文件时状态文件仍被刷新、但不出声。两个探针已删。收窄后单文件密钥扫描 2.48 s → 0.32 s。
+- **未做**：`Stop` 事件注册被 auto mode 分类器判定性拒绝，未接（脚本分支与 payload 测试都在，只差一行注册）；`~/.claude` 仓库未代提交（工作区本身 dirty）；本流水已 259 KB，超台账协议 200 KB 拆分线，未拆。
+
+### 常驻指令文件拆分：只留优先级、门禁、索引（2026-09-25）
+- **变更**：`~/.claude/CLAUDE.md` 183 行 / 14,306 B → 73 行 / 6,469 B。留在常驻的是 §0 适用范围与优先级、§1.2 决策分层 + §1.3 人工确认线（R0-R4 表原样）、§2 索引（18 行，三列「何时必读 | 规则在哪 | 判据一句话」，每行带触发条件）。其余正文原文下沉：§1.1／§1.4／§2.1／§2.3／§6／§7.2／§7.3 → 新建 `docs/protocols/collaboration.md`（58 行 / 3,695 B）；§3／§4 → 新建 `docs/protocols/evidence.md`（49 行 / 3,567 B）；§5 → 新建 `docs/protocols/expression.md`（43 行 / 2,443 B）。就近并入三处：§8 产物落点三段进 `docs/protocols-index.md`「落点与命名」、§7.1 经验入记忆进 `docs/protocols/memory.md` 判据、§8 独占容器勘察一句进 `skills/coding-workflow/references/worktree-and-resources.md`「本机配置」。
+- **依据**：`C:\ZYS\Workspace\notes\asset-principles-verdict\` 裁决 §5.3／§8 + `.scratch/asset-principles/issues/06-split-resident-instructions.md`（票 06）。落点与指针形态由用户当轮选定：载体取「3 份领域协议 + 就近并入」，指针取「逐行带触发条件」。
+- **回退**：改前三份原件在 `backups/claude-md-split-2026-09-25/`（`CLAUDE.md`、`memory.md`、`protocols-index.md`）；三份新协议删掉、`coding-workflow` 那半句去掉即回到拆分前。或 `git -C ~/.claude checkout -- <路径>` 逐文件还原。
+- **验证**：`protocol_check.py` rc=1，余下仅两处既有问题（last30days 195.4 KB、dev-clean/dev-status 重复）；门禁字段表 4 键全相符、命名 101 个全相符、映射表顶层 17 项全归类、根入口 187→190（三份新文件）。`ledger_check.py` rc=0。自建断言脚本 rc=0：22 段搬出正文在全库恰出现一次且 `CLAUDE.md` 里为 0，常驻 10 段逐字仍在。三份新文件 `git ls-files --eol` 均 `i/lf w/lf`。
+- **未做**：`~/.claude` 仓库未代提交（工作区本身 dirty）；`Stop` 事件注册仍缺（票 03 遗留）；本流水超 200 KB 拆分线，仍未拆。票 01／02／05 的资产此前未进流水（票 04 曾申请被分类器拒绝），本轮只补上现状表缺的 `rules/principles.md` 行，「同一轮两件事」在票 01／02／04／05 上仍不完整。
+
+### asset-guide 引导 skill（2026-09-25）
+- **变更**：新建 `~/.claude/skills/asset-guide/SKILL.md`（29 行 / 2,701 B，LF）。frontmatter 只有 `name` 与 `description`，**不加** `disable-model-invocation`——model-invocable 的 `description` 每轮在上下文里，这就是机制的常驻入口，解决「模型不知道这套机制存在」。正文是八步流程表（查重 → 定类型 → 定位 L0 → 写元数据 → 最小正文 → 指针 → 更新索引 → 设生命周期），每步只写动作与「判据出处」，指到 `rules/principles.md`、`docs/protocols-index.md`、`docs/protocols/memory.md`、`install-ledger`、`/writing-for-agents`，正文不复述判据。写作判据做成硬依赖指针（动笔前必读 `/writing-for-agents`）。「维护条款」留事后判据：正文压到十几行以内就并入 `rules/principles.md`，不独立成 skill。同步改两处：`.gitignore` 白名单加 `!skills/asset-guide/`（接在 `asset-auditor` 后）；`CLAUDE.md` §2 索引加一行（73 行 / 6,469 B → 74 行 / 6,663 B）。
+- **依据**：`notes/asset-principles-verdict/VERDICT.md` §8.1／§8.3 + `.scratch/asset-principles/issues/07-guide-skill.md`（票 07，前置票 04 已完成）。
+- **回退**：删 `~/.claude/skills/asset-guide/`、`.gitignore` 那一行与 `CLAUDE.md` §2 那一行即回到建前。
+- **验证**：Skill 工具调用 ✓——首次「Unknown skill: asset-guide」（本会话登记表未刷新），重试 `Launching skill: asset-guide`，宿主同时把它列进本会话可用 skill 清单，`description` 即 L0 落地实证。`git status --short skills/asset-guide` 显示 `??`（未跟踪但未被忽略），白名单生效。`protocol_check.py` 与 `ledger_check.py` 结果见票文件。
+- **未做**：`~/.claude` 仓库未代提交（工作区本身 dirty）；跨类留删判定留给票 08。
+### 阻断上线：常驻区与原则区拦住违规写入（2026-09-25）
+- **变更**：`hooks/scripts/protocol_check.py` 加 `BLOCK_SCOPE = ("CLAUDE.md", "rules/*.md")`、`--content <临时文件>`（把 `--file` 当成具有这份文本，判「这次写完之后的样子」）与退出码 `3`（有命中且在阻断区）；`hooks/scripts/protocol-report.py` 加 `pre_tool_use()` 分支与 `deny()`（JSON 形状逐字段照抄 `product-guard.py:63`，拒时往 `hooks/protocol-report.log` 写一条 `deny:`）；`settings.json` 的 `hooks.PreToolUse` 加第三组（matcher `Edit|Write|MultiEdit|NotebookEdit`，timeout 30，8,193 B → 8,538 B，CRLF 257 → 267 行、裸 LF 0）。改动前副本 `backups/protocol-block-2026-09-25/settings.json`。
+- **分工**：阻断面只在检查器里定义一次（按**路径模式**匹配，故还没落盘的新文件也算），hook 只按退出码行动、一条判据都没有。判据基座是「写入后的样子」：按盘上现状判会放行引入违规的那一次、并永久拦死修掉违规的那一次。
+- **依据**：`.scratch/asset-principles/issues/09-enable-blocking.md`（票 09，前置票 03 已完成）+ `notes/asset-principles-verdict/` 裁决。
+- **回退**：删 `settings.json` 里 PreToolUse 那一组即回到「只报告」；`protocol_check.py` 的 `--content`／`BLOCK_SCOPE`／退出码 3 都是纯增量，只删 `BLOCK_SCOPE` 一处即全库不再阻断。
+- **验证**：真树活体四步——写 126 B 合规文件到 `rules/zz-block-probe.md` 放行；同路径写 128.2 KB 被拦（理由 `✗ …体量 128.2 KB，超过 20 KB 上限`，盘上仍 126 B、超限内容未落盘）；`Edit` 加一句放行；探针删除后 `rules/` 只剩 `principles.md`。日志证据（探针前该文件不存在）：`2026-09-25 23:54:16 deny: rules/zz-block-probe.md｜✗ rules/zz-block-probe.md 体量 128.2 KB，超过 20 KB 上限`。夹具：`hooks/tests/test_protocol_check.py` 52 项 rc=0、`hooks/tests/test_protocol_report.py` 25 项 rc=0（含阻断面三条断言）。真树回归全量 rc=1，仍是既有两处；收窄跑 `rules/principles.md` rc=0。
+- **观察期**：扫 72 个会话 jsonl，hook 出声的唯一落点是 `docs/protocols/` 下 4 个文件（`collaboration`／`evidence`／`expression`／`20260925-naming-probe`），全部属其他区、逐条都是真命中，零误报；传输层零错误。
+- **过程中改掉的两个真 bug**：① `set_target` 存了 normcase 后的路径，`entry_files()` 把 `claude.md` 与 `CLAUDE.md` 当两个文件，同一次写入报两遍体积错误并伪造「同一段落出现在 2 个文件」，顺带静默废掉 `check_map` 收窄分支；② hook 的 stdin 按 GBK 解码（本机 `sys.stdin.encoding` 是 gbk，此前所有 hook 只重配过 stdout），含中文的 payload 变乱码——Write 路体量报 109.9 KB 而非 73.3 KB（3 字节汉字按 GBK 解成 1.5 字再按 4 字节算），Edit 路 `old_string` 对不上文件内容、复原静默失效。修法是存真实大小写、两侧各自 normcase，以及 `main()` 里把 stdin 与 stdout 一并重配成 utf-8。
+- **未做**：`Stop` 事件注册仍缺（票 03 遗留，被 auto mode 分类器判定性拒绝）；`~/.claude` 仓库未代提交（工作区本身 dirty）；本流水已超台账协议 200 KB 拆分线，未拆。
+
+### Stop 接线：会话结束的全量报告（2026-09-26）
+- **变更**：`settings.json` 新增 `hooks.Stop` 键（此前无此键，是唯一的纯增量改法）：`protocol-report.py`，timeout 60，matcher 空。8,538 → 8,872 B，CRLF 267 → 279 行、裸 LF 0，其余八个事件（Notification／PostToolUse／PreCompact／PreToolUse／SessionEnd／SessionStart／StopFailure）注册数与组内容逐字未变（dump 实测）。改动前副本 `backups/protocol-stop-2026-09-26/settings.json`。
+- **依据**：`C:\ZYS\Workspace\.claude\worktrees\asset-principles-verdict\.scratch\asset-principles\issues\03-checker-into-hook.md`（票 03 第 3 项验收，票 09 的前置）。
+- **为何此前没接上**：助手执行被 auto mode 分类器按 `[Self-Modification]` 判定性拒绝两次（2026-09-25 首拒、2026-09-26 重试再拒）。第二次拒绝文案明确要求停手交回用户，故未第三次尝试；用户当轮授权（「你来」）后同一脚本一次通过。**结论：拦住它的是「未经用户当场授权改 harness 配置」，不是这个改动本身有问题**——同一改动在授权下无阻力。
+- **回退**：删 `settings.json` 的 `Stop` 键即回到未接线；脚本与 `hooks/scripts/protocol-report.py` 的 `stop()` 分支都可留（不注册就不会跑）。
+- **验证**：① dump 运行时配置确认键在、其余事件未动。② 守卫实测——`hooks/protocol_report_state.json` 的 `session` = `54468203-b4d7-4433-9eab-fcc607861c55`，与本会话 jsonl 同名，`stop()` 第一道守卫（本会话写过资产）通过；第二道 `digest` 去重保证同一会话只出声一次。③ 分支契约由 `hooks/tests/test_protocol_report.py` 覆盖（写过资产才出声、没写过沉默、命中与上次相同沉默、退出码恒 0）。
+- **未做**：`~/.claude` 仓库未代提交（工作区本身 dirty）；本流水已超台账协议 200 KB 拆分线，未拆。
+
+### ai-product-development 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/ai-product-development/SKILL.md` 的 frontmatter `description` 从一句宽泛路线概述改为明确的新产品起点、完整闭环终点，并排除单次需求、Bug 修复和已有项目局部改动；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择「按推荐修改」。
+- **回退**：将 `description` 恢复为 `把产品想法走完原型验证 → MVP → Coding Agent 实现的闭环。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### asset-auditor 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/asset-auditor/SKILL.md` 的 frontmatter `description` 补明库级审计范围、全部资产类型、单个 Skill 分流边界，以及只出建议不直接执行删除／迁移／改路由；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择「按推荐修改」。
+- **回退**：恢复原描述 `评估资产库的保留、收窄、归档与新增，覆盖映射表里的每一类资产（skill、常驻指令、rules、协议、记忆、hook…），不止 skill 库。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### article-writer 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/article-writer/SKILL.md` 的 frontmatter `description` 补明单篇中文技术内容的深度创作／改写范围，并排除轻量校对、资料转笔记和单纯咨询；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择「按推荐修改」，并在台账编辑被拦后明确授权「你来」。
+- **回退**：恢复原描述 `创作或深度改写单篇中文技术内容：文章、博客、技术方案、知识库、面试题、教程。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### awesome-design-md 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/awesome-design-md/SKILL.md` 的 frontmatter `description` 补明视觉方向提炼与网页实现两种入口，并保持本地 Awesome DESIGN.md 资料来源边界；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择「按推荐修改」。
+- **回退**：恢复原描述 `从本地 Awesome DESIGN.md 库取品牌与网站视觉规则，落到网页实现。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### bidirectional-steelman 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/bidirectional-steelman/SKILL.md` 的 frontmatter `description` 明确两个或多个可行方案的取舍场景，并排除已定方案纯执行、单一事实查询和闲聊；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择「按推荐修改」，随后明确「继续」授权执行。
+- **回退**：恢复原描述 `对存在方案取舍的决策、选型或「怎么办」类问题做双向钢人论证。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### coding-workflow 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/coding-workflow/SKILL.md` 的 frontmatter `description` 增加「纯代码解释或只读查询不触发」的排除边界；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择补充排除项。
+- **回退**：恢复原描述 `代码改动：写功能、修 Bug、重构、审查 AI 代码、回退改动。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### content-to-note 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/content-to-note/SKILL.md` 的 frontmatter `description` 增加用户明确要求门槛，限定学习型 Markdown 笔记，并排除普通网页阅读和单纯摘要；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择「按推荐修改」。
+- **回退**：恢复原描述 `把公众号／B站／抖音链接提取成结构化 Markdown 笔记。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### cc-switch-setting-sync 触发描述收窄（2026-09-26）
+- **变更**：`~/.claude/skills/cc-switch-setting-sync/SKILL.md` 的 frontmatter `description` 补齐主动同步入口、Claude app_type 范围和明确请求门槛，并排除其他 app_type 与普通配置编辑；`disable-model-invocation: true` 保持不变。
+- **依据**：本次逐个审计触发条件；用户选择「按推荐修改」。
+- **回退**：恢复原描述 `修复 cc-switch 切换 provider 后 settings.json 的配置降级。`。
+- **验证**：改后复读目标 frontmatter，确认只变更 `description`，并保持用户专属调用标志。
+
+### 自建 Skill 触发描述二次收窄（2026-09-26）
+
+- **变更**：20 个自建 Skill 的 frontmatter `description` 按 `/writing-for-agents` 重新审计并收窄：`ai-product-development`、`article-writer`、`auto-browser`、`bidirectional-steelman`、`cc-switch-setting-sync`、`coding-workflow`、`content-to-note`、`dev-clean`、`dev-status`、`docker-only`、`improver-skill`、`install-ledger`、`instruction-engineering`、`leader`、`local-env-pitfalls`、`parallel-delegation`、`skill-auditor`、`asset-auditor`、`asset-guide`、`task-notes`。`awesome-design-md` 与 `drawio-chart` 经复审保持原文。
+- **依据**：本次 25 个 Skill 触发条件复审；description 只保留触发动作、真实分支和不可省略的安全／权限边界，正文流程仍由各 Skill 自身承载；用户确认统一清单后执行。
+- **回退**：按本次审计记录的改前值，逐个用文件编辑恢复目标 Skill 的 `description`；不使用 Git 回退覆盖其他未提交改动。
+- **验证**：逐文件复读 frontmatter；使用 `grep -rn` 复核 `~/.claude/skills` 的 description；目标文件 `git diff --check` 通过；`disable-model-invocation` 字段未改；未执行 Skill 正文脚本、配置同步或数据库操作。
+- **未做**：未修改任何 Skill 正文、`user-invocable`、`disable-model-invocation` 或 `allowed-tools`；未提交或推送 `.claude` 仓库。

@@ -1,6 +1,6 @@
 ---
 name: ai-product-development
-description: 把产品想法走完原型验证 → MVP → Coding Agent 实现的闭环。
+description: 推进新产品时，从产品意图、原型和视觉方向完成规格、工单、实现与验收。
 disable-model-invocation: true
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: coding-workflow
 version: 1.8.0
-description: 代码改动：写功能、修 Bug、重构、审查 AI 代码、回退改动。
+description: 写功能、修 Bug、重构、审查 AI 代码或回退代码改动时使用。
 disable-model-invocation: true
 ---
 # 编码工作流细则
