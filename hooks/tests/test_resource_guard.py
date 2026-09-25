@@ -633,6 +633,21 @@ with tempfile.TemporaryDirectory() as tmp:
         "command": "docker compose -f production-compose.yml up -d"}}, NO_BUSY_PATCH)
     check("生产变更进入确认线", decision(out), "ask")
 
+    for command, label in (
+        ("git remote -v", "只读 git remote -v 不提问"),
+        ("git remote get-url origin", "只读 git remote get-url 不提问"),
+        ("git grep production", "搜索 production 不提问"),
+        ("rg production .", "只读搜索 production 不提问"),
+        ("git diff -- production-config.yml", "读取 production 路径不提问"),
+    ):
+        out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+            "command": command}}, NO_BUSY_PATCH)
+        check(label, (decision(out), rc), (None, 0))
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me", "tool_input": {
+        "command": "git remote add origin https://example.invalid/repo.git"}}, NO_BUSY_PATCH)
+    check("修改 git remote 仍进入确认线", decision(out), "ask")
+
 print()
 print("失败项:", FAILED if FAILED else "无")
 sys.exit(1 if FAILED else 0)

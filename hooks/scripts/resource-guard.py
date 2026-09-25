@@ -141,7 +141,7 @@ REMOTE_GIT_VERBS = {"push", "fetch", "pull", "clone", "remote"}
 FORCE_GIT_FLAGS = {"--force", "-f", "--force-with-lease"}
 PRODUCTION_MARKER = re.compile(r"(?i)(?:^|[\s/_.:=-])(prod|production)(?:$|[\s/_.:=-])")
 PRODUCTION_MUTATION = re.compile(
-    r"(?i)\b(deploy|apply|migrate|migration|delete|drop|truncate|update|insert|write|push)\b"
+    r"(?i)\b(deploy|apply|migrate|migration|delete|drop|truncate|update|insert|write|push|up)\b"
 )
 REAL_DATA_MUTATION = re.compile(
     r"(?i)\b(drop\s+(?:database|table)|truncate\s+table|delete\s+from)\b"
@@ -896,6 +896,14 @@ def git_remote_actions(command, cwd):
     return actions, parse_failed
 
 
+def read_only_remote_action(action):
+    """git remote 的元数据查询不改变仓库或远端状态，不进入授权线。"""
+    if action["verb"] != "remote":
+        return False
+    arguments = action["scope"]["critical_params"]["arguments"]
+    return not arguments or arguments[0] == "get-url"
+
+
 def check_remote_git(command, cwd, self_id):
     if not isinstance(command, str):
         return
@@ -906,6 +914,8 @@ def check_remote_git(command, cwd, self_id):
         deny("无法安全解析远程 Git 命令；为避免误操作，改写成无歧义的 git 命令后再执行。")
         return
     for action in actions:
+        if read_only_remote_action(action):
+            continue
         if action["force"]:
             deny("Hook 拒绝 git push 强制推送；禁止 force push，改用普通推送并明确目标。")
             continue
@@ -925,7 +935,7 @@ def production_mutation_scope(command, cwd):
     markers = sorted(set(PRODUCTION_MARKER.findall(text)))
     actions = sorted(set(match.group(1).casefold() for match in PRODUCTION_MUTATION.finditer(text)))
     real_data = sorted(set(match.group(1).casefold() for match in REAL_DATA_MUTATION.finditer(text)))
-    if not markers and not real_data:
+    if not real_data and (not markers or not actions):
         return None
     return {
         "targets": [f"workspace:{norm(cwd)}"],
