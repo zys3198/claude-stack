@@ -1,6 +1,6 @@
 # 记忆协议
 
-跨会话长期事实存 `~/.claude/projects/<项目目录名>/memory/`。按项目分家：目录名是工作目录路径的转写（`C:\ZYS\Code\lab-area` → `C--ZYS-Code-lab-area`），换项目就换一份，不混放。
+跨会话长期事实存 `~/.claude/projects/<项目目录名>/memory/`。按项目分家：目录名是工作目录路径的转写（`C:\ZYS\Workspace` → `C--ZYS-Workspace`），换项目就换一份，不混放。
 
 ## 落点
 

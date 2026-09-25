@@ -288,3 +288,16 @@
 - 装到哪：`C:\ZYS\Study\.claude\skills\openmaic\`，含 `SKILL.md` 与 8 份 references（clone、extend、extend-cookbook、extend-sdk、generate-flow、live-demo、provider-keys、startup-modes）；未安装到用户级目录。
 - 依赖：Claude Code 项目级 Skill 加载（`SKILL.md` 的 `name: openmaic`、`user-invocable: true`）；课堂运行还需 OpenMAIC 托管访问码，或本地 OpenMAIC 仓库、依赖、Provider 配置和服务。
 - 备注：上一处 `C:\ZYS\Wiki` 项目已于 2026-09-19 整体删除，本条为该 skill 在新项目的落点。技能包与上游仓库 `skills/openmaic/` 目录结构一致。
+
+### last30days 与 impeccable：插件降级为裸 skill（2026-09-25）
+
+- 起因：插件精简。用户先给方向「删除或提取功能到本地」，再划禁区「不能动 ponytail 和 matt」，可动范围内只剩 last30days 与 impeccable。
+- 卸载命令原文：`claude plugin uninstall last30days@last30days-skill -s user`、`claude plugin uninstall impeccable@impeccable -s user`；市场注册清理：`claude plugin marketplace remove last30days-skill`、`claude plugin marketplace remove impeccable`。
+- 装到哪（裸 skill，非插件形态）：
+  - `~/.claude/skills/last30days/` v3.25.0，3.0 MB，https://github.com/mvanhorn/last30days-skill（MIT），含 SKILL.md + references + scripts
+  - `~/.claude/skills/impeccable/` v4.4.0，2.2 MB，https://github.com/pbakaus/impeccable（Apache 2.0），含 SKILL.md + reference + scripts
+- 裁剪：last30days 跳过上游 `assets/`（14 MB 演示素材）；impeccable 跳过 `plugin/hooks/`（裸装不带 hook）。
+- 两者都带 `disable-model-invocation: true`，只走 `/last30days`、`/impeccable` 手动调用。
+- 验证：`settings.json`、`plugins/installed_plugins.json`、`plugins/known_marketplaces.json` 三处 grep 0 命中；`plugins/{cache,marketplaces,data}/` 无对应目录；两个 skill 在会话内 skill 列表实测出现。
+- 恢复：`claude plugin marketplace add mvanhorn/last30days-skill` 后 `claude plugin install last30days@last30days-skill -s user`（impeccable 同理）；裸 skill 形态也可直接从上游 clone 对应版本。
+- 备注：清 cache 残留用 `find <path> -depth -delete`（`rm -r*` 在 settings.json deny 列表）；clone 的中间副本在 `~/.claude/jobs/340210f7/tmp/{l30d,imp}`，随 job 删除，勿依赖。

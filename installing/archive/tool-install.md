@@ -501,3 +501,20 @@
 - 同步：CLI 改动绕过 `settings-sync-auto.py`（该 hook 只挂 PostToolUse `Edit|Write`），首轮探测报 `settings-degrade-guard warn: common_config 与 settings.json 不一致`。手工跑 `sync_claude_common.py` 修复，差异仅 `enabledPlugins.last30days@last30days-skill` 一处；`common readback: MATCH`，`--check` 转 `[MATCH]`。回滚点 `~/.cc-switch/backups/sync-backup-20260925_003126_607810.json`
 - 未动（用户明确要求）：ponytail（2,510 B/轮 + 5,321 B/次注入）、mattpocock-skills（2,647 B/轮）
 - marketplace 与 37 MB cache 仍在盘上，未删
+
+### last30days 与 impeccable 插件彻底移除（2026-09-25）
+
+- 起因：用户「精简插件，删除或提取功能到本地」；随后明确「不能动 ponytail 和 matt」。承接上方「last30days 插件停用」一条——停用后进一步卸载。
+- 命令原文：`claude plugin uninstall last30days@last30days-skill -s user`、`claude plugin uninstall impeccable@impeccable -s user`；市场注册清理：`claude plugin marketplace remove last30days-skill`、`claude plugin marketplace remove impeccable`。
+- 残留 cache 目录用 `find <path> -depth -delete` 清除（`rm -r*` 在 settings.json deny 列表）。
+- 验证：`settings.json`、`plugins/installed_plugins.json`、`plugins/known_marketplaces.json` 三处 grep **0 命中**；`plugins/{cache,marketplaces,data}/` 无对应目录。
+- 功能未丢：两者已作为裸 skill 装回 `~/.claude/skills/`，见 [skill-install.md](../skill-install.md#第三方-skill-套件)。
+- 回滚点：`~/.claude/backups/plugin-removal-2026-09-25/`。
+
+### cc-switch DB 插件残留清理（2026-09-25）
+
+- 起因：插件移除后 `cc-switch.db` 仍留着对应键。该表是关闭代理接管时的回滚目标，写回 live 会让插件重新出现。
+- 处置一 `settings.common_config_claude`：`py ~/.claude/skills/cc-switch-setting-sync/scripts/sync_claude_common.py` → `common readback: MATCH`（10,555 → 10,209 B）。
+- 处置二 `proxy_live_backup.original_config`：手工 JSON 手术删 6 个叶子路径，0 新增，readback MATCH（8,361 → 8,016 B）。长度上涨是重新序列化加缩进所致。
+- 验证：两处与 `settings.json` 逐键一致，无空壳。
+- 回滚点：`~/.claude/backups/plugin-removal-2026-09-25/proxy-snapshot.before.json`、`~/.cc-switch/backups/sync-backup-20260925_141846_905720.json`。

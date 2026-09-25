@@ -32,7 +32,7 @@
 | skill-trimmer | 在用 | `~/.claude/skills/skill-trimmer/` | 自建 | git | 含 references/ |
 | task-notes | 在用 | `~/.claude/skills/task-notes/` | 自建 | git | 含 references/；**保持模型可见**（SessionStart hook 按名调用它） |
 
-2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-2026-09-25/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Code\lab-area\notes\skill-hook-review\SKILL-REVIEW.md`。
+2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-2026-09-25/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Workspace\notes\skill-hook-review\SKILL-REVIEW.md`。
 
 ## hook
 

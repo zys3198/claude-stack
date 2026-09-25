@@ -12,7 +12,7 @@
 
 ## 改动流程
 
-1. 先在实验目录做候选副本，不直接改正式 skill（实验规范见 `C:\ZYS\Code\lab-area\CLAUDE.md`）。
+1. 先在实验目录做候选副本，不直接改正式 skill（实验规范见 `C:\ZYS\Workspace\CLAUDE.md`）。
 2. 改正文规则（minor）：静态核对 + 显式 `/coding-workflow` 加载复验。
 3. 改 description 触发边界（major 候选）：必须重跑触发验证（正/负向场景），只有显式加载证据时不得宣布自动触发生效。
 4. 同步到正式目录后，新 CLI 会话显式加载一次，确认新规则可读。
@@ -43,4 +43,4 @@
 ## 相关路径
 
 - 安装台账：`C:\Users\zys31\.claude\installing\custom-setup.md`（### coding-workflow 小节）。
-- 来源实验：`C:\ZYS\Code\lab-area\exp\2026-09-11-claude-workflow-harness\`（VERIFICATION.md、FINDINGS-DISPOSITION.md、runtime-test/）。
+- 来源实验：`C:\ZYS\Workspace\exp\2026-09-11-claude-workflow-harness\`（VERIFICATION.md、FINDINGS-DISPOSITION.md、runtime-test/）。

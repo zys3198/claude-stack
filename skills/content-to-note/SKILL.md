@@ -49,7 +49,7 @@ node "$skill\scripts\wechat\run.js" "<mp-url>" "<笔记目录>\YYYY-MM-DD-标题
 
 `mcporter` 的 `douyin` server（`douyin-mcp-server` 1.2.1）已注册但**当前不可用**，2026-09-20 实测两处失效：分享页 `window._ROUTER_DATA` 不再返回 `videoInfoRes`，`parse_douyin_video_info` 与 `get_douyin_download_link` 报 `'videoInfoRes'` KeyError；构造函数无条件调 `create_asr_instance`，未设 `DASHSCOPE_API_KEY` 时全部工具抛错。不要再走这条路。
 
-可用路线无专用脚本，按步骤手工执行（2026-09-20 在 `C:\ZYS\Code\lab-area\exp\2026-09-20-douyin-content-notes\` 实际跑通）：
+可用路线无专用脚本，按步骤手工执行（2026-09-20 在 `C:\ZYS\Workspace\exp\2026-09-20-douyin-content-notes\` 实际跑通）：
 
 1. 用 `auto-browser` 打开分享页，读正文与作者信息存 `-page-text.txt`。
 2. 从页面取 CDN 音频轨，用 `ffmpeg` 抽成 16kHz 单声道 wav。
