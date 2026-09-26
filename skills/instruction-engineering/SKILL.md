@@ -1,6 +1,11 @@
 ---
 name: instruction-engineering
-description: 建立项目 AI 上下文，或审查指定的 CLAUDE.md、AGENTS.md、SKILL.md，并产出草稿、报告或最小 diff；不直接修改项目文件。
+description: >-
+  建立或审查项目指令资产。建立：按上下文工程方法梳理项目业务、架构、真实运行链路和文档索引，
+  产出 CLAUDE.md / AGENTS.md / 模块说明草稿，使项目能被 AI 持续看懂。审查：检查 SKILL.md、
+  CLAUDE.md、AGENTS.md 的触发边界、重复或冲突、资料读取、等待节点和完成标准，输出有证据的
+  最小修改 diff。用户要求让 AI 看懂项目、建立或补充项目 AI 上下文，或明确要求审查、优化这些
+  指令文件时使用。两部分都不直接修改项目文件，不审查 references/ 或 scripts/。
 disable-model-invocation: true
 ---
 # Instruction Engineering — 项目指令资产

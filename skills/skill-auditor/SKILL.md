@@ -30,7 +30,7 @@ disable-model-invocation: true
 
 ## 第 0 步：定靶与取证
 
-确认目标路径、名称、宿主、用户目标和是否允许修改；读目标 `SKILL.md` 全文及 frontmatter，仅按目标读取配套测试、引用它的 router 和维护文件；记录类型、来源证据、现有改动与目标外文件，不覆盖、删除或提交。候选根入口减量必须读取 [`references/skill-size-optimization.md`](references/skill-size-optimization.md)；审计本 skill 自身，或改其检查项、变更门禁与同步文件清单时，读 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
+确认目标路径、名称、宿主、用户目标和是否允许修改；读目标 `SKILL.md` 全文及 frontmatter，仅按目标读取配套测试、引用它的 router 和维护文件；记录类型、来源证据、现有改动与目标外文件，不覆盖、删除或提交。候选根入口减量必须读取 [`references/MAINTENANCE.md`](references/MAINTENANCE.md) 的「根入口减量方法」；审计本 skill 自身，或改其检查项、变更门禁与同步文件清单时，读 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)。
 
 ## 第 1 步：通用十查
 

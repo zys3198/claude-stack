@@ -1,9 +1,15 @@
 ---
 name: content-to-note
-description: 把公众号、B站或抖音链接提取为学习型 Markdown 笔记时使用。
+description: >-
+  把公众号/B站/抖音链接提取整理成结构化、学习型 Markdown 笔记，落盘到调用时指定的目录。
+  用户分享 mp.weixin.qq.com / bilibili.com / b23.tv / v.douyin.com / douyin.com
+  链接，或说「提取/整理/做笔记/存一下这篇/记成笔记」时触发。纯网页文章（Jina Reader
+  路线）、只要口头摘要不落盘、本地已有内容不触发。
 disable-model-invocation: true
 ---
 # content-to-note
+
+把公众号、B站或抖音内容提取成可学习、可检索、可回查证据的 Markdown 笔记，并落盘到调用时指定的目录。
 
 ## 入口契约
 
@@ -14,11 +20,11 @@ disable-model-invocation: true
 
 ## 路由
 
-| 来源 | URL | 默认引擎 |
+按域名识别来源，选择提取引擎，再按统一笔记契约整理并落盘。
 |---|---|---|
 | 微信公众号 | `mp.weixin.qq.com` | `$skill\scripts\wechat\run.js` |
 | B站视频/图文 | `bilibili.com`、`b23.tv`、`BV…` | `$skill\scripts\run_bili_note.py` |
-| 抖音 | `v.douyin.com`、`douyin.com/video` | `mcporter` 的 `douyin` server |
+| 抖音 | `v.douyin.com`、`douyin.com/video` | `agent-reach` 获取公开内容 |
 
 不支持的来源不触发；当前引擎不可用时说明覆盖范围并停在可交付的 fallback，不把局部失败说成整个 Skill 不可用。
 
@@ -28,7 +34,7 @@ disable-model-invocation: true
 2. 选择上表引擎；首次使用、依赖不明、提取失败或请求 ASR 时，先运行相应环境检查。
 3. 读取当前分支需要的参考文件：通用骨架必须读 `references/note-template.md`；B站接口、字幕、评论和图文结构读 `references/bilibili-api-notes.md`。
 4. 提取并归档允许保留的原始材料，写前读取 B站 `metadata\note_budget.json`，按预算组织学习型笔记。
-5. 写后运行评分脚本验收（现只有 B站 `score_bili_note.py`）；报告覆盖范围、证据位置、局限和 `passed`、`failed`、`blocked` 或 `not-run` 状态。
+5. 写后运行已有评分或测试脚本；报告覆盖范围、证据位置、局限和 `passed`、`failed`、`blocked` 或 `not-run` 状态。
 
 ## 微信公众号
 
@@ -47,15 +53,7 @@ node "$skill\scripts\wechat\run.js" "<mp-url>" "<笔记目录>\YYYY-MM-DD-标题
 
 ## 抖音
 
-`mcporter` 的 `douyin` server（`douyin-mcp-server` 1.2.1）已注册但**当前不可用**，2026-09-20 实测两处失效：分享页 `window._ROUTER_DATA` 不再返回 `videoInfoRes`，`parse_douyin_video_info` 与 `get_douyin_download_link` 报 `'videoInfoRes'` KeyError；构造函数无条件调 `create_asr_instance`，未设 `DASHSCOPE_API_KEY` 时全部工具抛错。不要再走这条路。
-
-可用路线无专用脚本，按步骤手工执行（2026-09-20 在 `C:\ZYS\Workspace\exp\2026-09-20-douyin-content-notes\` 实际跑通）：
-
-1. 用 `auto-browser` 打开分享页，读正文与作者信息存 `-page-text.txt`。
-2. 从页面取 CDN 音频轨，用 `ffmpeg` 抽成 16kHz 单声道 wav。
-3. 本地 FunASR 转写：`python transcribe.py <wav> <out.txt>`；脚本在 `exp\2026-09-20-douyin-content-notes\raw\transcribe.py`（SenseVoiceSmall + fsmn-vad，CPU，rtf≈0.1），模型缓存在 `~/.cache/modelscope/hub/models/iic/SenseVoiceSmall`。
-
-页面文字或转写缺失时说明覆盖范围并走手动 fallback，不把失败说成已提取。原始材料按 `<归档目录>\<YYYY-MM-DD>-douyin-<短标题>\` 保存。
+没有本地专用提取脚本。用 `agent-reach` 获取公开内容后按统一骨架整理；无法获取或需要完整音频转写时说明范围并走手动 fallback。原始材料按 `<归档目录>\<YYYY-MM-DD>-douyin-<短标题>\` 保存。
 
 ## 笔记契约
 
