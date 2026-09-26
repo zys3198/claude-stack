@@ -294,6 +294,7 @@ def main():
         big2 = "# 常驻\n\n" + ("字" * 1024 * 20)
         narrow = case_dir("narrow", {
             "skills/demo2/SKILL.md": big2, "newasset/thing.md": "x\n", "docs/plain.md": "# 中性\n",
+            "docs/protocols-index.md": "# 协议索引\n\n| `docs/session-lifecycle.md` |\n| `docs/plain.md` |\n",
         })
         code, out = run_file(narrow, "docs/plain.md")
         check("收窄·干净文件退出 0", code == 0, out)

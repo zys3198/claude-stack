@@ -1,7 +1,6 @@
 ---
 name: local-env-pitfalls
 description: 写脚本、运行命令或派子代理前，查阅本机路径、编码、解析、门禁、工作树与容器坑位。
-disable-model-invocation: true
 ---
 # 工具链坑位清单
 

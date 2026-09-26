@@ -1,7 +1,6 @@
 ---
 name: docker-only
 description: 构建、测试、安装依赖、运行脚本或启动服务时，使用受限容器流程；宿主机仅做只读查看、Git 和 Docker 管理。
-disable-model-invocation: true
 ---
 
 # 本机 Docker 使用约定

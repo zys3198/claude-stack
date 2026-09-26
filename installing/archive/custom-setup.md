@@ -1350,3 +1350,18 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：按本次审计记录的改前值，逐个用文件编辑恢复目标 Skill 的 `description`；不使用 Git 回退覆盖其他未提交改动。
 - **验证**：逐文件复读 frontmatter；使用 `grep -rn` 复核 `~/.claude/skills` 的 description；目标文件 `git diff --check` 通过；`disable-model-invocation` 字段未改；未执行 Skill 正文脚本、配置同步或数据库操作。
 - **未做**：未修改任何 Skill 正文、`user-invocable`、`disable-model-invocation` 或 `allowed-tools`；未提交或推送 `.claude` 仓库。
+
+### 模型调用边界恢复（2026-09-26）
+
+- **变更**：移除 `coding-workflow`、`docker-only`、`install-ledger`、`local-env-pitfalls`、`parallel-delegation` 五个 `SKILL.md` 的 `disable-model-invocation: true`；同步更新 `installing/custom-setup.md` 现状表。五个 skill 恢复为 model-invoked，模型可以在对应工作流中自行触达。
+- **依据**：用户指出全局路由不能穿透 user-invoked skill；`writing-for-agents/SKILL-MECHANICS.md:8-11` 的调用判据是「模型必须自行触达，或其他 skill 必须触达」才保留 model-invoked。上述五个 skill 被全局路由作为正常工作流前置，不能仅因已有路由就禁用模型调用。
+- **回退**：在上述五个 `SKILL.md` 的 frontmatter 重新加入 `disable-model-invocation: true`，并将现状表恢复为本条变更前的备注。
+- **验证**：五个目标文件均不再含 `disable-model-invocation`；全局 `skills/**/SKILL.md` 当前带 `disable-model-invocation: true` 的文件为 12 个；未修改 `user-invocable`、`allowed-tools`，未提交或推送 `.claude` 仓库。
+
+### 资产判据接线与三项检查扩展（2026-09-26）
+
+- **变更**：`protocol_check.py` 增加台账位置列路径、`archive/` 流水体量、顶层 `docs/*.md` 登记三项判据及 `--only ledger/archive/docs`；补 `test_protocol_check.py` 的正例、反例与边界。`settings.json` 移除 `herdr-agent-state.ps1` 的 `SessionStart` 注册，新增 `protocol-report.py` 的 `Stop` 注册；`rules/principles.md`、`docs/protocols-index.md`、`ledger-protocol.md` 与 `custom-setup.md` 同步补指针、索引和现状。
+- **依据**：用户 2026-09-26 明确「按更新后的推荐继续」；`asset-auditor` 实测；运行配置 dump 证实 Stop 缺失、Herdr 仍注册。
+- **回退**：追踪文件按 Git 逐路径恢复；`settings.json` 使用 `backups/asset-closeout-2026-09-26-settings.json` 恢复。
+- **验证**：`test_protocol_check.py` 与 `test_protocol_report.py` 容器内通过；台账检查待跑；全量检查预期保留既有体积/重复命中并新增 `archive/custom-setup.md` 体量命中。
+- **未做**：未删除、迁移或改路由；未拆分流水；未推送。

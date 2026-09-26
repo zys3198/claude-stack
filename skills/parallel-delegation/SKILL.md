@@ -2,7 +2,6 @@
 name: parallel-delegation
 description: 规划边界清楚、可独立验收的单个或并行子代理任务；涉及模型、effort、并发或隔离时先走确认门禁。
 compatibility: 需要宿主提供 agent/subagent 调度能力；模型、effort、并发和隔离能力以运行时实际暴露为准。
-disable-model-invocation: true
 ---
 
 # Model-agnostic parallel delegation

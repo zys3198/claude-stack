@@ -16,18 +16,18 @@
 | awesome-design-md | 在用 | `~/.claude/skills/awesome-design-md/` | 自建 | git | 2026-09-26：触发描述补齐视觉约束与网页实现两种入口；保持本地资料来源边界 |
 | bidirectional-steelman | 在用 | `~/.claude/skills/bidirectional-steelman/` | 自建 | git | 2026-09-26：按 writing-for-agents 收窄为方案取舍、技术选型与「怎么办」的论证入口；仍仅用户显式调用 |
 | cc-switch-setting-sync | 在用 | `~/.claude/skills/cc-switch-setting-sync/` | 自建 | git | 含 scripts/sync_claude_common.py；2026-09-26：按 writing-for-agents 保留修复／同步两条入口、Claude 范围与明确请求门槛；仍仅用户显式调用 |
-| coding-workflow | 在用 | `~/.claude/skills/coding-workflow/` | 自建 | git | 含 references/；2026-09-25 加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 收窄为代码改动、审查与回退入口；仍仅用户显式调用 |
+| coding-workflow | 在用 | `~/.claude/skills/coding-workflow/` | 自建 | git | 含 references/；2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 收窄为代码改动、审查与回退入口；恢复模型可调用 |
 | content-to-note | 在用 | `~/.claude/skills/content-to-note/` | 自建 | git | 2026-09-20 起仅手动调用；2026-09-26：按 writing-for-agents 保留三类来源与学习型笔记目标；仍仅用户显式调用 |
 | dev-clean | 在用 | `~/.claude/skills/dev-clean/` | 自建 | git | 由 `commands/dev-clean.md` 迁入；2026-09-26：触发描述收窄为用户明确项目收尾，并保留资源删除／停止与 push 门禁 |
 | dev-status | 在用 | `~/.claude/skills/dev-status/` | 自建 | git | 由 `commands/dev-status.md` 迁入；2026-09-26：触发描述改为查看仓库状态并原样返回脚本输出 |
-| docker-only | 在用 | `~/.claude/skills/docker-only/` | 自建 | git | 含 references/；2026-09-25 加 `disable-model-invocation: true`；2026-09-26：触发描述前置运行动作、受限容器流程与宿主边界 |
+| docker-only | 在用 | `~/.claude/skills/docker-only/` | 自建 | git | 含 references/；2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：触发描述前置运行动作、受限容器流程与宿主边界；恢复模型可调用 |
 | drawio-chart | 在用 | `~/.claude/skills/drawio-chart/` | 自建 | git | 含 examples/ |
 | improver-skill | 在用 | `~/.claude/skills/improver-skill/` | 自建 | git | 原名 wiki-skill；2026-09-26：按 writing-for-agents 明确 Trace、Pattern、候选 Skill 与 gate 四个入口；仍仅用户显式调用 |
-| install-ledger | 在用 | `~/.claude/skills/install-ledger/` | 自建 | git | 含 references/、scripts/；2026-09-25 加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 明确资产变更后的登记核对入口，并保留只写台账边界；仍仅用户显式调用 |
+| install-ledger | 在用 | `~/.claude/skills/install-ledger/` | 自建 | git | 含 references/、scripts/；2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 明确资产变更后的登记核对入口，并保留只写台账边界；恢复模型可调用 |
 | instruction-engineering | 在用 | `~/.claude/skills/instruction-engineering/` | 自建 | git | 2026-09-26：按 writing-for-agents 明确建立项目上下文与审查指令资产两条入口；仍仅用户显式调用 |
 | leader | 在用 | `~/.claude/skills/leader/` | 自建 | git | 2026-09-24 补进 `.gitignore` 白名单，此前一直被忽略；2026-09-26：按 writing-for-agents 明确调研、独立执行与验收任务书入口；仍仅用户显式调用 |
-| local-env-pitfalls | 在用 | `~/.claude/skills/local-env-pitfalls/` | 自建 | git | 含 references/；2026-09-25 加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 前置脚本、命令与子代理执行前的坑位查询入口；仍仅用户显式调用 |
-| parallel-delegation | 在用 | `~/.claude/skills/parallel-delegation/` | 自建 | git | 2026-09-25 加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 明确单个／并行委派及配置确认门禁；仍仅用户显式调用 |
+| local-env-pitfalls | 在用 | `~/.claude/skills/local-env-pitfalls/` | 自建 | git | 含 references/；2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 前置脚本、命令与子代理执行前的坑位查询入口；恢复模型可调用 |
+| parallel-delegation | 在用 | `~/.claude/skills/parallel-delegation/` | 自建 | git | 2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 明确单个／并行委派及配置确认门禁；恢复模型可调用 |
 | skill-auditor | 在用 | `~/.claude/skills/skill-auditor/` | 自建 | git | 2026-09-26：按 writing-for-agents 扩展为单 Skill 审计、减量、组合边界与来源重复审查；仍仅用户显式调用 |
 | asset-auditor | 在用 | `~/.claude/skills/asset-auditor/` | 自建 | git | 含 references/；原名 skill-trimmer，2026-09-25 泛化改名——判定范围扩到原则文件映射表里的每一类资产，新增第 0 节资产类型映射表当唯一适配点；判据／扫描脚本／复审服务器未动；2026-09-26：按 writing-for-agents 收窄为库级留存、收窄、归档与新增审计，并保留只出建议边界；仍仅用户显式调用 |
 | asset-guide | 在用 | `~/.claude/skills/asset-guide/` | 自建 | git | 2026-09-25 新建；model-invocable（不加 `disable-model-invocation`），`description` 即常驻入口；正文八步流程，写作判据转 `/writing-for-agents`；2026-09-26：按 writing-for-agents 将八步流程收窄为资产变更前的类型、入口、元数据、索引与生命周期指针；事后判据：正文压到十几行以内就并入 `rules/principles.md` |
@@ -50,7 +50,7 @@
 | session-guard.py | 在用 | `hooks/scripts/session-guard.py` → `hooks.SessionStart[1]`、`hooks.SessionEnd[0]` | 自建 | git | `start` / `end` 子命令 |
 | session-status.py | 在用 | `hooks/scripts/session-status.py` | 自建 | git | 由 `/dev-status` 调用，非 hook |
 | selftest.py | 在用 | `hooks/scripts/selftest.py` | 自建 | git | 自检入口，退出码 0 为全过 |
-| protocol_check.py | 在用 | `hooks/scripts/protocol_check.py` | 自建 | git | 八类判据（门禁／记忆／命名／体积／重复／密钥／生命周期／映射表）；`--file <路径>` 只查被写的那个文件（配 `--content <临时文件>` 改判「这次写完之后的样子」），`--only` 只跑某几类；只读、非 hook。退出码 0 全过／1 有命中／2 用法错误／3 有命中且在阻断区。**阻断面只此一处**：`BLOCK_SCOPE`（`CLAUDE.md`、`rules/*.md`），按路径模式匹配 |
+| protocol_check.py | 在用 | `hooks/scripts/protocol_check.py` | 自建 | git | 十一类判据（门禁／记忆／命名／体积／重复／密钥／生命周期／映射表／台账位置／归档体量／顶层文档）；`--file <路径>` 只查被写的那个文件（配 `--content <临时文件>` 改判「这次写完之后的样子」），`--only` 只跑某几类；只读、非 hook。退出码 0 全过／1 有命中／2 用法错误／3 有命中且在阻断区。**阻断面只此一处**：`BLOCK_SCOPE`（`CLAUDE.md`、`rules/*.md`），按路径模式匹配 |
 | protocol-report.py | 在用 | `hooks/scripts/protocol-report.py` → `hooks.PreToolUse[2]`、`hooks.PostToolUse[0]`、`hooks.Stop[0]` | 自建 | git | 资产判据的传输层：判据全在 protocol_check.py，本文件不含判据。PreToolUse 接阻断（检查器返 3 才拒，`deny` 形状照抄 product-guard.py，拒时留 `deny:` 日志）；PostToolUse 只报告；Stop 跑全量只读报告（本会话写过资产且命中与上次不同才出声） |
 | settings-degrade-guard.py | 在用 | `hooks/settings-degrade-guard.py` → `hooks.SessionStart[0]` | 自建 | git | matcher `.*`，未设 timeout |
 | settings-sync-auto.py | 在用 | `hooks/settings-sync-auto.py` → `hooks.PostToolUse[0]` | 自建 | git | 只挂 Edit\|Write 类；CLI 改 settings.json 不触发 |
@@ -87,6 +87,7 @@
 | docs/protocols/collaboration.md | 在用 | `~/.claude/docs/protocols/collaboration.md` | 自建 | git | 协作协议；原 `CLAUDE.md` §1.1／§1.4／§2.1／§2.3／§6／§7.2／§7.3 原文搬入 |
 | docs/protocols/evidence.md | 在用 | `~/.claude/docs/protocols/evidence.md` | 自建 | git | 证据与交付协议；原 `CLAUDE.md` §3／§4 原文搬入 |
 | docs/protocols/expression.md | 在用 | `~/.claude/docs/protocols/expression.md` | 自建 | git | 表达协议；原 `CLAUDE.md` §5 原文搬入 |
+| docs/session-lifecycle.md | 在用 | `~/.claude/docs/session-lifecycle.md` | 自建 | git | 会话启动、并发、收尾与工作树生命周期；由 `CLAUDE.md` §2 索引 |
 | installing/ | 在用 | `~/.claude/installing/` | 自建 | git | 四张现状表 + `archive/` |
 | docs/archive/ | 在用 | `~/.claude/docs/archive/` | 自建 | git | 4 份已废弃的时点产物，文件名 `<日期>-<主题>.md`，日期取内容反映的最新时点 |
 | codex-home-2026-09-09 | 已归档 | `~/.claude/backups/codex-home-2026-09-09/` | 自建（快照） | **无 git 路径** | Codex home 快照，90 文件 / 3,400,308 B；`~/.codex/` 已不存在，**这是唯一副本**；`backups/` 在 `.gitignore` 内，只有一份 |
