@@ -118,7 +118,8 @@ CLEAN = {
     "rules/principles.md": f"# 资产原则\n\n{TABLE}",
     "skills/demo/SKILL.md": "---\nname: demo\ndescription: 演示\n---\n\n正文。\n",
     "docs/protocols/gate.md": GATE,
-    "docs/protocols-index.md": "# 协议索引\n",
+    "docs/protocols-index.md": "# 协议索引\n\n| 会话生命周期 | `docs/session-lifecycle.md` |\n",
+    "docs/session-lifecycle.md": "# 会话生命周期\n",
     "hooks/scripts/authorization_scope.py": SCOPE_PY,
     "installing/ledger.md": "# 台账\n",
     "projects/demo/memory/note-one.md": MEMORY,
@@ -134,9 +135,10 @@ def main():
         good = temp / "good"
         build(good, CLEAN)
         code, out = run(good)
-        check("正例·八类全跑退出 0", code == 0, out)
-        check("正例·输出含八类摘要", all(k in out for k in
-              ("门禁", "记忆", "命名", "体积", "重复", "密钥", "生命周期", "映射表")), out)
+        check("正例·十一类全跑退出 0", code == 0, out)
+        check("正例·输出含十一类摘要", all(k in out for k in
+              ("门禁", "记忆", "命名", "体积", "重复", "密钥", "生命周期", "映射表",
+               "台账位置", "归档体量", "顶层文档")), out)
 
         def case_dir(name, spec):
             d = temp / name
@@ -204,6 +206,25 @@ def main():
         code, out = case("newasset", {"newasset/thing.md": "x\n"}, "map")
         check("反例·未归类顶层条目", code == 1 and "newasset" in out, out)
 
+        # ---------- 反例 · 台账位置 / 归档体量 / 顶层文档 ----------
+        ledger = (
+            "| 名称 | 状态 | 位置 | 出处 | 恢复 | 备注 |\n"
+            "|---|---|---|---|---|---|\n"
+            "| ghost | 在用 | `hooks/missing.py` | 自建 | git | — |\n"
+        )
+        code, out = case("ledger-path", {"installing/ledger.md": ledger}, "ledger")
+        check("反例·台账位置不存在", code == 1 and "hooks/missing.py" in out, out)
+
+        code, out = case("archive-size", {
+            "installing/archive/history.md": "x" * (200 * 1024 + 1),
+        }, "archive")
+        check("反例·归档流水超过 200 KB", code == 1 and "超过 200 KB" in out, out)
+
+        code, out = case("docs-unregistered", {
+            "docs/protocols-index.md": "# 协议索引\n",
+        }, "docs")
+        check("反例·顶层文档未登记", code == 1 and "session-lifecycle.md" in out, out)
+
         short_table = TABLE.replace("| hook | 不进上下文（平台执行） | `settings.json` matcher |\n", "")
         code, out = case("drift", {"rules/principles.md": f"# 资产原则\n\n{short_table}"}, "map")
         check("反例·表与判据漂移", code == 1 and "漂移" in out, out)
@@ -223,6 +244,11 @@ def main():
         over = head + "x" * (limit - len(head.encode("utf-8")) + 1)
         code, out = case("size-over", {"CLAUDE.md": over}, "size")
         check("边界·体积超 1 字节即报", code == 1, out)
+
+        code, out = case("archive-exact", {
+            "installing/archive/history.md": "x" * (200 * 1024),
+        }, "archive")
+        check("边界·归档流水恰好 200 KB 通过", code == 0, out)
 
         p120 = "重复样本" * 30  # 120 汉字
         spec = {

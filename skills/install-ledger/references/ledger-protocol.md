@@ -58,4 +58,6 @@
 python ~/.claude/skills/install-ledger/scripts/ledger_check.py
 ```
 
-只读。检查列数与顺序、状态枚举、表内名称唯一、单表体量、`archive/` 完整性，以及插件状态与 `settings.json → enabledPlugins` 相符。不挂 hook，不阻断操作。
+只读。检查列数与顺序、状态枚举、表内名称唯一、单表体量、`archive/` 完整性，以及插件状态与 `settings.json → enabledPlugins` 相符。
+
+删除判据与整理触发点各协议通用，见 `~/.claude/docs/protocols-index.md` 的「维护条款」。不挂 hook，不阻断操作。

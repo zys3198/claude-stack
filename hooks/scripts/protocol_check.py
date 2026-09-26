@@ -1,4 +1,4 @@
-"""校验资产里能机械校验的八类判据。
+"""校验资产里能机械校验的十一类判据。
 
 只读，自己不阻断操作——阻断与否由调用方按退出码决定：
 0 全过；1 有命中（只报告）；2 用法错误（argparse 自用）；
@@ -21,6 +21,9 @@
 | 密钥 | 高置信度密钥形态 | rules/principles.md C2 |
 | 生命周期 | 自报的 updated 是否过期 | rules/principles.md C4 |
 | 映射表 | 「资产 → 形态 → L0」表与磁盘双向对账 | rules/principles.md B6 |
+| 台账位置 | `installing/*.md` 现状表的位置列路径存在性 | skills/install-ledger/SKILL.md 现状表 |
+| 归档体量 | `installing/archive/*.md` 单份流水是否超过 200 KB | skills/install-ledger/references/ledger-protocol.md 组织规则 |
+| 顶层文档 | `docs/*.md` 是否在协议总表或台账登记 | docs/protocols-index.md 共同要求 |
 
 判不了的项在输出末尾显式列出，不静默略过——清单见 UNJUDGEABLE。
 
@@ -257,6 +260,12 @@ def relevant_checks(path):
         labels.add("密钥")
     if rel_path.split("/")[0] in repo_top_entries():
         labels.add("映射表")
+    if rel_path.startswith("installing/"):
+        labels.update({"台账位置", "归档体量"})
+    if (rel_path == "docs/protocols-index.md"
+            or re.match(r"^docs/[^/]+\.md$", rel_path)
+            or rel_path == "installing/custom-setup.md"):
+        labels.add("顶层文档")
     return labels
 
 
@@ -670,6 +679,102 @@ def check_map():
     return errors, summary
 
 
+LEDGER_ARCHIVE_LIMIT = 200 * 1024
+LEDGER_ROOT_PREFIXES = (
+    "CLAUDE.md", "rules/", "skills/", "docs/", "hooks/", "installing/",
+    "projects/", "plugins/", "statusline/", "archive-skills/", "backups/",
+    "authorization/", "settings.json",
+)
+
+
+def ledger_path(token):
+    """把台账位置列里的可核对路径解析成实际路径；非路径标记跳过。"""
+    token = token.split("→", 1)[0].strip()
+    if token.startswith(("hooks.", "settings.", "statusLine", "mcpServers")):
+        return None
+    if token.startswith("~/"):
+        return os.path.normpath(os.path.expanduser(token))
+    if re.match(r"^[A-Za-z]:[\\\\/]", token):
+        return os.path.normpath(token)
+    if not token.startswith(LEDGER_ROOT_PREFIXES):
+        return None
+    return os.path.normpath(os.path.join(CLAUDE, token))
+
+
+def ledger_rows(path):
+    """读取现状表中带「位置」列的 Markdown 表格行。"""
+    lines = read(path).splitlines()
+    in_table = False
+    for number, line in enumerate(lines, 1):
+        if not line.lstrip().startswith("|"):
+            if in_table:
+                break
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 6:
+            continue
+        if cells[:6] == ["名称", "状态", "位置", "出处", "恢复", "备注"]:
+            in_table = True
+            continue
+        if not in_table or all(set(cell) <= {"-", ":"} for cell in cells[:6]):
+            continue
+        yield number, cells[2]
+
+
+def check_ledger_paths():
+    """现状表的位置列必须指向仍存在的文件或目录。"""
+    errors, rows = [], 0
+    for path in sorted(glob.glob(os.path.join(CLAUDE, "installing", "*.md"))):
+        if TARGET is not None and not in_target(path):
+            continue
+        for number, position in ledger_rows(path):
+            rows += 1
+            for token in re.findall(r"`([^`]+)`", position):
+                actual = ledger_path(token)
+                if actual and not os.path.exists(actual):
+                    errors.append(f"{rel(path)}:{number} 位置「{token}」不存在")
+    summary = f"{rows} 个台账位置" + (f"，{len(errors)} 处不存在" if errors else "，全存在")
+    return errors, summary
+
+
+def check_archive_size():
+    """台账流水单体超过 200 KB 时必须按年拆分。"""
+    files = sorted(glob.glob(os.path.join(CLAUDE, "installing", "archive", "*.md")))
+    errors = []
+    for path in files:
+        if TARGET is not None and not in_target(path):
+            continue
+        if os.path.getsize(path) > LEDGER_ARCHIVE_LIMIT:
+            errors.append(
+                f"{rel(path)} 体量 {os.path.getsize(path) / 1024:.1f} KB，"
+                f"超过 {LEDGER_ARCHIVE_LIMIT // 1024} KB 流水拆分线"
+            )
+    summary = f"{len(files)} 份流水（上限 {LEDGER_ARCHIVE_LIMIT // 1024} KB）" + (
+        f"，{len(errors)} 处超限" if errors else "，全在限内")
+    return errors, summary
+
+
+def check_top_docs():
+    """docs/ 顶层文档必须在协议总表或台账中登记。"""
+    docs = sorted(glob.glob(os.path.join(CLAUDE, "docs", "*.md")))
+    index = os.path.join(CLAUDE, "docs", "protocols-index.md")
+    registry = read(index) + "\n" + "\n".join(
+        read(path) for path in glob.glob(os.path.join(CLAUDE, "installing", "*.md"))
+    )
+    errors = []
+    for path in docs:
+        if os.path.basename(path) == "protocols-index.md":
+            continue
+        if TARGET is not None and not in_target(path):
+            continue
+        relative = rel(path)
+        if relative not in registry and os.path.basename(path) not in registry:
+            errors.append(f"{relative} 未在协议总表或台账登记")
+    summary = f"{len(docs)} 个 docs/ 顶层文档（协议总表自身除外）" + (
+        f"，{len(errors)} 个未登记" if errors else "，全已登记")
+    return errors, summary
+
+
 CHECKS = (
     ("门禁", check_gate),
     ("记忆", check_memory),
@@ -679,10 +784,14 @@ CHECKS = (
     ("密钥", check_secret),
     ("生命周期", check_lifecycle),
     ("映射表", check_map),
+    ("台账位置", check_ledger_paths),
+    ("归档体量", check_archive_size),
+    ("顶层文档", check_top_docs),
 )
 ONLY_KEYS = {
     "gate": "门禁", "memory": "记忆", "naming": "命名", "size": "体积",
     "dupe": "重复", "secret": "密钥", "lifecycle": "生命周期", "map": "映射表",
+    "ledger": "台账位置", "archive": "归档体量", "docs": "顶层文档",
 }
 
 
