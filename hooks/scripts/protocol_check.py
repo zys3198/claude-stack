@@ -1,8 +1,8 @@
-"""校验资产里能机械校验的十一类判据。
+"""校验资产里能机械校验的十类判据。
 
 只读，自己不阻断操作——阻断与否由调用方按退出码决定：
 0 全过；1 有命中（只报告）；2 用法错误（argparse 自用）；
-3 有命中，且命中落在阻断区（常驻区与原则区，见 BLOCK_SCOPE）。
+3 有命中，且命中落在阻断区（常驻区与项目记忆索引区，见 BLOCK_SCOPE）。
 单独运行：`python hooks/scripts/protocol_check.py`；跑夹具树加 `--root`，
 只跑某几类加 `--only size,secret`。
 
@@ -17,12 +17,11 @@
 | 记忆 | frontmatter 必填键、索引孤儿与死链 | docs/protocols/memory.md |
 | 命名 | ASCII、日期写成 YYYY-MM-DD | docs/protocols-index.md「落点与命名」|
 | 体积 | 根入口体量上限 20 KB | docs/protocols-index.md「体量硬触发」|
-| 重复 | 同一段落出现在两个根入口 | rules/principles.md B4 |
-| 密钥 | 高置信度密钥形态 | rules/principles.md C2 |
-| 生命周期 | 自报的 updated 是否过期 | rules/principles.md C4 |
-| 映射表 | 「资产 → 形态 → L0」表与磁盘双向对账 | rules/principles.md B6 |
-| 台账位置 | `installing/*.md` 现状表的位置列路径存在性 | skills/install-ledger/SKILL.md 现状表 |
-| 归档体量 | `installing/archive/*.md` 单份流水是否超过 200 KB | skills/install-ledger/references/ledger-protocol.md 组织规则 |
+| 重复 | 同一段落出现在两个根入口 | skills/asset-guide/references/principles.md B4 |
+| 密钥 | 高置信度密钥形态 | skills/asset-guide/references/principles.md C2 |
+| 生命周期 | 自报的 updated 是否过期 | skills/asset-guide/references/principles.md C4 |
+| 映射表 | 「资产 → 形态 → L0」表与磁盘双向对账 | skills/asset-guide/references/principles.md B6 |
+| 台账位置 | `installing/*.md` 现状表的位置列路径存在性 | docs/protocols/ledger.md 现状表 |
 | 顶层文档 | `docs/*.md` 是否在协议总表或台账登记 | docs/protocols-index.md 共同要求 |
 
 判不了的项在输出末尾显式列出，不静默略过——清单见 UNJUDGEABLE。
@@ -62,7 +61,6 @@ MEMORY_TYPES = {"user", "feedback", "project", "reference"}
 # 是那类产物的固有形态，不是冗余。
 ENTRY_GLOBS = (
     "CLAUDE.md",
-    "rules/*.md",
     "skills/*/SKILL.md",
     "docs/protocols/*.md",
     "docs/protocols-index.md",
@@ -70,22 +68,23 @@ ENTRY_GLOBS = (
     "projects/*/memory/*.md",
 )
 
-# 阻断区：这两处的写入有命中就拒（票 09），其余区仍然只报告。
-# 覆盖全库每一轮都要付的常驻成本——常驻指令与原则。按路径模式判、不按存在与否，
-# 所以新写一个 rules/*.md 也在内。范围只此一处，改这里就是改阻断面。
-BLOCK_SCOPE = ("CLAUDE.md", "rules/*.md")
+# 阻断区：这两处的写入有命中就拒（常驻区与项目记忆索引区，票 09）。
+# 覆盖全库每一轮都要付的常驻指令与项目记忆索引；按路径模式判、不按存在与否，
+# 所以新写一个项目记忆索引也在内。范围只此一处，改这里就是改阻断面。
+BLOCK_SCOPE = ("CLAUDE.md", "projects/*/memory/MEMORY.md")
 
 # 密钥扫描面更宽：配置、脚本、参考文件都算。不含会话记录、缓存、备份，
 # 也不含 secrets/（那是本机指定的密钥存放处，且已被 .gitignore 排除）。
 SECRET_TARGETS = (
     "CLAUDE.md", "README.md", "long-complex-task-prompt.md", "keybindings.json",
     "settings.json", "settings.local.json", "settings.json.bak*",
-    "rules", "skills", "hooks", "docs", "installing", "authorization",
+    "skills", "hooks", "docs", "installing", "authorization",
     "external-configs", "tools", "statusline", "lib", "commands",
 )
 
-# 体积上限 20 KB 沿用既有两处判据，不另立数字：
-# docs/protocols-index.md「体量硬触发」、install-ledger 的 ledger_check.py MAX_BYTES。
+# 体量判据只管 ENTRY_GLOBS 定义的根入口，references/ 等按需文件不查；上限统一为 20 KB。
+# 全量模式报告超限，收窄模式按写入后的预览判定；BLOCK_SCOPE 内退出 3 由传输层拒绝，
+# 其余区域只报告，超限内容应下沉或收窄，不设例外表。
 SIZE_LIMIT = 20 * 1024
 # 段落重复的字数下限。实测：阈值 120 在 187 个根入口上只留 1 组真命中；
 # 降到更低会把「## 用法」这类小节标题算成重复。
@@ -121,12 +120,16 @@ PLACEHOLDER = re.compile(
     re.I,
 )
 
+# 原则文件在仓库里的位置。它是判据源：映射表的标签列、表侧报错、收窄判定都指它。
+# 挪动时只改这一处，映射表里那一行的标签跟着改。
+PRINCIPLES_PARTS = ("skills", "asset-guide", "references", "principles.md")
+PRINCIPLES = "/".join(PRINCIPLES_PARTS)
+
 # 映射表判据：键是表里的标签，值是它在磁盘上的对应物。表是这份表的投影，
 # 两边不等就是漂移——与 check_gate() 用同一套「脚本是源头、文档是投影」的做法。
 MAP_ROWS = {
-    "rules/principles.md": "rules/principles.md",
+    PRINCIPLES: PRINCIPLES,
     "CLAUDE.md": "CLAUDE.md",
-    "rules/*.md": "rules/*.md",
     "skill": "skills/*/SKILL.md",
     "docs/protocols/*.md": "docs/protocols/*.md",
     "memory": "projects/*/memory/*.md",
@@ -199,18 +202,24 @@ def preview_of(path):
     return PREVIEW.get(os.path.normcase(os.path.normpath(path)))
 
 
-# 以下四个是票 09 的「阻断区」判据。方向是收紧：给 `CLAUDE.md` 与 `rules/*.md`
-# 两处写入加要求，不改任何放行条件，不减任何既有判据，管辖范围不出这两个路径。
+# 以下四个是票 09 的「阻断区」判据。方向是收紧：给 `CLAUDE.md` 与项目记忆索引加要求，
+# 不改任何放行条件，不减任何既有判据，管辖范围不出这两个路径模式。
 def in_any(path, patterns):
     """路径落不落在这份清单里。按模式判，不按存在与否——还没落盘的新文件也要算。
 
-    目录项（`rules`）按前缀算，其余走 fnmatch。清单里带通配的项可能跨过 `/`
-    （`rules/*.md` 也认 `rules/a/b.md`），这对「整块区域」的语义是对的。
+    目录项按前缀算；带 `/` 的文件模式逐段匹配，避免 `*` 把 `installing/*.md`
+    错当成能跨过 `/` 的递归模式。
     """
     rel_path = rel(path)
     for pat in patterns:
         pat = pat.rstrip("/")
-        if fnmatch.fnmatch(rel_path, pat) or rel_path.startswith(pat + "/"):
+        path_parts, pattern_parts = rel_path.split("/"), pat.split("/")
+        same_depth = len(path_parts) == len(pattern_parts)
+        segment_match = same_depth and all(
+            fnmatch.fnmatch(path_part, pattern_part)
+            for path_part, pattern_part in zip(path_parts, pattern_parts)
+        )
+        if segment_match or rel_path.startswith(pat + "/"):
             return True
     return False
 
@@ -261,7 +270,7 @@ def relevant_checks(path):
     if rel_path.split("/")[0] in repo_top_entries():
         labels.add("映射表")
     if rel_path.startswith("installing/"):
-        labels.update({"台账位置", "归档体量"})
+        labels.add("台账位置")
     if (rel_path == "docs/protocols-index.md"
             or re.match(r"^docs/[^/]+\.md$", rel_path)
             or rel_path == "installing/custom-setup.md"):
@@ -596,8 +605,8 @@ def check_lifecycle():
 
 
 def table_labels():
-    """principles.md「资产 → 形态 → L0」一节的标签列，去格式后的样子。"""
-    text = read(os.path.join(CLAUDE, "rules", "principles.md"))
+    """原则文件「资产 → 形态 → L0」一节的标签列，去格式后的样子。"""
+    text = read(os.path.join(CLAUDE, *PRINCIPLES_PARTS))
     section = re.search(r"^## 资产 → 形态 → L0\s*$(.*?)(?=^## |\Z)", text, re.S | re.M)
     if not section:
         return None
@@ -638,11 +647,11 @@ def check_map():
     """
     labels = table_labels()
     if labels is None:
-        return ["rules/principles.md 没找到「资产 → 形态 → L0」一节"], "映射表缺失"
+        return [f"{PRINCIPLES} 没找到「资产 → 形态 → L0」一节"], "映射表缺失"
 
     # 表侧的问题（表与判据漂移、某一行在磁盘上找不到对应物）是整张表的事：全量跑都报，
-    # 收窄时只有写 principles.md 本身才报。窄跑要回答的是「刚写的这个归哪一类」。
-    whole_table = TARGET is None or in_target(os.path.join(CLAUDE, "rules", "principles.md"))
+    # 收窄时只有写原则文件本身才报。窄跑要回答的是「刚写的这个归哪一类」。
+    whole_table = TARGET is None or in_target(os.path.join(CLAUDE, *PRINCIPLES_PARTS))
 
     errors = []
     if whole_table and set(labels) != set(MAP_ROWS):
@@ -679,9 +688,30 @@ def check_map():
     return errors, summary
 
 
-LEDGER_ARCHIVE_LIMIT = 200 * 1024
+
+def check_top_docs():
+    """docs/ 顶层文档必须在协议总表或台账中登记。"""
+    docs = sorted(glob.glob(os.path.join(CLAUDE, "docs", "*.md")))
+    index = os.path.join(CLAUDE, "docs", "protocols-index.md")
+    registry = read(index) + "\n" + "\n".join(
+        read(path) for path in glob.glob(os.path.join(CLAUDE, "installing", "*.md"))
+    )
+    errors = []
+    for path in docs:
+        if os.path.basename(path) == "protocols-index.md":
+            continue
+        if TARGET is not None and not in_target(path):
+            continue
+        relative = rel(path)
+        if relative not in registry and os.path.basename(path) not in registry:
+            errors.append(f"{relative} 未在协议总表或台账登记")
+    summary = f"{len(docs)} 个 docs/ 顶层文档（协议总表自身除外）" + (
+        f"，{len(errors)} 个未登记" if errors else "，全已登记")
+    return errors, summary
+
+
 LEDGER_ROOT_PREFIXES = (
-    "CLAUDE.md", "rules/", "skills/", "docs/", "hooks/", "installing/",
+    "CLAUDE.md", "skills/", "docs/", "hooks/", "installing/",
     "projects/", "plugins/", "statusline/", "archive-skills/", "backups/",
     "authorization/", "settings.json",
 )
@@ -694,7 +724,7 @@ def ledger_path(token):
         return None
     if token.startswith("~/"):
         return os.path.normpath(os.path.expanduser(token))
-    if re.match(r"^[A-Za-z]:[\\\\/]", token):
+    if re.match(r"^[A-Za-z]:[\\/]", token):
         return os.path.normpath(token)
     if not token.startswith(LEDGER_ROOT_PREFIXES):
         return None
@@ -737,44 +767,6 @@ def check_ledger_paths():
     return errors, summary
 
 
-def check_archive_size():
-    """台账流水单体超过 200 KB 时必须按年拆分。"""
-    files = sorted(glob.glob(os.path.join(CLAUDE, "installing", "archive", "*.md")))
-    errors = []
-    for path in files:
-        if TARGET is not None and not in_target(path):
-            continue
-        if os.path.getsize(path) > LEDGER_ARCHIVE_LIMIT:
-            errors.append(
-                f"{rel(path)} 体量 {os.path.getsize(path) / 1024:.1f} KB，"
-                f"超过 {LEDGER_ARCHIVE_LIMIT // 1024} KB 流水拆分线"
-            )
-    summary = f"{len(files)} 份流水（上限 {LEDGER_ARCHIVE_LIMIT // 1024} KB）" + (
-        f"，{len(errors)} 处超限" if errors else "，全在限内")
-    return errors, summary
-
-
-def check_top_docs():
-    """docs/ 顶层文档必须在协议总表或台账中登记。"""
-    docs = sorted(glob.glob(os.path.join(CLAUDE, "docs", "*.md")))
-    index = os.path.join(CLAUDE, "docs", "protocols-index.md")
-    registry = read(index) + "\n" + "\n".join(
-        read(path) for path in glob.glob(os.path.join(CLAUDE, "installing", "*.md"))
-    )
-    errors = []
-    for path in docs:
-        if os.path.basename(path) == "protocols-index.md":
-            continue
-        if TARGET is not None and not in_target(path):
-            continue
-        relative = rel(path)
-        if relative not in registry and os.path.basename(path) not in registry:
-            errors.append(f"{relative} 未在协议总表或台账登记")
-    summary = f"{len(docs)} 个 docs/ 顶层文档（协议总表自身除外）" + (
-        f"，{len(errors)} 个未登记" if errors else "，全已登记")
-    return errors, summary
-
-
 CHECKS = (
     ("门禁", check_gate),
     ("记忆", check_memory),
@@ -785,13 +777,12 @@ CHECKS = (
     ("生命周期", check_lifecycle),
     ("映射表", check_map),
     ("台账位置", check_ledger_paths),
-    ("归档体量", check_archive_size),
     ("顶层文档", check_top_docs),
 )
 ONLY_KEYS = {
     "gate": "门禁", "memory": "记忆", "naming": "命名", "size": "体积",
     "dupe": "重复", "secret": "密钥", "lifecycle": "生命周期", "map": "映射表",
-    "ledger": "台账位置", "archive": "归档体量", "docs": "顶层文档",
+    "ledger": "台账位置", "docs": "顶层文档",
 }
 
 

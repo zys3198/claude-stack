@@ -6,12 +6,12 @@
 
 | 领域 | 协议在哪 | 校验 | 状态 |
 |---|---|---|---|
-| 台账 | `~/.claude/skills/install-ledger/references/ledger-protocol.md` | `python ~/.claude/skills/install-ledger/scripts/ledger_check.py` | **已落** |
-| 任务笔记 | `~/.claude/skills/task-notes/SKILL.md` | — | **已落** |
-| 执行环境 | `~/.claude/skills/docker-only/SKILL.md` | `~/.claude/hooks/scripts/resource-guard.py`（PreToolUse） | **已落** |
+| 台账 | `~/.claude/docs/protocols/ledger.md` | `python ~/.claude/hooks/scripts/ledger_check.py` | **已落** |
+| 任务笔记 | `~/.claude/docs/protocols/task-notes.md` | — | **已落** |
+| 执行环境 | `~/.claude/docs/protocols/execution-env.md` | `~/.claude/hooks/scripts/resource-guard.py`（PreToolUse） | **已落** |
 | 会话生命周期 | `~/.claude/docs/session-lifecycle.md` | `~/.claude/hooks/scripts/session-guard.py`（SessionStart／SessionEnd） | **已落** |
 | 记忆 | `~/.claude/docs/protocols/memory.md` | `python ~/.claude/hooks/scripts/protocol_check.py` | **已落** |
-| 委派 | `~/.claude/skills/parallel-delegation/SKILL.md` + `references/` | — | **已落** |
+| 委派 | `~/.claude/docs/protocols/delegation.md` + `delegation/` | — | **已落** |
 | 门禁 | `~/.claude/docs/protocols/gate.md`（操作规则留在 `~/.claude/CLAUDE.md` §1.3） | `python ~/.claude/hooks/scripts/protocol_check.py` | **已落** |
 | 协作 | `~/.claude/docs/protocols/collaboration.md` | — | **已落** |
 | 证据与交付 | `~/.claude/docs/protocols/evidence.md` | — | **已落** |

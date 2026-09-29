@@ -316,3 +316,10 @@
 - **回退**：按本条记录的改前 frontmatter 值，逐个用文件编辑恢复 `~/.claude/skills/{last30days,impeccable,motrix}/SKILL.md` 的 `description`；不使用 Git 回退覆盖其他未提交改动。
 - **验证**：逐文件复读 frontmatter；使用 `grep -rn` 复核 Skill 描述；目标文件 `git diff --check` 通过；三个 Skill 的权限字段保持原值。
 - **未做**：未安装、卸载、更新或重新注册任何第三方 Skill、插件或 Motrix 工具；未修改 `tool-install.md`。
+
+### motrix 裸 skill 核对（2026-09-28）
+- **变更**：核对 `~/.claude/skills/motrix/` 已不存在；现状表中的 motrix 条目随本批移除。
+- **依据**：`skills/` 下没有 `motrix` 目录，但 `motrix` CLI 仍可执行；CLI 与 skill 的安装状态分开记录。
+- **回退**：恢复 skill = 重新运行 `motrix skill install "C:/Users/zys31/.claude/skills"`。
+- **验证**：目录检索无命中；`command -v motrix` 返回 `C:/Users/zys31/AppData/Roaming/npm/motrix`。
+- **未做**：未卸载 Motrix CLI；未修改 `tool-install.md`。

@@ -1,15 +1,13 @@
 # §3 Agent 调度
 
-本节只定义进入 Plan 后的拆解、agent 与 verify 规则。Plan 触发条件见 §1.1。
+本节只补充编码任务在 Plan 后的切片、验证和 hooks 衔接；一般委派的独立性、worker 范围、模型/provider/route/effort、并发、隔离、授权、失败处理和主代理复核按 `parallel-delegation` 执行。Plan 触发条件见 `SKILL.md §1.1`。
 
-- 分解切片（要落成正式工单时提示用户运行 `/mattpocock-skills:to-tickets`）：tracer bullet 竖切，每片穿过全部受影响层（schema→服务→最小呈现）、自带阻塞边，分完先与用户对一遍粒度与依赖。本机补充：一个计划分 4-6 片；每片完成时必须拿得出外部可观察现象（界面可见变化、API 响应、命令输出），只能汇报「某层写完」算横切，打回重切；若项目已有执行计划、workflow contract 或状态机，沿用宿主定义的路径和字段协调文件范围、API 契约、共享类型、验证命令，没有时在项目约定位置记录最小计划。Plan 审批通过后执行。
-- 独立任务并行派 agent（code-reviewer/security-reviewer）。依赖任务串行。
-- **写任务的子代理必须各自隔离**：宿主提供 `isolation: "worktree"` 时用它，否则多个子代理在同一个检出里并行写会互相覆盖，且分不清是谁改的。
-- 独立任务按 `parallel-delegation` 的拆分门槛并行；存在依赖、共享写入或冲突风险时分阶段或顺序执行。高风险任务仍按 Verify 分级复核。
-- **Verify 分级**（按风险不按文件数）：
-  - 低（机械/重命名/格式）→ 一次独立轻量 reviewer + 项目已有的最小相关检查；不启动多 Agent adversarial，但不因改动小而跳过独立复核。
+- **Tracer bullet**：每片竖切穿过全部受影响层（schema→服务→最小呈现），自带阻塞边；切片后先与用户核对粒度和依赖。项目已有 workflow contract、规格或状态机时沿用其字段、契约和验证命令；没有时记录最小计划。正式工单提示用户运行 `/mattpocock-skills:to-tickets`；Plan 审批通过后执行。
+- 依赖任务串行；独立写任务按 `parallel-delegation` 的隔离规则后才并行。
+- **Verify 分级**（按风险，不按文件数）：
+  - 低（机械/重命名/格式）→ 一次独立轻量 reviewer + 项目已有的最小相关检查；不启动多 Agent 对抗审查。
   - 中（功能改动）→ 单 reviewer agent。
-  - 高（auth/DB schema/架构/安全敏感）→ 三 agent adversarial（找问题/求证/反驳），2/3 通过。
-- 全部完成后集成测试。
-- **Agent 使用**：subagent 跑自己模型+工具、更耗 token、继承当前 sandbox——审批请求看清是哪个 agent 发起。小改动（改 DTO 字段）别开多 agent，沟通成本 > 修改本身。只读探索用 `Explore`，通用多步用 `general-purpose`。
-- **护栏以实际挂载为准**：危险命令是否被拦截，看 `settings.json` 里实际挂载的 hooks，不按文档、台账或记忆里的记载推断；记载与挂载不一致时以挂载为准。没有挂载时按 CLAUDE.md §1.3 的人工确认线执行，不假设有兜底。长链编排（>3 agent）使用项目或宿主已定义的执行计划/工作流合同协调并设步数上限；没有时记录最小计划，超限即停，防 agent 无限烧。**进循环或放并行之前先单跑一轮同类任务**：核对路由、权限、输入契约与产物格式（细见 `parallel-delegation` 第 3 条），单步不可靠就上并行或进循环，只会同时收到一堆看不懂的改动。
+  - 高（auth/DB schema/架构/安全敏感）→ 三 agent adversarial（找问题/求证/反驳），2/3 通过；涉及安全边界时追加已证实的 `security-review`。
+- 每片完成时必须拿得出外部可观察现象（界面、API 响应或命令输出）；只能汇报「某层写完」算横切，打回重切。全部切片完成后跑集成测试。
+- 小改动（如 DTO 字段）不启动多 Agent，仍按低风险 Verify 做一次独立轻量复核；沟通和验收成本高于修改本身时不扩展并行规模。
+- **实际护栏**：危险命令是否被拦截，看 `settings.json` 实际挂载的 hooks；没有挂载时按 `CLAUDE.md §1.3` 的人工确认线执行。长链编排（>3 agent）使用已有执行计划或 workflow contract 并设步数上限；进入循环或并行前先单跑一轮同类任务，核对路由、权限、输入契约和产物格式。

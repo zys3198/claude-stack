@@ -224,6 +224,20 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - 未验证：重启 cc-switch/Claude 后的真实代理热切换回放尚未执行。
 - 回退：恢复脚本原文件；运行时 DB 写入前自动生成的 `~/.cc-switch/backups/sync-backup-<ts>.json` 可恢复公共配置和代理快照。
 
+### cc-switch-setting-sync repair mode（2026-09-26）
+- **变更**：`scripts/sync_claude_common.py` 新增 `--repair`，以 DB common hooks 为默认基线，一次性对齐 live `settings.json`、`settings.common_config_claude`、`proxy_live_backup.original_config`，并清理所有 Claude provider 快照中的三个 `CLAUDE_CODE_*` context 覆盖键。
+- **接线策略**：repair 移除独立 product/resource 入口与停用的 herdr 接线，收敛到 `pretool-guard`，确保 `protocol-report` 接入 PreToolUse、PostToolUse、Stop；provider 的凭据、地址和模型不改。
+- **入口**：先 `--repair --hooks-source db --auto-compact-window 200000 --dry-run`，确认后去掉 `--dry-run`；写前保存 SQLite 全量备份与 settings 备份，写后重启 cc-switch 再切换验收。
+- **验证**：Python AST/CLI 检查通过；临时 SQLite 四层夹具验证 dry-run 不写、repair 写入后四层一致；真实配置 dry-run 已执行，未改真实配置。
+- **回退**：使用 repair 生成的 SQLite 全量备份与 settings 备份恢复；provider 快照随 SQLite 备份一并回退。
+
+### cc-switch-setting-sync 用户环境权威迁移（2026-09-26）
+- **变更**：用户确认将 `CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000`、Artifact/反馈/自动更新/错误报告/遥测 5 个稳定关闭开关迁移到 Windows 用户环境；从 live、common、proxy 和 provider 快照移除重复键。
+- **脚本**：`extract_common`、`restore`、`repair`、代理快照和 provider 清理路径统一剔除 6 个用户环境键；旧 `--auto-compact-window` 参数只保留兼容提示，不再写回 settings。
+- **入口**：用户环境变量由 PowerShell 用户级设置；配置迁移先 dry-run，再执行 `--repair --hooks-source db`，写后重启 cc-switch，下一次 Claude Code 启动读取用户环境。
+- **验证**：真实 repair 写前生成 settings/SQLite 备份；脚本 AST 解析通过；待重启 cc-switch 与新 Claude Code 进程后复核 `/context` 和 `--check`。
+- **回退**：恢复本次 repair 生成的 `settings-repair-2026-09-26_120217_057113.json` 与 `repair-2026-09-26_120217_057113.db`，并删除或改回用户级环境变量。
+
 ### learning-personas
 - 出处：2026-08-16 从 DeepTutor（eduhub.deeptutor.info，本地装于 `C:\ZYS\Code\deep-tutor`）三 persona（peer/teacher/research-assistant）提炼，用户拍板独立 skill + CLAUDE.md 引用式
 - 内容：**学习系统总纲 + 说话层角色库**。三个正交决定：判级查（expose-unknowns）/ 归属问（这技能归你吗→你练/我讲/存起来）/ 说话层（peer/teacher/research）。全系统学习模式唯一词汇源
@@ -847,7 +861,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **输出文案**：模型侧 `hookSpecificOutput.additionalContext` = 「你该开始笔记模式了：调用 task-notes-by-user。」；用户侧顶层 `systemMessage` = 「笔记模式已开启」（均已核对 `systemMessage` 是「显示给用户的 UI 消息」，上限 4000 字符）。自动压缩累计 ≥3 时每次压缩后都提醒。
 - **依赖**：Python 3.12（`C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe`）。无第三方包。
 - **验证**：`python.exe ~/.claude/hooks/tests/test_task_notes_reminder.py` 21 项断言全过（`ALL PASS`），其中包含读回 `settings.json` 断言两处接线与 matcher 正确；`settings-degrade-guard.py` 喂 `SessionStart` payload 后无告警输出（rc=0，快照未判降级）；改 `settings.json` 两次编辑各触发一次 `settings-sync-auto.py`，均返回「已自动同步 cc-switch DB: [DONE]」。**未验证**：真实压缩触发链路（需要对一个会话实际跑满 3 次自动压缩才能观测），`~/.claude/task-notes-reminder.log` 会记录每次 `pre` 计数与每次提醒，首次真实压缩后看该文件即可确认。
-- **回退**：删除 `settings.json` 里 `hooks.PreCompact` 整段与 `hooks.SessionStart` 中 matcher 为 `compact` 的那一组，再删三个新文件（脚本、测试、状态目录 `~/.claude/task-notes-reminder/`）。`settings.json` 改动前副本：`~/.claude/settings.json.bak-autocompact-20260918_151656` 不含本轮改动，可按需对照。
+- **回退**：删除 `settings.json` 里 `hooks.PreCompact` 整段与 `hooks.SessionStart` 中 matcher 为 `compact` 的那一组，再删三个新文件（脚本、测试、状态目录 `~/.claude/task-notes-reminder/`）。`settings.json` 改动前副本：`~/.claude/backups/settings.json.bak-autocompact-20260918_151656` 不含本轮改动，可按需对照。
 
 ---
 
@@ -1365,3 +1379,68 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：追踪文件按 Git 逐路径恢复；`settings.json` 使用 `backups/asset-closeout-2026-09-26-settings.json` 恢复。
 - **验证**：`test_protocol_check.py` 与 `test_protocol_report.py` 容器内通过；台账检查待跑；全量检查预期保留既有体积/重复命中并新增 `archive/custom-setup.md` 体量命中。
 - **未做**：未删除、迁移或改路由；未拆分流水；未推送。
+
+### ai-product-development 归档（2026-09-27）
+
+- **变更**：`~/.claude/skills/ai-product-development/SKILL.md` 正文替换为触发空壳（名称、一句话摘要、4 个触发词、归档位置、恢复方式、60 天观察期）；原文件 2,921 B 备份至 `~/.claude/backups/ai-product-development-removal-2026-09-27/SKILL.md.bak`。独有增量并进 `~/.claude/skills/coding-workflow/SKILL.md`：§1.5.1 补「第一版跑通前不切模块」，§1.5.2 补验收后的迭代／`handoff` 出口。`installing/custom-setup.md` 现状表同步改状态与计数。
+- **依据**：本会话「skill 职责边界与重复」议题。该 skill 正文内容 100% 是 `mattpocock-skills` 路线转交表，`ask-matt` 路由器已完整覆盖且更全；用户批准「删整条，独有增量并进 coding-workflow 一节」，并在资产体系内按 `asset-auditor` §5 保留触发空壳。
+- **与既有裁决的差异**：`.scratch/asset-principles/issues/08-library-retention-verdict.md` 于 2026-09-25 判「保留-待观察」，依据「零常驻成本」，运行证据列标「未验证」。本次以新证据（读全两份 `SKILL.md`，确认 `ask-matt` 覆盖度更高）推翻该结论。
+- **回退**：用 `SKILL.md.bak` 覆盖回 `skills/ai-product-development/SKILL.md`，或用 Git 恢复该路径；已并入 `coding-workflow` 的两节可保留，不构成冲突。
+- **验证**：备份 md5 `e37bfbb83de4e7be1e7cd95b1b54161a` 与原件一致；替换后复读空壳正文确认不含路线表。
+- **未做**：未提交或推送；未改 `settings.json`、路由、插件或其他 skill 正文。
+
+### 资产原则移入 asset-guide（2026-09-27）
+
+- **变更**：`~/.claude/rules/principles.md`（66 行 / 3,219 B，无 `paths` 的常驻规则）移入 `~/.claude/skills/asset-guide/references/principles.md`（102 行 / 5,265 B），`rules/` 目录随之清空。新文件三改：删去「常驻：本文件无 `paths`，每个会话开始即进入上下文」自述句——它描述的是平台机制，写在文件里改变不了任何东西，移出常驻层后更不成立；每条原则补正例与反例各一，全部取本机实物（`dev-clean`／`dev-status` 的重复段、`last30days` 195.3 KB 超限、`skill-install.md:17` 死引用 motrix，三处均为 `protocol_check.py` 实测命中）；映射表首行改写为新路径，`rules/*.md` 一行随实物消失一并删去（留表会永久报「找不到对应物」）。`asset-guide/SKILL.md` 的判据指针改指 `references/principles.md`，删去「维护条款」一节（其落点已不存在，判「还该不该独立存在」归 `asset-auditor`）。`asset-auditor/SKILL.md` 的 `description` 与单一事实源声明改指 `asset-guide` 的原则。
+- **接线**：`protocol_check.py` 新增 `PRINCIPLES_PARTS`／`PRINCIPLES` 两个常量（原路径有 5 个可改处），`table_labels()`、`check_map()` 与 `MAP_ROWS` 改读新路径；`BLOCK_SCOPE` 与 `ENTRY_GLOBS` 的 `rules/*.md` 保持不动（二者按路径模式判、不按存在与否，平台机制仍在）。两个夹具的 `TABLE` 模板、夹具树与三处引用同步改路径；两条断言随「原则文件不再在阻断区」由退出码 3 降为 1，另两处改用 `CLAUDE.md` 当靶子——`rules/` 在夹具树里已无实物，而 `repo_top_entries()` 在非 git 夹具下走 `os.listdir`，空 `rules/` 目录会被判成「未归类」，且密钥判据按盘上文件列表扫描，不落盘的新路径扫不到。
+- **依据**：用户 2026-09-27「不用放这里吧，放到 skill 里面」＋「原则应该加一些优秀的示例到 reference 里面」＋「删掉这种无用的东西」。代价当场明示：常驻层 → 按需层，不调 `asset-guide` 的会话看不到原则；接受理由是「这东西该放哪」这个问题本身就是调 `asset-guide` 的信号。
+- **回退**：`git checkout 66879db -- rules/principles.md` 恢复原文件（该路径有两次提交历史）；再按本条把 `asset-guide/SKILL.md`、`asset-auditor/SKILL.md`、`protocol_check.py`（含 `MAP_ROWS` 的 `rules/*.md` 行）与两个夹具改回去。
+- **验证**：`test_protocol_check.py` 56 项 rc=0；`test_protocol_report.py` 25 项 rc=0（与改动前基线同项数）；收窄跑新文件 rc=0，判据调度为「密钥、映射表」；真树全量 rc=1，5 处命中中 4 处为既有漂移，新增 1 处「顶层条目 `rules` 未归类」是 `rm` 后未 `git add` 的中间状态，索引更新后消失。
+- **未做**：未动 git 索引（`rules/principles.md` 的删除仍待提交）；未删空的 `rules/` 目录（`BLOCK_SCOPE`／`ENTRY_GLOBS` 的模式仍在，留着与代码一致）；未把新路径纳入 `BLOCK_SCOPE`——该清单的语义是「覆盖每轮都要付的常驻成本」，原则已不常驻，从此不再受阻断保护，这是本次改动的已知后果；未提交或推送。
+
+### 资产收编：四个 skill 并入 docs/protocols/（2026-09-27）
+
+- **变更**：按「协议正文一律在 `docs/protocols/`，skill 只留触发面」收编四组。
+  1. `skill-auditor` 与 `instruction-engineering` 合并为 `~/.claude/docs/protocols/instruction-assets.md`（Skill 通用十查、渐进披露追加检查、Router／Executor 追加检查、分级输出；项目指令资产的范围与停止线、四步、不得削弱的约束、共用文件策略、外部方法论三分表）。两 skill 独有的 8 份 `references/` 与 3 份 `templates/` 移到 `docs/protocols/instruction-assets/`；`refactor-roadmap.md` 与两份 `evals/` 未搬，留在原目录待处置。
+  2. `install-ledger` 三合一进 `~/.claude/docs/protocols/ledger.md`：`SKILL.md` 正文 + `references/ledger-protocol.md` + `references/verification.md`。`scripts/ledger_check.py` 移到 `~/.claude/hooks/scripts/ledger_check.py`。
+  3. `task-notes` → `~/.claude/docs/protocols/task-notes.md`；`docker-only` → `~/.claude/docs/protocols/execution-env.md`，其 `references/new-project-setup.md` → `docs/protocols/execution-env/new-project-setup.md`；`parallel-delegation` → `~/.claude/docs/protocols/delegation.md`，其三份 `references/` → `docs/protocols/delegation/`。这三个 skill 的正文整段挪走后，`SKILL.md` 只留 `description` 触发面加一句「动手前必须读取 `<协议路径>`」，**保留 model-invocable**，名字与 `description` 未动。
+  4. 前三个 skill（`skill-auditor`、`instruction-engineering`、`install-ledger`）的 `SKILL.md` 换成触发空壳并加 `disable-model-invocation: true`，`description` 退出 listing。
+- **依据**：用户 2026-09-27 对 `notes/skill-hook-review/HANDOFF-2026-09-27-asset-consolidation.md` 的裁定；该文件逐项列出了四组工作。判据是 `docs/protocols/` 为协议正文唯一的家，skill 层只留「什么时候该用我」，机器判据集中在 `hooks/scripts/`。
+- **回退**：`installing/custom-setup.md` 与 `docs/protocols-index.md` 在 git 内，四个被改的 `SKILL.md` 同样在 git 内，未提交前可用 `git checkout -- <路径>` 恢复；原文件另有整目录备份 `~/.claude/backups/skill-consolidation-2026-09-27/`（32 份，含两个 skill 的全部 `references/` 与 `evals/`、`docs/skills/` 两份设计说明、`install-ledger` 全套）。恢复一个归档 skill 需用该备份整目录覆盖 `~/.claude/skills/<名>/`，`install-ledger` 另需把 `hooks/scripts/ledger_check.py` 移回 `scripts/`。
+- **验证**：`python ~/.claude/hooks/scripts/protocol_check.py` 退出码 1，五项命中经逐条比对全部是本次改动前既有的漂移（`skills/last30days/SKILL.md` 195.3 KB 超限、`dev-clean`／`dev-status` 重复段、顶层 `rules` 未归映射表、`installing/skill-install.md:17` 指向已不存在的 `skills/motrix/`、`installing/archive/custom-setup.md` 280.4 KB 超拆分线）；本次改动引入的段落重复命中（收编过程中新旧落点并存）已随 `SKILL.md` 换壳归零，改前实测为 15 处、改后为 0。新落点体积：`instruction-assets.md` 11,006 B、`ledger.md` 8,294 B、`task-notes.md` 7,558 B、`delegation.md` 4,243 B、`execution-env.md` 5,606 B，均在 20 KB 上限内；`docs/protocols/<名>/` 子目录不被 `docs/protocols/*.md` 的 glob 匹配，因此按需加载的细则不占根入口配额。`hooks/scripts/ledger_check.py` 尚未重跑。
+- **未做**：未删除三个归档 skill 目录下的残留附件（`skill-auditor/` 与 `instruction-engineering/` 的 `evals/`、`references/`、`test-prompts.json`、`refactor-roadmap.md`、`review-instructions.md`；`install-ledger/` 的 `references/`、`scripts/`、`__pycache__`）。删除命令被 auto mode 判为不可恢复删除并拒绝，按门禁交回用户执行。未拆分 `installing/archive/custom-setup.md`（本次追加前已 280 KB）。未提交、未推送。
+
+### 优化与未做项：台账与引用（2026-09-28）
+- **变更**：移除现状表中的 motrix 行并修正第三方裸 skill 计数；追加 motrix skill 不存在、CLI 仍存在的核对流水；将 last30days 从外部 skill 台账转入自建台账，恢复方式改为 git，并把目录加入 `.gitignore` 白名单；`dev-clean` 第一步改调 `/dev-status`；台账协议移除 200 KB 流水拆分条。第一批另改 `protocol_check.py`：移除 `rules` 扫描面、将阻断区扩为 `CLAUDE.md` 与 `projects/*/memory/MEMORY.md`、补全 `SIZE_LIMIT` 适用范围、移除归档体量判据；同步 `protocol-report.py`、两份夹具测试与现状表文案；用户随后移除空 `rules/` 目录。
+- **依据**：规划 Q6、Q7、Q8、Q9、Q10、Q15、Q16；目录检索、`command -v motrix` 与当前文件内容实测。
+- **回退**：按本条各文件的原位置反向编辑恢复；不使用 Git 回滚覆盖其他未提交改动。
+- **验证**：容器内 `test_protocol_check.py`、`test_protocol_report.py` 与 `ledger_check.py` 均退出 0；Windows `selftest.py` 为 153/153；目标判据文件的夹具测试覆盖十类判据与新的记忆索引阻断面。真树 `protocol_check.py` 仍报告 last30days 体量、运行时顶层条目未归类及 3 条 MCP 位置缺失，不能据此宣称全库通过。
+- **未做**：第三批物理删除、第四至第六批尚未执行；未提交、未推送。
+
+### statusline 停用死代码簇（2026-09-28）
+- **变更**：按用户授权删除 `statusline/context-monitor.js`、`cost-tracker.js`、`metrics-bridge.js`、`lib/utils.js`、`lib/agent-data-home.js` 五个停用文件，并从自建设施现状表移除对应行。
+- **依据**：当前无引用方、无注册；五个文件均由 Git 追踪，删除前已核对工作区状态与路径哈希。
+- **回退**：按 Git 追踪对象逐个恢复五个原路径；不使用 Git 回滚覆盖其他未提交改动。
+- **验证**：五个路径均已不存在；活跃 statusline 入口及 `cc-switch-usage.js`、`session-bridge.js` 未动。
+- **未做**：其余归档 skill 残留、字节码缓存与 `plugins/cache/caveman` 空目录未动；未提交、未推送。
+
+### 归档 skill 残留附件清理（2026-09-28）
+- **变更**：按用户授权删除 22 个已并入 `docs/protocols/` 或已无入口的附件：`skill-auditor` 的 evals、`MAINTENANCE.md`、`test-prompts.json`；`instruction-engineering` 的 evals 与 `refactor-roadmap.md`；`install-ledger` 的两份 references 与遗留字节码。保留当前会话新增的 `instruction-engineering/references/review-instructions.md`。
+- **依据**：现有 skill 入口已是触发壳或已归档；内容已在协议新落点或整目录备份中，删除前逐项核对 Git 追踪、路径哈希与无活跃引用。
+- **回退**：从 Git 追踪对象或 `backups/skill-consolidation-2026-09-27/` 按原路径恢复；不使用 Git 回滚覆盖其他未提交改动。
+- **验证**：三组目标 Glob 均无文件；`review-instructions.md` 仍存在；`ledger_check.py` 退出 0。
+- **未做**：`plugins/cache/caveman` 空目录未动；未提交、未推送。
+
+### 可重建缓存与空目录收口（2026-09-28）
+- **变更**：按用户授权删除活动树四个 `__pycache__/` 目录中的 23 个 `.pyc`，并移除已确认为空的 `commands/` 目录；`rules/` 已由用户先行移除。
+- **依据**：均为可由源码重建的字节码或无内容目录，不含 backups、虚拟环境或其他会话文件。
+- **回退**：重新运行对应 Python 脚本即可生成字节码；空目录按需重建。
+- **验证**：活动 `hooks/` 与 `skills/` 下的 `__pycache__` Glob 均无文件；`commands/` 与 `rules/` 均不存在；`ledger_check.py` 退出 0。
+- **未做**：`plugins/cache/caveman` 空目录未动；未提交、未推送。
+
+### last30days 分层重写（2026-09-28）
+- **变更**：按 Q4/Q5 将本地化 `last30days/SKILL.md` 的证据示例、四步预处理链细节与 Agent／Comparison／HTML 分支下沉到 `references/`；主文件保留触发点、步骤骨架和完成判据；移除上游 frontmatter 与 `v3.0.x` 历史痕迹。主入口由 199,943 B / 2,067 行降至 143,492 B / 1,389 行。
+- **依据**：规划 Q4、Q5、第五批；本地 skill 已切断上游，按需分支资料走同目录指针。
+- **回退**：用户从 `C:\Users\zys31\.claude\jobs\33227774\tmp\last30days-SKILL.before-optimization.md` 恢复原始主文件后，按修正后的不重叠区间重做；未提交、未推送。
+- **验证**：四个新增 reference 均存在，主文件触发点与关键输出契约仍在；容器内 disclosure check 通过；`protocol_check.py --only size` 仅报告该主入口仍超过 20 KB 的软目标。
+- **未做**：第四批常驻索引审计、第六批票 08；主入口体量不硬追 20 KB，按规划保留真实结果。

@@ -2,6 +2,16 @@
 
 本文件从 2026-09-12 起记；此前无版本惯例，历史变更只追溯安装台账。
 
+## 1.9.0 — 2026-09-27
+
+来源：用户确认继续按 `writing-for-agents` 去除与现有自建和插件 Skill 的重复规则。
+
+- 主入口的容器执行细节改为指向 `docker-only`，端口、独占资源、数据库目标和收尾改由 `references/worktree-and-resources.md` 承载。
+- `references/agent-dispatch.md` 保留编码任务特有的 tracer bullet、Verify 分级、集成测试和实际 hooks 衔接；通用委派门禁改由 `parallel-delegation` 承载。
+- `references/code-review.md` 保留本地 AI 代码审查门禁、三维检查和 Agent 汇报核对；fixed point、Standards/Spec 双轴和并行 reviewer 改由 `mattpocock-skills:code-review` 承载。
+
+验证：`git diff --check` 通过；已显式重新加载 `/coding-workflow`。未运行真实编码、构建或测试任务。
+
 ## 1.8.0 — 2026-09-21
 
 来源：按 Matt Pocock `writing-for-agents` v1.2.3 的上下文卫生方法做一轮精简。判据三条：no-op 测试（删掉这句，agent 的行为会变吗）、信息层级（每个分支都要读的内联，只有部分分支走到的下沉 `references/`）、单一事实来源（同一规则只留一个权威位置）。

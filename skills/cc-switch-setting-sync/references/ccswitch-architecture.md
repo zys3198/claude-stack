@@ -51,15 +51,15 @@ provider 无关的全部配置，例如：
   "permissions": {"allow": [...]},
   "statusLine": {...},
   "env": {
-    "CLAUDE_CODE_EFFORT_LEVEL": "max",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "ENABLE_TOOL_SEARCH": "true"
   }
 }
 ```
 
-注意 `env` 是混合字段：`ANTHROPIC_*` 是 provider 相关（剔除），其余
-（`CLAUDE_CODE_*`、`DISABLE_AUTOUPDATER`、`ENABLE_TOOL_SEARCH` 等）是公共（保留）。
+注意 `env` 是混合字段：`ANTHROPIC_*` 是 provider 相关（剔除）；其余通常是公共配置。以下 5 个稳定键由 Windows 用户环境提供，不应残留在 live/common/proxy/provider 快照：`CLAUDE_CODE_DISABLE_ARTIFACT`、`CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY`、`DISABLE_AUTOUPDATER`、`DISABLE_ERROR_REPORTING`、`DISABLE_TELEMETRY`。`CLAUDE_CODE_AUTO_COMPACT_WINDOW` 不进入 common/proxy；Codex OAuth provider 的 `settings_config.env` 必须保留显式目标值，以覆盖 cc-switch 对 GPT-5.6 的 372000 默认值。`CLAUDE_CODE_EFFORT_LEVEL`、`CLAUDE_CODE_MAX_CONTEXT_TOKENS` 仍视为 provider 覆盖风险，也不允许进入公共快照。
+
+repair 模式还会把 live、`settings.common_config_claude` 与 `proxy_live_backup.original_config` 的 hooks 对齐，并从公共层和所有 Claude provider 的 `settings_config.env` 清除上述 5 个用户环境键及两个 context 覆盖键；Codex OAuth provider 的 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 显式覆盖保留；provider 凭据、地址和模型字段保持不变。
 
 ## 切割边界（extract 逻辑）
 
@@ -68,10 +68,10 @@ provider 无关的全部配置，例如：
 1. `json.loads` 解析
 2. `pop("model", None)` 删顶层 model
 3. `env` dict 内删 `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_BASE_URL` /
-   `ANTHROPIC_DEFAULT_*_MODEL[_NAME]` 整组
+   `ANTHROPIC_DEFAULT_*_MODEL[_NAME]` 整组，以及 5 个用户环境键（自动压缩键虽不进 common，但保留为 Codex OAuth provider 覆盖）
 4. `json.dumps(indent=2, ensure_ascii=False)` 重新输出
 
-其余全部保留。`sync_claude_common.py` 的 `extract_common()` 实现。
+其余全部保留。`sync_claude_common.py` 的 `extract_common()` 实现；普通用户环境键只在新启动的 Claude Code 进程中读取，Codex OAuth 的自动压缩窗口则由 provider 显式值随下一次切换写入 live。
 
 ## WAL 与热改安全
 
@@ -81,7 +81,7 @@ ccswitch 开着时直接写 `settings` 表是安全的：ccswitch 请求转发�
 ## 生效时机
 
 ccswitch 平时只转发请求，不读 `common_config_claude`。**下次切换 provider**
-时从 DB 重组写 settings.json，新值才生效。切换后用脚本校验 settings.json 是否被降级。
+时从 DB 重组写 `settings.json`，新快照才生效；repair 后必须先重启 cc-switch，丢弃旧内存快照，再切换 provider。普通用户环境键则在下一次启动 Claude Code 时读取；Codex OAuth 的自动压缩窗口随 provider 显式值在下一次切换时写入 live。切换后用脚本校验 settings.json 是否被降级。
 
 ## settings.json 相关标志（只读参考）
 
@@ -96,10 +96,13 @@ ccswitch 平时只转发请求，不读 `common_config_claude`。**下次切换 
 
 ## 回滚
 
-backup json 在 `~/.cc-switch/backups/sync-backup-<ts>.json`，
-含旧 `common_config_claude` 全量。恢复：
+普通同步的 backup json 在 `~/.cc-switch/backups/sync-backup-<ts>.json`，含旧
+`common_config_claude` 与代理快照。恢复：
 
 ```sql
 UPDATE settings SET value='<旧值>' WHERE key='common_config_claude';
 ```
-或用 `sync_claude_common.py --dry-run` 检查后重新同步。
+
+repair 模式另生成 `~/.cc-switch/backups/repair-<YYYY-MM-DD>_<时间>.db` 与
+`~/.claude/backups/settings-repair-<YYYY-MM-DD>_<时间>.json`；四层回退优先恢复这两份，
+不要只恢复 common 快照。

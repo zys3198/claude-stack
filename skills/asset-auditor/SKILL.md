@@ -1,6 +1,6 @@
 ---
 name: asset-auditor
-description: 审计 ~/.claude 资产库的留存、收窄、归档或新增决策，覆盖映射表中的全部资产类型；只出建议，不执行删除、迁移或改路由。
+description: 审计 ~/.claude 资产是否遵守 asset-guide 的资产原则，以及留存、收窄、归档或新增决策，覆盖映射表中的全部资产类型；只出建议，不执行删除、迁移或改路由。
 disable-model-invocation: true
 ---
 # Asset Auditor — 资产库留存判定
@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 ## 0. 资产类型映射表（换资产类时唯一要改的地方）
 
-资产类目、加载形态、L0 入口以 `~/.claude/rules/principles.md` 的「资产 → 形态 → L0」表为单一事实源，此处不复制。本表只补审计特有的两列。机械判据（命名／frontmatter／索引／体积／重复／密钥／生命周期／映射表）一律跑 `hooks/scripts/protocol_check.py`——它是唯一检查实现；本 Skill 不复制判据，只做需要判断的部分（存在性、归属、生命周期、留删建议）。
+资产类目、加载形态、L0 入口以 `~/.claude/skills/asset-guide/references/principles.md` 的「资产 → 形态 → L0」表为单一事实源，此处不复制。本表只补审计特有的两列。机械判据（命名／frontmatter／索引／体积／重复／密钥／生命周期／映射表）一律跑 `hooks/scripts/protocol_check.py`——它是唯一检查实现；本 Skill 不复制判据，只做需要判断的部分（存在性、归属、生命周期、留删建议）。
 
 | 资产类 | 候选全集怎么拿 | 判定基准 |
 |---|---|---|
@@ -18,7 +18,7 @@ disable-model-invocation: true
 | `docs/protocols/*.md` | 枚举目录 + 与 `protocols-index.md` 对账 | 四问 + 生命周期（rubric 一、九节） |
 | memory | 枚举 `projects/*/memory/` + `MEMORY.md` | 四问 + 索引一致性 |
 | `notes/<任务名>/` | 枚举目录 | 不审留删——证据区，只审「该不该进 notes」 |
-| hook | `settings.json` 各事件 + `hooks/` | 触发契约与失败模式；判定细则借 `skill-auditor` 十查 |
+| hook | `settings.json` 各事件 + `hooks/` | 触发契约与失败模式；判定细则借 `docs/protocols/instruction-assets.md` 的十查 |
 | 台账／备份／授权记录 | 目录名 | 不适用「只放必要」，见原则文件「边界」一节 |
 
 skill 类独有的两样东西：网页复审通道（第 4 节，复审运行时只吃 `skills` 数组），以及触发面／描述预算判据。其他资产类走第 3 节的报告表。
@@ -80,4 +80,4 @@ python asset-auditor/scripts/review_server.py read --require-complete
 
 ## 数据驱动
 
-当前没有遥测时只使用可核的 mtime、引用方、台账、用户实测和运行输出；状态标为 `active`、`stale` 或 `archived`。机械判据跑 `protocol_check.py`，不在本 Skill 重写。单个 Skill 的设计/运行审计转 `skill-auditor`；跨指令文件审查转 `instruction-engineering`。
+当前没有遥测时只使用可核的 mtime、引用方、台账、用户实测和运行输出；状态标为 `active`、`stale` 或 `archived`。机械判据跑 `protocol_check.py`，不在本 Skill 重写。单个 Skill 的设计/运行审计与跨指令文件审查转 `docs/protocols/instruction-assets.md`。

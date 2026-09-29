@@ -23,9 +23,8 @@ TABLE = """## 资产 → 形态 → L0
 
 | 资产 | 加载形态 | L0 由谁提供 |
 |---|---|---|
-| `~/.claude/rules/principles.md`（本文件） | 常驻 | 文件自身 |
+| `~/.claude/skills/asset-guide/references/principles.md`（本文件） | 按需 | `asset-guide` 的 `description` 与 SKILL.md 指针 |
 | `~/.claude/CLAUDE.md` | 常驻 | 路由表 |
-| `rules/*.md` | 条件（带 `paths`）／常驻（不带） | 文件头 |
 | skill | 按需 | `description` 字段 |
 | `docs/protocols/*.md` | 不进上下文 | `protocols-index.md` 对应行 |
 | memory | 召回 | `MEMORY.md` 索引行 |
@@ -36,7 +35,7 @@ TABLE = """## 资产 → 形态 → L0
 # 映射表的每一行都要在磁盘上找得到对应物，否则夹具自己就带着映射表违规。
 TREE = {
     "CLAUDE.md": "# 常驻指令\n",
-    "rules/principles.md": f"# 资产原则\n\n{TABLE}",
+    "skills/asset-guide/references/principles.md": f"# 资产原则\n\n{TABLE}",
     "skills/demo/SKILL.md": "---\nname: demo\ndescription: 演示\n---\n\n正文。\n",
     "docs/protocols/index.md": "# 协议索引\n",
     "hooks/scripts/noop.py": "# 占位\n",
@@ -155,11 +154,11 @@ def main():
         _, out = feed(root, write_payload(root / "CLAUDE.md", huge))
         check("阻断·常驻区写入超限被拒", '"permissionDecision": "deny"' in out and "超过 20 KB" in out, out)
 
-        _, out = feed(root, write_payload(Path(root, "rules", "new.md"), huge))
-        check("阻断·原则区新文件也拦（还没落盘）", '"permissionDecision": "deny"' in out, out)
+        _, out = feed(root, write_payload(Path(root, "projects", "demo", "memory", "MEMORY.md"), huge))
+        check("阻断·项目记忆索引写入也拦（还没落盘）", '"permissionDecision": "deny"' in out, out)
 
-        _, out = feed(root, edit_payload(Path(root, "rules", "principles.md"),
-                                         "# 资产原则\n", "# 资产原则\n\n" + huge))
+        _, out = feed(root, edit_payload(root / "CLAUDE.md",
+                                         "# 常驻指令\n", "# 常驻指令\n\n" + huge))
         check("阻断·Edit 按复原后的样子判", '"permissionDecision": "deny"' in out, out)
 
         _, out = feed(root, write_payload(root / "CLAUDE.md", "# 常驻指令\n\n合规。\n"))
@@ -173,12 +172,14 @@ def main():
 
         _, out = feed(root, {"hook_event_name": "PreToolUse", "session_id": "s1",
                              "tool_name": "NotebookEdit",
-                             "tool_input": {"notebook_path": str(Path(root, "rules", "nb.ipynb"))}})
+                             "tool_input": {"notebook_path": str(Path(root, "docs", "protocols", "nb.ipynb"))}})
         check("放行·NotebookEdit 判不出内容就不拦", out.strip() == "", out)
 
         # 盘上已经违规、这次写入是把它改好 → 放行，否则违规文件永远改不动
-        broken = Path(root, "rules", "broken.md")
-        broken.write_text("# 规则\n\n" + "字" * 25_000, encoding="utf-8")
+        # 盘上先放一份违规内容，再喂一次「把它改好」的编辑：改好的那次必须放行，
+        # 否则已经违规的文件永远改不动。用夹具树里现存的阻断区文件当靶子。
+        broken = Path(root, "CLAUDE.md")
+        broken.write_text("# 常驻\n\n" + "字" * 25_000, encoding="utf-8")
         _, out = feed(root, edit_payload(broken, "字" * 25_000, "短。"))
         check("放行·修掉违规的那次写入", out.strip() == "", out)
 

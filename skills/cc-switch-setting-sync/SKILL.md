@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 机制详解见 [references/ccswitch-architecture.md](references/ccswitch-architecture.md)。
 
-切换时按 `build_effective_settings_with_common_config`（cc-switch 源码 `services/provider/live.rs`）处理：以 provider 的 `settings_config` 为起点，把 DB 的 `common_config_claude` **深合并**进去（source 覆盖 target），再写 live `settings.json`。所以 provider env 里非 ANTHROPIC 的 `CLAUDE_CODE_*` 键（实测有 `CLAUDE_CODE_EFFORT_LEVEL`、`CLAUDE_CODE_MAX_CONTEXT_TOKENS`）不在 `PROVIDER_ENV_KEYS` 剥离清单里，切换时会被注入 live，随后 `settings-sync-auto.py` 的 PostToolUse hook 又把它当 common 内容同步固化进 DB 快照——配置「被重置修改」的确定性路径。排查窗口异常时先查 `providers` 表 `app_type='claude'` 的 `settings_config` env（改前备份 DB）。live `settings.json` 是权威，DB 快照只是镜像。
+切换时按 `build_effective_settings_with_common_config`（cc-switch 源码 `services/provider/live.rs`）处理：以 provider 的 `settings_config` 为起点，把 DB 的 `common_config_claude` **深合并**进去（source 覆盖 target），再写 live `settings.json`。provider env 里非 ANTHROPIC 的 `CLAUDE_CODE_*` 键不应成为公共配置；其中 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 对 Codex OAuth provider 是必须保留的显式覆盖，用来压过 cc-switch 对 GPT-5.6 的 372000 默认值。本 skill 将其从 common/proxy 剔除，但 repair 不再删除 provider 覆盖；其他稳定行为键仍由 Windows 用户环境提供。
 
 ## 前置确认
 
@@ -88,21 +88,42 @@ python scripts/sync_claude_common.py --restore
 自动兜底：`~/.claude/hooks/settings-degrade-guard.py` 已在 SessionStart 注册，
 每次 Claude 会话启动检测降级并自动执行同款修复（静默，恢复时输出提示）。
 
-## 切割边界
+## 5. 一次性修复（`--repair`）
+
+当 live 文件、公共快照、代理快照或 provider 环境键同时漂移时，不要分层手改；用一次 repair 生成同一目标并写入四层：
+
+```bash
+python scripts/sync_claude_common.py --repair --hooks-source db --dry-run
+python scripts/sync_claude_common.py --repair --hooks-source db
+```
+
+`--auto-compact-window` 仍可识别但只提示弃用，不改变目标。`CLAUDE_CODE_AUTO_COMPACT_WINDOW` 不进入 common/proxy；对 Codex OAuth 的 ChatGPT provider，必须在 provider 自身的 `settings_config.env` 中保留目标值，以覆盖 GPT-5.6 的 372000 默认值。以下其他稳定开关仍由 Windows 用户环境提供：`CLAUDE_CODE_DISABLE_ARTIFACT`、`CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY`、`DISABLE_AUTOUPDATER`、`DISABLE_ERROR_REPORTING`、`DISABLE_TELEMETRY`。
+
+repair 默认以 DB 公共快照的 hooks 为基线，并做当前接线的确定性收敛：`pretool-guard.py` 取代独立的 product/resource 入口，移除已停用的 `herdr-agent-state.ps1`，确保 `protocol-report.py` 接入 PreToolUse、PostToolUse、Stop。`--hooks-source live` 或 JSON 快照路径只在该来源已人工审阅时使用。
+
+一次写入同时：
+
+- 将修复后的公共配置写入 `settings.common_config_claude`；
+- 保留 live 中已有的 provider 显式自动压缩值，重建 `settings.json` 公共部分；对齐 `proxy_live_backup.original_config` 的 hooks，代理快照继续清除用户环境键；
+- 从 common/proxy 和所有 Claude provider 的 `settings_config.env` 清除其他稳定开关及 `CLAUDE_CODE_EFFORT_LEVEL`、`CLAUDE_CODE_MAX_CONTEXT_TOKENS`，但保留 Codex OAuth provider 的 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 显式覆盖，不改 provider 凭据、地址或模型。
+
+`--dry-run` 不写文件、不写数据库；写入前保存完整 SQLite backup 与 settings 备份。若任一 Claude provider 未启用 Common Config、缺少代理快照或目标校验失败，repair 拒绝做部分写入。写入后重启 cc-switch，再执行 `--check`；用户环境变量则在下一次启动 Claude Code 时生效。
+
 
 **进 common（保留）**：enabledPlugins、extraKnownMarketplaces、hooks、permissions、
 statusLine、attribution、effortLevel、includeCoAuthoredBy，以及 env 中既非 provider 注入键、
-也非 `CLAUDE_CODE_EFFORT_LEVEL` / `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 的公共配置。
+也非用户环境权威键或 `CLAUDE_CODE_EFFORT_LEVEL` / `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 的公共配置。
 
 权限列表的公共快照以 live `settings.json` 为唯一权威：`allow`、`ask`、`deny` 每次同步都完整替换旧值，`permissions.ask` 可以是空数组，`permissions.defaultMode` 保持 `auto`；删除规则不会由旧快照并集恢复。
 
 **不进 common（脚本剔除或拒绝）**：顶层 `model`；`env` 内的 `ANTHROPIC_API_KEY`、
 `ANTHROPIC_AUTH_TOKEN`、`ANTHROPIC_BASE_URL`、`ANTHROPIC_MODEL`、
-`ANTHROPIC_DEFAULT_*_MODEL[_NAME]` 整组；以及 `CLAUDE_CODE_EFFORT_LEVEL`、
-`CLAUDE_CODE_MAX_CONTEXT_TOKENS`。前一组由 cc-switch 切换时从 provider 模板注入 + 代理运行时改写，
-后一组由 provider/代理注入，不能进入公共快照。`ANTHROPIC_API_KEY` 在代理接管模式下
-是 `PROXY_MANAGED` 占位符，落进公共快照后，任何启用 Common Config 的 provider 合并时都会
-拿占位符盖掉自己的真 key，上游回 401 Missing API key。
+`ANTHROPIC_DEFAULT_*_MODEL[_NAME]` 整组；以及
+`CLAUDE_CODE_AUTO_COMPACT_WINDOW`、`CLAUDE_CODE_DISABLE_ARTIFACT`、
+`CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY`、`DISABLE_AUTOUPDATER`、
+`DISABLE_ERROR_REPORTING`、`DISABLE_TELEMETRY`、`CLAUDE_CODE_EFFORT_LEVEL`、
+`CLAUDE_CODE_MAX_CONTEXT_TOKENS`。其中 Codex OAuth provider 的显式
+`CLAUDE_CODE_AUTO_COMPACT_WINDOW` 留在 provider 组中，由 cc-switch 切换时注入；其余 provider 组由 cc-switch 切换时注入 + 代理运行时改写，其他稳定键由 Windows 用户环境提供。
 
 ## 边界情况
 
@@ -118,13 +139,14 @@ statusLine、attribution、effortLevel、includeCoAuthoredBy，以及 env 中既
   `sync_claude_common.py` 重写快照，再重新打开开关。
 - **codex/openclaw 等 app_type**：本 skill 只管 claude。其他 app_type 的 common_config
   各自独立（common_config_codex / common_config_openclaw），如需同步照搬本流程改 key 名。
+- **自动压缩窗口的 provider 覆盖**：`CLAUDE_CODE_AUTO_COMPACT_WINDOW` 对 Codex OAuth ChatGPT provider 不再只依赖 Windows 用户环境；目标值必须保留在 provider 自身的 `settings_config.env`，并在 live 中保留已有值。普通稳定开关仍由 Windows 用户环境提供；修改 provider 或 repair 后需重启 cc-switch，再切换 provider，Claude Code 新进程再读取 live 配置。
 - **「关了的配置又回来」（四层一致性检查，2026-09-23 EFFORT 复活事故）**：CLAUDE_CODE_* 键
   存在于四层——注册表/进程 env、live settings.json、DB 公共快照、provider env。
-  注入优先级 provider env > 公共快照；公共快照由 sync 脚本镜像 live，现有 `proxy_live_backup` 只修正目标键并保留其他代理字段，不从 live 配置伪造重建。
-  规则：**加键只加 live 一处**（要 provider 例外才写进该 provider env）；
+  注入优先级 provider env > 公共快照；对 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`，Codex OAuth provider 的显式值还优先于 GPT-5.6 的 372000 默认值。公共快照由 sync 脚本镜像 live，现有 `proxy_live_backup` 只修正目标键并保留其他代理字段，不从 live 配置伪造重建。
+  规则：普通公共键仍只加 live 一处；`CLAUDE_CODE_AUTO_COMPACT_WINDOW` 需同时保留在目标 Codex OAuth provider env，并在 live 写入同一目标值；`--repair` 不再删除该 provider 覆盖；
   **删键四层全扫**——live 用 grep，DB 用 `SELECT id,name FROM providers WHERE settings_config LIKE '%键名%'`
   （另查 settings 表 common_config_claude），注册表查 HKCU/HKLM Environment；
-  **症状即信号**：改了 live 但切 provider 后旧值回来 = provider env 藏了同名键。
+  **症状即信号**：改了 live 但切 provider 后旧值回来 = provider env 缺少显式覆盖或仍有旧 provider 快照。
   改 provider env 后重启 cc-switch 载入（内存缓存不改 settings.json）。
 
 ## 资源

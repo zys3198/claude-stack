@@ -1,6 +1,6 @@
 ---
 name: coding-workflow
-version: 1.8.0
+version: 1.9.0
 description: 写功能、修 Bug、重构、审查 AI 代码或回退代码改动时使用。
 ---
 # 编码工作流细则
@@ -16,9 +16,7 @@ CLAUDE.md §1 只保留路由与高代价确认线；本文件保留编码任务
 
 ## 本机执行与容器规则
 
-构建、测试、安装依赖、跑脚本和起服务一律按 `docker-only` 放入容器。容器场景先验证容器内路径；启动前核对资源、端口、独占容器/数据库，写库或清理资源在未获范围授权时走确认线，已获授权不重复询问；不顺延到下一个端口。
-
-用户说「启动本项目」「继续」这类宽泛启动指令，且仓库已有文档化 dev 流程（`AGENTS.md` / `CLAUDE.md` / `README` 的 Commands 段）时，**直接按文档化流程执行**，不追问「dev 模式还是全容器化」——先查文档，没有再问。
+构建、测试、安装依赖、跑脚本和起服务按 `docker-only` 执行；端口、独占资源、数据库目标和收尾按 [`references/worktree-and-resources.md`](references/worktree-and-resources.md) 核对。用户给出「启动本项目」「继续」等宽泛指令时，先查 `AGENTS.md`、`CLAUDE.md` 或 `README` 的 Commands 段；已有文档化流程就直接执行，没有才追问运行模式。
 
 ## 1.1 改前
 
@@ -54,7 +52,15 @@ CLAUDE.md §1 只保留路由与高代价确认线；本文件保留编码任务
 
 ## 1.5.1 深模块与接口归属
 
-设计/重构模块形态时读 `mattpocock-skills:codebase-design`；要扫全库找深化点时提示用户运行 `/mattpocock-skills:improve-codebase-architecture`；接口归人、实现归 AI、测试负责诚实；一个模块一个目录。
+设计/重构模块形态时读 `mattpocock-skills:codebase-design`；要扫全库找深化点时提示用户运行 `/mattpocock-skills:improve-codebase-architecture`；接口归人、实现归 AI、测试负责诚实；一个模块一个目录。第一版跑通前不切模块——那时切是在猜。
+
+## 1.5.2 新产品起步
+
+产品意图用 `mattpocock-skills:grilling` 拷问清楚，落成项目根的 `PRODUCT.md`（意图、用户、首版范围、核心路径），后续每一步都读它；原型、规格、工单、实现分别走 `mattpocock-skills:prototype`、`to-spec`、`to-tickets`、`implement`，整条路线的入口是 `/mattpocock-skills:ask-matt`。
+
+**视觉方向在写实现之前定**：出 2–3 套文字方向（气质、配色、排版、密度各一句）供用户选，选定的写进 `PRODUCT.md`。没有能点的原型、没有定下来的视觉方向就进实现，返工在实现阶段付，那里最贵。
+
+验收通过后按 `mattpocock-skills:implement` 迭代，或交 `mattpocock-skills:handoff` 给另一个会话接手。
 
 ## 1.6 工作树与本地资源
 
@@ -66,7 +72,7 @@ CLAUDE.md §1 只保留路由与高代价确认线；本文件保留编码任务
 
 ## 3. Agent 调度
 
-大型搜索、批量读取和互不依赖调查优先隔离 worker；主会话保留业务取舍、权限判断和最终验收。拆解、并行/串行、Verify 分级、隔离和实际 hooks 护栏见 [`references/agent-dispatch.md`](references/agent-dispatch.md)。
+大型搜索、批量读取和互不依赖调查需要委派时按 `parallel-delegation`；编码切片、Verify 分级和实际 hooks 护栏见 [`references/agent-dispatch.md`](references/agent-dispatch.md)。
 
 ## 4. 止血与回退
 

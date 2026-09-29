@@ -101,7 +101,7 @@
 
 模型输出无需逐字一致；比较任务结果、关键判断、门禁、产物和失败状态。确定性脚本或模板可以增加内容 hash、文件清单和退出码对照。
 
-正式候选与基线比较可交给 `/improver-skill`；它拥有相同条件、target、guardrail、holdout 和 apply 门禁。本 Skill 负责找出该移、该删、该留的位置，并产出候选结构。
+正式候选与基线比较可交给 `/improver-skill`；它拥有相同条件、target、guardrail、holdout 和 apply 门禁。本协议负责找出该移、该删、该留的位置，并产出候选结构。
 
 ## 输出合同
 

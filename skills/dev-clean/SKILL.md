@@ -6,10 +6,10 @@ argument-hint: "[仓库路径，留空取当前目录]"
 
 按顺序执行，每步都把结果给用户看。
 
-**第一步** 运行状态脚本：
+**第一步** 运行 `/dev-status`：
 
 ```
-C:/Users/zys31/AppData/Local/Programs/Python/Python312/python.exe "C:/Users/zys31/.claude/hooks/scripts/session-status.py" $ARGUMENTS
+/dev-status $ARGUMENTS
 ```
 
 **第二步** 先看输出里有没有「活跃会话 枚举失败」。有的话**立即停止**，把这条提示原样报给用户。枚举不可用时「在用」分组必然为空，正在被别的会话使用的工作树会落进「可清理」，照着删会删掉别人正在用的工作树。等枚举恢复后重跑。

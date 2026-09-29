@@ -1,6 +1,6 @@
 schema_version: "1.0"
 name: route-single-audit
-description: 单个 Skill 的触发、运行和组合审计应转交 skill-auditor，不应启动库级留删判定。
+description: 单个 Skill 的触发、运行和组合审计应由 instruction-assets 协议承接，不应启动库级留删判定。
 tags: [negative, routing]
 execution:
   prompt: |
@@ -16,7 +16,7 @@ graders:
   - type: regex
     name: delegate-auditor
     target: last_message
-    pattern: skill-auditor
+    pattern: instruction-assets
     match: contains
   - type: regex
     name: trim-boundary

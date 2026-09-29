@@ -1,6 +1,6 @@
 # <项目名> AI 上下文分析报告
 
-> 由 instruction-auditor skill 生成 | 日期：<YYYY-MM-DD> | 状态：草稿（待项目负责人确认）
+> 由 `docs/protocols/instruction-assets.md` 的建立模式生成 | 日期：<YYYY-MM-DD> | 状态：草稿（待项目负责人确认）
 
 ## 1. 项目概览
 <!-- 技术栈、规模（文件数/行数）、README 摘要、构建/启动方式 -->

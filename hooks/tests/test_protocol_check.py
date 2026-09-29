@@ -4,7 +4,7 @@
 只断言退出码与输出文字，不导入被测算法的内部函数——判据改实现时这份测试不用改。
 夹具用 tempfile 现搭，不留固定样本树。
 
-正例：一份干净夹具跑全量，八类全通过、退出 0。
+正例：一份干净夹具跑全量，十类全通过、退出 0。
 反例：每类各造一处违规，断言退出 1 且报出对应事实。
 边界：恰好在阈值上 / 差一点 / 空目录 / 占位符，断言判与不判的分界。
 """
@@ -77,9 +77,8 @@ TABLE = """## 资产 → 形态 → L0
 
 | 资产 | 加载形态 | L0 由谁提供 |
 |---|---|---|
-| `~/.claude/rules/principles.md`（本文件） | 常驻 | 文件自身 |
+| `~/.claude/skills/asset-guide/references/principles.md`（本文件） | 按需 | `asset-guide` 的 `description` 与 SKILL.md 指针 |
 | `~/.claude/CLAUDE.md` | 常驻 | 路由表 |
-| `rules/*.md` | 条件（带 `paths`）／常驻（不带） | 文件头 |
 | skill | 按需 | `description` 字段 |
 | `docs/protocols/*.md` | 不进上下文 | `protocols-index.md` 对应行 |
 | memory | 召回 | `MEMORY.md` 索引行 |
@@ -115,7 +114,7 @@ metadata:
 
 CLEAN = {
     "CLAUDE.md": "# 常驻指令\n",
-    "rules/principles.md": f"# 资产原则\n\n{TABLE}",
+    "skills/asset-guide/references/principles.md": f"# 资产原则\n\n{TABLE}",
     "skills/demo/SKILL.md": "---\nname: demo\ndescription: 演示\n---\n\n正文。\n",
     "docs/protocols/gate.md": GATE,
     "docs/protocols-index.md": "# 协议索引\n\n| 会话生命周期 | `docs/session-lifecycle.md` |\n",
@@ -135,10 +134,10 @@ def main():
         good = temp / "good"
         build(good, CLEAN)
         code, out = run(good)
-        check("正例·十一类全跑退出 0", code == 0, out)
-        check("正例·输出含十一类摘要", all(k in out for k in
+        check("正例·十类全跑退出 0", code == 0, out)
+        check("正例·输出含十类摘要", all(k in out for k in
               ("门禁", "记忆", "命名", "体积", "重复", "密钥", "生命周期", "映射表",
-               "台账位置", "归档体量", "顶层文档")), out)
+               "台账位置", "顶层文档")), out)
 
         def case_dir(name, spec):
             d = temp / name
@@ -166,7 +165,7 @@ def main():
         code, out = case("orphan", spec, "memory")
         check("反例·索引孤儿", code == 1 and "没进 MEMORY.md 索引" in out, out)
 
-        spec = {"projects/demo/memory/MEMORY.md": "# 索引\n\n- [没了](vanished.md)\n"}
+        spec = {"projects/demo/memory/MEMORY.md": "# 索引\n\n- [一条](note-one.md)\n- [没了](vanished.md)\n"}
         code, out = case("deadlink", spec, "memory")
         check("反例·索引死链", code == 1 and "索引指向不存在" in out, out)
 
@@ -177,6 +176,9 @@ def main():
 
         code, out = case("bigskill", {"skills/demo/SKILL.md": big}, "size")
         check("反例·skill 根入口超限", code == 1 and "skills/demo/SKILL.md" in out, out)
+
+        code, out = case("nested-ledger", {"installing/archive/custom-setup.md": big}, "size")
+        check("边界·台账 archive 不算根入口", code == 0 and "archive/custom-setup.md" not in out, out)
 
         # ---------- 反例 · 段落重复 ----------
         para = "这一整段是用来做重复判定的样本文字，" * 10
@@ -199,14 +201,14 @@ def main():
 
         # ---------- 反例 · updated 过期 ----------
         old = (TODAY - timedelta(days=400)).isoformat()
-        code, out = case("stale", {"rules/old.md": f"# 老规则\n\n更新：{old}\n"}, "lifecycle")
+        code, out = case("stale", {"docs/protocols/old.md": f"# 老规则\n\n更新：{old}\n"}, "lifecycle")
         check("反例·updated 过期", code == 1 and old in out and "过期" in out, out)
 
         # ---------- 反例 · 映射表 ----------
         code, out = case("newasset", {"newasset/thing.md": "x\n"}, "map")
         check("反例·未归类顶层条目", code == 1 and "newasset" in out, out)
 
-        # ---------- 反例 · 台账位置 / 归档体量 / 顶层文档 ----------
+        # ---------- 反例 · 台账位置 / 顶层文档 ----------
         ledger = (
             "| 名称 | 状态 | 位置 | 出处 | 恢复 | 备注 |\n"
             "|---|---|---|---|---|---|\n"
@@ -215,18 +217,13 @@ def main():
         code, out = case("ledger-path", {"installing/ledger.md": ledger}, "ledger")
         check("反例·台账位置不存在", code == 1 and "hooks/missing.py" in out, out)
 
-        code, out = case("archive-size", {
-            "installing/archive/history.md": "x" * (200 * 1024 + 1),
-        }, "archive")
-        check("反例·归档流水超过 200 KB", code == 1 and "超过 200 KB" in out, out)
-
         code, out = case("docs-unregistered", {
             "docs/protocols-index.md": "# 协议索引\n",
         }, "docs")
         check("反例·顶层文档未登记", code == 1 and "session-lifecycle.md" in out, out)
 
         short_table = TABLE.replace("| hook | 不进上下文（平台执行） | `settings.json` matcher |\n", "")
-        code, out = case("drift", {"rules/principles.md": f"# 资产原则\n\n{short_table}"}, "map")
+        code, out = case("drift", {"skills/asset-guide/references/principles.md": f"# 资产原则\n\n{short_table}"}, "map")
         check("反例·表与判据漂移", code == 1 and "漂移" in out, out)
 
         # ---------- 反例 · 门禁漂移 ----------
@@ -245,11 +242,6 @@ def main():
         code, out = case("size-over", {"CLAUDE.md": over}, "size")
         check("边界·体积超 1 字节即报", code == 1, out)
 
-        code, out = case("archive-exact", {
-            "installing/archive/history.md": "x" * (200 * 1024),
-        }, "archive")
-        check("边界·归档流水恰好 200 KB 通过", code == 0, out)
-
         p120 = "重复样本" * 30  # 120 汉字
         spec = {
             "skills/demo/SKILL.md": f"---\nname: demo\ndescription: 演示\n---\n\n{p120}\n",
@@ -267,11 +259,11 @@ def main():
         check("边界·119 字不算重复", code == 0, out)
 
         edge = (TODAY - timedelta(days=180)).isoformat()
-        code, out = case("stale-180", {"rules/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
+        code, out = case("stale-180", {"docs/protocols/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
         check("边界·恰好 180 天不过期", code == 0, out)
 
         edge = (TODAY - timedelta(days=181)).isoformat()
-        code, out = case("stale-181", {"rules/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
+        code, out = case("stale-181", {"docs/protocols/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
         check("边界·181 天算过期", code == 1, out)
 
         code, out = case("empty-memory", {"projects/empty/memory/": ""}, "memory")
@@ -319,26 +311,26 @@ def main():
         check("收窄·刚写的记忆没进索引报出来", code == 1 and "没进 MEMORY.md 索引" in out, out)
 
         index_dir = case_dir("narrow-index", {
-            "projects/demo/memory/MEMORY.md": "# 索引\n\n- [没了](vanished.md)\n",
+            "projects/demo/memory/MEMORY.md": "# 索引\n\n- [一条](note-one.md)\n- [没了](vanished.md)\n",
         })
         code, out = run_file(index_dir, "projects/demo/memory/MEMORY.md")
-        check("收窄·写索引时报整份索引的死链", code == 1 and "索引指向不存在" in out, out)
+        check("收窄·写索引时报整份索引的死链", code == 3 and "索引指向不存在" in out, out)
 
         # 表侧问题（漂移、某一行找不到对应物）只在写 principles.md 时报
         short2 = TABLE.replace("| hook | 不进上下文（平台执行） | `settings.json` matcher |\n", "")
-        drift_dir = case_dir("narrow-drift", {"rules/principles.md": f"# 资产原则\n\n{short2}"})
+        drift_dir = case_dir("narrow-drift", {"skills/asset-guide/references/principles.md": f"# 资产原则\n\n{short2}"})
         code, out = run_file(drift_dir, "CLAUDE.md")
         check("收窄·写别的文件不报表漂移", code == 0, out)
-        code, out = run_file(drift_dir, "rules/principles.md")
-        check("收窄·写映射表本身才报表漂移（且在阻断区，退出 3）", code == 3 and "漂移" in out, out)
+        code, out = run_file(drift_dir, "skills/asset-guide/references/principles.md")
+        check("收窄·写映射表本身才报表漂移", code == 1 and "漂移" in out, out)
 
-        # ---------- 阻断区：常驻区与原则区给 3，其余区仍旧给 1 ----------
+        # ---------- 阻断区：常驻区与项目记忆索引区给 3，其余区仍旧给 1 ----------
         big3 = "# 常驻\n\n" + ("字" * 1024 * 20)
         code, out = run_file(narrow, "CLAUDE.md", preview=big3)
         check("阻断·常驻区将要超限的写入给 3", code == 3 and "超过 20 KB" in out, out)
 
-        code, out = run_file(narrow, "rules/new-rule.md", preview=big3)
-        check("阻断·还没落盘的原则区新文件也算", code == 3 and "new-rule.md" in out, out)
+        code, out = run_file(narrow, "projects/demo/memory/MEMORY.md", preview=big3)
+        check("阻断·项目记忆索引写入也拦", code == 3 and "MEMORY.md" in out, out)
 
         code, out = run_file(narrow, "skills/demo2/SKILL.md", preview=big3)
         check("阻断·其他区写着超限文件只给 1", code == 1 and "超过 20 KB" in out, out)
@@ -359,16 +351,16 @@ def main():
         dupe_dir = case_dir("block-dupe", {
             "skills/demo/SKILL.md": f"---\nname: demo\ndescription: 演示\n---\n\n{para}\n",
         })
-        code, out = run_file(dupe_dir, "rules/dup.md", preview=f"# 规则\n\n{para}\n")
-        check("阻断·原则区新文件抄别处段落被拦", code == 3 and "重复" in out, out)
+        code, out = run_file(dupe_dir, "projects/demo/memory/MEMORY.md", preview=f"# 索引\n\n{para}\n")
+        check("阻断·项目记忆索引抄别处段落被拦", code == 3 and "重复" in out, out)
 
         code, out = run_file(dupe_dir, "docs/protocols/probe.md", preview=f"# 协议\n\n{para}\n")
         check("阻断·其他区抄同一段只报告（给 1）", code == 1 and "重复" in out, out)
 
         # 假密钥用拼接构造：写成字面量的话，这份测试文件自己会被密钥判据扫出来。
         fake2 = "sk-ant-" + "api03-" + "B" * 24
-        code, out = run_file(good, "rules/principles.md", preview=f"# 资产原则\n\n{TABLE}\nkey: {fake2}\n")
-        check("阻断·原则区写入含密钥被拦", code == 3 and "密钥" in out, out)
+        code, out = run_file(good, "CLAUDE.md", preview=f"# 常驻指令\n\nkey: {fake2}\n")
+        check("阻断·常驻区写入含密钥被拦", code == 3 and "密钥" in out, out)
 
         # 全量模式一律只报告：夹具里就有常驻超限，仍旧退出 1
         code, out = run(fix_dir)
@@ -377,7 +369,7 @@ def main():
         code, out = run_file(narrow, "../../escape.md")
         check("收窄·根之外的路径直接拒绝", code == 2 and "不在被检查的根" in out, out)
 
-        # 交集为空 = 一类都不跑，不能退化成「八类全跑」
+        # 交集为空 = 一类都不跑，不能退化成「全量跑」
         code, out = run_file(narrow, "docs/plain.md", only="gate")
         check("收窄·与 --only 交集为空则一类都不跑", code == 0 and "判据 （无" in out, out)
         check("收窄·交集为空时不报别类的命中", "20 KB" not in out, out)

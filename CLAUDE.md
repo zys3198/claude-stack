@@ -28,7 +28,7 @@
 | R0/R1/R2 | 明确、私有、可逆、当前工作树或容器内常规操作，主模型直接执行 |
 | R3/R4 | 共享资源、不可恢复删除、生产或真实数据、外部发布、远程 Git、密钥、数据迁移或真实用户可见变更，进入确认线 |
 
-- 子代理授权只在派发时当场传递，不得跨会话复用；继承边界见 `parallel-delegation`。
+- 子代理授权只在派发时当场传递，不得跨会话复用；继承边界见 `docs/protocols/delegation.md`。
 - hook 分工、授权范围字段与授权登记命令、hook 结论、以及改本文件或接线被 auto mode 拦下时的处置，见 `docs/protocols/gate.md`。
 
 以下动作执行前必须取得用户明确确认：
@@ -38,6 +38,7 @@
 - 不可恢复删除：数据库、文件或外部数据。按体积或目录名给出的「可清理」清单，动手前逐项勘察内容唯一性——带日期的备份、归档目录、遗留工作树常是唯一副本；勘察三项为目录名语义、与另一副本比 hash/mtime、`git status --short` 看未提交改动。**体积数字不等于垃圾；即使已获批准，勘察结论与原推荐冲突时先报再动。**
 - 对外发送或发布：邮件、消息、公开内容。
 - Git 远程操作：`git push`、`git fetch`、`git pull`、创建或关闭 MR/PR。禁止 force push、推送主干、删除远程分支或标签——这几项是硬禁止，不因确认而放行。
+- OA/EAM 模块开发线：本仓库的 OA 改动直接在 `oa-finance` 开发，EAM 改动直接在 `eam-ems` 开发；完成验证后直接以对应开发分支提交 MR，不另起功能分支或单独的 MR 源分支。同步前先把本地 `develop` 快进到远程 `origin/develop` 最新提交，再将该基线同步到对应开发分支；两条开发分支必须包含远程 `develop` 最新提交，只接收所属模块改动，不互相合并。
 
 确认前逐项说明命令原文、目标仓库或分支、影响范围；用户明确授权某个命令、目标或范围后，该范围内的同类后续动作直接执行；重新确认只在扩大范围、改变目标或影响升级时进行。其他可逆操作直接执行，并交付差异、方案和验证证据。
 
@@ -54,11 +55,11 @@
 | 编码、Bug 修复、重构、代码审查、回退 | `coding-workflow` | 全局只留两条底线：修根因、必须复核；回退改动一律用文件编辑改回 |
 | 编写或修改 `CLAUDE.md`、`AGENTS.md`、skill 文档 | `mattpocock-skills:writing-for-agents` | 先读它再动笔 |
 | 设计取舍、术语、架构决策 | `grilling`／`domain-modeling`／`codebase-design` skill | 按需取用，不预设流程 |
-| 安装、卸载、移动 skill／MCP／插件／CLI／桌面工具 | `install-ledger` | 当轮登记；改动路径与恢复路径必须入表 |
-| 运行服务、构建、测试、脚本 | `docker-only` | 一律进容器；宿主机只做只读查看、Git 操作与 Docker 命令 |
+| 安装、卸载、移动 skill／MCP／插件／CLI／桌面工具 | `docs/protocols/ledger.md` | 当轮登记；改动路径与恢复路径必须入表 |
+| 运行服务、构建、测试、脚本 | `docs/protocols/execution-env.md` | 一律进容器；宿主机只做只读查看、Git 操作与 Docker 命令 |
 | 编写命令、脚本或派子代理之前 | `local-env-pitfalls` | git-bash 路径改写、编码与解析坑位 |
-| 跨会话任务 | `task-notes` + 项目 `notes/<任务名>/STATE.md` | 先读状态；段落边界保存已确认、已修改、未完成、下一步、验证结果 |
-| 派发子代理 | `parallel-delegation` | 启动前展示模型、provider、route、effort、并发与隔离并取得确认 |
+| 跨会话任务 | `docs/protocols/task-notes.md` + 项目 `notes/<任务名>/STATE.md` | 先读状态；段落边界保存已确认、已修改、未完成、下一步、验证结果 |
+| 派发子代理 | `docs/protocols/delegation.md` | 启动前展示模型、provider、route、effort、并发与隔离并取得确认 |
 | 拿不准该不该问用户、方案怎么给、改动范围与纠正 | `docs/protocols/collaboration.md` | 提问线、三次无进展即停、实验目录与产物去向 |
 | 给结论、写交付报告、判断任务算不算完成 | `docs/protocols/evidence.md` | 证据分级、三层完成判定、Git 交付前四条命令 |
 | 写回复、写报告、写提交信息、写落盘产物 | `docs/protocols/expression.md` | 中文与用词、符号优先、用户原文保留 |

@@ -13,7 +13,7 @@ USAGE:
 (missing statusLine/enabledPlugins/hooks), keeping live provider fields
 (ANTHROPIC_* env, model). Backs up settings.json before writing. Idempotent.
 """
-import argparse, datetime, json, os, sqlite3, sys
+import argparse, datetime, json, os, shutil, sqlite3, sys, tempfile
 
 DEFAULT_CONFIG = os.path.join(os.path.expanduser("~"), ".claude", "settings.json")
 DEFAULT_DB = os.path.join(os.path.expanduser("~"), ".cc-switch", "cc-switch.db")
@@ -38,7 +38,22 @@ SENSITIVE_PATH_MARKERS = ("API_KEY", "AUTH_TOKEN", "PASSWORD", "SECRET")
 MISSING = object()
 PROXY_BACKUP_APP = "claude"
 AUTO_COMPACT_ENV_KEY = "CLAUDE_CODE_AUTO_COMPACT_WINDOW"
-PROXY_SYNC_ENV_KEYS = (AUTO_COMPACT_ENV_KEY,) + FORBIDDEN_ENV_KEYS
+# 自动压缩窗口不进入 common/proxy；Codex OAuth provider 用显式值覆盖 cc-switch 的模型默认值。
+# 其他稳定开关仍由 Windows 用户环境提供。
+USER_ENV_KEYS = (
+    AUTO_COMPACT_ENV_KEY,
+    "CLAUDE_CODE_DISABLE_ARTIFACT",
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY",
+    "DISABLE_AUTOUPDATER",
+    "DISABLE_ERROR_REPORTING",
+    "DISABLE_TELEMETRY",
+)
+PROXY_SYNC_ENV_KEYS = USER_ENV_KEYS + FORBIDDEN_ENV_KEYS
+# 保留 Codex OAuth provider 的显式自动压缩窗口；其他禁止键继续清理。
+REPAIR_PROVIDER_ENV_KEYS = tuple(
+    key for key in USER_ENV_KEYS + FORBIDDEN_ENV_KEYS
+    if key != AUTO_COMPACT_ENV_KEY
+)
 
 
 def extract_common(config_text: str) -> str:
@@ -53,7 +68,10 @@ def extract_common(config_text: str) -> str:
     data.pop("model", None)
     env = data.get("env")
     if isinstance(env, dict):
-        data["env"] = {k: v for k, v in env.items() if k not in PROVIDER_ENV_KEYS}
+        data["env"] = {
+            k: v for k, v in env.items()
+            if k not in PROVIDER_ENV_KEYS and k not in USER_ENV_KEYS
+        }
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 
@@ -148,17 +166,14 @@ def prepare_proxy_backup(raw, live_common):
     if not isinstance(snapshot, dict):
         raise ValueError("proxy_live_backup original_config root is not an object")
     live = json.loads(live_common)
+    if not isinstance(live, dict):
+        raise ValueError("live common root is not an object")
     snapshot_env = snapshot.get("env")
     if not isinstance(snapshot_env, dict):
         raise ValueError("proxy_live_backup original_config.env is not an object")
     live_env = live.get("env") if isinstance(live.get("env"), dict) else {}
     before = _target_env_values(snapshot)
-    desired_auto = live_env.get(AUTO_COMPACT_ENV_KEY, MISSING)
-    if desired_auto is MISSING:
-        snapshot_env.pop(AUTO_COMPACT_ENV_KEY, None)
-    else:
-        snapshot_env[AUTO_COMPACT_ENV_KEY] = desired_auto
-    for key in FORBIDDEN_ENV_KEYS:
+    for key in USER_ENV_KEYS + FORBIDDEN_ENV_KEYS:
         snapshot_env.pop(key, None)
     after = _target_env_values(snapshot)
     new_raw = json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n"
@@ -227,13 +242,13 @@ def restore_settings(config_text: str, common_text: str) -> str:
         merged["permissions"] = merge_permissions(live.get("permissions"), snap.get("permissions"))
     live_env = live.get("env", {})
     env = dict(live_env) if isinstance(live_env, dict) else {}
-    for key in FORBIDDEN_ENV_KEYS:
+    for key in USER_ENV_KEYS + FORBIDDEN_ENV_KEYS:
         env.pop(key, None)
     snap_env = snap.get("env", {})
     if not isinstance(snap_env, dict):
         snap_env = {}
     for k, v in snap_env.items():
-        if not k.startswith("ANTHROPIC_") and k not in FORBIDDEN_ENV_KEYS:
+        if not k.startswith("ANTHROPIC_") and k not in USER_ENV_KEYS + FORBIDDEN_ENV_KEYS:
             env[k] = v
     merged["env"] = env
     return json.dumps(merged, ensure_ascii=False, indent=2) + "\n"
@@ -277,9 +292,9 @@ def validate(new_common):
     for key in sorted(PROVIDER_ENV_KEYS):
         if key in env:
             errors.append(f"LEAKED provider-specific content: {key!r}")
-    for key in FORBIDDEN_ENV_KEYS:
+    for key in USER_ENV_KEYS + FORBIDDEN_ENV_KEYS:
         if key in env:
-            errors.append(f"FORBIDDEN common env key: {key!r}")
+            errors.append(f"ENVIRONMENT-owned common env key: {key!r}")
     return errors
 
 
@@ -407,6 +422,330 @@ def restore_main(args):
     print(f"new len      : {len(new_text)}")
     print("[DONE]")
     return 0
+def _load_json_file(path):
+    with open(path, encoding="utf-8-sig") as f:
+        return json.load(f)
+
+
+def _hook_commands(group):
+    return [
+        hook.get("command", "")
+        for hook in group.get("hooks", [])
+        if isinstance(hook, dict) and isinstance(hook.get("command"), str)
+    ]
+
+
+def _find_hook_command(hooks, marker):
+    for groups in hooks.values():
+        for group in groups if isinstance(groups, list) else []:
+            for command in _hook_commands(group):
+                if marker in command:
+                    return command
+    home = os.path.expanduser("~").replace("\\", "/")
+    python = sys.executable.replace("\\", "/")
+    script = f'{home}/.claude/hooks/scripts/{marker}'
+    return f'{python} "{script}"'
+
+
+def _new_hook_group(matcher, command, timeout):
+    return {
+        "hooks": [{"command": command, "timeout": timeout, "type": "command"}],
+        "matcher": matcher,
+    }
+
+
+def _group_has_marker(group, marker):
+    return any(marker in command for command in _hook_commands(group))
+
+
+def _canonical_hooks(source_hooks):
+    """以当前 hooks 契约重建 cc-switch 会覆盖的接线，保留无关组。"""
+    if not isinstance(source_hooks, dict):
+        raise ValueError("hooks must be an object")
+    hooks = json.loads(json.dumps(source_hooks, ensure_ascii=False))
+    pretool = _find_hook_command(hooks, "pretool-guard.py")
+    protocol = _find_hook_command(hooks, "protocol-report.py")
+
+    pretool_groups = hooks.get("PreToolUse", [])
+    if not isinstance(pretool_groups, list):
+        pretool_groups = []
+    pretool_groups = [
+        group for group in pretool_groups
+        if not _group_has_marker(group, "product-guard.py")
+        and not _group_has_marker(group, "resource-guard.py")
+        and not _group_has_marker(group, "pretool-guard.py")
+        and not _group_has_marker(group, "protocol-report.py")
+    ]
+    hooks["PreToolUse"] = [
+        _new_hook_group("Bash|EnterWorktree|Write|Edit|MultiEdit", pretool, 45),
+        *pretool_groups,
+        _new_hook_group("Edit|Write|MultiEdit|NotebookEdit", protocol, 30),
+    ]
+
+    session_start = hooks.get("SessionStart", [])
+    if isinstance(session_start, list):
+        hooks["SessionStart"] = [
+            group for group in session_start
+            if not _group_has_marker(group, "herdr-agent-state.ps1")
+        ]
+
+    post_tool = hooks.get("PostToolUse", [])
+    if not isinstance(post_tool, list):
+        post_tool = []
+    if not any(_group_has_marker(group, "protocol-report.py") for group in post_tool):
+        target = next(
+            (group for group in post_tool if _group_has_marker(group, "settings-sync-auto.py")),
+            None,
+        )
+        if target is None:
+            post_tool.append(
+                _new_hook_group(
+                    "Edit|Write|MultiEdit|NotebookEdit|apply_patch|update|str_replace_based_edit_tool|file_edit",
+                    protocol,
+                    30,
+                )
+            )
+        else:
+            target.setdefault("hooks", []).append(
+                {"command": protocol, "timeout": 30, "type": "command"}
+            )
+    hooks["PostToolUse"] = post_tool
+
+    stop = hooks.get("Stop", [])
+    if not isinstance(stop, list):
+        stop = []
+    stop = [group for group in stop if not _group_has_marker(group, "protocol-report.py")]
+    stop.append(_new_hook_group("", protocol, 60))
+    hooks["Stop"] = stop
+    return hooks
+
+
+def _repair_common(db_common, live_common, hooks_source):
+    common = json.loads(db_common)
+    if not isinstance(common, dict):
+        raise ValueError("common snapshot root must be an object")
+    if hooks_source == "db":
+        source = common
+    elif hooks_source == "live":
+        source = json.loads(live_common)
+    else:
+        source = _load_json_file(hooks_source)
+        source = json.loads(extract_common(json.dumps(source, ensure_ascii=False)))
+    common.pop("model", None)
+    common["hooks"] = _canonical_hooks(source.get("hooks", {}))
+    env = common.get("env") if isinstance(common.get("env"), dict) else {}
+    env = dict(env)
+    for key in USER_ENV_KEYS + FORBIDDEN_ENV_KEYS:
+        env.pop(key, None)
+    common["env"] = env
+    return common
+
+
+def _repair_live(live, common):
+    repaired = dict(live)
+    for key, value in common.items():
+        if key != "env":
+            repaired[key] = value
+    live_env = live.get("env") if isinstance(live.get("env"), dict) else {}
+    common_env = dict(common.get("env") or {})
+    for key in PROVIDER_ENV_KEYS:
+        if key in live_env:
+            common_env[key] = live_env[key]
+    # Codex OAuth 的显式覆盖必须留在 live，避免 repair 后当前会话失去 200k 阈值。
+    if AUTO_COMPACT_ENV_KEY in live_env:
+        common_env[AUTO_COMPACT_ENV_KEY] = live_env[AUTO_COMPACT_ENV_KEY]
+    repaired["env"] = common_env
+    return repaired
+
+
+def _repair_proxy(proxy, common):
+    repaired = dict(proxy)
+    repaired["hooks"] = common["hooks"]
+    env = dict(repaired.get("env") or {})
+    for key in USER_ENV_KEYS + FORBIDDEN_ENV_KEYS:
+        env.pop(key, None)
+    repaired["env"] = env
+    return repaired
+
+
+def _clean_provider_config(raw):
+    config = json.loads(raw or "{}")
+    if not isinstance(config, dict):
+        raise ValueError("provider settings_config root must be an object")
+    env = config.get("env")
+    changed = []
+    if isinstance(env, dict):
+        env = dict(env)
+        for key in REPAIR_PROVIDER_ENV_KEYS:
+            if key in env:
+                changed.append(key)
+                env.pop(key, None)
+        config["env"] = env
+    return config, changed
+
+
+def _json_text(data, original_bytes=None):
+    text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    if original_bytes is not None and b"\r\n" in original_bytes:
+        text = text.replace("\n", "\r\n")
+    return text
+
+
+def _write_atomic(path, data, original_bytes=None):
+    text = _json_text(data, original_bytes)
+    fd, tmp = tempfile.mkstemp(prefix=".settings-repair-", dir=os.path.dirname(path))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+
+
+def _write_bytes_atomic(path, content):
+    fd, tmp = tempfile.mkstemp(prefix=".settings-repair-", dir=os.path.dirname(path))
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(content)
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+
+
+def _backup_repair_state(config_path, db_path):
+    ts = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S_%f")
+    db_dir = os.path.join(os.path.dirname(db_path), "backups")
+    settings_dir = os.path.join(os.path.dirname(config_path), "backups")
+    os.makedirs(db_dir, exist_ok=True)
+    os.makedirs(settings_dir, exist_ok=True)
+    db_backup = os.path.join(db_dir, f"repair-{ts}.db")
+    settings_backup = os.path.join(settings_dir, f"settings-repair-{ts}.json")
+    if os.path.exists(db_backup) or os.path.exists(settings_backup):
+        raise FileExistsError("repair backup path already exists")
+    shutil.copy2(config_path, settings_backup)
+    source = _read_only_connection(db_path)
+    target = sqlite3.connect(db_backup)
+    try:
+        source.backup(target)
+    finally:
+        target.close()
+        source.close()
+    return settings_backup, db_backup
+
+
+def repair_main(args):
+    """一次性对齐 live、common、代理快照，并清理 provider context 覆盖。"""
+    try:
+        with open(args.config, "rb") as f:
+            original_bytes = f.read()
+        config_text = original_bytes.decode("utf-8-sig")
+        live = json.loads(config_text)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        print(f"[FAIL] cannot read settings.json: {exc}")
+        return 1
+
+    con = None
+    try:
+        con = _read_only_connection(args.db) if args.dry_run else sqlite3.connect(args.db, timeout=10)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        common_row = cur.execute("SELECT value FROM settings WHERE key=?", (KEY,)).fetchone()
+        proxy_row = cur.execute(
+            "SELECT original_config FROM proxy_live_backup WHERE app_type=?",
+            (PROXY_BACKUP_APP,),
+        ).fetchone()
+        provider_rows = cur.execute(
+            "SELECT id,name,settings_config,meta FROM providers WHERE app_type='claude' ORDER BY name"
+        ).fetchall()
+        if not common_row:
+            print("[FAIL] no common_config_claude snapshot in DB")
+            return 1
+        if not proxy_row:
+            print("[FAIL] no claude proxy_live_backup row; refusing partial repair")
+            return 1
+        disabled = [
+            row["name"] for row in provider_rows
+            if not json.loads(row["meta"] or "{}").get("commonConfigEnabled", False)
+        ]
+        if disabled:
+            print("[FAIL] Common Config disabled for: " + ", ".join(disabled))
+            return 1
+        live_common = extract_common(config_text)
+        common = _repair_common(common_row["value"], live_common, args.hooks_source)
+        common_text = _json_text(common)
+        errors = validate(common_text)
+        if errors:
+            print("[FAIL] repair target validation errors:")
+            for error in errors:
+                print(f"  - {error}")
+            return 1
+        new_live = _repair_live(live, common)
+        proxy = json.loads(proxy_row["original_config"])
+        new_proxy = _repair_proxy(proxy, common)
+        provider_updates = []
+        for row in provider_rows:
+            cleaned, changed = _clean_provider_config(row["settings_config"])
+            if changed:
+                provider_updates.append((row["id"], row["name"], cleaned, changed))
+
+        print(f"settings.json: {args.config}")
+        print(f"cc-switch.db : {args.db}")
+        print(f"hooks source : {args.hooks_source}")
+        if args.auto_compact_window is not None:
+            print("[WARN] --auto-compact-window ignored; context and stable switches are user-environment-owned")
+        print("auto compact : <user environment>")
+        print(f"user env keys: {', '.join(USER_ENV_KEYS)}")
+        print(f"providers cleaned: {len(provider_updates)}")
+        if provider_updates:
+            for _, name, _, changed in provider_updates:
+                print(f"  {name}: {', '.join(changed)}")
+        changed = (
+            json.dumps(new_live, sort_keys=True, ensure_ascii=False)
+            != json.dumps(live, sort_keys=True, ensure_ascii=False)
+            or common_row["value"] != common_text
+            or json.dumps(new_proxy, sort_keys=True, ensure_ascii=False)
+            != json.dumps(proxy, sort_keys=True, ensure_ascii=False)
+            or bool(provider_updates)
+        )
+        if not changed:
+            print("[NO-OP] all repair targets already match")
+            return 0
+        if args.dry_run:
+            print("[DRY-RUN] no write performed.")
+            return 0
+
+        settings_backup, db_backup = _backup_repair_state(args.config, args.db)
+        try:
+            _write_atomic(args.config, new_live, original_bytes)
+            con.rollback()
+            con.execute("BEGIN IMMEDIATE")
+            con.execute("UPDATE settings SET value=? WHERE key=?", (common_text, KEY))
+            con.execute(
+                "UPDATE proxy_live_backup SET original_config=? WHERE app_type=?",
+                (_json_text(new_proxy), PROXY_BACKUP_APP),
+            )
+            for provider_id, _, cleaned, _ in provider_updates:
+                con.execute(
+                    "UPDATE providers SET settings_config=? WHERE id=?",
+                    (_json_text(cleaned), provider_id),
+                )
+            con.commit()
+        except Exception:
+            con.rollback()
+            _write_bytes_atomic(args.config, original_bytes)
+            raise
+        print(f"settings backup: {settings_backup}")
+        print(f"database backup : {db_backup}")
+        print("[DONE] repair written; restart cc-switch before switching provider")
+        return 0
+    except (OSError, sqlite3.Error, TypeError, ValueError) as exc:
+        print(f"[FAIL] repair failed: {exc}")
+        return 1
+    finally:
+        if con is not None:
+            con.close()
 
 
 def main():
@@ -418,7 +757,16 @@ def main():
                     help='read-only semantic comparison of settings.json and DB')
     ap.add_argument('--restore', action='store_true',
                     help='fix mode: merge DB snapshot back into settings.json')
+    ap.add_argument('--repair', action='store_true',
+                    help='one-shot repair live/common/proxy/provider context layers')
+    ap.add_argument('--hooks-source', default='db',
+                    help='repair hook source: db, live, or a JSON settings snapshot path')
+    ap.add_argument('--auto-compact-window', type=int,
+                    help='deprecated compatibility option; user environment owns this setting')
     args = ap.parse_args()
+
+    if args.repair:
+        sys.exit(repair_main(args))
 
     if args.check:
         sys.exit(check_main(args))
