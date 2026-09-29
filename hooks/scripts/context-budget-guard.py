@@ -1,8 +1,13 @@
-# UserPromptSubmit hook：上下文用量逼近 smart zone 终点时，提醒更新接续笔记。
+# hook：上下文用量逼近 smart zone 终点时，提醒更新接续笔记。
 #
-# 挂 UserPromptSubmit 而不是 PostToolUse：这个提醒每轮说一次就够，挂 PostToolUse
-# 会在每次工具调用上起一个解释器、再读一遍 transcript，成本叠在每一步上。
-# UserPromptSubmit 在 exit 0 时把 stdout 纯文本作为上下文注入，故这里直接 print。
+# 当前挂 PostToolUse（见 installing/custom-setup.md 的位置列；改挂 UserPromptSubmit
+# 也成立，本文件不依赖接线位置——事件名从 payload 里读）。
+#
+# 输出**必须**是 JSON 的 `hookSpecificOutput.additionalContext`，不能是裸 print。
+# 2026-09-29 实测订正：除 UserPromptSubmit／UserPromptExpansion／SessionStart／
+# PostModelSwitch 外，其余事件的纯文本 stdout 只写调试日志，既不进上下文也不
+# 显示给用户。本脚本长期用 `print(reminder)`，于是每次判断都对、每次输出都丢，
+# 静默失效。证据留痕见 installing/archive/custom-setup.md 同日一节。
 #
 # 用量来源：transcript 是 JSONL，每条 assistant 记录带 message.usage。
 #   input_tokens + cache_read_input_tokens + cache_creation_input_tokens
@@ -21,7 +26,9 @@ import sys
 import time
 from pathlib import Path
 
-CLAUDE = Path(os.path.expanduser("~")) / ".claude"
+# 夹具测试用 CLAUDE_ASSET_ROOT 指向临时树，与 protocol-router.py 同一约定。
+CLAUDE = Path(os.environ.get("CLAUDE_ASSET_ROOT")
+              or Path(os.path.expanduser("~")) / ".claude")
 STATE_DIR = CLAUDE / "context-budget"
 LOGFILE = CLAUDE / "context-budget-guard.log"
 
@@ -117,8 +124,14 @@ def reminder(size):
     )
 
 
-def emit(size):
-    print(reminder(size))
+def emit(event, size):
+    """hookEventName 必须与 additionalContext 同层：缺了它 Claude Code 会静默忽略。"""
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": event,
+            "additionalContext": reminder(size),
+        },
+    }, ensure_ascii=False))
 
 
 def main():
@@ -135,7 +148,7 @@ def main():
     if previous is not None and size - previous < REMIND_STEP:
         return
     remember(session, size)
-    emit(size)
+    emit(str(data.get("hook_event_name") or "PostToolUse"), size)
 
 
 if __name__ == "__main__":

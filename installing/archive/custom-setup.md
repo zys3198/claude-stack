@@ -1444,3 +1444,39 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：用户从 `C:\Users\zys31\.claude\jobs\33227774\tmp\last30days-SKILL.before-optimization.md` 恢复原始主文件后，按修正后的不重叠区间重做；未提交、未推送。
 - **验证**：四个新增 reference 均存在，主文件触发点与关键输出契约仍在；容器内 disclosure check 通过；`protocol_check.py --only size` 仅报告该主入口仍超过 20 KB 的软目标。
 - **未做**：第四批常驻索引审计、第六批票 08；主入口体量不硬追 20 KB，按规划保留真实结果。
+
+### protocol-router：按动作与领域把协议推给模型（2026-09-29）
+
+- **变更**：新增 `hooks/scripts/protocol-router.py` 与 `hooks/tests/test_protocol_router.py`；`settings.json` 加两组接线——`hooks.UserPromptSubmit[1]`、`hooks.PreToolUse[3]`（matcher `Bash|PowerShell|Edit|Write|Agent|Task`，timeout 10）。`context-budget-guard.py`／`protocol-report.py`／`settings.json` 三行的台账记录同时订正，见本节末。
+- **依据**：用户观察到「并不能及时地想起有协议并用上」。协议族的 `description` 已全是时机式写法、触发面写足，但 2026-09-27 收编后 `skill-auditor`／`instruction-engineering`／`install-ledger` 三个 skill 加了 `disable-model-invocation: true`，其描述已退出 listing；`instruction-assets.md` 在全局 `CLAUDE.md` 路由表里也没有直接指向它的行（那一行指的是外部插件 `mattpocock-skills:writing-for-agents`），只能经 `asset-guide` 的「转交」表两跳到达。可见性不是瓶颈，**动作那一刻没被激活**才是。hook 是唯一能按时刻推送的机制，且 hook 代码不进上下文、只在命中时付字。
+- **设计要点**：输出**必须**写成事实陈述句。官方明确警告写成 out-of-band 系统命令会触发 Claude 的提示注入防御，反被表面化给用户看、当不成上下文。两个事件分两张表：`UserPromptSubmit` 匹配用户输入的领域词，是唯一能在「动手前」到达的非拦截通道；`PreToolUse` 匹配 `tool_name` + `tool_input`，注入点在工具结果旁，模型读到它时本次工具已跑完。按 session 节流，上限 10 个会话（超了挤掉最早的）。
+- **回退**：删 `settings.json` 里那两组接线 + 删两个新文件。`settings.json` 未受 git 跟踪，改前副本在 `backups/protocol-router-2026-09-29/settings.json`（sha256 `756eb2c7b63f6f1cd5291ede6eaddf6e01d41ccdf3d8f7f64438028700866788`）。
+- **验证**：`test_protocol_router.py` 31 项全过；`test_protocol_report.py` PASS；`selftest.py` 153 项 0 失败；`ledger_check.py` rc=0。**真实会话实测**：`docker ps` 触发 `PreToolUse` 注入 execution-env 事实句，同会话第二次同命令已节流沉默（无注入、日志无新记录），`hooks/protocol-router.log` 留痕。`settings.json` 与备份 diff 只有两处新增、零删除，JSON 可解析，事件组总数仍 15。**`UserPromptSubmit` 那条路同日也在真实会话里成立**：一次子代理回收触发了注入，按表命中五份协议（delegation／collaboration／evidence／session-lifecycle／protocols-index）。键名 `prompt` 经三处独立证据坐实：本机 `C:\Users\zys31\.local\bin\claude.exe` 内置代码的载荷构造 `hook_event_name:"UserPromptSubmit",prompt:r`、官方 hooks 文档 zh-CN／ja／ko 三个镜像的输入示例、以及这次真实触发。
+- **未做**：`PowerShell` 与 `Agent`／`Task` 三条分支只经夹具验证，未在真实调用里出现。表二不含 `installing/` 路径 → `ledger.md` 这条路由（用户确认的定稿表未列）。`PreToolUse` 对 `git push`／`rm -r` 这类一次性动作太晚，用户选「只提示不拦」，该缺口已知未补。脚本保留 `user_prompt` 兜底——键名已坐实为 `prompt`，留着无副作用。`claude -p` 联调被 auto mode 分类器拒绝，未绕行。未提交、未推送。
+- **台账订正**（2026-09-29，本节顺带，均为「以实测改表」）：`context-budget-guard.py` 的位置列原记 `hooks.UserPromptSubmit[0]`，实测挂在 `PostToolUse` 的 `.*` 组，改 `hooks.PostToolUse[1]`；`protocol-report.py` 的 `hooks.Stop[0]` 实测为 `hooks.Stop[1]`；`settings.json` 的恢复列原写 `git`，实测该文件在 `.gitignore:54` 内、未被跟踪，恢复路径不成立，改为 `**无 git 路径**` 并注明改前须往 `backups/` 留副本。
+
+### context-budget-guard：提醒静默失效的发现与修复（2026-09-29）
+
+- **变更**：`hooks/scripts/context-budget-guard.py` 的 `emit()` 由裸 `print(reminder(size))` 改为输出 `hookSpecificOutput.additionalContext`，事件名从 payload 的 `hook_event_name` 读（缺省 `PostToolUse`），换接线位置不必再改脚本；脚本改用 `CLAUDE_ASSET_ROOT` 定位状态目录与日志，与 `protocol-router.py` 同一夹具约定。`hooks/tests/test_context_budget_guard.py` 同步改断言。
+- **怎么发现的**：给 `protocol-router` 核 `UserPromptSubmit` 载荷键名时顺带读接线，发现该脚本 docstring 自称 `UserPromptSubmit hook`、而实测挂在 `hooks.PostToolUse[1]`（matcher `.*`）。查下去才知不是接线错，是**输出格式与接线不匹配**。
+- **依据（三层，互相独立）**：① 官方 hooks 文档「退出代码 0」一节：除 `UserPromptSubmit`／`UserPromptExpansion`／`SessionStart`／`PostModelSwitch` 外，纯文本 stdout 只写调试日志、**不在转录中显示**；`PostToolUse` 要送上下文必须用 JSON 的 `additionalContext`。② transcript 实证：同一份**源码自 2026-09-24 11:22 起未改动**（mtime 加 git 只有一个提交）的脚本，2026-09-24（CLI 2.1.280）留下 1 条 `hook_additional_context` 附件，即真的注入过；2026-09-28 起（CLI 2.1.283）全部是 `hook_success` 执行记录，只留 `stdout` 字段、不注入。③ 改前改后同 payload 对跑：改前裸文本、改后 JSON。
+- **未坐实的一点**：失效起点**推断**在 2.1.280→2.1.283 之间的 CLI 行为变更，但 changelog 里没有对应条目，没有实证。当前失效本身是实证的。
+- **为什么一直没被发现**：`test_context_budget_guard.py` 原来那条断言写的是「跨过提醒线：stdout 纯文本即注入内容」（`out.startswith("上下文已用约")`）——它把 bug 当成期望行为锁死了；且测试 payload 从不带 `hook_event_name`，事件名那条路径从未被走过。**断言「有输出」测不出「输出到不了」。**
+- **为什么按现状修而不是改接线**：改输出格式在 `PostToolUse` 与 `UserPromptSubmit` 两种接线**都正确**，不必先做接线取舍。`PostToolUse` 也不是坏选择——注入点在工具结果旁，正是上下文被消耗的时刻；代价是每次工具调用起一次解释器（原 docstring 明说要避开的成本），由 25k 节流兜住。是否移回 `UserPromptSubmit` 留给用户定，本次未动。
+- **回退**：`git checkout -- hooks/scripts/context-budget-guard.py hooks/tests/test_context_budget_guard.py`（两文件改前均无本地改动，已核）。
+- **验证**：`test_context_budget_guard.py` 全过；`test_protocol_router.py` rc=0；`selftest.py` 153 项 0 失败；`ledger_check.py` rc=0；改前改后对跑见上。
+- **未做**：未改接线位置（理由见上）；失效的 CLI 版本号未坐实。未提交、未推送。
+
+### 代码复核发现的三处订正：接线漏匹配、总表漏行、测试夹具不隔离（2026-09-29）
+
+`/mattpocock-skills:code-review` 对上两节改动做了双轴复核（Standards 10 条发现、Spec 6 条发现），本节只记经用户裁决落地的三条；其余发现当轮**刻意不动**，理由见末条。
+
+- **变更**：
+  1. `settings.json` 的 `hooks.PreToolUse[3]` matcher 由 `Bash|PowerShell|Edit|Write|Agent|Task` 改为 `Bash|PowerShell|Edit|Write|MultiEdit|NotebookEdit|Agent|Task`。脚本里 `EDIT_TOOLS` 已含 `MultiEdit`／`NotebookEdit`，接线却没匹配它们——`protocol-router.py` 的那两条分支自上线起**永不触发**。改前备份 `backups/protocol-router-matcher-2026-09-29/settings.json`（sha256 `5a79d0c3b5770adf0f66699ecae6665e5239203bc99450a320fe7726f285947e`）。
+  2. `docs/protocols-index.md` 补一行 `| 指令资产 | ~/.claude/docs/protocols/instruction-assets.md + instruction-assets/ | — | **已落** |`；同一节里枚举「校验留 `—`」的散文同步补上它（「后三者」改「中间三者」＋ `指令资产` 另起一句）。总表原 10 行里没有它，而 `docs/protocols/` 实有 10 份协议——按目录逐份枚举对账，缺的正是 `instruction-assets.md`（2026-09-27 新建时漏登）。
+  3. `hooks/tests/test_context_budget_guard.py` 夹具化：`CLAUDE_ASSET_ROOT` 指向 `tempfile.mkdtemp(prefix="cbtest-")`，结束 `shutil.rmtree`。**赋值必须在 `exec_module` 之前**——脚本在导入时读这个变量，`run()` 的 `env` 由 `os.environ` 展开、子进程自动继承。此前 `run()` 不传该变量、`g.STATE_DIR` 指向真实 `~/.claude/context-budget/`，跑一次测试就往真实目录写节流文件、末尾再删掉，注释却写着走夹具。
+
+- **依据**：复核的三条可落地发现，逐条经用户确认（原话：清单合流、死分支、注释与实际不符）。补 matcher 的方向是**让接线追上代码**而非删代码——`NotebookEdit` 是真工具，`MultiEdit` 虽已不在工具表但留着无害；总表那一行是**过期表**的问题，总表与脚本内的机器表是两种产物（一张运行期读、一张给人读），不做合流；总表「新增一份协议时，在本表加一行」即本节依据。
+- **回退**：`settings.json` 用 `backups/protocol-router-matcher-2026-09-29/settings.json` 覆盖；另两处 `git checkout`。
+- **验证**：`diff` 备份与现状只有第 182 行一行之差，`PreToolUse` 仍 4 组，`settings-sync-auto` 已触发同步；总表终态 11 行、0 个 CR 行；测试改前改后 `~/.claude/context-budget/` 目录内容 md5 一致（`7ba72d3d842f8d60a0e5fb55997b0d3b`），测试 `ALL PASS` rc=0；`ledger_check.py` rc=0；`protocol_check.py` rc=1 仅剩 `skills/last30days/SKILL.md` 那条既有体量命中；四个 hook 测试 rc=0，`selftest.py` 153 项 0 失败。
+- **未做**：复核的其余发现（含 `protocol-router.py` 与总表并存两份协议清单、`route_prompt` 正则重叠、`Spec` 轴报的四处超出批准清单的改动等）按用户裁决不动——当轮只批准上述三条；既有问题已在报告中披露为「超出批准清单」，此处仅留痕不改动。未提交、未推送。

@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,12 @@ from pathlib import Path
 GUARD = Path(os.path.expanduser("~")) / ".claude" / "hooks" / "scripts" / "context-budget-guard.py"
 PY = sys.executable
 FAILED = []
+
+# 夹具根：节流状态与日志都落在下面，不碰真实 ~/.claude/context-budget/。
+# 必须在 exec_module 之前设——脚本在导入时读这个变量。run() 的 env 由 os.environ
+# 展开，子进程自动继承。
+FIXTURE = Path(tempfile.mkdtemp(prefix="cbtest-"))
+os.environ["CLAUDE_ASSET_ROOT"] = str(FIXTURE)
 
 spec = importlib.util.spec_from_file_location("context_budget_guard", GUARD)
 g = importlib.util.module_from_spec(spec)
@@ -117,10 +124,30 @@ with tempfile.TemporaryDirectory() as tmp:
     check("低于提醒线：无输出、退出码 0", (out, code), ("", 0))
 
     path.write_bytes(transcript(g.REMIND_AT + 2000))
-    out, code = run({"session_id": session, "transcript_path": str(path)})
-    body = out
-    check("跨过提醒线：stdout 纯文本即注入内容", body.startswith("上下文已用约"), True)
+    out, code = run({"session_id": session, "transcript_path": str(path),
+                     "hook_event_name": "PostToolUse"})
+    # 这里曾经断言 `out.startswith("上下文已用约")`——「stdout 纯文本即注入内容」。
+    # 那个前提只对 UserPromptSubmit 成立。挂到 PostToolUse 后裸 stdout 只进调试
+    # 日志，脚本每次判断都对、每次输出都丢，而这条断言照样绿。所以现在断言
+    # 输出是 JSON 且带 hookSpecificOutput.additionalContext。
+    try:
+        block = json.loads(out)["hookSpecificOutput"]
+    except (ValueError, KeyError, TypeError):
+        block = {}
+    check("跨过提醒线：输出是 JSON 而非裸 stdout", bool(block), True)
+    check("带 hookEventName 与 additionalContext",
+          (block.get("hookEventName"), isinstance(block.get("additionalContext"), str)),
+          ("PostToolUse", True))
+    body = block.get("additionalContext") or ""
     check("提醒文案带当前用量", f"约 {(g.REMIND_AT + 2000) // 1000}k" in body, True)
+
+    # hookEventName 取自 payload，换接线位置不必改脚本
+    out, _ = run({"session_id": session + "-evt", "transcript_path": str(path),
+                  "hook_event_name": "UserPromptSubmit"})
+    check("换事件名原样回传",
+          (json.loads(out).get("hookSpecificOutput") or {}).get("hookEventName"),
+          "UserPromptSubmit")
+    (g.STATE_DIR / (session + "-evt")).unlink(missing_ok=True)
 
     out, _ = run({"session_id": session, "transcript_path": str(path)})
     check("同量再跑：节流生效不重复提醒", out, "")
@@ -148,6 +175,8 @@ if candidates:
     print(f"      最新 transcript {candidates[-1].name} 用量 {size}")
 else:
     check("找到真实 transcript", False, True)
+
+shutil.rmtree(FIXTURE, ignore_errors=True)
 
 print()
 if FAILED:
