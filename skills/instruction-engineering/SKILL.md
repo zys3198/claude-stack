@@ -2,6 +2,7 @@
 name: instruction-engineering
 description: 已归档（2026-09-27）。清单与模板并入 docs/protocols/instruction-assets.md；本文件只作触发重定向。
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # 已归档：instruction-engineering

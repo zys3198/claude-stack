@@ -36,6 +36,8 @@
 
 2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-2026-09-25/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Workspace\notes\skill-hook-review\SKILL-REVIEW.md`。
 
+4 个已归档空壳 2026-09-30 补 `user-invocable: false`：`/` 菜单原不受 `disable-model-invocation` 影响。
+
 ## hook
 
 `位置` 列的 `→ hooks.<事件>[<分组>]` 指 `settings.json` 里的注册位置。

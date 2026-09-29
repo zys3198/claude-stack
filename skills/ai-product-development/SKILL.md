@@ -2,6 +2,7 @@
 name: ai-product-development
 description: 已归档（2026-09-27）。推进新产品改用 mattpocock-skills:ask-matt，产品起步路线见 coding-workflow §1.5.2。
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # 已归档：ai-product-development

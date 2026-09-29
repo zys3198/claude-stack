@@ -1494,3 +1494,14 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：`installing/settings-wiring.md` 与 `.gitignore` 的改动走 git；`authorization/` 恢复跟踪用 `git add -f authorization/`。
 - **验证**：`ledger_check.py` rc=0（custom-setup.md 19.8 KB / 67 行 · 待核 0）；`protocol_check.py` rc=1 仅剩 `skills/last30days/SKILL.md` 那条既有体量命中，密钥一类 2660 文件零命中；`git worktree list` 只剩主检出；`git branch` 只剩 `master`。
 - **未做**：未推主干（硬禁止）；未开 PR（`gh` 已登录、remote 给出了 PR 链接，但创建 PR 属另一道确认线）；`~/.claude` 本地 `ticket08-archive-2026-09-28` 分支未处置（不在本次裁定范围）。
+
+### 归档空壳从 `/` 菜单摘除（2026-09-30）
+
+- **变更**：
+  1. 4 个已归档空壳的 `SKILL.md` 在 `disable-model-invocation: true` 下补 `user-invocable: false`：`ai-product-development`、`install-ledger`、`instruction-engineering`、`skill-auditor`。
+  2. `installing/custom-setup.md` 表后加一行共用说明。原拟逐行写进 4 条备注，撑到 20,715 B 越过 20 KB 上限（`protocol-report` 的 PostToolUse 当场报出），按维护条款「先删再加」收回为一条，终态 20,380 B / 105 行。
+- **依据**：用户 2026-09-30 指令「有些 skill 已经标明被归档了，那就不用再出现在 / 命令下了」。触发事实是这 4 个空壳仍在 `/` 菜单里——台账原写的「触发面不再占 listing」只对模型侧成立；`disable-model-invocation: true` 的语义是「只有你能调用」，恰恰保留 `/` 入口。
+- **为什么写在 frontmatter 而不是 `settings.json` 的 `skillOverrides: "off"`**：后者语义更贴（两端都不列；适用范围含个人 skill、不含插件 skill），但 `settings.json` 按本台账无 git 路径、且与 cc-switch common_config 双向同步（快照会盖），这 4 份 `SKILL.md` 却走 git；本机既有写法也把可见性放 frontmatter（`impeccable`／`last30days` 用 `disable-model-invocation: true` + `user-invocable: true`）。两开关合起来才两端不可达：前者挡模型侧，后者挡 `/`。
+- **回退**：`git checkout -- skills/ai-product-development/SKILL.md skills/install-ledger/SKILL.md skills/instruction-engineering/SKILL.md skills/skill-auditor/SKILL.md`；台账那行删掉。
+- **验证**：`~/.claude/skills/` 24 份逐份取 `^user-invocable:`，只得 6 份——4 个归档为 `false`，`impeccable`／`last30days` 为 `true`（在用，须留在 `/`，未误伤）。`disable-model-invocation` 为真的 14 份全不在模型侧 listing 内，为假的 10 份与本会话模型侧可见 10 项逐名相同（`asset-guide`、`auto-browser`、`bidirectional-steelman`、`coding-workflow`、`dev-clean`、`dev-status`、`docker-only`、`local-env-pitfalls`、`parallel-delegation`、`task-notes`），说明新增开关不会把描述带回模型上下文。真归档的判据取 `description` 行以「已归档」开头，而非全文含该词——`asset-auditor` 正文把「已归档」当判定词用，全文匹配会误伤。
+- **未做**：未提交、未推送。`/` 菜单的实际变化无命令行入口可实测（`claude --help` 无 skills 列子命令，`/skills` 只在 TUI），依据是官方文档字段语义与本机 2.1.284 二进制 schema 描述（两处一致）。插件轴未动：`github` 停用与 `enabledPlugins: false` 一致；`archify`、`company-discovery-evaluation-by-user` 在 `archive-skills/`、`codex-home-2026-09-09` 在 `backups/`，均不在 skill 扫描路径，本就未污染 `/`。

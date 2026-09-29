@@ -2,6 +2,7 @@
 name: install-ledger
 description: 已归档（2026-09-27）。正文并入 docs/protocols/ledger.md，校验脚本移到 hooks/scripts/ledger_check.py；本文件只作触发重定向。
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # 已归档：install-ledger
