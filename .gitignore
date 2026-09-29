@@ -40,6 +40,8 @@ daemon/
 *.log
 .ponytail-active
 hooks/*_state.json
+# 授权范围登记（authorization_scope.py 的 STATE_DIR），跟着机器与任务走，不进仓库
+authorization/
 .last-cleanup
 .last-update-result.json
 cost-tracker.log
