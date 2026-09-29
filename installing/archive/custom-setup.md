@@ -1480,3 +1480,17 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：`settings.json` 用 `backups/protocol-router-matcher-2026-09-29/settings.json` 覆盖；另两处 `git checkout`。
 - **验证**：`diff` 备份与现状只有第 182 行一行之差，`PreToolUse` 仍 4 组，`settings-sync-auto` 已触发同步；总表终态 11 行、0 个 CR 行；测试改前改后 `~/.claude/context-budget/` 目录内容 md5 一致（`7ba72d3d842f8d60a0e5fb55997b0d3b`），测试 `ALL PASS` rc=0；`ledger_check.py` rc=0；`protocol_check.py` rc=1 仅剩 `skills/last30days/SKILL.md` 那条既有体量命中；四个 hook 测试 rc=0，`selftest.py` 153 项 0 失败。
 - **未做**：复核的其余发现（含 `protocol-router.py` 与总表并存两份协议清单、`route_prompt` 正则重叠、`Spec` 轴报的四处超出批准清单的改动等）按用户裁决不动——当轮只批准上述三条；既有问题已在报告中披露为「超出批准清单」，此处仅留痕不改动。未提交、未推送。
+
+### 收尾：公开仓库前置检查、接线进仓库、工作树与分支清理（2026-09-29）
+
+- **变更**：
+  1. `authorization/` 取消跟踪（`git rm --cached`，本机文件保留）。它是 `hooks/scripts/authorization_scope.py:11` 的 `STATE_DIR`，与 `hooks/*_state.json`、`context-budget/`、`task-notes-reminder/` 同属运行期状态；`1e2923d` 在一次宽泛 `git add` 里误纳入，而 `.gitignore:42` 只覆盖 `hooks/*_state.json`。`.gitignore` 在 42 行下补规则。
+  2. 新增 `installing/settings-wiring.md`：`protocol-router.py` 在 `settings.json` 里的两段接线片段，可直接粘回。台账 `protocol-router.py` 行的恢复列改为指向它，`settings.json` 行备注同步。
+  3. 删除 Workspace 遗留工作树 `skill-slimming-evals`（41 条未提交条目，`notes/2026-09-21-skill-slimming/` 与 `output/skill-slimming-evals/` 下的笔记与 HTML 报告，主检出里无同名文件）与其分支；删掉 9 条已并入 `master` 的 `worktree-*` 本地分支（全部 0 提交领先，无内容损失）。另删两个空壳孤儿工作树目录 `claude-config-standards/`、`mindspore-transformer-lab/`（递归为空、git 早已不登记）。
+- **依据**：用户逐条裁定——「1.推送，2.删不保留，3.删，残留风险也解决了」。第 1 条按硬禁止项改走**分支**而非主干（remote 上 `config-sync-2026-09-24`、`asset-system-2026-09-26` 是同一做法）。
+- **为什么先修 `authorization/` 再推**：推送前勘察发现 `origin` 是**公开**仓库 `zys3198/claude-stack`（`gh repo view` 报 `visibility: PUBLIC`），而该文件点名内部仓库与合并目标（`eam-ems`、`develop.flyway_schema_history:version=20260924`、`merge-request:eam-ems->develop`、任务 id `eam-perm-migration-hotfix`）。公开仓库会被缓存与索引，事后删除不能真正撤回，故先在本地取消跟踪。
+- **为什么没把 `settings.json` 纳入版本控制**（残留风险的解法取舍）：实测该文件**无真密钥**——`ANTHROPIC_API_KEY` 是 `PROXY_MANAGED` 占位符，其余是本地 URL、模型名别名、路径与开关，高置信密钥模式零命中。因此「纳入 git」在密钥面是安全的，但它被放在 `.gitignore:51–57` 的「local-only secrets / personal config」内，且与 cc-switch common_config 双向同步——纳入等于把私人配置送进公开仓库、并给同步路径制造固定冲突。故取替代方案：把片段落到一个进了 git 的参考文件，恢复时手工补回。
+- **片段一度超限**：先写进 `installing/custom-setup.md`，撑到 21.0 KB 超过 20 KB 上限（`protocol-report` 的 PostToolUse 当场报出）。按维护条款「正文逼近上限就强制复核，先删再加」挪出独立文件；台账现 19.8 KB / 103 行。
+- **回退**：`installing/settings-wiring.md` 与 `.gitignore` 的改动走 git；`authorization/` 恢复跟踪用 `git add -f authorization/`。
+- **验证**：`ledger_check.py` rc=0（custom-setup.md 19.8 KB / 67 行 · 待核 0）；`protocol_check.py` rc=1 仅剩 `skills/last30days/SKILL.md` 那条既有体量命中，密钥一类 2660 文件零命中；`git worktree list` 只剩主检出；`git branch` 只剩 `master`。
+- **未做**：未推主干（硬禁止）；未开 PR（`gh` 已登录、remote 给出了 PR 链接，但创建 PR 属另一道确认线）；`~/.claude` 本地 `ticket08-archive-2026-09-28` 分支未处置（不在本次裁定范围）。
