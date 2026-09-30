@@ -128,7 +128,7 @@ plugins/marketplaces/*/
 ide/
 
 # ----- skills: 默认忽略全部，只追踪自建 -----
-# 新增 skill：白名单加一行 !skills/<name>/（判据见 skills/install-ledger/references/verification.md）
+# 新增 skill：白名单加一行 !skills/<name>/（判据见 docs/protocols/ledger.md「最小修改」节）
 skills/*
 !skills/last30days/
 archive-skills/agent-browser/
