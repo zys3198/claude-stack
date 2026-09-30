@@ -53,7 +53,7 @@
 | 何时必读 | 规则在哪 | 判据一句话 |
 |---|---|---|
 | 编码、Bug 修复、重构、代码审查、回退 | `coding-workflow` | 全局只留两条底线：修根因、必须复核；回退改动一律用文件编辑改回 |
-| 编写或修改 `CLAUDE.md`、`AGENTS.md`、skill 文档 | `mattpocock-skills:writing-for-agents` | 先读它再动笔 |
+| 编写或修改 `CLAUDE.md`、`AGENTS.md`、skill 文档 | `/writing-for-agents` | 先读它再动笔 |
 | 设计取舍、术语、架构决策 | `grilling`／`domain-modeling`／`codebase-design` skill | 按需取用，不预设流程 |
 | 安装、卸载、移动 skill／MCP／插件／CLI／桌面工具 | `docs/protocols/ledger.md` | 当轮登记；改动路径与恢复路径必须入表 |
 | 运行服务、构建、测试、脚本 | `docs/protocols/execution-env.md` | 一律进容器；宿主机只做只读查看、Git 操作与 Docker 命令 |

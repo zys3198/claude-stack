@@ -10,11 +10,12 @@
 
 | 名称 | 状态 | 位置 | 出处 | 恢复 | 备注 |
 |---|---|---|---|---|---|
-| Matt Pocock skills | 在用 | `~/.claude/plugins/cache/mattpocock/mattpocock-skills/1.2.3/skills/` | https://github.com/mattpocock/skills | `/plugin install mattpocock-skills@mattpocock` | 主力套件，35 个 SKILL.md，分 engineering / in-progress / misc / productivity 四组。**2026-09-24 实测：`~/.claude/skills/` 下已无裸名副本**，旧「裸名 + 插件」双形态只剩插件形态；部分 skill 带 `disable-model-invocation: true`，模型调不动，要用户在提示符敲 `/mattpocock-skills:<名>` |
+| Matt Pocock skills（插件形态） | 停用 | `~/.claude/plugins/cache/mattpocock/mattpocock-skills/1.2.3/` | https://github.com/mattpocock/skills | `/plugin enable mattpocock-skills@mattpocock` | 25 个 SKILL.md，分 engineering（18）/ productivity（7）两组；misc（4）与 in-progress（6）插件本就不加载。**2026-09-30 停用**：`enabledPlugins` 置 false，cache 与 marketplace clone（commit `84fdeff`）原样冻结，作本地副本的 fork 基线 |
+| Matt Pocock skills（本地副本） | 在用 | `~/.claude/skills/` 下 25 个裸目录 | 同上，v1.2.3（MIT） | 重装插件后复制；或按 [archive/skill-install.md](archive/skill-install.md) 2026-09-30 条重做 | **2026-09-30 由插件形态转本地裸名**：只改 `description`（英译中，引号内英文原词照抄）并加 `version: 1.2.3`，正文与附属文件逐字节未动；未带 35 个 `agents/openai.yaml`（CC 读不到）；11 个模型可见，14 个 `disable-model-invocation: true` 需手敲 |
 | archify | 已归档 | `~/.claude/archive-skills/archify/` | 待补 | 手工拷贝 | v2.17.0-dev.1，带 LICENSE 与 THIRD_PARTY_NOTICES，属第三方分发 |
 | impeccable | 在用 | `~/.claude/skills/impeccable/` | https://github.com/pbakaus/impeccable | 重新 clone 上游取 v4.4.0 | 2.2 MB，v4.4.0。**2026-09-25 由插件降级为裸 skill**：原插件与市场注册均已卸载移除。跳过上游 `plugin/hooks/`（裸装不带 hook）。带 `disable-model-invocation: true`，只走 `/impeccable` 手动调用。**2026-09-25 本地化评估：判定不改**——reference 按需加载不占常驻 token；native 分支（`ios.md`、`android.md`、`adapt.native.md`、`audit.native.md`）被 11 处以上交叉引用，删除只造死链；`degraded/` 是无 subagent 能力时的降级路径，与平台无关；**2026-09-26：按 writing-for-agents 将 description 收窄为界面设计、评审与迭代指针，权限字段保持** |
 
 ## 说明
 
 - 磁盘上不再存在的第三方套件（仓颉 cangjie-skill、first-principles pack、Superpowers、ECC）只在流水里留痕，不进本表。
-- `~/.claude/skills/` 下当前 23 个目录：21 个自建（见 [custom-setup.md](custom-setup.md)），2 个第三方裸 skill（last30days、impeccable，见上表）。
+- `~/.claude/skills/` 下当前 49 个目录：24 个原有（其中 2 个第三方裸 skill 为 last30days、impeccable，见上表；其余自建见 [custom-setup.md](custom-setup.md)），25 个为 2026-09-30 从 Matt Pocock 插件转入的本地副本（见上表）。

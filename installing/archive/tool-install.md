@@ -525,3 +525,11 @@
 - **回退**：`git checkout -- installing/tool-install.md installing/archive/tool-install.md`。
 - **验证**：`winget list` → Motrix 2.0.0-beta.40；`motrix --version` → 0.5.0；`motrix open` → `alreadyRunning:false, launched:true`，bridge ready 1841 ms @ `http://127.0.0.1:16802`；`motrix add` → `status:completed`、`bytesDone:2000000`；磁盘核对 2,000,000 B、`finalPath` 正确；`motrix remove <id> --delete-files` → `{"ok":true}`，任务表回空、文件已删。
 - **未做**：未登记 `AppData/Local/motrix-turbo-updater/`（自更新残留，未核实）；编辑时 `installing/tool-install.md` 正被并行会话改动（last30days/impeccable 清理），本次基于该会话已落盘的内容追加。
+
+### mattpocock-skills 插件停用（2026-09-30）
+
+- **变更**：`settings.json` 的 `enabledPlugins["mattpocock-skills@mattpocock"]` 由 `true` 改 `false`（文件 11,878 → 11,879 B）。现状表该行状态改「停用」。marketplace `mattpocock`、`plugins/cache/mattpocock/mattpocock-skills/1.2.3/`（commit `84fdeff`）与 `installed_plugins.json` 登记**全部保留**，作本地 25 个副本的 fork 基线。
+- **依据**：用户 `/grill-me` 会话拍板「停用而非卸载」，留 cache 作回退路径；上游追踪改走 `git -C ~/.claude/plugins/marketplaces/mattpocock`（该目录是 `mattpocock/skills` 的完整 clone，HEAD 与登记里的 `gitCommitSha` 一致），不用 `claude plugin update`——后者会往 cache 塞新版本目录、动摇 fork 基线，而 skill 已不加载，更新 cache 无加载意义。
+- **回退**：`enabledPlugins` 该键改回 `true`，或 `claude plugin enable mattpocock-skills@mattpocock`。
+- **验证**：`sync_claude_common.py --check` → `[MATCH] settings.json common config and proxy backup match`（PostToolUse `settings-sync-auto.py` 已自动同步；hook 首报的 `[MISMATCH]` 是同步**前**的差异行，被 hook 取为摘要）；编辑后复检 `settings.json` 仍为全 CRLF（407 行、零裸 LF），换行符未被翻。
+- **未做**：未卸载插件、未清 cache 与 marketplace 注册；未跑 `claude plugin update`；未实测「插件停用后 `claude plugin update` 是否仍可用」（推断可用，标记未验证）。

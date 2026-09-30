@@ -2,7 +2,7 @@
 
 本节只补充编码任务在 Plan 后的切片、验证和 hooks 衔接；一般委派的独立性、worker 范围、模型/provider/route/effort、并发、隔离、授权、失败处理和主代理复核按 `parallel-delegation` 执行。Plan 触发条件见 `SKILL.md §1.1`。
 
-- **Tracer bullet**：每片竖切穿过全部受影响层（schema→服务→最小呈现），自带阻塞边；切片后先与用户核对粒度和依赖。项目已有 workflow contract、规格或状态机时沿用其字段、契约和验证命令；没有时记录最小计划。正式工单提示用户运行 `/mattpocock-skills:to-tickets`；Plan 审批通过后执行。
+- **Tracer bullet**：每片竖切穿过全部受影响层（schema→服务→最小呈现），自带阻塞边；切片后先与用户核对粒度和依赖。项目已有 workflow contract、规格或状态机时沿用其字段、契约和验证命令；没有时记录最小计划。正式工单提示用户运行 `/to-tickets`；Plan 审批通过后执行。
 - 依赖任务串行；独立写任务按 `parallel-delegation` 的隔离规则后才并行。
 - **Verify 分级**（按风险，不按文件数）：
   - 低（机械/重命名/格式）→ 一次独立轻量 reviewer + 项目已有的最小相关检查；不启动多 Agent 对抗审查。

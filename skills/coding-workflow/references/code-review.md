@@ -2,7 +2,7 @@
 
 适用范围：AI 生成的代码（含 learning 模式骨架、vibe coding 产出、agent 批量改）。**AI 代码默认必审**，无「小到不用审」豁免——一行配置也可能搞挂整站。
 
-**审查方法**：AI 代码需要独立审查时，先确定 fixed point（提交、分支、标签或 merge-base），按 `mattpocock-skills:code-review` 执行；它负责 fixed point、Standards/Spec 双轴和并行 reviewer。本节只补充本地强制门禁，不复制插件流程。
+**审查方法**：AI 代码需要独立审查时，先确定 fixed point（提交、分支、标签或 merge-base），按 `/code-review` 执行；它负责 fixed point、Standards/Spec 双轴和并行 reviewer。本节只补充本地强制门禁，不复制插件流程。
 
 **审查强度**复用 §3 Verify 分级：高（auth/DB schema/架构/安全）→ 三 agent adversarial；涉及安全边界时追加已证实的 `security-review`；中（功能改动）→ 单 reviewer + 自检；低（机械/重命名）→ 一次独立轻量复核 + 项目已有的最小相关检查，不启动多 Agent 对抗审查。
 

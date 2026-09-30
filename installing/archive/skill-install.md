@@ -323,3 +323,11 @@
 - **回退**：恢复 skill = 重新运行 `motrix skill install "C:/Users/zys31/.claude/skills"`。
 - **验证**：目录检索无命中；`command -v motrix` 返回 `C:/Users/zys31/AppData/Roaming/npm/motrix`。
 - **未做**：未卸载 Motrix CLI；未修改 `tool-install.md`。
+
+### Matt Pocock skills 转本地裸名（2026-09-30）
+
+- **变更**：把插件 `mattpocock-skills@mattpocock` 的 skill 转成本机裸名副本，`~/.claude/skills/` 下新增 25 个目录（engineering 18 + productivity 7）。只动 `description`——英译中、结构不变、引号内英文原词照抄（`"diagnose"`/`"debug this"`/`"red-green-refactor"`/`"review since X"`/`"grill"`）——并加一行 `version: 1.2.3`；正文与全部附属文件逐字节未动，`name`、`disable-model-invocation`、`argument-hint` 等字段原样保留。未搬插件本就不加载的 misc（4）与 in-progress（6）；未带每个 skill 的 `agents/openai.yaml`（CC 的 subagent 定义在 `~/.claude/agents/`）。现状表拆成两行记（插件形态改「停用」+ 本地副本新增一行），说明行目录数 23 → 49。
+- **依据**：用户 `/grill-me` 会话三轮拍板——动机是统一描述语言（本机自建 skill 的 description 全中文、插件全英文）并去掉 `mattpocock-skills:` 前缀；范围取插件实际加载的全部 25 个；**不改名**；停用方式取 `enabledPlugins` 置 false 保留 cache；上游追踪走 git 不跑 `plugin update`。引号内照抄、不动正文两条是用户直接指令（原话「就翻译原文就行，不乱动」）。
+- **回退**：删 25 个目录（`find ~/.claude/skills/<name> -depth -delete`）；`settings.json` 的 `enabledPlugins["mattpocock-skills@mattpocock"]` 改回 `true`（该文件被 `.gitignore:56` 覆盖，不走 git 恢复）；引用改动按本条 diff 用文件编辑改回 `mattpocock-skills:<名>`。台账本身 `git checkout -- installing/`。
+- **验证**：`yaml.safe_load` 逐份解析 25 个 frontmatter 全通过；逐 skill 与源文件比对，正文、换行符、文件清单三项一致且无 `agents/`；5 个引用文件残留 `mattpocock-skills:` **0 命中**、无 `//` 误伤；会话内 skill 列表实测出现 11 个裸名中文描述（恰为无 `disable-model-invocation` 的 11 个），**无需重启即热重载生效**。
+- **未做**：未删 cache、marketplace clone 与 `installed_plugins.json` 登记；未动 `docs/` 下 CHANGELOG/HANDOFF/archive 与 Workspace 的 `exp/`、`notes/`；未改 `cc-switch-setting-sync/references/ccswitch-architecture.md` 里的 `enabledPlugins` schema 示例（非 skill 引用）；`notes/asset-principles-verdict/VERDICT.md:145` 仍称 `/writing-for-agents` 是「插件 skill」，定性已过时但属历史结论文档，未改。

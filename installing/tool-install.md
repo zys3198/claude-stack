@@ -18,7 +18,7 @@
 
 | 名称 | 状态 | 位置 | 出处 | 恢复 | 备注 |
 |---|---|---|---|---|---|
-| mattpocock-skills | 在用 | `plugins/cache/mattpocock/mattpocock-skills/` | mattpocock | `/plugin install mattpocock-skills@mattpocock` | 见 [skill-install.md](skill-install.md) |
+| mattpocock-skills | 停用 | `plugins/cache/mattpocock/mattpocock-skills/` | mattpocock | `/plugin enable mattpocock-skills@mattpocock` | 2026-09-30 停用（`enabledPlugins` 置 false，cache 与 marketplace 注册保留）；25 个 skill 已转 `~/.claude/skills/` 本地裸名副本，见 [skill-install.md](skill-install.md) |
 | ponytail | 在用 | `plugins/cache/ponytail/ponytail/` | ponytail | `/plugin install ponytail@ponytail` | SessionStart 注入 5,299 字符 |
 | context7 | 在用 | `plugins/cache/claude-plugins-official/context7/` | claude-plugins-official | `/plugin install context7@claude-plugins-official` | 提供 context7 MCP 工具 |
 | github | 停用 | `plugins/cache/claude-plugins-official/github/` | claude-plugins-official | `/plugin install github@claude-plugins-official` | `enabledPlugins` 为 false |
