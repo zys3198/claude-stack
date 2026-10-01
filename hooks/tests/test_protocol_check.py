@@ -117,7 +117,7 @@ CLEAN = {
     "skills/asset-guide/references/principles.md": f"# 资产原则\n\n{TABLE}",
     "skills/demo/SKILL.md": "---\nname: demo\ndescription: 演示\n---\n\n正文。\n",
     "docs/protocols/gate.md": GATE,
-    "docs/protocols-index.md": "# 协议索引\n\n| 会话生命周期 | `docs/session-lifecycle.md` |\n",
+    "docs/protocols-index.md": "# 协议索引\n\n| 会话生命周期 | `docs/session-lifecycle.md` |\n| 门禁 | `docs/protocols/gate.md` |\n",
     "docs/session-lifecycle.md": "# 会话生命周期\n",
     "hooks/scripts/authorization_scope.py": SCOPE_PY,
     "installing/ledger.md": "# 台账\n",
@@ -355,7 +355,10 @@ def main():
         check("阻断·项目记忆索引抄别处段落被拦", code == 3 and "重复" in out, out)
 
         code, out = run_file(dupe_dir, "docs/protocols/probe.md", preview=f"# 协议\n\n{para}\n")
-        check("阻断·其他区抄同一段只报告（给 1）", code == 1 and "重复" in out, out)
+        check("阻断·协议正文抄别处段落被拦", code == 3 and "重复" in out, out)
+
+        code, out = run_file(dupe_dir, "skills/demo2/SKILL.md", preview=f"---\nname: demo2\ndescription: 演示\n---\n\n{para}\n")
+        check("阻断·非阻断区抄同一段只报告（给 1）", code == 1 and "重复" in out, out)
 
         # 假密钥用拼接构造：写成字面量的话，这份测试文件自己会被密钥判据扫出来。
         fake2 = "sk-ant-" + "api03-" + "B" * 24

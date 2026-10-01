@@ -165,7 +165,10 @@ def main():
         check("放行·合规写入不出声", out.strip() == "", out)
 
         _, out = feed(root, write_payload(Path(root, "docs", "protocols", "new.md"), huge))
-        check("放行·其他区超限只报告不拦", '"permissionDecision"' not in out, out)
+        check("阻断·协议正文写入超限也拦", '"permissionDecision": "deny"' in out, out)
+
+        _, out = feed(root, write_payload(Path(root, "skills", "demo2", "SKILL.md"), huge))
+        check("放行·非阻断区超限只报告不拦", '"permissionDecision"' not in out, out)
 
         _, out = feed(root, write_payload(Path(temp) / "outside.md", huge))
         check("放行·根之外的路径不判", out.strip() == "", out)
@@ -185,12 +188,12 @@ def main():
 
         # ---------- 阻断面只有 BLOCK_SCOPE 那一处 ----------
         joined = "\n".join(SPOKE)
-        check("阻断面·只有阻断区的三次被拒",
-              joined.count('"permissionDecision": "deny"') == 3, joined[:300])
+        check("阻断面·只有阻断区的四次被拒",
+              joined.count('"permissionDecision": "deny"') == 4, joined[:300])
         check("阻断面·拒的输出带原因字段", '"permissionDecisionReason"' in joined, joined[:300])
         check("阻断面·每次喂 payload 退出码都是 0", not [f for f in FAILED if "退出码非 0" in f], FAILED)
         log_text = Path(root, "hooks", "protocol-report.log").read_text(encoding="utf-8", errors="replace")
-        check("阻断面·日志留了 deny 证据", log_text.count("deny:") == 3, log_text[:300])
+        check("阻断面·日志留了 deny 证据", log_text.count("deny:") == 4, log_text[:300])
 
     if FAILED:
         print(f"\n{len(FAILED)} 项未过：")
