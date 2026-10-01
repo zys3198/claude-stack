@@ -176,7 +176,7 @@ heredoc 的正文是喂给命令的数据，拆词前先剥掉，所以提交消
 
 判定基准是主检出的 `.claude/worktrees/`。在链接工作树里开会话时 `git rev-parse --show-toplevel` 返回工作树自身，所以改取 `git rev-parse --git-common-dir` 的上一级。命名格式见 `~/.claude/docs/protocols-index.md` 的「落点与命名」：kebab-case，禁用 hash、纯日期和保留名；词数不做校验。
 
-拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件由 `/dev-status` 报告；产物放错目录没有自动检查，靠 `~/.claude/CLAUDE.md` §8 的文本约定。
+拦截只覆盖工作树的创建位置与命名，因为这两条是客观可判定的。仓库根建文件由 `/dev-status` 报告；产物放错目录没有自动检查，靠 `~/.claude/docs/protocols-index.md` 的「落点与命名」的文本约定。
 
 非 git 目录里确定不了仓库根，此时对 `git worktree add` 一律拒绝并说明原因，不做猜测。
 
@@ -249,3 +249,11 @@ EOF
 - **端口占用只认 Windows**：`session-status.py` 用 `netstat -ano -p TCP`，其他平台返回空，端口段显示为无占用者。
 
 复验这套机制时的探针形状（两轮审计用过，探针本身每次都要重写）：并发丢失（多进程分别反复调裁剪与 `handle_end`，数标记记录的存活数）、拦截边界（以真实 hook 入口喂 stdin 判定后，**再用真实 git 跑一遍**确认）、锁（真实调 `lock_acquire`／`lock_release`，`os.utime` 伪造陈旧与将来的锁）、降级（起占锁进程后并发起多个 `handle_end`）、追加原子性（保持句柄／每次开关／`O_APPEND`／`lseek+write` 各跑一遍）、性能（造 0/25/70/150/220 棵工作树的沙箱计时）、归档（`mklink /J` 与 `/D` 对比 `abspath` 与 `realpath`）。
+
+---
+
+## 十一、维护条款
+
+**分界。** 会变的（各节所述机制、拦截判据、已知边界与复验方法）整体重写。只增的：本文件没有——依据留在 `hooks/scripts/*.py` 的头部注释与实测记录里，正文不留历史。
+
+删除判据与整理触发点各协议通用，见 `~/.claude/docs/protocols-index.md` 的「维护条款」。

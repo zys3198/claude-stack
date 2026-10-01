@@ -1,4 +1,4 @@
-"""校验资产里能机械校验的十类判据。
+"""校验资产里能机械校验的十一类判据。
 
 只读，自己不阻断操作——阻断与否由调用方按退出码决定：
 0 全过；1 有命中（只报告）；2 用法错误（argparse 自用）；
@@ -23,6 +23,7 @@
 | 映射表 | 「资产 → 形态 → L0」表与磁盘双向对账 | skills/asset-guide/references/principles.md B6 |
 | 台账位置 | `installing/*.md` 现状表的位置列路径存在性 | docs/protocols/ledger.md 现状表 |
 | 顶层文档 | `docs/*.md` 是否在协议总表或台账登记 | docs/protocols-index.md 共同要求 |
+| 指针 | 协议族文档的 Markdown 链接目标是否存在 | docs/protocols-index.md「维护条款」删除判据 |
 
 判不了的项在输出末尾显式列出，不静默略过——清单见 UNJUDGEABLE。
 
@@ -57,21 +58,35 @@ PREVIEW = {}
 MEMORY_TYPES = {"user", "feedback", "project", "reference"}
 
 # 根入口：一次进上下文就是一整份的那类文件。体积、段落重复、生命周期三判据查它。
-# 不含 references/：那是按分支单独取用的文档，共用的样板（如设计库各篇的组件词表）
+# 各 glob 只到单层，子目录（`docs/protocols/*/`、`skills/*/references/` 等 references/
+# 形态）不在内：那是按分支单独取用的文档，共用的样板（如设计库各篇的组件词表）
 # 是那类产物的固有形态，不是冗余。
 ENTRY_GLOBS = (
     "CLAUDE.md",
     "skills/*/SKILL.md",
+    "docs/session-lifecycle.md",
     "docs/protocols/*.md",
     "docs/protocols-index.md",
     "installing/*.md",
     "projects/*/memory/*.md",
 )
 
-# 阻断区：这两处的写入有命中就拒（常驻区与项目记忆索引区，票 09）。
-# 覆盖全库每一轮都要付的常驻指令与项目记忆索引；按路径模式判、不按存在与否，
-# 所以新写一个项目记忆索引也在内。范围只此一处，改这里就是改阻断面。
-BLOCK_SCOPE = ("CLAUDE.md", "projects/*/memory/MEMORY.md")
+# 阻断区：这里的写入有命中就拒（常驻区、协议正文区与项目记忆索引区，票 09）。
+# 覆盖全库每一轮都要付的常驻指令、协议正文（「维护条款」的体量硬触发要拦得住）
+# 与项目记忆索引；按路径模式判、不按存在与否，所以新写一份协议或一个新项目记忆
+# 索引也在内。范围只此一处，改这里就是改阻断面。
+BLOCK_SCOPE = ("CLAUDE.md", "docs/protocols/*.md", "docs/session-lifecycle.md",
+               "projects/*/memory/MEMORY.md")
+
+# 指针检查面：协议族文档。Markdown 链接目标必须存在——这是「维护条款」删除判据
+# 「指向的目标已不存在 → 删引用，或改指向」的机械支撑。
+POINTER_GLOBS = (
+    "CLAUDE.md",
+    "docs/protocols-index.md",
+    "docs/session-lifecycle.md",
+    "docs/protocols/*.md",
+)
+POINTER_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
 # 密钥扫描面更宽：配置、脚本、参考文件都算。不含会话记录、缓存、备份，
 # 也不含 secrets/（那是本机指定的密钥存放处，且已被 .gitignore 排除）。
@@ -275,6 +290,8 @@ def relevant_checks(path):
             or re.match(r"^docs/[^/]+\.md$", rel_path)
             or rel_path == "installing/custom-setup.md"):
         labels.add("顶层文档")
+    if in_any(path, POINTER_GLOBS):
+        labels.add("指针")
     return labels
 
 
@@ -690,8 +707,9 @@ def check_map():
 
 
 def check_top_docs():
-    """docs/ 顶层文档必须在协议总表或台账中登记。"""
-    docs = sorted(glob.glob(os.path.join(CLAUDE, "docs", "*.md")))
+    """docs/ 顶层文档与协议正文必须在协议总表或台账中登记。"""
+    docs = sorted(glob.glob(os.path.join(CLAUDE, "docs", "*.md")) +
+                  glob.glob(os.path.join(CLAUDE, "docs", "protocols", "*.md")))
     index = os.path.join(CLAUDE, "docs", "protocols-index.md")
     registry = read(index) + "\n" + "\n".join(
         read(path) for path in glob.glob(os.path.join(CLAUDE, "installing", "*.md"))
@@ -705,8 +723,57 @@ def check_top_docs():
         relative = rel(path)
         if relative not in registry and os.path.basename(path) not in registry:
             errors.append(f"{relative} 未在协议总表或台账登记")
-    summary = f"{len(docs)} 个 docs/ 顶层文档（协议总表自身除外）" + (
+    summary = f"{len(docs)} 个 docs/ 顶层与协议文档（协议总表自身除外）" + (
         f"，{len(errors)} 个未登记" if errors else "，全已登记")
+    return errors, summary
+
+
+def strip_code(text):
+    """剥掉围栏代码块与行内代码，返回逐行结果（行号与原文件对齐）。
+
+    示例里的 `[标题](file.md)` 是模板占位，不是活链接，不该当死指针报出来。
+    """
+    out, fence = [], None
+    for line in text.splitlines():
+        marker = re.match(r"\s*(`{3,})", line)
+        if fence is None:
+            if marker:
+                fence = marker.group(1)
+                out.append("")
+            else:
+                out.append(re.sub(r"`[^`]*`", "", line))
+        else:
+            if marker and len(marker.group(1)) >= len(fence):
+                fence = None
+            out.append("")
+    return out
+
+
+def check_pointers():
+    """协议族文档里的 Markdown 链接目标必须存在。"""
+    files = set(expand(POINTER_GLOBS))
+    if TARGET is not None and in_any(TARGET, POINTER_GLOBS):
+        files.add(os.path.normpath(TARGET))
+    errors, count = [], 0
+    for path in sorted(files):
+        if TARGET is not None and not in_target(path):
+            continue
+        base = os.path.dirname(path)
+        for number, line in enumerate(strip_code(read(path)), 1):
+            for target in POINTER_LINK.findall(line):
+                target = target.strip().split("#", 1)[0].strip()
+                if not target or target.startswith(("http://", "https://", "mailto:")):
+                    continue
+                count += 1
+                if target.startswith("~/"):
+                    resolved = os.path.expanduser(target)
+                elif re.match(r"^[A-Za-z]:[\\/]", target):
+                    resolved = target
+                else:
+                    resolved = os.path.normpath(os.path.join(base, target))
+                if not os.path.exists(resolved):
+                    errors.append(f"{rel(path)}:{number} 链接目标「{target}」不存在")
+    summary = f"{count} 个链接" + (f"，{len(errors)} 处目标不存在" if errors else "，全存在")
     return errors, summary
 
 
@@ -778,11 +845,12 @@ CHECKS = (
     ("映射表", check_map),
     ("台账位置", check_ledger_paths),
     ("顶层文档", check_top_docs),
+    ("指针", check_pointers),
 )
 ONLY_KEYS = {
     "gate": "门禁", "memory": "记忆", "naming": "命名", "size": "体积",
     "dupe": "重复", "secret": "密钥", "lifecycle": "生命周期", "map": "映射表",
-    "ledger": "台账位置", "docs": "顶层文档",
+    "ledger": "台账位置", "docs": "顶层文档", "pointer": "指针",
 }
 
 

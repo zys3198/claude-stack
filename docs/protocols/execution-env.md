@@ -57,7 +57,7 @@ Docker 容器内的真实业务写入、数据库写入、验收测试数据、�
 
 ## 机械保证
 
-`~/.claude/hooks/scripts/resource-guard.py` 挂在 `settings.json` 的 PreToolUse 上，拦截客观可判定的动作：compose 文件里新增的服务缺 `mem_limit` 或 `security_opt`；变更 `session-hygiene.json` 独占清单里正在运行、且本机另有活跃会话的容器；远程 Git 和生产/真实数据变更在未获得精确授权时进入确认线；在宿主机上执行 pnpm、mvn、java、node 这类构建工具链时直接阻断。
+`~/.claude/hooks/scripts/resource-guard.py` 由 `hooks/scripts/pretool-guard.py` 同进程加载（`settings.json` 的 PreToolUse 只注册合并入口 `pretool-guard.py`），拦截客观可判定的动作：compose 文件里新增的服务缺 `mem_limit` 或 `security_opt`；变更 `session-hygiene.json` 独占清单里正在运行、且本机另有活跃会话的容器；远程 Git 和生产/真实数据变更在未获得精确授权时进入确认线；在宿主机上执行 pnpm、mvn、java、node 这类构建工具链时直接阻断。
 
 **失败时怎么走，按资源性质分两类**（与 hook 判据 H4 一致）：
 

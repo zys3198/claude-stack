@@ -34,3 +34,4 @@ description: 新增、修改、迁移或删除 Claude Code 资产前，先确定
 | 装完、卸完或换机后登记与核对来源、位置、状态、恢复路径 | `docs/protocols/ledger.md` |
 | 单个 Skill 的触发契约、运行行为、体量审计，或新建一个 Skill | `docs/protocols/instruction-assets.md` |
 | 建立或审查项目指令资产（`CLAUDE.md` / `AGENTS.md` / 模块说明） | 同上 |
+| 新建或修改一份协议文档（`docs/protocols/*.md`、`docs/session-lifecycle.md`） | `docs/protocols/instruction-assets.md` |

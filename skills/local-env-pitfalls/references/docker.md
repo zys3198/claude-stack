@@ -10,7 +10,7 @@
 
 `wsl` 与 `powershell` 这类能塞 shell 文本的命令从工作树会话里发不出去（会话级守卫无法确认内部不执行 git），直接拒绝。`!` 前缀同样被拦，必须到 Claude Code 之外的普通终端执行。
 
-判据实现见 `~/.claude/hooks/resource-guard.py`；断言套件 `~/.claude/hooks/tests/test_resource_guard.py`，127 条。耗时：普通命令 68 毫秒，heredoc 写文件 67 毫秒。判据二在子进程里替换独占清单、容器运行状态与活跃会话数三处读取，不照实机跑（照实机跑等于不测）。
+判据实现见 `~/.claude/hooks/scripts/resource-guard.py`；断言套件 `~/.claude/hooks/tests/test_resource_guard.py`，127 条。耗时：普通命令 68 毫秒，heredoc 写文件 67 毫秒。判据二在子进程里替换独占清单、容器运行状态与活跃会话数三处读取，不照实机跑（照实机跑等于不测）。
 
 ## API 版本
 

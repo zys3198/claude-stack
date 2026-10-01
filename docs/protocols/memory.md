@@ -59,7 +59,7 @@ Agent 产生新错误后，将可复用经验写入 `~/.claude/projects/*/memory
 
 ## 校验
 
-`—`，暂无可机械校验的脚本。可做而没做的是只读核对：索引行数与 `*.md` 条数相符；每条 frontmatter 的 `name` 与文件名一致；`type` 落在四个枚举内。
+`python ~/.claude/hooks/scripts/protocol_check.py` 的「记忆」一项：frontmatter 必填键（`name`、`description`、`metadata.type` 落在四个枚举内）、每条记忆是否进索引、索引里的死链。
 
 ## 维护条款
 

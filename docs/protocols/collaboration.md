@@ -2,7 +2,7 @@
 
 管什么时候自己定、什么时候问用户，以及改动范围、任务状态与实验的处置。
 
-正文原本在 `~/.claude/CLAUDE.md` §1.1、§1.4、§2.1、§2.3、§6、§7，2026-09-25 原文搬入；常驻区只留索引行。本域的其他落点见 `~/.claude/CLAUDE.md` 的索引表与 `~/.claude/docs/protocols-index.md`。
+本域的其他落点见 `~/.claude/CLAUDE.md` 的索引表与 `~/.claude/docs/protocols-index.md`。来源与搬入记录见文末「历史」。
 
 ## 开工前判断
 
