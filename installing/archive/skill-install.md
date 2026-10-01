@@ -346,3 +346,10 @@
 - **回退**：重新 clone 上游取 v2.17（`author tt-a1i`，基于 `Cocoon-AI/architecture-diagram-generator`，MIT），安装命令原文见本文件上方 2026-09-23 登记行。**2026-10-02 订正**：原写的另一条回退「亦可从 `~/.claude/backups/skills-before-slim-2026-09-21/` 取历史副本」不成立——该目录实测只有 21 个自建 `-by-user` skill，从未含第三方件；全盘 `find` 在 `backups/` 与 magpie 库下均无 archify 副本。故**上游 clone 是唯一回退路径**，不是可选项之一。
 - **验证**：`~/.claude/skills/archify` 不存在；`~/.claude/archive-skills/archify/` 亦已不在。`ledger_check.py` 回到全绿。
 - **未做**：未核 `~/.claude/plugins/cache/` 下是否还有同名副本。**本条是补记他人改动，非本会话执行。**
+### magpie 库副本出清后的台账订正（2026-10-02）
+
+- **变更**：Matt Pocock 本地副本行的 `位置` 列改写——原写「`~/.claude/skills/` 下同名条目全为符号链接，指向真身目录（库外路径）」，库外副本删除后该陈述失真，改为「24 份，`~/.claude/skills/` 下的真实目录（已摘除库外符号链接、复制回仓库内，该库副本同日出清）」。同行备注里 `resolving-merge-conflicts` 的归档落点改写——原写指向 `archive-skills/` 下一个具体子目录，实测该目录已空、副本无处可寻；补记删除无损失的理由（正文与插件缓存 1.2.3 逐字节相同，唯一差异是 `version` 与中文 description）。
+- **依据**：库外 43 份副本经勘察与本仓库逐字节相同后由用户删除，`protocol_check.py` 的台账位置判据随即在 `installing/skill-install.md:14` 报出该路径不存在。**这是校验器在台账里抓到的死引用，不是人工翻出来的**——「位置」列写的路径若已不存在，判据直接命中。
+- **回退**：`git checkout HEAD -- installing/skill-install.md`；本条只改陈述，不动磁盘。
+- **验证**：`protocol_check.py` 由退出码 1 回到 0（台账位置 26 处全存在），`ledger_check.py` 退出 0。
+- **未做**：`~/.claude/CLAUDE.md` 在本轮出现非本会话的改动（§0 标题被并入正文、遗留一个空列表项 `- `），疑为并行会话进行中的编辑，未触碰、未提交。
