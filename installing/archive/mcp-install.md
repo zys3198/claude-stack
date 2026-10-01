@@ -81,3 +81,11 @@
 
 ### douyin / douyin-mcp-server（2026-09-20 注册）
 - 条目已上移至上方「当前在用」（2026-09-21 整理）。曾误置于本节，实际为在用状态，`mcporter list` 实测 healthy。
+
+### headroom MCP 注销（2026-10-01）
+
+- **变更**：`~/.claude.json → mcpServers.headroom` 整条删除，现状表「当前注册」表该行删除。该 MCP 是当时 **Claude Code 侧唯一注册的 MCP**（stdio），与 `ANTHROPIC_BASE_URL=127.0.0.1:8787` 是同一条链路的两端。
+- **依据**：headroom 整体卸载（见 tool-install 流水同日条目）。其 MCP 三工具是手动压缩入口，CC 不会自动调用；代理层压缩随 headroom 一并消失后，主力压缩改由 `rtk hook claude` 与自建 `context-budget-guard.py` 承担。
+- **回退**：重装 headroom 后重新注册其 MCP；无需额外注册命令（随 headroom 安装带入）。
+- **验证**：读 `~/.claude.json` 的 `mcpServers` 键，实测为空对象 `{}`。
+- **未做**：未核 mcporter 侧（`~/.mcporter/mcporter.json`）是否另有 headroom 残留注册——当日未查，仍是待消解项。

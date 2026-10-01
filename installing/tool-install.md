@@ -21,15 +21,14 @@
 | mattpocock-skills | 停用 | `plugins/cache/mattpocock/mattpocock-skills/` | mattpocock | `/plugin enable mattpocock-skills@mattpocock` | 2026-09-30 停用（`enabledPlugins` 置 false，cache 与 marketplace 注册保留）；25 个 skill 已转 `~/.claude/skills/` 本地裸名副本，见 [skill-install.md](skill-install.md) |
 | ponytail | 在用 | `plugins/cache/ponytail/ponytail/` | ponytail | `/plugin install ponytail@ponytail` | SessionStart 注入 5,299 字符 |
 | context7 | 在用 | `plugins/cache/claude-plugins-official/context7/` | claude-plugins-official | `/plugin install context7@claude-plugins-official` | 提供 context7 MCP 工具 |
-| github | 停用 | `plugins/cache/claude-plugins-official/github/` | claude-plugins-official | `/plugin install github@claude-plugins-official` | `enabledPlugins` 为 false |
+| github | 待核 | `plugins/cache/claude-plugins-official/github/` | claude-plugins-official | `/plugin install github@claude-plugins-official` | 2026-10-01 实测：cache 目录在盘，但 `enabledPlugins` 已无该键（不是 false，是没有），台账原记「`enabledPlugins` 为 false」不成立。何时、由谁移除未查，下次触发本台账须消解 |
 
 ## CLI 工具
 
 | 名称 | 状态 | 位置 | 出处 | 恢复 | 备注 |
 |---|---|---|---|---|---|
 | Claude Code | 在用 | `~/.local/bin/claude.exe` | Anthropic | — | `claude.exe.old.*` 为升级残留 |
-| headroom | 在用 | `~/.local/bin/headroom.exe` | 0.37.0 | 见流水 2026-09-05 | `ANTHROPIC_BASE_URL` 指向它的 8787 |
-| cc-switch | 在用 | `~/.cc-switch/`（配置目录） | 待补 | 手工拷贝 | GUI，不在 PATH |
+| magpie | 在用 | `C:\ZYS\Software\Magpie\magpie-windows-amd64.exe` | https://github.com/yetone/magpie | 由源码重编，见流水 2026-10-01 | GUI，本地网关 3425；stock 版（源码 `C:\ZYS\Code\magpie` @ `771506c`），无本地补丁。2026-10-01 起接替 cc-switch + headroom，链路 `CC → 3425 → opencode-go`；私有 fork `zys3198/magpie` 保留 |
 | uv / uvx | 在用 | `~/.local/bin/uv.exe` | — | — | 另有 `uvw.exe` |
 | node / npx | 在用 | `C:/Program Files/nodejs/` | — | — | — |
 | agent-browser | 在用 | `AppData/Roaming/npm/agent-browser` | — | — | 0.38.1（2026-09-18 升级） |

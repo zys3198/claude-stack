@@ -12,7 +12,6 @@
 
 | 名称 | 状态 | 位置 | 出处 | 恢复 | 备注 |
 |---|---|---|---|---|---|
-| headroom | 在用 | `~/.claude.json → mcpServers.headroom` | 待补 | 见流水 2026-09-05 | **Claude Code 侧唯一注册的 MCP**，stdio。与 `ANTHROPIC_BASE_URL=127.0.0.1:8787` 是同一条链路的两端 |
 | douyin | 在用 | `~/.mcporter/mcporter.json → mcpServers.douyin` | douyin-mcp-server | 见流水 2026-09-20 | 指向 `C:/Users/zys31/pipx/venvs/douyin-mcp-server/Scripts/douyin-mcp-server.exe`。**不在 `~/.claude.json`**，Claude Code 里调不到，只有 mcporter 能拉起 |
 | exa | 待核 | `~/.config/mcporter/config.json → mcpServers.exa` | https://mcp.exa.ai/mcp | 待补 | 远程 URL 形态，无本地二进制。2026-06-08 起未动，是否仍在用未核实 |
 

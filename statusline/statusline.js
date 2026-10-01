@@ -19,12 +19,12 @@
 'use strict';
 
 const fs = require('fs');
-const { execFileSync, spawn } = require('child_process');
+const { execFileSync } = require('child_process');
 const net = require('net');
 const os = require('os');
 const path = require('path');
 const { sanitizeSessionId, readBridge, writeBridgeAtomic } = require('./lib/session-bridge');
-const ccSwitchUsage = require('./cc-switch-usage');
+const magpieUsage = require('./magpie-usage');
 
 const MAX_STDIN = 1024 * 1024;
 
@@ -192,17 +192,38 @@ function formatGitStatus(status) {
   return parts.join(' ');
 }
 
+// Claude slot -> the model it routes to. One table for both the display name
+// and the provider lookup, so the two cannot drift apart.
+const MODEL_SLOTS = [
+  [/sonnet/i, 'SONNET'],
+  [/opus/i, 'OPUS'],
+  [/haiku/i, 'HAIKU'],
+  [/fable|mythos/i, 'FABLE']
+];
+
+function modelSlot(modelInfo) {
+  const displayName = modelInfo?.display_name || 'Claude';
+  return MODEL_SLOTS.find(([re]) => re.test(displayName));
+}
+
 function resolveModelName(modelInfo) {
   const displayName = modelInfo?.display_name || 'Claude';
-  const modelName = displayName.toLowerCase();
+  // 路由：显示当前模型槽实际指向的下游模型名（_MODEL_NAME），而非 Claude 槽名
+  const slot = modelSlot(modelInfo);
+  if (!slot) return displayName;
+  return process.env[`ANTHROPIC_DEFAULT_${slot[1]}_MODEL_NAME`] || displayName;
+}
 
-  // cc-switch 路由：显示当前模型槽实际指向的下游模型名（_MODEL_NAME），而非 Claude 槽名
-  if (modelName.includes('sonnet')) return process.env.ANTHROPIC_DEFAULT_SONNET_MODEL_NAME || displayName;
-  if (modelName.includes('opus')) return process.env.ANTHROPIC_DEFAULT_OPUS_MODEL_NAME || displayName;
-  if (modelName.includes('haiku')) return process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME || displayName;
-  if (modelName.includes('fable') || modelName.includes('mythos')) return process.env.ANTHROPIC_DEFAULT_FABLE_MODEL_NAME || displayName;
-
-  return displayName;
+/**
+ * Provider id actually serving this session, e.g. "opencode-go". The display
+ * name never carries it, so read the slot's routing env var.
+ * @param {object} modelInfo - payload's model object
+ * @returns {string} empty when nothing names a provider
+ */
+function servingProvider(modelInfo) {
+  const slot = modelSlot(modelInfo);
+  const routed = (slot && process.env[`ANTHROPIC_DEFAULT_${slot[1]}_MODEL`]) || process.env.ANTHROPIC_MODEL || '';
+  return routed.split('/')[0];
 }
 
 
@@ -290,23 +311,6 @@ function probeTcp(host, port, timeoutMs = 250) {
   });
 }
 
-/**
- * Kick off a detached cache refresh so no render waits on the network.
- * Only the child writes the cache; its output goes to a log file.
- */
-function refreshUsageInBackground() {
-  const dir = path.dirname(ccSwitchUsage.CACHE_FILE);
-  fs.mkdirSync(dir, { recursive: true });
-  const log = fs.openSync(path.join(dir, 'ccswitch-usage.log'), 'w');
-  const child = spawn(process.execPath, [path.join(__dirname, 'cc-switch-usage.js'), '--refresh'], {
-    detached: true,
-    env: { ...process.env, NODE_USE_SYSTEM_CA: '1' },
-    stdio: ['ignore', log, log],
-    windowsHide: true
-  });
-  child.unref();
-}
-
 const QUOTA_LABEL = 'Usage';
 const QUOTA_WINDOWS = [
   ['rolling', 'h'],
@@ -315,10 +319,10 @@ const QUOTA_WINDOWS = [
 ];
 
 /**
- * Render the active cc-switch provider's coding-plan quota, e.g.
+ * Render the serving provider's coding-plan quota, e.g.
  * "Usage h3% w16% m8%". Every window is a used percentage.
- * @param {object|null} cache - cache for the currently served cc-switch
- *   provider, or null when ownership is unproven
+ * @param {object|null} cache - magpie quota for the serving provider, or
+ *   null when magpie has none for it
  * @returns {string} Colored segment, or empty when unavailable
  */
 function buildQuotaSegment(cache) {
@@ -359,13 +363,9 @@ function runStatusline() {
       const remaining = cw.remaining_percentage;
       const totalInputTokens = cw.total_input_tokens;
 
-      // cc-switch coding-plan quota, refreshed by a detached child. Only
-      // staleness gates the refresh: a cache a failed refresh left without a
-      // providerId would otherwise look "not current" on every render and
-      // spawn a child per render. isCurrent still decides what may be shown.
-      const usageCache = ccSwitchUsage.readCache();
-      const usageIsCurrent = ccSwitchUsage.isCurrent(usageCache);
-      if (ccSwitchUsage.isStale(usageCache)) refreshUsageInBackground();
+      // Coding-plan quota for whatever provider serves this session's model.
+      // magpie polls it on a timer, so this is a plain synchronous read.
+      const usageCache = magpieUsage.read(servingProvider(data.model));
       const compactWindow = Number(process.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW);
       const contextLimit = compactWindow > 0 ? compactWindow : cw.context_window_size;
 
@@ -437,7 +437,7 @@ function runStatusline() {
           : '\x1b[31m[HEADROOM:DOWN]\x1b[0m';
       }
 
-      const usageStr = [ctx, hitStr, buildQuotaSegment(usageIsCurrent ? usageCache : null)].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
+      const usageStr = [ctx, hitStr, buildQuotaSegment(usageCache)].filter(Boolean).join(' \x1b[2m│\x1b[0m ');
 
       // Build output
       const dirname = path.basename(dir);

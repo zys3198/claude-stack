@@ -533,3 +533,27 @@
 - **回退**：`enabledPlugins` 该键改回 `true`，或 `claude plugin enable mattpocock-skills@mattpocock`。
 - **验证**：`sync_claude_common.py --check` → `[MATCH] settings.json common config and proxy backup match`（PostToolUse `settings-sync-auto.py` 已自动同步；hook 首报的 `[MISMATCH]` 是同步**前**的差异行，被 hook 取为摘要）；编辑后复检 `settings.json` 仍为全 CRLF（407 行、零裸 LF），换行符未被翻。
 - **未做**：未卸载插件、未清 cache 与 marketplace 注册；未跑 `claude plugin update`；未实测「插件停用后 `claude plugin update` 是否仍可用」（推断可用，标记未验证）。
+
+### pi coding agent npm 全局版彻底清除（2026-10-01）
+
+- **变更**：删 `npm uninstall -g @earendil-works/pi-coding-agent` 的完整安装形态，与 09-05 那次清的 fork 仓库（`C:\ZYS\Code\pi`）**不是同一件东西**——这次是 10-01 重新装的 npm 全局包。已删：`C:\Users\zys31\.pi\`（配置目录：`agent/settings.json`、`models.json`、`models-store.json`、`auth.json`、`bin\fd.exe`，以及 `agent/sessions/--C--ZYS-Workspace--/` 下 13 个 jsonl，全部为 2026-10-01 当天，最新 14:23Z）；全局主体 `...\npm\node_modules\@earendil-works\pi-coding-agent`（含嵌套 `@earendil-works/pi-ai`）；PATH shim `pi` / `pi.cmd` / `pi.ps1`；卸载后残留的空作用域目录 `@earendil-works\`（`rmdir`）。现状表 CLI 工具表无 pi 行，本次无需删行。
+- **依据**：用户「帮我清除掉本机的pi agent」。勘察时确认为**当天活跃安装**（13 个 session 全部 10-01，settings.json 记 `lastChangelogVersion: 0.87.1`），不是残留。09-05 那批老路径已复核不存在（`C:\ZYS\Code\pi`、`~/.claude/backups/skill-trim-20260903/pi-side`、`lab-area` 下的 `.pi` 与三个 exp 目录），未重复处理。
+- **回退**：`npm install -g @earendil-works/pi-coding-agent`。配置、模型清单、凭据、session **均无备份**，重装后从零开始；用户选择前已被明确告知这一点。
+- **验证**：7 个路径逐一 `test -e` 全为 gone（`~/.pi`、三个 shim、`pi-coding-agent`、`pi-ai`、`C:\ZYS\Code\pi`）；`command -v pi` 无结果；`@earendil-works` 空目录 `rmdir` 后 `ls -d` 报错=已移除。
+- **未做**：`auth.json` 内两个 API key（deepseek `sk-4686…`、opencode-go `oc_sk_d499…`）按用户「全清，含凭据」的选择一并删除，**唯一副本，无备份**，日后复用需重新签发；13 个今日 session 记录同批丢弃。全局包版本号未读取即删除（settings.json 的 `lastChangelogVersion: 0.87.1` 是唯一的版本线索）。`C:\ZYS\Workspace` 内 10 处 `pi` 文字命中（`notes/`、`exp/` 下的历史笔记记述）非安装，未动。**操作坑**：`npm uninstall -g` 被 `execution-env` 协议的 PreToolUse hook 拦下（npm 只能在容器内跑，而卸载全局包必须作用于宿主机 npm prefix），该条由用户在自己终端执行；`Remove-Item -LiteralPath` 逐条字面量删除则可由 Claude 执行，与 09-05 同因。
+
+### headroom 卸载 + cc-switch 卸载 + magpie 接替（2026-10-01）
+
+- **变更**：三条同时发生，现状表 CLI 工具表删两行、加一行。(1) **headroom 卸载**：进程、两个计划任务（`headroom-init-user-startup` / `-health`）、`uv tool` 包体（1.8 GB）、`~/.headroom/` 数据目录、MCP 注册全清，与 cc-switch 合计回收约 1.9 GB；现状表该行删除。(2) **cc-switch 卸载**：MSI `/x` 卸载、`~/.cc-switch/` 1.3 GB 数据删除、Run 注册值删除、`~/.claude/skills/cc-switch-setting-sync/` 与两个专用 hook 移除；唯一凭据（`codex_oauth_auth.json`，含别处没有的 `lishengfu.tech@gmail.com`；`copilot_auth.json`）已存档到 `C:/Users/zys31/.claude/removed-tools/cc-switch-archive-20261001/`，**不进 git**；现状表该行删除。(3) **magpie 接替**：新增行，`C:/ZYS/Software/Magpie/magpie-windows-amd64.exe`，上游 `https://github.com/yetone/magpie`，stock 版（源码 `C:/ZYS/Code/magpie` @ `771506c`，工作树干净），sha256 `fa1ff9fe…098d4f5c`，GUI 本地网关占 3425。
+- **依据**：用户决定链路改为 `CC → http://127.0.0.1:3425(magpie stock) → https://opencode.ai/zen/go`，并在中途追加「headroom 一起移除」。中间曾给 magpie 打 `thruGateway` 补丁以兼容 headroom，headroom 移除后补丁即无用途，已撤销、源码回 stock 重编。
+- **回退**：headroom 需重装重部署（`uv tool install --python 3.13 "headroom-ai[all]"` + `headroom install apply`；不可逆，数据已删）。cc-switch 需重装 MSI；Run 值可从工作区 `exp/2026-09-30-ccswitch-to-magpie/p0/run-2026-10-01.reg` 恢复；数据不可恢复。magpie 源码可从私有 fork `https://github.com/zys3198/magpie` 重编（`upstream` 指向 yetone/magpie），补丁版 exe 另存于工作区 `exp/…/p2/magpie-patched-90306139.exe`，补丁原文 `exp/…/p2/headroom-thru-gateway.patch`。
+- **验证**：`POST http://127.0.0.1:3425/v1/messages` 实测 200；`~/.local/bin/headroom.exe`、`~/.headroom`、`~/.cc-switch`、`skills/cc-switch-setting-sync` 四路径 `ls -d` 全部 gone；`.claude.json → mcpServers` 为空对象；`git -C C:/ZYS/Code/magpie status` 干净、tip `771506c`。
+- **未做**：未删除 `~/.claude/removed-tools/` 下的 cc-switch 凭据存档（Codex 凭据去留待用户定）。未实测 CLI 侧直连 magpie（当时 `settings.json` 无 `ANTHROPIC_*`，CLI 无路由；用户随后自行补齐并实测可用）。**删除即注销**：`cc-switch-usage.js` 的数据源随 `~/.cc-switch/` 一起消失，`statusline.js` 两处 require 成为死引用，详见 custom-setup 流水同日条目。
+
+### cc-switch 存档凭据清理（2026-10-02）
+
+- **变更**：删除 `removed-tools/cc-switch-archive-20261001/cc-switch-config/` 下 `codex_oauth_auth.json`（4,855 B）与 `copilot_auth.json`（397 B）。同目录其余 7 个文件（`settings.json`、`sync-backup-*.json`、`model-pricing.json`、两个 `BACKUP_*.md`、`crash.log`、`settings.json.bak.*`）保留。现状表无对应行——cc-switch 本体已在 2026-10-01 整行删掉，本次只清附属凭据。
+- **依据**：勘察后确认两份都不是唯一副本。`codex_oauth_auth.json` 含两个账号（`zys3198247039@gmail.com`、`lishengfu.tech@gmail.com`），其 OAuth token 指纹与 `~/.config/magpie/logins.json` 中 magpie 自己持有的同名账号登录态**全部不同**（存档 refresh `97a8ee01`/`2c1e8d72` vs magpie `40cabe60`/`469e8d7e`）——存档是 cc-switch 卸载前的旧快照，magpie 侧已各自刷新过；其中 `zys3198247039` 一份还与现行 `~/.codex/auth.json` 逐字段一致。目录名语义为本次迁移自建，无历史归档风险；该目录不在任何 git 仓内，删除不可由 git 恢复。
+- **回退**：无法回退，只能重新 OAuth 登录两个 Codex 账号。判断依据是 magpie 与 `~/.codex/` 各自持有可用凭据；若两者日后同时失效，需走各自主流的登录流程。
+- **验证**：删后 `ls` 该目录剩 7 个非凭据文件；`~/.config/magpie/logins.json` 读出两个账号条目不变，`quotas.json` 的 `codex/*` 额度条目不受影响；magpie 走自己的 `logins.json`，不读本目录，实测无任何路径引用指向被删文件。
+- **未做**：未查同目录 `settings.json` 与 `sync-backup-20260625_223814.json` 是否仍含明文 API key（cc-switch 的 provider 快照通常带 `ANTHROPIC_API_KEY`）；未处理 `~/.claude/backups/` 下的历史 cc-switch 快照。用户本次只授权删 Codex 凭据。
