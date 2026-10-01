@@ -42,6 +42,7 @@
 | iii | 在用 | `~/.local/bin/iii.exe` | 待补 | — | — |
 | Motrix | 在用 | winget 装，`AppData/Local/Programs/Motrix/` | https://motrix.app | `winget install Motrix` | 桌面端，2.0.0-beta.40。bridge 端口**随机**（实测 16802），落在 `AppData/Roaming/Motrix/bridge/endpoint.json`，非 aria2 16800 |
 | @motrix/cli | 在用 | `AppData/Roaming/npm/node_modules/@motrix/cli/` | https://github.com/motrixapp/cli | `npm i -g @motrix/cli` | 0.5.0，命令名 `motrix`。自带 SKILL.md，见 [skill-install.md](skill-install.md) |
+| cc-switch 归档 | 已归档 | `removed-tools/cc-switch-archive-20261001/` | 自建（cc-switch 卸载留档） | git（本次入库后） | 13 个文件：`cc-switch-config/`（settings.json、2 个备份、crash.log、恢复说明、model-pricing）、`skills/cc-switch-setting-sync/`、`hooks/`（settings-sync-auto.py、settings-degrade-guard.py）。cc-switch 本体 2026-10-01 已卸载，恢复靠重新 clone 上游 |
 
 ## 运行环境基线
 

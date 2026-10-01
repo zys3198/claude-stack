@@ -99,11 +99,30 @@ SECRET_TARGETS = (
 
 # 体量判据只管 ENTRY_GLOBS 定义的根入口，references/ 等按需文件不查；上限统一为 20 KB。
 # 全量模式报告超限，收窄模式按写入后的预览判定；BLOCK_SCOPE 内退出 3 由传输层拒绝，
-# 其余区域只报告，超限内容应下沉或收窄，不设例外表。
+# 其余区域只报告。
+# SIZE_EXEMPT 收窄了「不设例外表」这条原话：上限不因资产类型而变，但已批准的例外
+# 必须有对账位置，否则判据会对着台账里已裁定的资产长期命中，训练人忽略它。
+# 每条写明批准依据（台账出处）与复审日期。复审日本身不自动生效——到期不会自己恢复
+# 命中，要复审就改表或删条目。（早先这里写着「复审日过了照样报」，代码并无此逻辑。）
 SIZE_LIMIT = 20 * 1024
+SIZE_EXEMPT = {
+    "skills/last30days/SKILL.md":
+        "2026-09-29 台账裁定：143 KB 中约 4% 可移，其余是必须常驻的契约带；"
+        "2026-10-02 实测 134.8 KB，复审 2026-12-02",
+}
 # 段落重复的字数下限。实测：阈值 120 在 187 个根入口上只留 1 组真命中；
 # 降到更低会把「## 用法」这类小节标题算成重复。
 PARA_MIN = 120
+# 段落重复的豁免表，按 paragraphs() 归一化后的原文逐字匹配（不是按文件对）。
+# 精确匹配是故意的：上游改动措辞会让豁免失效并重新命中，逼人复审一次，
+# 而不是让「这两个文件之间的一切重复」长期免检。
+PARA_EXEMPT = {
+    "The issue tracker and triage label vocabulary should have been provided "
+    "to you — run `/setup-matt-pocock-skills` if not.":
+        "2026-10-02 实测：to-spec 与 to-tickets 的入口引导句，归一化后 120 字"
+        "正好卡在阈值上。两者是上游 v1.2.3 第三方副本的独立入口，各自都需要"
+        "这句；改一边会让本地进一步偏离上游，对账时反而更难。复审 2026-12-02",
+}
 # updated 过期线。本机没有既有出处，属新定的默认值，要调就改这里。
 STALE_DAYS = 180
 
@@ -157,6 +176,7 @@ MAP_ROWS = {
 EXEMPT = {
     ".gitignore": "仓库元文件",
     "README.md": "仓库说明",
+    "RTK.md": "命令输出压缩规则，被全局 CLAUDE.md 以 @ 导入",
     "keybindings.json": "平台按键配置",
     "long-complex-task-prompt.md": "一次性产出的长 prompt",
     "archive-skills": "归档（历史记录）",
@@ -167,11 +187,21 @@ EXEMPT = {
     "tools": "自建工具（程序）",
     "statusline": "statusline 程序",
     "task-notes-reminder": "提醒程序的状态目录",
+    # 以下三项 2026-10-02 补：旧判据用前缀匹配把它们整个放行，从没被问过归哪一类
+    "docs": "协议族所在目录；只有 docs/protocols/ 与 docs/session-lifecycle.md 属映射表，"
+            "archive/ 与 skills/ 是记录与历史，不进运行时",
+    "hooks": "hook 脚本与日志；只有 hooks/scripts/*.py 属映射表，.ps1/.log/.json 是通知程序、"
+             "降级日志与传输层状态",
+    "skills": "按需加载的 skill 入口，全部为指向 ~/.config/magpie/library/skills/ 的符号链接；"
+              "真源不在本仓库",
+    "removed-tools": "cc-switch 2026-10-01 卸载后留下的归档，不进运行时",
 }
 
 # 判不了的项。写在输出里，免得把「没有检查」当成「检查通过」。
+# A1 判据 2026-10-02 改写（principles.md 挪进治理层）后，前半句「能机械判的规则必须有
+# 校验者」已由本脚本各判据覆盖，剩下的「唯一权威载体」只能人工对账，仍列在此。
 UNJUDGEABLE = (
-    "A1 协议 > 文字（同一内容写成散文还是字段表，都能过检查）",
+    "A1 同一件事是否只留一份权威载体（跨载体对账无判据，需人工查）",
     "A2 判据是否足够",
     "A4 命名好坏（ASCII 与日期格式之外的部分）",
     "C1 字段够不够",
@@ -523,13 +553,21 @@ def check_size():
     """根入口的体量上限。整份文件一次进上下文，超限就是每轮都付这个代价。"""
     files = entry_files()
     errors = []
+    exempted = 0
     for p in files:
         if not in_target(p):
             continue
         size = size_of(p)
-        if size > SIZE_LIMIT:
-            errors.append(f"{rel(p)} 体量 {size / 1024:.1f} KB，超过 {SIZE_LIMIT // 1024} KB 上限")
-    summary = f"{len(files)} 个根入口（上限 {SIZE_LIMIT // 1024} KB）" + (
+        if size <= SIZE_LIMIT:
+            continue
+        why = SIZE_EXEMPT.get(rel(p))
+        if why:
+            # 例外不是免检：照常计入摘要，过期与否由复审日期说明
+            exempted += 1
+            continue
+        errors.append(f"{rel(p)} 体量 {size / 1024:.1f} KB，超过 {SIZE_LIMIT // 1024} KB 上限")
+    summary = f"{len(files)} 个根入口（上限 {SIZE_LIMIT // 1024} KB" + (
+        f"，{exempted} 条按 SIZE_EXEMPT 免报）" if exempted else "") + (
         f"，{len(errors)} 处超限" if errors else "，全在限内")
     return errors, summary
 
@@ -541,11 +579,15 @@ def check_dupe():
     而参考文件本就按分支单独取用，几篇共享同一段样板不构成第二个源。
     """
     files, owners, blocks = entry_files(), {}, 0
+    exempt = 0
     for p in files:
         for norm in paragraphs(p):
             if len(norm) < PARA_MIN:
                 continue
             blocks += 1
+            if norm in PARA_EXEMPT:
+                exempt += 1
+                continue
             key = hashlib.sha256(norm.encode("utf-8")).hexdigest()
             owners.setdefault(key, []).append((rel(p), norm))
     errors = []
@@ -557,7 +599,8 @@ def check_dupe():
         if TARGET is not None and not any(in_target(os.path.join(CLAUDE, r)) for r in where):
             continue
         errors.append(f"同一段落出现在 {len(where)} 个文件：{'、'.join(where)}｜{group[0][1][:60]}…")
-    summary = f"{len(files)} 个根入口 · {blocks} 个段落（≥{PARA_MIN} 字）" + (
+    summary = f"{len(files)} 个根入口 · {blocks} 个段落（≥{PARA_MIN} 字" + (
+        f"，{exempt} 条按 PARA_EXEMPT 免检" if exempt else "") + "）" + (
         f"，{len(errors)} 组重复" if errors else "，无重复")
     return errors, summary
 
@@ -656,6 +699,26 @@ def repo_top_entries():
     return sorted(n for n in os.listdir(CLAUDE) if n not in (".git",))
 
 
+def walk_uncovered(name, prefix, row_paths):
+    """顶层目录 name 内部有没有不被映射表任何一行覆盖的文件。
+
+    只看文件与已知程序扩展名——logs、pycache、测试产物不该逼着人分类。
+    判据源是 principles.md 的映射表（B6）。
+    """
+    covered = set(row_paths)
+    # skills/ 下全是符号链接（真源在 ~/.config/magpie/library/），不跟随就看不见里面
+    for dirpath, dirnames, filenames in os.walk(os.path.join(CLAUDE, name), followlinks=True):
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        for fn in filenames:
+            full = os.path.join(dirpath, fn)
+            if full in covered or os.path.splitext(fn)[1] in BINARY_EXT:
+                continue
+            if fn.endswith(".log") or fn.endswith(".jsonl"):
+                continue
+            return True
+    return False
+
+
 def check_map():
     """B6：映射表与磁盘双向对账。
 
@@ -690,11 +753,20 @@ def check_map():
     for name in repo_top_entries():
         if name in EXEMPT:
             exempt += 1
-        elif any(p == os.path.join(CLAUDE, name) or p.startswith(os.path.join(CLAUDE, name) + os.sep)
-                 for p in row_paths):
+        elif os.path.join(CLAUDE, name) in row_paths:
+            # 该条目本身就是某行 glob 展开出来的东西（如 CLAUDE.md）。
             covered += 1
         else:
-            unclassified.append(name)
+            # 目录型条目：只有当它内部所有文件都被映射表某行覆盖时才算归表。
+            # 2026-10-02 起不再用「前缀匹配任一文件」——那会让 docs/protocols/*.md
+            # 把整个 docs/ 树（archive/、skills/、superpowers/）一并放行，
+            # 实跑摘要「归表 4」正是这个漏洞的产物。
+            prefix = os.path.join(CLAUDE, name) + os.sep
+            inner = [p for p in row_paths if p.startswith(prefix)]
+            if inner and not walk_uncovered(name, prefix, row_paths):
+                covered += 1
+            else:
+                unclassified.append(name)
     for name in unclassified:
         # 收窄时只问被写文件所在的那一个顶层条目归哪一类。
         if TARGET is not None and name != rel(TARGET).split("/")[0]:

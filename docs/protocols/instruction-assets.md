@@ -103,7 +103,15 @@ P0＝误路由、幻觉目标、危险动作无门或运行完全失效；P1＝�
 
 贯穿性原则（如 feedback loop 质量决定产出上限）单独标注——它决定第一类动作能否成立。
 
-## 五、维护条款
+## 五、校验
+
+```
+python ~/.claude/hooks/scripts/protocol_check.py --only size,dupe,lifecycle
+```
+
+本文件的正文形态由上列三项判据覆盖（体积、重复、生命周期）；运行时传输层是 `hooks/scripts/protocol-report.py`，它不含判据、只按检查器退出码行动。清单语义（skill 该不该留、该收窄还是该归档）判不了，那部分走 `/asset-auditor`。
+
+## 六、维护条款
 
 **分界。** 本文件的正文（分界、清单、判据、流程）是可变区，可以整体重写；依据与历史只追加。删除判据与触发点通用，见 `docs/protocols-index.md`「维护条款」。
 

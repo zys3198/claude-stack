@@ -59,12 +59,20 @@ Docker 容器内的真实业务写入、数据库写入、验收测试数据、�
 
 `~/.claude/hooks/scripts/resource-guard.py` 由 `hooks/scripts/pretool-guard.py` 同进程加载（`settings.json` 的 PreToolUse 只注册合并入口 `pretool-guard.py`），拦截客观可判定的动作：compose 文件里新增的服务缺 `mem_limit` 或 `security_opt`；变更 `session-hygiene.json` 独占清单里正在运行、且本机另有活跃会话的容器；远程 Git 和生产/真实数据变更在未获得精确授权时进入确认线；在宿主机上执行 pnpm、mvn、java、node 这类构建工具链时直接阻断。
 
-**失败时怎么走，按资源性质分两类**（与 hook 判据 H4 一致）：
+**失败时怎么走，按资源性质分两类**（与 `resource-guard.py` 的 fail-closed／fail-open 约定一致）：
 
 - **共享资源类一律 fail-closed**：独占容器状态、其他活跃会话数、授权状态这三项读不到时，hook 返回 `ask` 而非放行。「枚举失败」与「确实没有容器在跑」必须分开表达，否则失败会被当成「都没有在跑」而被放过。
 - **普通路径 fail-open**：hook 自身异常、payload 解析失败、命令形态认不出时放行，不堵干活。这类降级写进 `~/.claude/resource-guard.log` 备查。
 
 判据细节、边界与已知覆盖不到的情形写在脚本头部注释里，要改判据就看那里。Hook 不代替主模型做 R0-R4 语义分类。
+
+## 校验
+
+```
+echo '{}' | python ~/.claude/hooks/scripts/pretool-guard.py
+```
+
+空 payload 走一遍无输出、退出 0 即接线正常；`--help` 不适用（本脚本无 argparse，只认 stdin payload）。运行时结论形状见 `gate.md`「hook 分工」，降级记录看 `~/.claude/resource-guard.log`。
 
 ## 维护条款
 

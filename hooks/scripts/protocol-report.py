@@ -1,7 +1,8 @@
 """资产判据的传输层：把刚写的路径转达给检查器，把结论转达回去。
 
-判据一条都不在这里——十类全在 protocol_check.py，改判据只改那一处。
-只在常驻区与项目记忆索引区（`CLAUDE.md`、`projects/*/memory/MEMORY.md`）阻断，其余区仍然只报告；
+判据一条都不在这里——十一类全在 protocol_check.py，改判据只改那一处。
+只在阻断面（`CLAUDE.md`、`docs/protocols/*.md`、`docs/session-lifecycle.md`、
+`projects/*/memory/MEMORY.md`）阻断，其余区仍然只报告；
 阻断面由检查器的 BLOCK_SCOPE 决定，这里只按它的退出码行动，不自己判。
 
 | 事件 | 动作 | 出声条件 |
@@ -165,7 +166,8 @@ def pre_tool_use(payload):
     rel_path = os.path.relpath(path, ROOT).replace(os.sep, "/")
     findings = [line.strip() for line in out.splitlines() if line.strip().startswith("✗")]
     reason = (f"资产判据拦下这次写入：{rel_path}\n" + "\n".join(findings)
-              + "\n\n这条只在常驻区与项目记忆索引区拦。改到没有命中再写。")
+              + "\n\n这条只在阻断面拦（`CLAUDE.md`、`docs/protocols/*.md`、`docs/session-lifecycle.md`、"
+              "`projects/*/memory/MEMORY.md`）。改到没有命中再写。")
     log(f"deny: {rel_path}｜{' · '.join(findings)[:400]}")
     deny(reason[:MAX_CHARS])
 

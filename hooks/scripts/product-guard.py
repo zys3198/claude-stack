@@ -1,5 +1,5 @@
 # 产物守卫：PreToolUse 阶段拦截绕过约定位置或违反命名要求的工作树创建。
-# 规则依据见 ~/.claude/CLAUDE.md 第 8 节「工作树」。
+# 规则依据见 ~/.claude/docs/session-lifecycle.md 第七节「工作树」。
 #
 # 只拦可以客观判定的行为：git worktree add 的目标路径不在当前仓库
 # .claude/worktrees/ 下，或工作树名不合规。不做主观推测，其余一律放行。
@@ -28,7 +28,7 @@ AGENT_HASH = re.compile(r"^(worktree-)?agent-[0-9a-f]{6,}")
 # git worktree add 中会吃掉下一个词的选项。依据 git 2.54 的用法行：
 # [-b | -B] <new-branch> 与 [--lock [--reason <string>]]，其余选项都不带值。
 OPTS_WITH_VALUE = {"-b", "-B", "--reason"}
-# 工作树名要求：kebab-case，禁用 hash、纯日期与保留名。依据 CLAUDE.md 第 8 节。
+# 工作树名要求：kebab-case，禁用 hash、纯日期与保留名。依据 docs/session-lifecycle.md 第七节。
 NAME_OK = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 NAME_RESERVED = {"tmp", "test"}
 NAME_RESERVED_PREFIX = ("agent-", "worktree-")

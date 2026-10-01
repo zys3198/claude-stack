@@ -1505,3 +1505,39 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：`git checkout -- skills/ai-product-development/SKILL.md skills/install-ledger/SKILL.md skills/instruction-engineering/SKILL.md skills/skill-auditor/SKILL.md`；台账那行删掉。
 - **验证**：`~/.claude/skills/` 24 份逐份取 `^user-invocable:`，只得 6 份——4 个归档为 `false`，`impeccable`／`last30days` 为 `true`（在用，须留在 `/`，未误伤）。`disable-model-invocation` 为真的 14 份全不在模型侧 listing 内，为假的 10 份与本会话模型侧可见 10 项逐名相同（`asset-guide`、`auto-browser`、`bidirectional-steelman`、`coding-workflow`、`dev-clean`、`dev-status`、`docker-only`、`local-env-pitfalls`、`parallel-delegation`、`task-notes`），说明新增开关不会把描述带回模型上下文。真归档的判据取 `description` 行以「已归档」开头，而非全文含该词——`asset-auditor` 正文把「已归档」当判定词用，全文匹配会误伤。
 - **未做**：未提交、未推送。`/` 菜单的实际变化无命令行入口可实测（`claude --help` 无 skills 列子命令，`/skills` 只在 TUI），依据是官方文档字段语义与本机 2.1.284 二进制 schema 描述（两处一致）。插件轴未动：`github` 停用与 `enabledPlugins: false` 一致；`archify`、`company-discovery-evaluation-by-user` 在 `archive-skills/`、`codex-home-2026-09-09` 在 `backups/`，均不在 skill 扫描路径，本就未污染 `/`。
+### cc-switch 衍生资产注销（2026-10-01）
+
+- **变更**：现状表三行。`cc-switch-setting-sync` **整行删除**（`~/.claude/skills/cc-switch-setting-sync/` 目录已不存在，随 cc-switch 卸载移除；它是全库唯一与 cc-switch DB 双向同步的 skill）。`cc-switch-usage.js` 状态改 **停用**：数据源 `~/.cc-switch/` 已随 cc-switch 删除，`refresh()` → `currentProviderId()` → `readJson(~/.cc-switch/settings.json)` 必抛 ENOENT（`readJson` 在 228 行无 try/catch，裸 `readFileSync`）；文件本身（20.9 KB）保留。`settings.json` 行备注订正：cc-switch 卸载后**不再有 common_config 双向同步**。
+- **依据**：cc-switch 卸载，用户决定链路改由 magpie 承担（见 tool-install 流水同日条目）。台账协议 §七「死引用当场处理」与 §六「位置列指向的文件已不在，就删引用或改指向」——本次只做了状态标记，未动代码。
+- **回退**：`cc-switch-setting-sync` 在 git 内（`~/.claude` 仓库），`git checkout -- installing/custom-setup.md` 可回退本行；skill 本体若需恢复，从 cc-switch 存档 `~/.claude/removed-tools/cc-switch-archive-20261001/skills/` 取回。`cc-switch-usage.js` 同在 git，改数据源即可复活。
+- **验证**：`ls -d ~/.claude/skills/cc-switch-setting-sync` 报 No such file or directory；`~/.cc-switch` 同样 gone；`statusline.js` 仍有 2 处引用（27 行 `require`、301 行 `spawn ... --refresh`）。
+- **未做**：**死引用未修**——`statusline.js` 仍 require 并 spawn 已失效的 `cc-switch-usage`。未在宿主机跑 node 实测（受 `execution-env` 协议限制，脚本运行须进容器），故「抛 ENOENT」是读码推断，非运行验证；已确认的只是模块级 `require` 本身安全（模块顶层只有定义），主进程走 `readCache()` 有 try/catch 兜底，故表现为**静默失去额度刷新**而非崩溃。修法二选一：改读 magpie 配置，或摘掉 `statusline.js` 这两处。用户未定。
+### statusline 额度段改接 magpie（2026-10-02）
+
+- **变更**：`statusline.js` 四处——`require('./cc-switch-usage')` 换 `require('./magpie-usage')`；删掉 `refreshUsageInBackground()` 整个函数与 `child_process` 的 `spawn` 导入；三行缓存判定（`readCache`/`isCurrent`/`isStale`）收成一行 `magpieUsage.read(servingProvider(data.model))`；`resolveModelName` 的四段 if 改成 `MODEL_SLOTS` 表，顺带新增 `servingProvider()` 从 `ANTHROPIC_DEFAULT_<槽>_MODEL` 取 provider 前缀（显示名里没有 provider）。新增 `magpie-usage.js`（95 行）；**删除** `cc-switch-usage.js`（20.9 KB）与 `tests/cc-switch-usage.test.js`（7.0 KB），连同 `statusline/.cache/` 下 `ccswitch-usage.json`、3 个 `.tmp`、`ccswitch-usage.log` 一并清掉。现状表 `cc-switch-usage.js` 行删除、`magpie-usage.js` 行新增。
+- **依据**：cc-switch 已卸载（见流水 2026-10-01），额度段失去唯一数据源。magpie 自己按 `settings.json.trayUsageEvery=3`（秒）轮询并写 `~/.config/magpie/quotas.json`，其 `windows[].used` 语义与旧的 `usage.{rolling,weekly,monthly}.percent` 一致，`{5 hours,7 days,Month}` 与状态栏的 `{rolling,weekly,monthly}` 正好一一对应。既然已有上游在轮询，就不再实现第二套刷新。
+- **回退**：`git checkout HEAD~1 -- statusline/` 恢复三个文件（旧测试一并回来）；`installing/custom-setup.md` 同理。已删的 `.cache/` 内容是可重建缓存，无需恢复。
+- **验证**：容器内 `node --check statusline.js` 通过；`node magpie-usage.js` 自检（最新条目胜出 / 异 provider 返回 null / 空 provider 返回 null）通过并打出实测值 `h1% w45% m95%`；端到端灌 payload `{model:{display_name:"Mythos"}}` + `ANTHROPIC_DEFAULT_FABLE_MODEL=opencode-go/space-bunny-free[1m]` 渲染出 `Usage h1% w45% m95%`，m95% 正确转红。删前的 ENOENT 由 `statusline/.cache/ccswitch-usage.log` 里的 MODULE_NOT_FOUND 栈实证，不再是读码推断。
+- **未做**：未做 Codex 段——magpie 的 `quotas.json` 有 `codex/*` 条目，但 Claude Code 会话不走 codex 通道，接上是另一件事。多 provider 同名时按 `at` 最新者取（`quotas.json` 现有 3 个 `opencode-go/plan` 条目），未加"哪个账号在服务"的判定；`routing/*.jsonl` 里有更准的答案，暂不引入。`magpie-usage.js` 用 `Date.parse` 比 `at`，`resetsAt` 字段读进来没用于渲染。
+### 5 份自建 skill 注销（2026-10-02）
+
+- **变更**：现状表 5 行**整行删除**——`ai-product-development`、`install-ledger`、`instruction-engineering`、`skill-auditor`、`company-discovery-evaluation-by-user`。表头计数由「19 在用 + 4 归档」订正为「17 在用」。本条同时**补记**同批删除的流水：这 5 项此前的登记只改了现状表、未按协议 §四「一次变更做两件事」落流水，本次一并补齐。
+- **依据**：`ai-product-development`／`install-ledger`／`instruction-engineering`／`skill-auditor` 四份是 2026-09-27 起的**触发空壳**——正文分别已下沉进 `docs/protocols/ledger.md`、`docs/protocols/instruction-assets.md` 与 `coding-workflow`，剩下一个触发面；`company-discovery-evaluation-by-user` 单列删除。状态列原被写作「已删除」，该值不在协议 §三枚举（`在用`/`停用`/`已归档`/`待核`）内，且按 §七「对象不再是本机现状」应整行删掉、只在流水留痕，故改为删行。
+- **回退**：`install-ledger`、`instruction-engineering`、`skill-auditor`、`company-discovery-evaluation-by-user` 在 git 内，`git checkout HEAD -- skills/<名>/` 取回；`ai-product-development` 另有 `backups/ai-product-development-removal-2026-09-27/`。四份空壳的正文都还在 `docs/protocols/` 下，触发面删除不影响被指向的协议。
+- **验证**：`~/.claude/skills/` 下 5 个路径逐一 `test -e` 均为否；`~/.claude/backups/` 命中 `install-ledger`（3 处）与 `company-discovery-evaluation-by-user`（1 处）历史副本，删除可回退。`ledger_check.py` 由 6 处报错回到全绿，现状表 66 → 61 行、20.0 → 18.1 KB。
+- **未做**：未核这 5 份是否还有别处引用（`docs/protocols/index` 指针、`CLAUDE.md` §2 索引行）；`company-discovery-evaluation-by-user` 的删除理由未查，原行只记「已于 2026-10-02 移除」而无依据。**本条是补记他人改动，非本会话执行**——删除动作发生在更早的会话，本次只做核实、补流水与按协议删行。
+### skills 真源迁回仓库（2026-10-02）
+
+- **变更**：`~/.claude/skills/` 下 43 项由「全部为指向 `~/.config/magpie/library/skills/` 的符号链接」复制回仓库内真实目录，逐项摘除链接（43/43 成功，残留符号链接 0，2487 个文件）。同步改四处陈述：`README.md` 目录表与「维护」节、`installing/skill-install.md` 说明节与本地副本行、`docs/protocols/ledger.md` 第八节整节重写、`.gitignore` 第 97 行注释。顺带清 `.gitignore` 5 条失效白名单（`ai-product-development`、`cc-switch-setting-sync`、`install-ledger`、`instruction-engineering`、`skill-auditor`，对应目录已不存在）。现状表 `位置` 列无需改动——本就写的是 `~/.claude/skills/<名>/`，搬迁后由假变真。
+- **依据**：用户 2026-10-02 裁定「magpie 里面不需要管理 skill，skill 只放在 `.claude` 里面」。根因是 git 不跟随符号链接：白名单机制静默失效，413 个文件被判「已删除」，17 项自建 skill 实际无任何版本备份，而信号只是 `git status` 里一串删除条目。`ledger.md` 第八节由「真源在库外时如何回退」改写为「真源必须在仓库内」。
+- **回退**：`git checkout HEAD -- skills/`（仓库内快照自 2026-09-29／09-30 起）；`~/.config/magpie/library/skills/` 原 43 项**未删**，是本次搬迁的来源副本，可作第二退路。
+- **验证**：搬迁前后各跑一次 `diff -r` 与真源逐字节比对，43/43 不符 0；`git status --short skills/` 由 413 处删除塌缩到 8 处删除 + 2 处修改，删除对应磁盘上真已删掉的 5 个 skill、修改即本会话改的 `principles.md` 与 `coding-workflow/SKILL.md`；`protocol_check.py` 退出 0、`ledger_check.py` 退出 0、`selftest.py` 通过 153 项失败 0 项。
+- **未做**：未删除 `~/.config/magpie/library/skills/` 的 43 份副本——magpie 是外部工具，其 library 可能被自身引用，删除属不可恢复操作，待用户单独裁定。`~/.augment/skills` 下有 1 个链接，未查指向（与本库无关）。`skill-trimmer-workspace/` 目录仍在磁盘上被忽略，未查用途。
+
+### claude-notify.ps1 注销（2026-10-02）
+
+- **变更**：现状表 `claude-notify.ps1` 行**整行删除**。该行原记「在用」，位置列写 `hooks.Notification[0]`、`hooks.StopFailure[0]`。
+- **依据**：2026-10-02 实测——`hooks/claude-notify.ps1` 磁盘上不存在；`settings.json` 的 `hooks` 里**没有任何 `Notification` 事件注册**，`StopFailure` 只剩 orca 的 `claude-hook.cmd`。按协议 §七「对象不再是本机现状」整行删掉、只在流水留痕。删除动作发生在更早的会话，本次只做核实与补记。
+- **回退**：该文件在 git 内，`git checkout HEAD -- hooks/claude-notify.ps1` 可取回；重新接线需同时改 `settings.json`。
+- **验证**：`test -e hooks/claude-notify.ps1` 为否；遍历 `settings.json → hooks` 全部事件，无一条 command 含 `claude-notify`。
+- **未做**：**通知功能目前无任何 hook 承接**——`Notification` 事件没有注册方。是刻意移除还是误删未查，需要用户确认后再决定是否接回。原行「不挂 PostToolUseFailure，避免工具失败噪声」是有效的设计约束，接回时应保留。

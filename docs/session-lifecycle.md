@@ -223,9 +223,12 @@ EOF
 | 路径 | 作用 |
 |------|------|
 | `~/.claude/hooks/scripts/session-guard.py` | 开发前检查与开发结束记录 |
-| `~/.claude/hooks/scripts/product-guard.py` | 工作树拦截 |
+| `~/.claude/hooks/scripts/pretool-guard.py` | **PreToolUse 实际注册入口**（`settings.json` 只注册它），合并入口，同进程跑下面两个守卫 |
+| `~/.claude/hooks/scripts/product-guard.py` | 工作树拦截；由 `pretool-guard.py` 加载，不单独注册 |
+| `~/.claude/hooks/scripts/resource-guard.py` | 资源守卫（容器、独占清单、宿主机构建）；由 `pretool-guard.py` 加载，内载入 `authorization_scope.py` |
 | `~/.claude/hooks/scripts/session-status.py` | 状态汇总，`/dev-status` 调用 |
 | `~/.claude/hooks/scripts/selftest.py` | 自检，`python selftest.py`，退出码 0 为全过 |
+| `~/.claude/hooks/scripts/task-notes-reminder.py` | PreCompact／SessionStart 提醒记任务笔记 |
 | `~/.claude/skills/dev-status/SKILL.md` | `/dev-status` skill |
 | `~/.claude/skills/dev-clean/SKILL.md` | `/dev-clean` skill |
 | `~/.claude/session-handoff.jsonl` | 会话收尾记录，保留 7 天 |
@@ -252,7 +255,16 @@ EOF
 
 ---
 
-## 十一、维护条款
+## 十一、校验
+
+```
+python ~/.claude/hooks/scripts/selftest.py
+echo '{}' | python ~/.claude/hooks/scripts/session-guard.py start
+```
+
+`selftest.py` 覆盖本机制三个脚本（session-guard／session-status／product-guard），退出码 0 为全过；`session-guard.py` 的 `start` 子命令为空 payload 只读跑，用于验接线。
+
+## 十二、维护条款
 
 **分界。** 会变的（各节所述机制、拦截判据、已知边界与复验方法）整体重写。只增的：本文件没有——依据留在 `hooks/scripts/*.py` 的头部注释与实测记录里，正文不留历史。
 

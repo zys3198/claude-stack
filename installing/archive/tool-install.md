@@ -557,3 +557,10 @@
 - **回退**：无法回退，只能重新 OAuth 登录两个 Codex 账号。判断依据是 magpie 与 `~/.codex/` 各自持有可用凭据；若两者日后同时失效，需走各自主流的登录流程。
 - **验证**：删后 `ls` 该目录剩 7 个非凭据文件；`~/.config/magpie/logins.json` 读出两个账号条目不变，`quotas.json` 的 `codex/*` 额度条目不受影响；magpie 走自己的 `logins.json`，不读本目录，实测无任何路径引用指向被删文件。
 - **未做**：未查同目录 `settings.json` 与 `sync-backup-20260625_223814.json` 是否仍含明文 API key（cc-switch 的 provider 快照通常带 `ANTHROPIC_API_KEY`）；未处理 `~/.claude/backups/` 下的历史 cc-switch 快照。用户本次只授权删 Codex 凭据。
+### cc-switch 归档目录补登记（2026-10-02）
+
+- **变更**：现状表「CLI 工具」新增一行 `cc-switch 归档`（状态 `已归档`）。此前 `removed-tools/cc-switch-archive-20261001/` 在四本台账里均无登记，本次补记并随本轮一并入库 git。
+- **依据**：cc-switch 本体已于 2026-10-01 卸载，现状表按协议 §七 删行、只在流水留痕——但卸载时留下的归档目录本身没有进过任何台账。资产先入库后登记，等于让 git 里出现无主条目。
+- **回退**：本轮入库后 `git checkout HEAD -- removed-tools/` 可取回；目录内 `cc-switch-config/RESTORE_SYMLINKS.md` 另记有符号链接恢复步骤。
+- **验证**：`grep -rEl 'sk-[A-Za-z0-9_-]{16,}|-----BEGIN [A-Z ]*PRIVATE KEY-----' removed-tools/` 无命中；三个 JSON（`settings.json`、`sync-backup-20260625_223814.json`、`settings.json.bak.20260706_152828`）按 `sk-` 形态、键名=长值、私钥块三种模式单独扫描，各 0 处——**补上了前一条流水「未查是否含明文 API key」的缺口**。共 13 个文件。
+- **未做**：未核 `crash.log` 与 `BACKUP_BEFORE_CHANGE.md` 的正文是否含非密钥形态的敏感信息（路径、账号名）。

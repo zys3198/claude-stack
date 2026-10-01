@@ -8,17 +8,17 @@
 |---|---|---|---|
 | 台账 | `~/.claude/docs/protocols/ledger.md` | `python ~/.claude/hooks/scripts/ledger_check.py` | **已落** |
 | 任务笔记 | `~/.claude/docs/protocols/task-notes.md` | — | **已落** |
-| 执行环境 | `~/.claude/docs/protocols/execution-env.md` | `~/.claude/hooks/scripts/resource-guard.py`（PreToolUse） | **已落** |
+| 执行环境 | `~/.claude/docs/protocols/execution-env.md` | `~/.claude/hooks/scripts/pretool-guard.py`（PreToolUse 合并入口，内跑 `product-guard.py` 与 `resource-guard.py`） | **已落** |
 | 会话生命周期 | `~/.claude/docs/session-lifecycle.md` | `~/.claude/hooks/scripts/session-guard.py`（SessionStart／SessionEnd） | **已落** |
-| 记忆 | `~/.claude/docs/protocols/memory.md` | `python ~/.claude/hooks/scripts/protocol_check.py` | **已落** |
+| 记忆 | `~/.claude/docs/protocols/memory.md` | `protocol-report.py`（内含 `protocol_check.py`） | **已落** |
 | 委派 | `~/.claude/docs/protocols/delegation.md` + `delegation/` | — | **已落** |
-| 门禁 | `~/.claude/docs/protocols/gate.md`（操作规则留在 `~/.claude/CLAUDE.md` §1.3） | `python ~/.claude/hooks/scripts/protocol_check.py` | **已落** |
+| 门禁 | `~/.claude/docs/protocols/gate.md`（操作规则留在 `~/.claude/CLAUDE.md` §1.3） | `python ~/.claude/hooks/scripts/protocol_check.py`；运行时经 `pretool-guard.py` 内跑 `product-guard.py`（产物／工作树守卫）与 `resource-guard.py`（资源守卫，内载入 `authorization_scope.py` 做授权范围匹配） | **已落** |
 | 协作 | `~/.claude/docs/protocols/collaboration.md` | — | **已落** |
 | 证据与交付 | `~/.claude/docs/protocols/evidence.md` | — | **已落** |
 | 表达 | `~/.claude/docs/protocols/expression.md` | — | **已落** |
-| 指令资产 | `~/.claude/docs/protocols/instruction-assets.md` + `instruction-assets/` | `python ~/.claude/hooks/scripts/protocol_check.py` | **已落** |
+| 指令资产 | `~/.claude/docs/protocols/instruction-assets.md` + `instruction-assets/` | `protocol-report.py`（内含 `protocol_check.py`） | **已落** |
 
-「校验或执行者」列两种含义：`*_check.py`、`protocol_check.py` 是对文档的只读校验；`resource-guard.py`（PreToolUse）、`session-guard.py`（SessionStart／SessionEnd）是运行时执行该协议的 hook。门禁与记忆共用一个脚本，两者分开报，退出码 0 才算全过。`任务笔记`、`委派`、`协作`、`证据与交付`、`表达` 的校验留 `—`：前两者的产物是各项目仓库里自由形态的记录与 prompt 模板，后三者判的是问不问、证据够不够、措辞准不准，磁盘上都没有可判的固定形态。`指令资产` 的正文由 `protocol_check.py` 的体积、重复、生命周期三项覆盖。源路径已删的项目的记忆不再被加载，脚本把它们单独分组计数、不细查。
+「校验或执行者」列两种含义：`*_check.py`、`protocol_check.py`（含经 `protocol-report.py` 调用）是对文档的只读校验；`pretool-guard.py`（PreToolUse 合并入口，内跑 `product-guard.py`、`resource-guard.py`）、`session-guard.py`（SessionStart／SessionEnd）是运行时执行该协议的 hook。门禁与记忆共用一个脚本，两者分开报，退出码 0 才算全过。`任务笔记`、`委派`、`协作`、`证据与交付`、`表达` 的校验留 `—`：前两者的产物是各项目仓库里自由形态的记录与 prompt 模板，后三者判的是问不问、证据够不够、措辞准不准，磁盘上都没有可判的固定形态。`指令资产` 的正文由 `protocol_check.py` 的体积、重复、生命周期三项覆盖。源路径已删的项目的记忆不再被加载，脚本把它们单独分组计数、不细查。
 
 ## 共同要求
 

@@ -94,7 +94,7 @@ task-queue/
 worktrees/
 task-notes-reminder/
 
-# ----- skills (cc-switch links resolved to real files, tracked) -----
+# ----- skills: 真源在本仓库内，是真实目录而非符号链接（git 不跟随链接，链接会让白名单静默失效，见 docs/protocols/ledger.md 第八节）-----
 skill-trimmer-workspace/
 
 # ----- backups (git history is the source of truth) -----
@@ -132,11 +132,9 @@ ide/
 skills/*
 !skills/last30days/
 archive-skills/agent-browser/
-!skills/ai-product-development/
 !skills/article-writer/
 !skills/awesome-design-md/
 !skills/bidirectional-steelman/
-!skills/cc-switch-setting-sync/
 !skills/coding-workflow/
 !skills/content-to-note/
 skills/content-to-note/scripts/wechat/node_modules/
@@ -145,13 +143,10 @@ skills/content-to-note/scripts/wechat/node_modules/
 !skills/docker-only/
 !skills/drawio-chart/
 !skills/improver-skill/
-!skills/install-ledger/
-!skills/instruction-engineering/
 !skills/leader/
 !skills/auto-browser/
 !skills/local-env-pitfalls/
 !skills/parallel-delegation/
-!skills/skill-auditor/
 !skills/asset-auditor/
 !skills/asset-guide/
 !skills/task-notes/

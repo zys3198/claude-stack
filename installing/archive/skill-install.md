@@ -339,3 +339,10 @@
 - **回退**：25 个目录不在 `.gitignore` 白名单内，`git checkout` 不适用；回退用 `~/.claude/plugins/cache/mattpocock/mattpocock-skills/1.2.3/` 的英文原文重做直译，或按本条列出的典型改动逐条改回。
 - **验证**：`yaml.safe_load` 逐份解析 25 个 frontmatter 全通过；逐 skill 与上游源文件比对——正文逐字节一致、换行符未翻、文件清单一致且无 `agents/`、`disable-model-invocation` 与 `argument-hint` 与源一致、除 `description` 外无新增字段（`version` 为上一轮故意添加，已从越界判据中排除）；单行 description、无 ASCII 单引号破坏 YAML。校验脚本 `verify_redesc.py` 报「通过: 25 失败: 0」。会话内 skill 列表热重载实测出现 11 条新描述（恰为无 `disable-model-invocation` 的 11 条），无需重启。
 - **未做**：未动正文、未动 `name`／`disable-model-invocation`／`argument-hint`；未改上游 cache 与 marketplace clone（仍作 fork 基线）；未动 `CLAUDE.md` 与 coding-workflow 里 16 处 skill 引用（上一轮已改为裸名，本轮改写不涉及引用）。
+### archify 注销（2026-10-02）
+
+- **变更**：现状表 `archify` 行整行删除。该 skill 状态列原被写作「已删除」，不在协议 §三枚举内；按 §七，对象已不在本机现状即整行删掉、只在流水留痕。
+- **依据**：`~/.claude/skills/archify/` 已随 skill 归置到 `~/.config/magpie/library/skills/` 的迁移一并移出。第三方分发件（v2.17，含 LICENSE 与 THIRD_PARTY_NOTICES），非自建。
+- **回退**：重新 clone 上游取 v2.17（`author tt-a1i`，基于 `Cocoon-AI/architecture-diagram-generator`，MIT），安装命令原文见本文件上方 2026-09-23 登记行。**2026-10-02 订正**：原写的另一条回退「亦可从 `~/.claude/backups/skills-before-slim-2026-09-21/` 取历史副本」不成立——该目录实测只有 21 个自建 `-by-user` skill，从未含第三方件；全盘 `find` 在 `backups/` 与 magpie 库下均无 archify 副本。故**上游 clone 是唯一回退路径**，不是可选项之一。
+- **验证**：`~/.claude/skills/archify` 不存在；`~/.claude/archive-skills/archify/` 亦已不在。`ledger_check.py` 回到全绿。
+- **未做**：未核 `~/.claude/plugins/cache/` 下是否还有同名副本。**本条是补记他人改动，非本会话执行。**
