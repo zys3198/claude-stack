@@ -1540,4 +1540,4 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **依据**：2026-10-02 实测——`hooks/claude-notify.ps1` 磁盘上不存在；`settings.json` 的 `hooks` 里**没有任何 `Notification` 事件注册**，`StopFailure` 只剩 orca 的 `claude-hook.cmd`。按协议 §七「对象不再是本机现状」整行删掉、只在流水留痕。删除动作发生在更早的会话，本次只做核实与补记。
 - **回退**：该文件在 git 内，`git checkout HEAD -- hooks/claude-notify.ps1` 可取回；重新接线需同时改 `settings.json`。
 - **验证**：`test -e hooks/claude-notify.ps1` 为否；遍历 `settings.json → hooks` 全部事件，无一条 command 含 `claude-notify`。
-- **未做**：**通知功能目前无任何 hook 承接**——`Notification` 事件没有注册方。是刻意移除还是误删未查，需要用户确认后再决定是否接回。原行「不挂 PostToolUseFailure，避免工具失败噪声」是有效的设计约束，接回时应保留。
+- **裁定（2026-10-02，用户答）**：通知功能**确认不要**，不接回。本条从「未决」转为「已决」——原先记的「是刻意移除还是误删未查」到此终结：不论当初动因如何，`Notification` 事件无注册方就是本机现状，回接与否是产品选择而非待查缺口。原行「不挂 PostToolUseFailure，避免工具失败噪声」随本条一并作废，不再是待恢复时的设计约束。

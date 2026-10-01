@@ -7,7 +7,7 @@
 | 目录/文件 | 内容 |
 |---|---|
 | `CLAUDE.md` | 全局指令（给 AI 的规则） |
-| `hooks/` | 会话生命周期守卫与工具链脚本（pretool-guard 合并入口、session-guard、product-guard、resource-guard、protocol-report、protocol-router、通知） |
+| `hooks/` | 会话生命周期守卫与工具链脚本（pretool-guard 合并入口、session-guard、product-guard、resource-guard、protocol-report、protocol-router） |
 | `skills/` | `.gitignore` 白名单制，只追踪自建 skill。2026-10-02 实测：磁盘 43 项**全部为仓库内真实目录**（当日从 `~/.config/magpie/library/skills/` 的符号链接复制回来，该库不再充当真源）；git 追踪 23 个，其中 5 个已从磁盘删除、18 个在用。白名单与磁盘仍有错位，以 `installing/skill-install.md` 为准 |
 | `statusline/` | 状态栏 JS（statusline.js、magpie-usage.js、`lib/session-bridge.js`） |
 | `docs/` | 配置清单、盘点、迁移计划 |
