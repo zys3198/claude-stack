@@ -346,9 +346,17 @@ def test_session_guard():
     finally:
         outside_repo.rmdir()
 
-    out_claude = run_hook(sg, "handle_start",
-                          {"cwd": str(Path.home() / ".claude"), "session_id": "me"})
-    check("机制自己的仓库按普通仓库汇报", "会话卫生" in out_claude, out_claude)
+    # 自造脏状态：早先这里直接拿真实的 ~/.claude 当夹具，断言它会报会话卫生，
+    # 那个断言只是因为本机恰好一直有未提交改动才成立——工作树一干净就变成假失败，
+    # 与被测代码无关。改为放一个临时未跟踪文件，测完即删。
+    probe = Path.home() / ".claude" / f"_selftest_dirty_{os.urandom(4).hex()}"
+    probe.write_text("x\n", encoding="utf-8")
+    try:
+        out_claude = run_hook(sg, "handle_start",
+                              {"cwd": str(Path.home() / ".claude"), "session_id": "me"})
+        check("机制自己的仓库按普通仓库汇报", "会话卫生" in out_claude, out_claude)
+    finally:
+        probe.unlink(missing_ok=True)
 
     out_wt = run_hook(sg, "handle_start",
                       {"cwd": str(TREES / "sample-hold"), "session_id": "me"})
