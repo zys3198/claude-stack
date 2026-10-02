@@ -2,7 +2,7 @@
 
 目的：**任何 skill / MCP / 插件 / CLI 装完，或自建 skill / hook / 配置改完，必须在对应台账登记一条**。重装机器、换环境、回滚时，拿着这些表就能原样装回。
 
-字段含义、流水格式、归档规则见 [`docs/protocols/ledger.md`](../docs/protocols/ledger.md)。本文件只做入口。
+字段含义、流水格式、归档规则见 [`docs/protocols/ledger/ledger.md`](../docs/protocols/ledger/ledger.md)。本文件只做入口。
 
 ## 文件分工
 

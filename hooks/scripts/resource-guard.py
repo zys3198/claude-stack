@@ -1,5 +1,5 @@
 # 资源守卫：PreToolUse 阶段执行客观资源检查、确定性硬阻断与高风险兜底，不代替主模型做 R0-R4 语义分类。
-# 规则依据见 ~/.claude/CLAUDE.md 第 1.3 节与 docs/protocols/execution-env.md（容器内存上限、
+# 规则依据见 ~/.claude/CLAUDE.md 第 1.3 节与 docs/protocols/execution-env/execution-env.md（容器内存上限、
 # 独占资源先协商、一律在容器内执行）；工作树规则见 docs/session-lifecycle.md 第七节。
 #
 # 判据一：docker-compose 文件改动后，相对改动前新增的服务必须同时声明 mem_limit 与
@@ -74,7 +74,7 @@ except Exception as exc:
 COMPOSE_FILE = re.compile(r"^[\w.-]*compose[\w.-]*\.ya?ml$", re.I)
 # heredoc 起始标记：<<EOF、<<'EOF'、<<-EOF。用来把正文从命令里剥掉。
 HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_]\w*)\1")
-# 新增服务必须同时具备的两项。依据 docs/protocols/execution-env.md 与 docs/session-lifecycle.md 第七节：
+# 新增服务必须同时具备的两项。依据 docs/protocols/execution-env/execution-env.md 与 docs/session-lifecycle.md 第七节：
 # 内存上限防单容器吃光本机，禁止提权防容器内进程拿到 root 之外的额外权限。
 REQUIRED_KEYS = ("mem_limit", "security_opt")
 # 判据一在 Bash 路径上的粗判：这些命令会把内容写进文件，取出目标文件名比对 compose 文件名。
@@ -109,7 +109,7 @@ DOCKER_OPTS_WITH_VALUE = {
     "--net", "--label", "--mount", "--entrypoint", "--restart", "--env-file",
     "--log-driver", "--stop-signal", "--cpus", "--memory-swap",
 }
-# 命令起首位置出现这些名字时按「宿主机上的构建工具链」拦下。依据 docs/protocols/execution-env.md：
+# 命令起首位置出现这些名字时按「宿主机上的构建工具链」拦下。依据 docs/protocols/execution-env/execution-env.md：
 # 在本机运行的构建、测试与服务一律在容器内执行，宿主机只保留只读查看、git 与 docker。
 # 不含 python：宿主机上的 python 在本机只用于只读查看（查进程与端口、跑 ~/.claude 下的
 # 状态脚本），而它是通用解释器，命令行上看不出是查一下还是起一个服务。
@@ -467,7 +467,7 @@ def check_compose(tool, tool_input, cwd):
         return
     deny(
         f"docker-compose 文件 {name} 里新增的服务没有写全资源限制：{'；'.join(problems)}。"
-        f"依据 ~/.claude/docs/protocols/execution-env.md，每个服务都要同时声明 mem_limit"
+        f"依据 ~/.claude/docs/protocols/execution-env/execution-env.md，每个服务都要同时声明 mem_limit"
         f"（内存上限）与 security_opt（禁止容器内进程提权）。补齐后再写入。"
     )
 
@@ -525,7 +525,7 @@ def check_compose_write(command, cwd):
             name = os.path.basename(target.replace("\\", "/"))
             if COMPOSE_FILE.match(name):
                 deny(
-                    f"该命令要改写 docker-compose 文件 {name}。依据 ~/.claude/docs/protocols/execution-env.md，"
+                    f"该命令要改写 docker-compose 文件 {name}。依据 ~/.claude/docs/protocols/execution-env/execution-env.md，"
                     f"新增的服务必须同时声明 mem_limit（内存上限）与 security_opt"
                     f"（禁止容器内进程提权），而通过重定向或 sed 这类写法改写时读不到改动前后的"
                     f"内容，无法自动核对。确认这次改动会写全这两项之后继续。"
@@ -815,7 +815,7 @@ def check_host_toolchain(command, cwd):
     if name is None:
         return
     deny(
-        f"该命令要在宿主机上执行 {name}。依据 ~/.claude/docs/protocols/execution-env.md，需要在本机"
+        f"该命令要在宿主机上执行 {name}。依据 ~/.claude/docs/protocols/execution-env/execution-env.md，需要在本机"
         f"运行的构建、测试与服务一律在容器内执行，宿主机只保留只读查看、git 与 docker 命令。"
         f"改到容器内执行，或在 compose 里加一个对应服务。"
     )

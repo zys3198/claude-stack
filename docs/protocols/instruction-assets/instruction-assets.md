@@ -53,15 +53,15 @@ P0＝误路由、幻觉目标、危险动作无门或运行完全失效；P1＝�
 
 | 用户目标 | 读哪份 |
 |---|---|
-| 新建或重写 Skill | [`instruction-assets/new-skill-design.md`](instruction-assets/new-skill-design.md) |
-| 缩小单个入口，或减少调用后的上下文 | [`instruction-assets/trim-entry.md`](instruction-assets/trim-entry.md) |
-| 检查多个 Skill 的搭配 | [`instruction-assets/combination-review.md`](instruction-assets/combination-review.md) |
+| 新建或重写 Skill | [`instruction-assets/new-skill-design.md`](new-skill-design.md) |
+| 缩小单个入口，或减少调用后的上下文 | [`instruction-assets/trim-entry.md`](trim-entry.md) |
+| 检查多个 Skill 的搭配 | [`instruction-assets/combination-review.md`](combination-review.md) |
 
 ## 四、项目指令资产
 
 ### 建立项目 AI 上下文
 
-用户要求让 AI 看懂项目、建立或补充项目 AI 上下文时，读 [`instruction-assets/build-project-context.md`](instruction-assets/build-project-context.md)。产物输出到 `docs/ai-context/`，由用户审阅后自行落地。
+用户要求让 AI 看懂项目、建立或补充项目 AI 上下文时，读 [`instruction-assets/build-project-context.md`](build-project-context.md)。产物输出到 `docs/ai-context/`，由用户审阅后自行落地。
 
 ### 审查指令设计
 
@@ -74,7 +74,7 @@ P0＝误路由、幻觉目标、危险动作无门或运行完全失效；P1＝�
 3. **证据分级**：`[源码]`、`[执行记录]`、`[官方原则]`、`[规则推测]`、`[未知]` 分开标；静态文字不能冒充运行行为。
 4. **输出最小 diff**：每条 FAIL 写位置、最小摘录、场景、证据类型、影响、diff 和保留约束；全部通过时写「无须修改」。
 
-九项检查的操作标准，以及六条冲突判据（两个负担、信息层级、正面陈述、锚定词、context pointer、归置相邻）见 [`instruction-assets/review-basis.md`](instruction-assets/review-basis.md)。判断常驻还是按需时，优先保留安全、权限、业务和验收门禁；只在当前分支会改变判断/执行/验收的资料才读取。
+九项检查的操作标准，以及六条冲突判据（两个负担、信息层级、正面陈述、锚定词、context pointer、归置相邻）见 [`instruction-assets/review-basis.md`](review-basis.md)。判断常驻还是按需时，优先保留安全、权限、业务和验收门禁；只在当前分支会改变判断/执行/验收的资料才读取。
 
 **完成条件**：所有范围内文件都有结论；建议含原文、场景、最小 diff、证据类型和保留约束；不同证据等级不混写；未执行内容标 `unknown`、`not-run` 或「未验证」；末尾给一个最小下一步或明确「无需修改」。
 
@@ -89,7 +89,7 @@ P0＝误路由、幻觉目标、危险动作无门或运行完全失效；P1＝�
 - `AGENTS.md` 是内容源，`CLAUDE.md` 只用 `@AGENTS.md` 导入并补 Claude Code 特有内容；不双写、不用 symlink。
 - 根文件只留路径与 1–2 句摘要；真正非有不可的内容限于项目说明、非默认包管理器、非标准构建/类型检查命令。根入口预算 ≤120 行。
 - 全局规则、项目事实、术语与领域模型、ADR、任务状态、Skill 流程、hook/CI/测试和 memory 分层归置；可复用结论就近落盘并更新根索引，索引过期主动修正。
-- 草稿模板见 [`instruction-assets/templates/`](instruction-assets/templates/)。
+- 草稿模板见 [`instruction-assets/templates/`](templates/)。
 
 ### 吸收外部方法论文章
 

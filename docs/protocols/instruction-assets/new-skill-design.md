@@ -1,6 +1,6 @@
 # 新 Skill 设计
 
-适用：用户明确要新建或重写 Skill 时，由 `docs/protocols/instruction-assets.md` 读取本文件。
+适用：用户明确要新建或重写 Skill 时，由 `docs/protocols/instruction-assets/instruction-assets.md` 读取本文件。
 
 先不用候选 Skill 裸跑；已能稳定完成就不新建。再写设计卡（问题、用户、宿主事实、非目标、触发、输入输出、风险、验收），把项目约定/机械约束/静态知识/库级治理分流到宿主文件、hook/CI、reference 或 `asset-auditor`。只写模型猜不到且会复用的核心，长资料入 `references/`，机械动作入 `scripts/`；定义可重跑、失败状态和维护入口。宿主迁移先查官方能力、原生包和真实源码，第三方优先插件化。
 

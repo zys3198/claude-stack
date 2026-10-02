@@ -26,7 +26,7 @@
 
 - **改配置** → 走 CLAUDE.md §1 流程（确认线 + commit 前展示 stat）。
 - **同步 external-configs** → 源变更后手动 `cp`，见 `external-configs/README.md`。
-- **skills 的真源**就在 `~/.claude/skills/` 下，是仓库内的真实目录；本仓库按 `.gitignore` 白名单追踪自建 skill（第三方随插件走，不入 git）。真源不得放在仓库外——git 不跟随符号链接，2026-10-02 曾因此让自建 skill 静默失去版本备份，见 `docs/protocols/ledger.md` 第八节。
+- **skills 的真源**就在 `~/.claude/skills/` 下，是仓库内的真实目录；本仓库按 `.gitignore` 白名单追踪自建 skill（第三方随插件走，不入 git）。真源不得放在仓库外——git 不跟随符号链接，2026-10-02 曾因此让自建 skill 静默失去版本备份，见 `docs/protocols/ledger/ledger.md` 第八节。
 
 ## 历史里程碑
 

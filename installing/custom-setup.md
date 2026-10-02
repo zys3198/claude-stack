@@ -20,16 +20,16 @@
 | content-to-note | 在用 | `~/.claude/skills/content-to-note/` | 自建 | git | 2026-09-20 起仅手动调用；2026-09-26：按 writing-for-agents 保留三类来源与学习型笔记目标；仍仅用户显式调用 |
 | dev-clean | 在用 | `~/.claude/skills/dev-clean/` | 自建 | git | 由 `commands/dev-clean.md` 迁入；2026-09-26：触发描述收窄为用户明确项目收尾，并保留资源删除／停止与 push 门禁 |
 | dev-status | 在用 | `~/.claude/skills/dev-status/` | 自建 | git | 由 `commands/dev-status.md` 迁入；2026-09-26：触发描述改为查看仓库状态并原样返回脚本输出 |
-| docker-only | 在用 | `~/.claude/skills/docker-only/`（触发面；正文在 `docs/protocols/execution-env.md`） | 自建 | git | 2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：触发描述前置运行动作、受限容器流程与宿主边界；恢复模型可调用。2026-09-27：正文挪进 `docs/protocols/execution-env.md`，`references/new-project-setup.md` 移到 `docs/protocols/execution-env/`；本 Skill 只剩触发面与必读指针，仍 model-invocable |
+| docker-only | 在用 | `~/.claude/skills/docker-only/`（触发面；正文在 `docs/protocols/execution-env/execution-env.md`） | 自建 | git | 2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：触发描述前置运行动作、受限容器流程与宿主边界；恢复模型可调用。2026-09-27：正文挪进 `docs/protocols/execution-env/execution-env.md`，`references/new-project-setup.md` 移到 `docs/protocols/execution-env/`；本 Skill 只剩触发面与必读指针，仍 model-invocable |
 | drawio-chart | 在用 | `~/.claude/skills/drawio-chart/` | 自建 | git | 含 examples/ |
 | improver-skill | 在用 | `~/.claude/skills/improver-skill/` | 自建 | git | 原名 wiki-skill；2026-09-26：按 writing-for-agents 明确 Trace、Pattern、候选 Skill 与 gate 四个入口；仍仅用户显式调用 |
 | leader | 在用 | `~/.claude/skills/leader/` | 自建 | git | 2026-09-24 补进 `.gitignore` 白名单，此前一直被忽略；2026-09-26：按 writing-for-agents 明确调研、独立执行与验收任务书入口；仍仅用户显式调用 |
 | last30days | 在用 | `~/.claude/skills/last30days/` | 本地化，上游已切断 | git | v3.25.0；原第三方裸 skill 已本地化，`disable-model-invocation: true`，按 `/last30days` 手动调用；含 `references/` 与 `scripts/`，跳过上游 `assets/`。**2026-09-29 纳入 git 复核**：`.gitignore:131` 白名单虽已加，但从未 `git add`——135 文件 / 2.85 MB 一直是 untracked，本列写 `git` 的恢复路径**当时不成立**，提交 `b92a9d5` 后才成立。同日「轻量化」勘察：`references/` 分层**已完成**（8 份 127 KB，主文件各 Step 0.x 章只剩指针），剩余 143,486 B 是必须常驻的契约带（文内 `:87`/`:179` 记着规则移出前部后连续失败的实例），可移量仅约 4%；故只把 `## WHEN USER RESPONDS` 主体移入 `references/followup.md` 留指针，143,486 → 137,989 B，字节完全对账。保留 `CONTEXT MEMORY`、`## Output Summary Footer`、`Security & Permissions`（ht-ml.app 发布门禁）。备份 `backups/skill-last30days-slim-2026-09-29/` |
 | local-env-pitfalls | 在用 | `~/.claude/skills/local-env-pitfalls/` | 自建 | git | 含 references/；2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 前置脚本、命令与子代理执行前的坑位查询入口；恢复模型可调用 |
-| parallel-delegation | 在用 | `~/.claude/skills/parallel-delegation/`（触发面；正文在 `docs/protocols/delegation.md`） | 自建 | git | 2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 明确单个／并行委派及配置确认门禁；恢复模型可调用。2026-09-27：正文挪进 `docs/protocols/delegation.md`，三份 `references/` 移到 `docs/protocols/delegation/`；本 Skill 只剩触发面与必读指针，仍 model-invocable |
+| parallel-delegation | 在用 | `~/.claude/skills/parallel-delegation/`（触发面；正文在 `docs/protocols/delegation/delegation.md`） | 自建 | git | 2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 明确单个／并行委派及配置确认门禁；恢复模型可调用。2026-09-27：正文挪进 `docs/protocols/delegation/delegation.md`，三份 `references/` 移到 `docs/protocols/delegation/`；本 Skill 只剩触发面与必读指针，仍 model-invocable |
 | asset-auditor | 在用 | `~/.claude/skills/asset-auditor/` | 自建 | git | 含 references/；原名 skill-trimmer，2026-09-25 泛化改名——判定范围扩到原则文件映射表里的每一类资产，新增第 0 节资产类型映射表当唯一适配点；判据／扫描脚本／复审服务器未动；2026-09-26：按 writing-for-agents 收窄为库级留存、收窄、归档与新增审计，并保留只出建议边界；仍仅用户显式调用 |
 | asset-guide | 在用 | `~/.claude/skills/asset-guide/` | 自建 | git | 含 references/；2026-09-25 新建；model-invocable（不加 `disable-model-invocation`），`description` 即常驻入口；正文八步流程，写作判据转 `/writing-for-agents`；2026-09-26：按 writing-for-agents 将八步流程收窄为资产变更前的类型、入口、元数据、索引与生命周期指针；2026-09-27：资产原则由 `rules/principles.md` 移入 `references/principles.md`（九条判据 + 本机正反例 + 边界 + 加载形态四格 + 映射表），并删去事后判据一条 |
-| task-notes | 在用 | `~/.claude/skills/task-notes/`（触发面；正文在 `docs/protocols/task-notes.md`） | 自建 | git | **保持模型可见**（SessionStart hook 按名调用它）；2026-09-26：按 writing-for-agents 前置跨会话接手、压缩与整理时的更新入口。2026-09-27：正文挪进 `docs/protocols/task-notes.md`；本 Skill 只剩触发面与必读指针，名字与触发面未动 |
+| task-notes | 在用 | `~/.claude/skills/task-notes/`（触发面；正文在 `docs/protocols/task-notes/task-notes.md`） | 自建 | git | **保持模型可见**（SessionStart hook 按名调用它）；2026-09-26：按 writing-for-agents 前置跨会话接手、压缩与整理时的更新入口。2026-09-27：正文挪进 `docs/protocols/task-notes/task-notes.md`；本 Skill 只剩触发面与必读指针，名字与触发面未动 |
 
 2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-2026-09-25/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Workspace\notes\skill-hook-review\SKILL-REVIEW.md`。
 
@@ -79,16 +79,16 @@
 | .gitignore skills 白名单 | 在用 | `~/.claude/.gitignore` | 自建 | git | 20 条 `!skills/<name>/` |
 | session-hygiene.json | 在用 | `~/.claude/session-hygiene.json` | 自建 | git | 独占容器清单 |
 | docs/protocols-index.md | 在用 | `~/.claude/docs/protocols-index.md` | 自建 | git | 协议总表；含「落点与命名」规约（原 `docs/protocols.md`）；2026-09-25 起是「删除判据」「触发点」两条维护条款的唯一来源，各协议正文只留分界 + 指针 |
-| docs/protocols/gate.md | 在用 | `~/.claude/docs/protocols/gate.md` | 自建 | git | 门禁协议；操作规则仍在 `CLAUDE.md` §1.3 |
-| docs/protocols/memory.md | 在用 | `~/.claude/docs/protocols/memory.md` | 自建 | git | 记忆协议；合并宿主格式说明与各项目 MEMORY.md 头部的约定 |
-| docs/protocols/collaboration.md | 在用 | `~/.claude/docs/protocols/collaboration.md` | 自建 | git | 协作协议；原 `CLAUDE.md` §1.1／§1.4／§2.1／§2.3／§6／§7.2／§7.3 原文搬入 |
-| docs/protocols/evidence.md | 在用 | `~/.claude/docs/protocols/evidence.md` | 自建 | git | 证据与交付协议；原 `CLAUDE.md` §3／§4 原文搬入 |
-| docs/protocols/expression.md | 在用 | `~/.claude/docs/protocols/expression.md` | 自建 | git | 表达协议；原 `CLAUDE.md` §5 原文搬入 |
-| docs/protocols/ledger.md | 在用 | `~/.claude/docs/protocols/ledger.md` | 自建 | git | 台账协议；2026-09-27 由 `skills/install-ledger/` 的 SKILL.md 正文 + 两份 `references/` 三合一并入；校验脚本另落 `hooks/scripts/ledger_check.py`；2026-10-02 新增第八节「真源在库外时的改动与回退」——`~/.claude/skills/` 43 项全为符号链接，真源的库不在 git 内，实测 18 项有 `~/.claude` 快照、25 项没有，回退走 `git show` 不走 `git checkout` |
-| docs/protocols/task-notes.md | 在用 | `~/.claude/docs/protocols/task-notes.md` | 自建 | git | 任务笔记协议；2026-09-27 由 `skills/task-notes/SKILL.md` 正文挪入，skill 留触发面 |
-| docs/protocols/execution-env.md | 在用 | `~/.claude/docs/protocols/execution-env.md` | 自建 | git | 执行环境协议；2026-09-27 由 `skills/docker-only/SKILL.md` 正文挪入，`new-project-setup.md` 落同目录子目录 `execution-env/` |
-| docs/protocols/delegation.md | 在用 | `~/.claude/docs/protocols/delegation.md` | 自建 | git | 委派协议；2026-09-27 由 `skills/parallel-delegation/SKILL.md` 正文挪入，三份 `references/` 落同目录子目录 `delegation/` |
-| docs/protocols/instruction-assets.md | 在用 | `~/.claude/docs/protocols/instruction-assets.md` | 自建 | git | 指令资产协议；2026-09-27 合并 `skill-auditor` 与 `instruction-engineering` 两个 skill 的清单与模板，细则落同目录子目录 `instruction-assets/` |
+| docs/protocols/gate/gate.md | 在用 | `~/.claude/docs/protocols/gate/gate.md` | 自建 | git | 门禁协议；操作规则仍在 `CLAUDE.md` §1.3 |
+| docs/protocols/memory/memory.md | 在用 | `~/.claude/docs/protocols/memory/memory.md` | 自建 | git | 记忆协议；合并宿主格式说明与各项目 MEMORY.md 头部的约定 |
+| docs/protocols/collaboration/collaboration.md | 在用 | `~/.claude/docs/protocols/collaboration/collaboration.md` | 自建 | git | 协作协议；原 `CLAUDE.md` §1.1／§1.4／§2.1／§2.3／§6／§7.2／§7.3 原文搬入 |
+| docs/protocols/evidence/evidence.md | 在用 | `~/.claude/docs/protocols/evidence/evidence.md` | 自建 | git | 证据与交付协议；原 `CLAUDE.md` §3／§4 原文搬入 |
+| docs/protocols/expression/expression.md | 在用 | `~/.claude/docs/protocols/expression/expression.md` | 自建 | git | 表达协议；原 `CLAUDE.md` §5 原文搬入 |
+| docs/protocols/ledger/ledger.md | 在用 | `~/.claude/docs/protocols/ledger/ledger.md` | 自建 | git | 台账协议；2026-09-27 由 `skills/install-ledger/` 的 SKILL.md 正文 + 两份 `references/` 三合一并入；校验脚本另落 `hooks/scripts/ledger_check.py`；2026-10-02 新增第八节「真源在库外时的改动与回退」——`~/.claude/skills/` 43 项全为符号链接，真源的库不在 git 内，实测 18 项有 `~/.claude` 快照、25 项没有，回退走 `git show` 不走 `git checkout` |
+| docs/protocols/task-notes/task-notes.md | 在用 | `~/.claude/docs/protocols/task-notes/task-notes.md` | 自建 | git | 任务笔记协议；2026-09-27 由 `skills/task-notes/SKILL.md` 正文挪入，skill 留触发面 |
+| docs/protocols/execution-env/execution-env.md | 在用 | `~/.claude/docs/protocols/execution-env/execution-env.md` | 自建 | git | 执行环境协议；2026-09-27 由 `skills/docker-only/SKILL.md` 正文挪入，`new-project-setup.md` 落同目录子目录 `execution-env/` |
+| docs/protocols/delegation/delegation.md | 在用 | `~/.claude/docs/protocols/delegation/delegation.md` | 自建 | git | 委派协议；2026-09-27 由 `skills/parallel-delegation/SKILL.md` 正文挪入，三份 `references/` 落同目录子目录 `delegation/` |
+| docs/protocols/instruction-assets/instruction-assets.md | 在用 | `~/.claude/docs/protocols/instruction-assets/instruction-assets.md` | 自建 | git | 指令资产协议；2026-09-27 合并 `skill-auditor` 与 `instruction-engineering` 两个 skill 的清单与模板，细则落同目录子目录 `instruction-assets/` |
 | docs/session-lifecycle.md | 在用 | `~/.claude/docs/session-lifecycle.md` | 自建 | git | 会话启动、并发、收尾与工作树生命周期；由 `CLAUDE.md` §2 索引 |
 | installing/ | 在用 | `~/.claude/installing/` | 自建 | git | 四张现状表 + `archive/` |
 | docs/archive/ | 在用 | `~/.claude/docs/archive/` | 自建 | git | 4 份已废弃的时点产物，文件名 `<日期>-<主题>.md`，日期取内容反映的最新时点 |

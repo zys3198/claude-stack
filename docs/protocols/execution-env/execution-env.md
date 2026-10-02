@@ -53,7 +53,7 @@ Docker 容器内的真实业务写入、数据库写入、验收测试数据、�
 
 ## 新项目接入
 
-容器定义入口目录、资源字段、端口绑定、profiles 分组、容器内上限与台账登记见 [`execution-env/new-project-setup.md`](execution-env/new-project-setup.md)。
+容器定义入口目录、资源字段、端口绑定、profiles 分组、容器内上限与台账登记见 [`execution-env/new-project-setup.md`](new-project-setup.md)。
 
 ## 机械保证
 

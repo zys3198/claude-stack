@@ -16,10 +16,10 @@ description: 新增、修改、迁移或删除 Claude Code 资产前，先确定
 | 1 | **查重**：全库检索这条知识是否已有一处权威；命中就改那一处，不新建 | `principles.md` 的 B4 引用 > 复制；`docs/protocols-index.md`「维护条款」的删除判据 |
 | 2 | **定类型**：落进映射表的哪一行（skill／rules／协议文档／记忆／台账／hook／索引）；选不出类型的，通常说明它不该存在 | `principles.md` 映射表 |
 | 3 | **定位 L0**：这类资产的常驻入口是谁——常驻文件、model-invocable skill 的 `description`、索引一行 | 同上，「L0 由谁提供」列 |
-| 4 | **写元数据**：按类型走各自那份协议；`rules/*.md` 只写 `paths`，其余字段平台静默忽略 | `docs/protocols/memory.md`、`docs/protocols/ledger.md`、`docs/protocols-index.md` 的共同要求 |
+| 4 | **写元数据**：按类型走各自那份协议；`rules/*.md` 只写 `paths`，其余字段平台静默忽略 | `docs/protocols/memory/memory.md`、`docs/protocols/ledger/ledger.md`、`docs/protocols-index.md` 的共同要求 |
 | 5 | **最小正文**：只留触发条件、判据与动作；概念与阶梯不在本机复述 | `/writing-for-agents` |
 | 6 | **指针**：要全文时按名字引用（skill 名、协议路径），不复制正文，不写带版本号的缓存路径 | `/writing-for-agents` §Context pointers |
-| 7 | **更新索引**：协议进 `docs/protocols-index.md`；路径规则进 `CLAUDE.md` §2；记忆进 `MEMORY.md`；资产进台账现状表并追加流水 | `docs/protocols-index.md`、`docs/protocols/ledger.md` |
+| 7 | **更新索引**：协议进 `docs/protocols-index.md`；路径规则进 `CLAUDE.md` §2；记忆进 `MEMORY.md`；资产进台账现状表并追加流水 | `docs/protocols-index.md`、`docs/protocols/ledger/ledger.md` |
 | 8 | **设生命周期**：命名与日期用 `YYYY-MM-DD`、写状态词、留过期与删除判据；删除动作本身走确认线 | `docs/protocols-index.md`「落点与命名」与「维护条款」 |
 
 收尾跑一次 `python ~/.claude/hooks/scripts/protocol_check.py`——机器判据只在那一处实现。
@@ -31,7 +31,7 @@ description: 新增、修改、迁移或删除 Claude Code 资产前，先确定
 | 场景 | 去哪 |
 |---|---|
 | 审全库资产是否遵守 `references/principles.md` 的原则；判一条资产该留、该收窄还是该归档 | `asset-auditor`（只出建议，不删） |
-| 装完、卸完或换机后登记与核对来源、位置、状态、恢复路径 | `docs/protocols/ledger.md` |
-| 单个 Skill 的触发契约、运行行为、体量审计，或新建一个 Skill | `docs/protocols/instruction-assets.md` |
+| 装完、卸完或换机后登记与核对来源、位置、状态、恢复路径 | `docs/protocols/ledger/ledger.md` |
+| 单个 Skill 的触发契约、运行行为、体量审计，或新建一个 Skill | `docs/protocols/instruction-assets/instruction-assets.md` |
 | 建立或审查项目指令资产（`CLAUDE.md` / `AGENTS.md` / 模块说明） | 同上 |
-| 新建或修改一份协议文档（`docs/protocols/*.md`、`docs/session-lifecycle.md`） | `docs/protocols/instruction-assets.md` |
+| 新建或修改一份协议文档（`docs/protocols/*.md`、`docs/session-lifecycle.md`） | `docs/protocols/instruction-assets/instruction-assets.md` |

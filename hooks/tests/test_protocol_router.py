@@ -113,7 +113,7 @@ def main():
         check("工具·路径大小写不敏感", "instruction-assets.md" in out, out)
 
         out = feed(root, tool_event("Write", "tool-proto",
-                                    file_path=r"C:\ZYS\x\docs/protocols/gate.md"))
+                                    file_path=r"C:\ZYS\x\docs/protocols/gate/gate.md"))
         check("工具·协议文档写入也算指令资产", "instruction-assets.md" in out, out)
 
         out = feed(root, tool_event("Write", "tool-notes",

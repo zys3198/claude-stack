@@ -76,6 +76,6 @@ CLAUDE.md §1 只保留路由与高代价确认线；本文件保留编码任务
 
 ## 4. 止血与回退
 
-AI 改动引入错误时停止继续改，用 `git diff` 定位并分析根因，按 §1.0 手动恢复后重新验证。同一条验收连败 3 次时复盘已证伪假设并换下一项；结果比开工基线差就回滚并如实报告；已跑满 N 轮即停并汇报卡在哪。防作弊姿势与非阻塞执行见 [`docs/protocols/execution-discipline.md`](../../docs/protocols/execution-discipline.md)。
+AI 改动引入错误时停止继续改，用 `git diff` 定位并分析根因，按 §1.0 手动恢复后重新验证。同一条验收连败 3 次时复盘已证伪假设并换下一项；结果比开工基线差就回滚并如实报告；已跑满 N 轮即停并汇报卡在哪。防作弊姿势与非阻塞执行见 [`docs/protocols/execution-discipline/execution-discipline.md`](../../docs/protocols/execution-discipline/execution-discipline.md)。
 
 版本和维护入口见 [`references/MAINTENANCE.md`](references/MAINTENANCE.md)；变更记录见 `~/.claude/docs/skills/coding-workflow/CHANGELOG.md`。

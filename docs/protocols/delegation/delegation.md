@@ -5,10 +5,10 @@
 
 1. 先判断子任务是否独立、边界是否清楚、结果是否可单独验收，以及收益是否超过成本。收益有两笔：并行省下的时间，以及主代理窗口省下的上下文；成本是钱照付，加上协调与验收开销。需要跟主代理已有上下文一起权衡的决策不委派：worker 看不到主代理的窗口，做出来的取舍缺前提。
 2. 按主会话减少的中间材料评估上下文收益。要求 worker 返回短摘要、证据路径、未决项和状态，不把原始搜索结果、完整工具输出或重复背景带回主会话；摘要仍不足以验收时，宁可保留必要证据，不为节省上下文删掉验证依据。
-3. 准备派发时读取 [`delegation/dispatch-contract.md`](delegation/dispatch-contract.md)。
+3. 准备派发时读取 [`delegation/dispatch-contract.md`](dispatch-contract.md)。
 4. 批量并行（≥2 个 worker）前先派一个 worker 单跑同类任务，核对路由、权限、输入契约和产物格式；单跑未验证可靠不得放并行，首次暴露的通常是脚本和配置问题（参数传错、prompt 漏条件、权限少一项）。
-5. 涉及模型、effort、并发、隔离能力或失败处理时读取 [`delegation/runtime-and-failure.md`](delegation/runtime-and-failure.md)，并按下面的 Configuration gate 取得确认。
-6. 整合前读取 [`delegation/verification.md`](delegation/verification.md)，按风险完成主代理复核和最终报告。
+5. 涉及模型、effort、并发、隔离能力或失败处理时读取 [`delegation/runtime-and-failure.md`](runtime-and-failure.md)，并按下面的 Configuration gate 取得确认。
+6. 整合前读取 [`delegation/verification.md`](verification.md)，按风险完成主代理复核和最终报告。
 
 ## Keep in main agent
 

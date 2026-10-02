@@ -38,43 +38,43 @@ MAX_CHARS = 800
 # 协议 key → (相对 ~/.claude 的路径, 一句话说它管什么)。触发词里出现的路径都取自这里。
 PROTOCOLS = {
     "instruction-assets": (
-        "docs/protocols/instruction-assets.md",
+        "docs/protocols/instruction-assets/instruction-assets.md",
         "指令资产（CLAUDE.md／AGENTS.md／SKILL.md／协议文档）的类型判定、唯一入口、元数据与维护判据",
     ),
     "memory": (
-        "docs/protocols/memory.md",
+        "docs/protocols/memory/memory.md",
         "记忆的进退判据、frontmatter 字段与索引维护",
     ),
     "delegation": (
-        "docs/protocols/delegation.md",
+        "docs/protocols/delegation/delegation.md",
         "子代理派发的边界、契约字段与配置确认门禁",
     ),
     "ledger": (
-        "docs/protocols/ledger.md",
+        "docs/protocols/ledger/ledger.md",
         "安装资产的来源、位置、状态与恢复路径登记",
     ),
     "collaboration": (
-        "docs/protocols/collaboration.md",
+        "docs/protocols/collaboration/collaboration.md",
         "该不该问用户、方案怎么给、改动范围与纠正的处理",
     ),
     "execution-env": (
-        "docs/protocols/execution-env.md",
+        "docs/protocols/execution-env/execution-env.md",
         "构建、测试、跑脚本与起服务的容器流程与宿主机边界",
     ),
     "evidence": (
-        "docs/protocols/evidence.md",
+        "docs/protocols/evidence/evidence.md",
         "证据分级、三层完成判定与交付前检查",
     ),
     "expression": (
-        "docs/protocols/expression.md",
+        "docs/protocols/expression/expression.md",
         "中文用词、符号选取与用户原文保留",
     ),
     "gate": (
-        "docs/protocols/gate.md",
+        "docs/protocols/gate/gate.md",
         "R0–R4 影响等级、必须确认清单与授权范围字段",
     ),
     "task-notes": (
-        "docs/protocols/task-notes.md",
+        "docs/protocols/task-notes/task-notes.md",
         "跨会话任务的状态记录字段与更新时机",
     ),
     "session-lifecycle": (

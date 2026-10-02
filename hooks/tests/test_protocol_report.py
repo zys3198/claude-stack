@@ -116,17 +116,19 @@ def main():
         _, out = feed(root, "这不是 JSON")
         check("沉默·payload 非法 JSON 也不报错", out.strip() == "", out)
 
-        clean = root / "docs" / "protocols" / "clean.md"
+        clean = root / "docs" / "protocols" / "clean" / "clean.md"
+        clean.parent.mkdir(parents=True, exist_ok=True)
         clean.write_text("# 干净文档\n\n没有违规。\n", encoding="utf-8")
         _, out = feed(root, write_event(clean))
         check("沉默·查了但没命中", out.strip() == "", out)
 
         # ---------- 出声 ----------
-        big = root / "docs" / "protocols" / "big.md"
+        big = root / "docs" / "protocols" / "big" / "big.md"
+        big.parent.mkdir(parents=True, exist_ok=True)
         big.write_text("# 大文档\n\n" + "字" * 25_000, encoding="utf-8")
         _, out = feed(root, write_event(big))
         check("出声·刚写的文件超限", "additionalContext" in out and "超过 20 KB" in out, out)
-        check("出声·点名是哪一个文件", "docs/protocols/big.md" in out, out)
+        check("出声·点名是哪一个文件", "docs/protocols/big/big.md" in out, out)
 
         note = root / "projects" / "demo" / "memory" / "orphan.md"
         note.write_text("---\nname: orphan\ndescription: 没进索引\nmetadata:\n  type: feedback\n---\n\nx\n",
@@ -164,7 +166,7 @@ def main():
         _, out = feed(root, write_payload(root / "CLAUDE.md", "# 常驻指令\n\n合规。\n"))
         check("放行·合规写入不出声", out.strip() == "", out)
 
-        _, out = feed(root, write_payload(Path(root, "docs", "protocols", "new.md"), huge))
+        _, out = feed(root, write_payload(Path(root, "docs", "protocols", "new", "new.md"), huge))
         check("阻断·协议正文写入超限也拦", '"permissionDecision": "deny"' in out, out)
 
         _, out = feed(root, write_payload(Path(root, "skills", "demo2", "SKILL.md"), huge))
@@ -175,7 +177,7 @@ def main():
 
         _, out = feed(root, {"hook_event_name": "PreToolUse", "session_id": "s1",
                              "tool_name": "NotebookEdit",
-                             "tool_input": {"notebook_path": str(Path(root, "docs", "protocols", "nb.ipynb"))}})
+                             "tool_input": {"notebook_path": str(Path(root, "docs", "protocols", "nb", "nb.ipynb"))}})
         check("放行·NotebookEdit 判不出内容就不拦", out.strip() == "", out)
 
         # 盘上已经违规、这次写入是把它改好 → 放行，否则违规文件永远改不动

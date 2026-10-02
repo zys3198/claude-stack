@@ -32,9 +32,9 @@
 
 ## 规矩
 
-- 防作弊点名到具体姿势：按 `docs/protocols/execution-discipline.md`「防作弊」一节逐条点名（跳过测试、放宽判断、伪造被测对象、删测试、改判卷标准、吞失败），并把该节的基线不变量（测试数／覆盖率 ≥ 基线、skipped = 0）写成本书的硬指标；补测试类任务加「实现目录 `git diff` 为空（业务代码一行没动）」
+- 防作弊点名到具体姿势：按 `docs/protocols/execution-discipline/execution-discipline.md`「防作弊」一节逐条点名（跳过测试、放宽判断、伪造被测对象、删测试、改判卷标准、吞失败），并把该节的基线不变量（测试数／覆盖率 ≥ 基线、skipped = 0）写成本书的硬指标；补测试类任务加「实现目录 `git diff` 为空（业务代码一行没动）」
 - 不新增流程、权限、依赖，必须加的按笔记协议记进未决
-- 三道止损按 `docs/protocols/execution-discipline.md`「三道止损」一节
+- 三道止损按 `docs/protocols/execution-discipline/execution-discipline.md`「三道止损」一节
 - 项目自有纪律（分支／PR 规则、提交前检查）写在这里
 
 ## 完成条件

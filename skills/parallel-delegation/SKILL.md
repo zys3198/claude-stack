@@ -8,4 +8,4 @@ compatibility: 需要宿主提供 agent/subagent 调度能力；模型、effort�
 
 本 Skill 只保留触发面。命中它意味着：**接下来要派子代理**。
 
-规划前**必须读取 `~/.claude/docs/protocols/delegation.md`**——Route、留在主代理的活、Boundaries、Configuration gate 和失败判据都在那里，本文件不复述。启动前的配置展示与确认是硬门禁：常规单个委派也不豁免。
+规划前**必须读取 `~/.claude/docs/protocols/delegation/delegation.md`**——Route、留在主代理的活、Boundaries、Configuration gate 和失败判据都在那里，本文件不复述。启动前的配置展示与确认是硬门禁：常规单个委派也不豁免。

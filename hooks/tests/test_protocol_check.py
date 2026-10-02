@@ -116,8 +116,8 @@ CLEAN = {
     "CLAUDE.md": "# 常驻指令\n",
     "skills/asset-guide/references/principles.md": f"# 资产原则\n\n{TABLE}",
     "skills/demo/SKILL.md": "---\nname: demo\ndescription: 演示\n---\n\n正文。\n",
-    "docs/protocols/gate.md": GATE,
-    "docs/protocols-index.md": "# 协议索引\n\n| 会话生命周期 | `docs/session-lifecycle.md` |\n| 门禁 | `docs/protocols/gate.md` |\n",
+    "docs/protocols/gate/gate.md": GATE,
+    "docs/protocols-index.md": "# 协议索引\n\n| 会话生命周期 | `docs/session-lifecycle.md` |\n| 门禁 | `docs/protocols/gate/gate.md` |\n",
     "docs/session-lifecycle.md": "# 会话生命周期\n",
     "hooks/scripts/authorization_scope.py": SCOPE_PY,
     "installing/ledger.md": "# 台账\n",
@@ -201,7 +201,7 @@ def main():
 
         # ---------- 反例 · updated 过期 ----------
         old = (TODAY - timedelta(days=400)).isoformat()
-        code, out = case("stale", {"docs/protocols/old.md": f"# 老规则\n\n更新：{old}\n"}, "lifecycle")
+        code, out = case("stale", {"docs/protocols/old/old.md": f"# 老规则\n\n更新：{old}\n"}, "lifecycle")
         check("反例·updated 过期", code == 1 and old in out and "过期" in out, out)
 
         # ---------- 反例 · 映射表 ----------
@@ -259,11 +259,11 @@ def main():
         check("边界·119 字不算重复", code == 0, out)
 
         edge = (TODAY - timedelta(days=180)).isoformat()
-        code, out = case("stale-180", {"docs/protocols/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
+        code, out = case("stale-180", {"docs/protocols/old/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
         check("边界·恰好 180 天不过期", code == 0, out)
 
         edge = (TODAY - timedelta(days=181)).isoformat()
-        code, out = case("stale-181", {"docs/protocols/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
+        code, out = case("stale-181", {"docs/protocols/old/old.md": f"# 老规则\n\n更新：{edge}\n"}, "lifecycle")
         check("边界·181 天算过期", code == 1, out)
 
         code, out = case("empty-memory", {"projects/empty/memory/": ""}, "memory")
@@ -354,7 +354,7 @@ def main():
         code, out = run_file(dupe_dir, "projects/demo/memory/MEMORY.md", preview=f"# 索引\n\n{para}\n")
         check("阻断·项目记忆索引抄别处段落被拦", code == 3 and "重复" in out, out)
 
-        code, out = run_file(dupe_dir, "docs/protocols/probe.md", preview=f"# 协议\n\n{para}\n")
+        code, out = run_file(dupe_dir, "docs/protocols/probe/probe.md", preview=f"# 协议\n\n{para}\n")
         check("阻断·协议正文抄别处段落被拦", code == 3 and "重复" in out, out)
 
         code, out = run_file(dupe_dir, "skills/demo2/SKILL.md", preview=f"---\nname: demo2\ndescription: 演示\n---\n\n{para}\n")

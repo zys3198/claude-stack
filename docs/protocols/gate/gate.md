@@ -29,7 +29,7 @@
 | `critical_params` | 关键参数 |
 | `impact_ceiling` | 影响上限 |
 
-复用已有授权时四条都要相等或更宽：`targets`、`operation_family`、`critical_params` 必须完全相同，`impact_ceiling` 必须不小于请求值，且 `task_id` 是当前有效任务。任何一条放宽都算新动作，重新进入确认线——这就是 [`delegation.md`](delegation.md) 里「子代理不得扩大范围、跨会话复用或自行登记更高影响授权」的机械含义。
+复用已有授权时四条都要相等或更宽：`targets`、`operation_family`、`critical_params` 必须完全相同，`impact_ceiling` 必须不小于请求值，且 `task_id` 是当前有效任务。任何一条放宽都算新动作，重新进入确认线——这就是 [`delegation.md`](../delegation/delegation.md) 里「子代理不得扩大范围、跨会话复用或自行登记更高影响授权」的机械含义。
 
 ## 授权登记
 

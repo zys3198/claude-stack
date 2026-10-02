@@ -13,15 +13,15 @@
 
 | 判据 | 判什么 | 判据出处 |
 |---|---|---|
-| 门禁 | gate.md 的固定字段表 vs authorization_scope.py | docs/protocols/gate.md |
-| 记忆 | frontmatter 必填键、索引孤儿与死链 | docs/protocols/memory.md |
+| 门禁 | gate.md 的固定字段表 vs authorization_scope.py | docs/protocols/gate/gate.md |
+| 记忆 | frontmatter 必填键、索引孤儿与死链 | docs/protocols/memory/memory.md |
 | 命名 | ASCII、日期写成 YYYY-MM-DD | docs/protocols-index.md「落点与命名」|
 | 体积 | 根入口体量上限 20 KB | docs/protocols-index.md「体量硬触发」|
 | 重复 | 同一段落出现在两个根入口 | skills/asset-guide/references/principles.md B4 |
 | 密钥 | 高置信度密钥形态 | skills/asset-guide/references/principles.md C2 |
 | 生命周期 | 自报的 updated 是否过期 | skills/asset-guide/references/principles.md C4 |
 | 映射表 | 「资产 → 形态 → L0」表与磁盘双向对账 | skills/asset-guide/references/principles.md B6 |
-| 台账位置 | `installing/*.md` 现状表的位置列路径存在性 | docs/protocols/ledger.md 现状表 |
+| 台账位置 | `installing/*.md` 现状表的位置列路径存在性 | docs/protocols/ledger/ledger.md 现状表 |
 | 顶层文档 | `docs/*.md` 是否在协议总表或台账登记 | docs/protocols-index.md 共同要求 |
 | 指针 | 协议族文档的 Markdown 链接目标是否存在 | docs/protocols-index.md「维护条款」删除判据 |
 
@@ -58,14 +58,14 @@ PREVIEW = {}
 MEMORY_TYPES = {"user", "feedback", "project", "reference"}
 
 # 根入口：一次进上下文就是一整份的那类文件。体积、段落重复、生命周期三判据查它。
-# 各 glob 只到单层，子目录（`docs/protocols/*/`、`skills/*/references/` 等 references/
-# 形态）不在内：那是按分支单独取用的文档，共用的样板（如设计库各篇的组件词表）
-# 是那类产物的固有形态，不是冗余。
+# 协议正文是主题目录下的同名入口（`docs/protocols/*/<主题>.md`），比 `*/*.md` 深一层；
+# 同目录下的兄弟文件（`attribution-evidence.md` 等）是按分支单独取用的下沉件，与
+# `skills/*/references/` 一样不在内——那是按需取用的规程，共用样板是那类产物的固有形态。
 ENTRY_GLOBS = (
     "CLAUDE.md",
     "skills/*/SKILL.md",
     "docs/session-lifecycle.md",
-    "docs/protocols/*.md",
+    "docs/protocols/*/*.md",
     "docs/protocols-index.md",
     "installing/*.md",
     "projects/*/memory/*.md",
@@ -75,7 +75,7 @@ ENTRY_GLOBS = (
 # 覆盖全库每一轮都要付的常驻指令、协议正文（「维护条款」的体量硬触发要拦得住）
 # 与项目记忆索引；按路径模式判、不按存在与否，所以新写一份协议或一个新项目记忆
 # 索引也在内。范围只此一处，改这里就是改阻断面。
-BLOCK_SCOPE = ("CLAUDE.md", "docs/protocols/*.md", "docs/session-lifecycle.md",
+BLOCK_SCOPE = ("CLAUDE.md", "docs/protocols/*/*.md", "docs/session-lifecycle.md",
                "projects/*/memory/MEMORY.md")
 
 # 指针检查面：协议族文档。Markdown 链接目标必须存在——这是「维护条款」删除判据
@@ -84,7 +84,7 @@ POINTER_GLOBS = (
     "CLAUDE.md",
     "docs/protocols-index.md",
     "docs/session-lifecycle.md",
-    "docs/protocols/*.md",
+    "docs/protocols/*/*.md",
 )
 POINTER_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 
@@ -165,7 +165,7 @@ MAP_ROWS = {
     PRINCIPLES: PRINCIPLES,
     "CLAUDE.md": "CLAUDE.md",
     "skill": "skills/*/SKILL.md",
-    "docs/protocols/*.md": "docs/protocols/*.md",
+    "docs/protocols/*.md": "docs/protocols/*/*.md",
     "memory": "projects/*/memory/*.md",
     "notes": None,          # 落在各项目仓库里，~/.claude 下没有对应物
     "hook": "hooks/scripts/*.py",
@@ -216,7 +216,7 @@ BINARY_EXT = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".zip", ".gz", ".
 def set_root(root):
     global CLAUDE, GATE, SCOPE_PY, PROJECTS, FIXTURE
     CLAUDE = os.path.abspath(root)
-    GATE = os.path.join(CLAUDE, "docs", "protocols", "gate.md")
+    GATE = os.path.join(CLAUDE, "docs", "protocols", "gate", "gate.md")
     SCOPE_PY = os.path.join(CLAUDE, "hooks", "scripts", "authorization_scope.py")
     PROJECTS = os.path.join(CLAUDE, "projects")
     FIXTURE = CLAUDE != os.path.abspath(DEFAULT_ROOT)

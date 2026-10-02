@@ -18,7 +18,7 @@ disable-model-invocation: true
 | `docs/protocols/*.md` | 枚举目录 + 与 `protocols-index.md` 对账 | 四问 + 生命周期（rubric 一、九节） |
 | memory | 枚举 `projects/*/memory/` + `MEMORY.md` | 四问 + 索引一致性 |
 | `notes/<任务名>/` | 枚举目录 | 不审留删——证据区，只审「该不该进 notes」 |
-| hook | `settings.json` 各事件 + `hooks/` | 触发契约与失败模式；判定细则借 `docs/protocols/instruction-assets.md` 的十查 |
+| hook | `settings.json` 各事件 + `hooks/` | 触发契约与失败模式；判定细则借 `docs/protocols/instruction-assets/instruction-assets.md` 的十查 |
 | 台账／备份／授权记录 | 目录名 | 不适用「只放必要」，见原则文件「边界」一节 |
 
 skill 类独有的两样东西：网页复审通道（第 4 节，复审运行时只吃 `skills` 数组），以及触发面／描述预算判据。其他资产类走第 3 节的报告表。
@@ -80,4 +80,4 @@ python asset-auditor/scripts/review_server.py read --require-complete
 
 ## 数据驱动
 
-当前没有遥测时只使用可核的 mtime、引用方、台账、用户实测和运行输出；状态标为 `active`、`stale` 或 `archived`。机械判据跑 `protocol_check.py`，不在本 Skill 重写。单个 Skill 的设计/运行审计与跨指令文件审查转 `docs/protocols/instruction-assets.md`。
+当前没有遥测时只使用可核的 mtime、引用方、台账、用户实测和运行输出；状态标为 `active`、`stale` 或 `archived`。机械判据跑 `protocol_check.py`，不在本 Skill 重写。单个 Skill 的设计/运行审计与跨指令文件审查转 `docs/protocols/instruction-assets/instruction-assets.md`。

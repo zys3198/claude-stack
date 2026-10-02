@@ -37,7 +37,7 @@ A1 原在表达层，2026-10-02 挪进治理层：它判的是规则能不能被
 每条一个正例、一个反例，都取自本机实物。反例只标出问题，不在此改——改动走各自的确认线。
 
 **A1 协议化**
-- ✓ `docs/protocols/gate.md` 把门禁写成四个固定字段，`hooks/scripts/authorization_scope.py` 逐字比对：协议可执行、可核对
+- ✓ `docs/protocols/gate/gate.md` 把门禁写成四个固定字段，`hooks/scripts/authorization_scope.py` 逐字比对：协议可执行、可核对
 - ✗ 散文式授权描述「在合适的时候取得授权」——判据靠每次重新解读
 
 **A2 结构化**
@@ -69,7 +69,7 @@ A1 原在表达层，2026-10-02 挪进治理层：它判的是规则能不能被
 - ✗ `skills/last30days/SKILL.md` 到 2026-10-02 为 134.8 KB——20 KB 上限可机械判，但 `BLOCK_SCOPE` 不含 `skills/`，写入时只报告不拦
 
 **C4 生命周期**
-- ✓ 归档空壳写明归档位置、恢复方式与观察截止（60 天）；台账状态词枚举见 `docs/protocols/ledger.md`，由 `ledger_check.py` 强制对账，本文件不另列
+- ✓ 归档空壳写明归档位置、恢复方式与观察截止（60 天）；台账状态词枚举见 `docs/protocols/ledger/ledger.md`，由 `ledger_check.py` 强制对账，本文件不另列
 - ✗ 废弃 skill 原地留着、不标状态、不写恢复方式——半年后没人敢删
 
 ## 边界
