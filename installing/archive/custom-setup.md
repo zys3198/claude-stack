@@ -1549,3 +1549,11 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：本条只记录核实结果，未改任何磁盘状态。①magpie 副本已删，其内容与 `~/.claude/skills/` 下 43 项的搬迁前状态逐字节相同（搬迁时 `diff -r` 43/43 不符 0），真源仍在仓库内，无损失。②死链接删除前后无差别，未动。
 - **验证**：`ls -la ~/.agents/skills/` 实测三个目录无 `agent-browser`；`du -sh ~/.config/magpie/library/skills/` 报不存在。
 - **未做**：`skill-trimmer-workspace/` 的用途仍未查；`~/.augment/skills/agent-browser` 死链接未删（属 `~/.augment` 与 `~/.agents`，不在本仓库台账范围，删除需用户单独确认）。
+
+### 体检收尾：删 skill-trimmer-workspace 与 augment 死链接（2026-10-02）
+
+- **变更**：删 `~/.claude/skill-trimmer-workspace/`（392 KB，20 个文件）与 `~/.augment/skills/agent-browser` 死链接。`.gitignore` 删 `skill-trimmer-workspace/` 行并修第 97 行注释的协议路径（`docs/protocols/ledger.md` → `docs/protocols/ledger/ledger.md`，协议目录化时漏了本文件）。
+- **依据**：用户裁定直接删。删除前按三项勘察：①目录名语义指向 2026-09-03 那次 skill 精简的一次性工作区（`audit-report.md`、`inventory.json`、8 个 `shard-N-results.json`、`extract_targets.py` 等），对应的 `skill-trimmer` skill 本身已不存在；②内容是 2026-08-13 的 skill 盘点快照（96 项、11 个插件市场、无 `enabledPlugins` 字段），与当前实况 43 项、3 个插件、cc-switch 已卸载已隔数轮，留着会误导；③`git log --all -- skill-trimmer-workspace/` 为空，从未进 git，无快照。augment 死链接实测 `~/.agents/skills/` 下只有 `computer-use`/`orca-cli`/`orchestration`，无 `agent-browser`。
+- **回退**：两者均无 git 快照、不可恢复。skill-trimmer-workspace 的内容已由 2026-08-13 的盘点结论覆盖，且 `installing/archive/custom-setup.md` 的多条流水记载了那次精简的最终结果（4 份空壳 + 3 份归档物已清），中间产物无独立留存价值。augment 死链接删除无影响。
+- **验证**：`Test-Path` 与 `ls -la` 均确认目录与链接已消失；`~/.augment/skills/` 现为空目录。
+- **未做**：`~/.config/magpie/library/skills/` 的 43 份副本已由用户在本日删除（见上条）；`~/.augment/settings.json.bak`（25 B）未查内容。

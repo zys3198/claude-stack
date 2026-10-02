@@ -94,8 +94,7 @@ task-queue/
 worktrees/
 task-notes-reminder/
 
-# ----- skills: 真源在本仓库内，是真实目录而非符号链接（git 不跟随链接，链接会让白名单静默失效，见 docs/protocols/ledger.md 第八节）-----
-skill-trimmer-workspace/
+# ----- skills: 真源在本仓库内，是真实目录而非符号链接（git 不跟随链接，链接会让白名单静默失效，见 docs/protocols/ledger/ledger.md 第八节）-----
 
 # ----- backups (git history is the source of truth) -----
 *.bak
