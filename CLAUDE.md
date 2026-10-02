@@ -59,6 +59,7 @@
 | 编写命令、脚本或派子代理之前 | `local-env-pitfalls` | git-bash 路径改写、编码与解析坑位 |
 | 跨会话任务 | `docs/protocols/task-notes.md` + 项目 `notes/<任务名>/STATE.md` | 先读状态；段落边界保存已确认、已修改、未完成、下一步、验证结果 |
 | 派发子代理 | `docs/protocols/delegation.md` | 启动前展示模型、provider、route、effort、并发与隔离并取得确认 |
+| 执行有验收标准的任务、目标达成方式被判可疑、该不该停下换方向 | `docs/protocols/execution-discipline.md` | 防作弊点名姿势；基线不可退；连败 3 次换项；未决不阻塞 |
 | 拿不准该不该问用户、方案怎么给、改动范围与纠正 | `docs/protocols/collaboration.md` | 提问线、三次无进展即停、实验目录与产物去向 |
 | 给结论、写交付报告、判断任务算不算完成 | `docs/protocols/evidence.md` | 证据分级、三层完成判定、Git 交付前四条命令 |
 | 写回复、写提交信息、写落盘产物的措辞 | `docs/protocols/expression.md` | 中文与用词、符号优先、用户原文保留 |
