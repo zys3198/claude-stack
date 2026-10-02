@@ -1541,3 +1541,11 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：该文件在 git 内，`git checkout HEAD -- hooks/claude-notify.ps1` 可取回；重新接线需同时改 `settings.json`。
 - **验证**：`test -e hooks/claude-notify.ps1` 为否；遍历 `settings.json → hooks` 全部事件，无一条 command 含 `claude-notify`。
 - **裁定（2026-10-02，用户答）**：通知功能**确认不要**，不接回。本条从「未决」转为「已决」——原先记的「是刻意移除还是误删未查」到此终结：不论当初动因如何，`Notification` 事件无注册方就是本机现状，回接与否是产品选择而非待查缺口。原行「不挂 PostToolUseFailure，避免工具失败噪声」随本条一并作废，不再是待恢复时的设计约束。
+
+### skills 真源迁回仓库：三项「未做」的后续（2026-10-02，同日追加）
+
+- **变更**：核实上条「未做」三项的实际状态。①`~/.config/magpie/library/skills/` 的 43 份副本**已由用户删除**，原记「待用户单独裁定」就此消解，该库不再充当任何 skill 的来源副本。②`~/.augment/skills/` 下的链接实测为 `agent-browser -> ~/.agents/skills/agent-browser`，而该目录下只有 `computer-use`、`orca-cli`、`orchestration`，**`agent-browser` 不存在，是死链接**。③`skill-trimmer-workspace/`（392 KB）仍在磁盘上被忽略，用途未查。
+- **依据**：上条「未做」列明三项待办，其中两项因信息不足未动。核实后前两项已可定论，不必再挂待核。
+- **回退**：本条只记录核实结果，未改任何磁盘状态。①magpie 副本已删，其内容与 `~/.claude/skills/` 下 43 项的搬迁前状态逐字节相同（搬迁时 `diff -r` 43/43 不符 0），真源仍在仓库内，无损失。②死链接删除前后无差别，未动。
+- **验证**：`ls -la ~/.agents/skills/` 实测三个目录无 `agent-browser`；`du -sh ~/.config/magpie/library/skills/` 报不存在。
+- **未做**：`skill-trimmer-workspace/` 的用途仍未查；`~/.augment/skills/agent-browser` 死链接未删（属 `~/.augment` 与 `~/.agents`，不在本仓库台账范围，删除需用户单独确认）。
