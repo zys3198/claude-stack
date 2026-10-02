@@ -1529,7 +1529,7 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 ### skills 真源迁回仓库（2026-10-02）
 
 - **变更**：`~/.claude/skills/` 下 43 项由「全部为指向 `~/.config/magpie/library/skills/` 的符号链接」复制回仓库内真实目录，逐项摘除链接（43/43 成功，残留符号链接 0，2487 个文件）。同步改四处陈述：`README.md` 目录表与「维护」节、`installing/skill-install.md` 说明节与本地副本行、`docs/protocols/ledger.md` 第八节整节重写、`.gitignore` 第 97 行注释。顺带清 `.gitignore` 5 条失效白名单（`ai-product-development`、`cc-switch-setting-sync`、`install-ledger`、`instruction-engineering`、`skill-auditor`，对应目录已不存在）。现状表 `位置` 列无需改动——本就写的是 `~/.claude/skills/<名>/`，搬迁后由假变真。
-- **依据**：用户 2026-10-02 裁定「magpie 里面不需要管理 skill，skill 只放在 `.claude` 里面」。根因是 git 不跟随符号链接：白名单机制静默失效，413 个文件被判「已删除」，17 项自建 skill 实际无任何版本备份，而信号只是 `git status` 里一串删除条目。`ledger.md` 第八节由「真源在库外时如何回退」改写为「真源必须在仓库内」。
+- **依据**：用户 2026-10-02 裁定「magpie 里面不需要管理 skill，skill 只放在 `.claude` 里面」。根因是 git 不跟随符号链接：白名单机制静默失效，413 个文件被判「已删除」，17 项自建 skill 实际无任何版本备份，而信号只是 `git status` 里一串删除条目。`ledger.md` 第八节由「真源在库外时如何回退」改写为「真源必须在仓库内」。**2026-10-02 补**：同日按用户裁定「档案」，该节再次收窄——事故细节（43 项符号链接、413 个文件被判已删除、8+2 的塌缩结果）移回本条，协议正文只留判据、符号链接令白名单失效的机理、`ls -l` 核实手段与修法步骤，并加一句指回本条。
 - **回退**：`git checkout HEAD -- skills/`（仓库内快照自 2026-09-29／09-30 起）；`~/.config/magpie/library/skills/` 原 43 项**未删**，是本次搬迁的来源副本，可作第二退路。
 - **验证**：搬迁前后各跑一次 `diff -r` 与真源逐字节比对，43/43 不符 0；`git status --short skills/` 由 413 处删除塌缩到 8 处删除 + 2 处修改，删除对应磁盘上真已删掉的 5 个 skill、修改即本会话改的 `principles.md` 与 `coding-workflow/SKILL.md`；`protocol_check.py` 退出 0、`ledger_check.py` 退出 0、`selftest.py` 通过 153 项失败 0 项。
 - **未做**：未删除 `~/.config/magpie/library/skills/` 的 43 份副本——magpie 是外部工具，其 library 可能被自身引用，删除属不可恢复操作，待用户单独裁定。`~/.augment/skills` 下有 1 个链接，未查指向（与本库无关）。`skill-trimmer-workspace/` 目录仍在磁盘上被忽略，未查用途。
