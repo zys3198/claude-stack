@@ -648,6 +648,51 @@ with tempfile.TemporaryDirectory() as tmp:
         "command": "git remote add origin https://example.invalid/repo.git"}}, NO_BUSY_PATCH)
     check("修改 git remote 仍进入确认线", decision(out), "ask")
 
+# --- 判据六：不可恢复删除 ---
+# 授权匹配在子进程里替换掉：判据六读的是本机 ~/.claude/authorization/，
+# 照实机跑两种结果都可能出现，断言会失效。
+NO_AUTH = "g.authorization_match = lambda sid, scope: {'matched': False, 'state_error': None}\n"
+
+with tempfile.TemporaryDirectory() as tmp:
+    for command, want, label in (
+        ("rm -rf ~/Documents", "ask", "递归删除仓库外目录进入确认线"),
+        ("rm -r build", "ask", "递归删除不带 -f 也进确认线"),
+        ("rm -f notes/a.md", "ask", "单文件带 -f 进确认线"),
+        ("rm -rf /c/tmp/x", "ask", "绝对路径递归删除进确认线"),
+        ("rm notes/a.md", None, "单个文件删除不进确认线"),
+        ("rm .git", "deny", "直接删 .git 被阻断"),
+        ("rm -rf .git", "deny", "递归删 .git 被阻断"),
+        ("rm -rf sub/.git", "deny", "删子目录里的 .git 被阻断"),
+        ("git clean -fdx", "deny", "git clean 强制加扩大范围被阻断"),
+        ("git clean -fd", "deny", "git clean 强制加目录被阻断"),
+        ("git clean -f", "ask", "git clean -f 进确认线"),
+        ("git clean -n", None, "git clean 空转为 dry-run 不进确认线"),
+        ("git clean", None, "git clean 不带 -f 不进确认线"),
+        ("git status", None, "普通 git 命令不受影响"),
+        ("bash -c 'rm -rf ~/x'", "ask", "包一层 shell 的递归删除仍取得到"),
+        ("echo rm -rf ~/x", None, "非起首位置提到 rm 不算删除"),
+    ):
+        out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me",
+                               "tool_input": {"command": command}}, NO_BUSY_PATCH + NO_AUTH)
+        check(label, decision(out), want)
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me",
+                           "tool_input": {"command": "rm -rf ~/x"}},
+        NO_BUSY_PATCH + NO_AUTH + "g.authorization_match = lambda sid, scope: {'matched': True, 'state_error': None}\n")
+    check("已授权的递归删除放行", decision(out), None)
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me",
+                           "tool_input": {"command": "git clean -fdx"}},
+        NO_BUSY_PATCH + NO_AUTH + "g.authorization_match = lambda sid, scope: {'matched': True, 'state_error': None}\n")
+    check("已授权的 git clean 放行", decision(out), None)
+
+    out, rc = run_patched({"tool_name": "Bash", "cwd": tmp, "session_id": "me",
+                           "tool_input": {"command": "rm -rf ~/x"}},
+        NO_BUSY_PATCH + "g.authorization_match = lambda sid, scope: {'matched': False, 'state_error': '状态损坏'}\n")
+    check("授权状态损坏时删除不放行", decision(out), "ask")
+
 print()
+print("失败项:", FAILED if FAILED else "无")
+sys.exit(1 if FAILED else 0)
 print("失败项:", FAILED if FAILED else "无")
 sys.exit(1 if FAILED else 0)

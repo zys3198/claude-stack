@@ -17,6 +17,15 @@
 #   或远程 Git 无法安全解析时直接阻断。
 # 判据五：生产环境或真实数据变更信号在没有精确授权时提请确认；授权状态、资源状态或活跃会话状态
 #   无法确认时不静默放行高风险动作。
+# 判据六：不可恢复删除。依据 ~/.claude/CLAUDE.md 第 1.3 节把「不可恢复删除」列为 R3 确认线。
+#   三档分级，各自理由不同：
+#   - rm 非递归、单目标、不带 -f：可恢复的低风险清理，不进这条线。
+#   - rm 递归或带 -f：进授权线提请确认，不直接阻断。判 ask 而非 deny 的理由是清理
+#     自己刚建的临时文件同样是递归删除，硬阻断会误伤这类正当操作。
+#   - rm 作用于 .git（含 rm -rf .git 与删除落在 .git 内的路径）、git clean -f 带上扩大
+#     范围的开关（-x/-X/--exclude/-d）：直接阻断。这两者没有日常正当用途，放行等于
+#     放弃这条线——.git 删掉不可恢复，未跟踪文件里常有唯一的本地配置与实验产物。
+#   - git clean -f 只带路径：进授权线提请确认。
 #
 # 只拦可以客观判定的动作，不做主观推测；低风险且明确放行时无输出。
 # 判定方式是把命令拆成词，要求目标命令出现在命令起首位置（行首，或管道与分号、
@@ -139,6 +148,13 @@ GIT_GLOBAL_OPTS_WITH_VALUE = {
 }
 REMOTE_GIT_VERBS = {"push", "fetch", "pull", "clone", "remote"}
 FORCE_GIT_FLAGS = {"--force", "-f", "--force-with-lease"}
+# 判据六用。rm 的递归与强制开关；git clean 的强制开关与扩大范围的开关。
+RM_RECURSIVE_FLAGS = {"-r", "-R", "--recursive"}
+RM_FORCE_FLAGS = {"-f", "--force"}
+GIT_CLEAN_FORCE_FLAGS = {"-f", "--force"}
+GIT_CLEAN_WIDEN_FLAGS = {"-x", "-X", "--exclude", "-d", "--remove-untracked"}
+# git clean 的子命令位置。Bash 路径上只认 git clean，不含 git submodule 之类。
+GIT_CLEAN_VERB = "clean"
 PRODUCTION_MARKER = re.compile(r"(?i)(?:^|[\s/_.:=-])(prod|production)(?:$|[\s/_.:=-])")
 PRODUCTION_MUTATION = re.compile(
     r"(?i)\b(deploy|apply|migrate|migration|delete|drop|truncate|update|insert|write|push|up)\b"
@@ -1009,6 +1025,193 @@ def check_docker(command, cwd, self_id):
     )
 
 
+def rm_targets(tokens):
+    # 取出命令里每一处 rm 作用的目标。选项按 -r/-rf 这类黏连写法拆开，
+    # 目标是不以 - 开头的位置实参；`--` 之后的全部按目标处理。
+    targets = []
+    recursive = False
+    forced = False
+    seen_sep = False
+    for token in tokens:
+        if is_control(token):
+            break
+        if seen_sep:
+            targets.append(token)
+            continue
+        if token == "--":
+            seen_sep = True
+            continue
+        if token.startswith("-") and token != "-":
+            for ch in token.lstrip("-"):
+                if ch in {"r", "R"}:
+                    recursive = True
+                elif ch == "f":
+                    forced = True
+            continue
+        targets.append(token)
+    return targets, recursive, forced
+
+
+def rm_scope(targets, cwd):
+    return {
+        "targets": sorted({
+            f"path:{norm(t if os.path.isabs(t) else os.path.join(cwd, t))}"
+            for t in targets
+        }),
+        "operation_family": "destructive-rm",
+        "impact_ceiling": 3,
+        "critical_params": {
+            "paths": sorted(targets),
+            "recursive": True,
+        },
+    }
+
+
+def is_git_dir_target(target, cwd):
+    # 目标本身是 .git，或解析后落在某个 .git 里。删掉任意一个 .git 都不可恢复。
+    full = norm(target if os.path.isabs(target) else os.path.join(cwd, target))
+    if os.path.basename(full).lower() == ".git":
+        return True
+    parts = [p.lower() for p in full.replace("\\", "/").split("/") if p]
+    return ".git" in parts[:-1] or ".git" in parts
+
+
+def check_destructive_rm(command, cwd, self_id):
+    if not isinstance(command, str):
+        return
+    for tokens in expand_command(command):
+        for i, token in enumerate(tokens):
+            if command_name(token) != "rm" or not starts_command(tokens, i):
+                continue
+            rest = tokens[i + 1:]
+            if not rest:
+                continue
+            targets, recursive, forced = rm_targets(rest)
+            if not targets:
+                continue
+            if any(is_git_dir_target(t, cwd) for t in targets):
+                deny(
+                    "该命令要删除 Git 仓库数据（.git）。依据 ~/.claude/CLAUDE.md 第 1.3 节，"
+                    "不可恢复删除属于 R3 确认线，且没有任何日常正当用途。改用 git 命令操作"
+                    "工作区（git reset、git checkout），不要删 .git。"
+                )
+                continue
+            # 非递归、单个文件、没带 -f 的 rm 是可恢复的低风险清理，不进授权线。
+            if not recursive and not forced:
+                continue
+            scope = rm_scope(targets, cwd)
+            result = authorization_match(self_id, scope)
+            if result.get("matched"):
+                continue
+            state = result.get("state_error")
+            suffix = f"授权状态无法确认：{state}。" if state else ""
+            names = "、".join(targets[:8]) + ("…" if len(targets) > 8 else "")
+            ask(
+                f"该命令要不可恢复地删除 {names}。依据 ~/.claude/CLAUDE.md 第 1.3 节，"
+                f"删除属于 R3 确认线；删之前先勘察内容唯一性（目录名语义、与另一副本比 "
+                f"hash/mtime、git status 看未提交改动），确认不是唯一副本再执行。{suffix}"
+                f"精确授权范围：{scope_reason(scope)}。"
+            )
+
+
+def git_clean_actions(command, cwd):
+    # 取出每一处 git clean 的选项。返回 (选项列表, 是否解析失败)。
+    parse_failed = lex(command) is None
+    found = []
+    for tokens in expand_command(command):
+        i = 0
+        while i < len(tokens):
+            if command_name(tokens[i]) != "git" or not starts_command(tokens, i):
+                i += 1
+                continue
+            j = i + 1
+            while j < len(tokens) and not is_control(tokens[j]):
+                token = tokens[j]
+                key, sep, _ = token.partition("=")
+                if token in GIT_GLOBAL_OPTS_WITH_VALUE and j + 1 < len(tokens):
+                    j += 2
+                elif key in GIT_GLOBAL_OPTS_WITH_VALUE and sep:
+                    j += 1
+                elif token == "-c" and j + 1 < len(tokens):
+                    j += 2
+                else:
+                    break
+            if j >= len(tokens) or is_control(tokens[j]):
+                i += 1
+                continue
+            if tokens[j].casefold() != GIT_CLEAN_VERB:
+                i = j + 1
+                continue
+            options = []
+            paths = []
+            k = j + 1
+            while k < len(tokens) and not is_control(tokens[k]):
+                token = tokens[k]
+                if token.startswith("-") and token != "-":
+                    # git clean 的选项常黏连（-fdx、-fd），逐字符拆开；
+                    # 带 -n 的 dry-run 要能从拆分结果里认出来。
+                    for ch in token.lstrip("-"):
+                        options.append(f"-{ch}")
+                    if token.startswith("--"):
+                        options.append(token.partition("=")[0])
+                    k += 1
+                    continue
+                paths.append(token)
+                k += 1
+            found.append({"options": options, "paths": paths})
+            i = k
+    return found, parse_failed
+
+
+def git_clean_scope(paths, options, cwd):
+    return {
+        "targets": [f"workspace:{norm(cwd)}"],
+        "operation_family": "destructive-git-clean",
+        "impact_ceiling": 4,
+        "critical_params": {
+            "paths": sorted(paths),
+            "options": sorted(options),
+        },
+    }
+
+
+def check_destructive_git_clean(command, cwd, self_id):
+    if not isinstance(command, str):
+        return
+    actions, parse_failed = git_clean_actions(command, cwd)
+    if not actions:
+        return
+    if parse_failed:
+        deny("无法安全解析 git clean 命令；为避免误删未跟踪文件，改写成无歧义的命令后再执行。")
+        return
+    for action in actions:
+        options = set(action["options"])
+        # 不带 -f 的 git clean 是 dry-run，只报告不删除，不进这条线。
+        if not (options & GIT_CLEAN_FORCE_FLAGS):
+            continue
+        scope = git_clean_scope(action["paths"], action["options"], cwd)
+        result = authorization_match(self_id, scope)
+        if result.get("matched"):
+            continue
+        state = result.get("state_error")
+        suffix = f"授权状态无法确认：{state}。" if state else ""
+        widen = sorted(options & GIT_CLEAN_WIDEN_FLAGS)
+        # 带扩大范围（-x/-d）时没有日常正当用途，直接阻断；只 -f 时进确认线。
+        if widen:
+            deny(
+                f"该命令要 git clean -f 并扩大到 {'、'.join(widen)}，删掉范围内全部未跟踪文件。"
+                f"依据 ~/.claude/CLAUDE.md 第 1.3 节，删除属于 R3 确认线。未跟踪文件里常有"
+                f"唯一的本地配置、实验产物与笔记，删掉无法从 Git 恢复。改用只清理指定路径："
+                f"git clean -f <路径>。{suffix}精确授权范围：{scope_reason(scope)}。"
+            )
+            continue
+        ask(
+            f"该命令要 git clean -f，删掉未跟踪文件。依据 ~/.claude/CLAUDE.md 第 1.3 节，"
+            f"删除属于 R3 确认线。删之前先勘察内容唯一性（与另一副本比 hash/mtime、"
+            f"git status 看未提交改动）。{suffix}精确授权范围：{scope_reason(scope)}。"
+        )
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     raw = sys.stdin.read()
@@ -1030,6 +1233,8 @@ def main():
             check_remote_git(command, cwd, payload.get("session_id"))
             check_production_mutation(command, cwd, payload.get("session_id"))
             check_docker(command or "", cwd, payload.get("session_id"))
+            check_destructive_rm(command, cwd, payload.get("session_id"))
+            check_destructive_git_clean(command, cwd, payload.get("session_id"))
             check_host_toolchain(command, cwd)
         else:
             check_compose(tool, tool_input, cwd)
