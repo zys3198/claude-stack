@@ -17,5 +17,6 @@
 ## 说明
 
 - 磁盘上不再存在的第三方套件（仓颉 cangjie-skill、first-principles pack、Superpowers、ECC）只在流水里留痕，不进本表。
-- `~/.claude/skills/` 下共 43 项，**全部为仓库内的真实目录**（2026-10-02 从 `~/.config/magpie/library/skills/` 的符号链接复制回来，该库不再充当真源）：17 个自建（见 [custom-setup.md](custom-setup.md)），2 个第三方裸 skill（last30days、impeccable，见上表），24 个 Matt Pocock 本地副本（见上表）。自建 18 项在 `.gitignore` 白名单内、有 git 快照；另 25 项（24 份 Matt Pocock 副本 + `impeccable`）是第三方、有意排除，退路见上表「恢复」列。2026-10-02 已清理完毕（4 份自建空壳 + 3 份归档物），`archive-skills/` 现为空目录。
+- `~/.claude/skills/` 下共 43 项，**全部为仓库内的真实目录**（2026-10-02 从 `~/.config/magpie/library/skills/` 的符号链接复制回来，该库不再充当真源）：18 个自建（见 [custom-setup.md](custom-setup.md)），2 个第三方裸 skill（last30days、impeccable，见上表），24 个 Matt Pocock 本地副本（见上表）。自建 18 项在 `.gitignore` 白名单内、有 git 快照；另 25 项（24 份 Matt Pocock 副本 + `impeccable`）是第三方、有意排除，退路见上表「恢复」列。2026-10-02 已清理完毕（4 份自建空壳 + 3 份归档物），`archive-skills/` 现为空目录。
+- **2026-10-02 归属裁定：24 份副本转正为自建资产，留在 git 外。** 按用户裁定，本地化过的副本不再按「第三方在装物」对待——正身虽来自上游，但已带本地化改动，处置权在本机。**但不进 git 跟踪与 `.gitignore` 白名单**：这批的正身是上游且要定期同步，进 git 会把「diff 两个目录」变成「在版本历史里做三方合并」，越同步越难；快照收益也让位于同步成本。退路仍是冻结的插件 cache（1.2.3），改动前先与 cache 逐字diff 取差异来源。本地化改动的逐项记述见上表「备注」列与 [mattpocock-1.3-pending.md](mattpocock-1.3-pending.md)。
 - **2026-10-02 决定：24 份 Matt Pocock 副本保留，只登记状态不删。** 实测两处内容 0 个逐字节相同（24 份全有差异），插件 `enabledPlugins` 为 false，是磁盘双份不是运行时双载——没有双载风险。触发删除的条件：插件重新启用且本地副本不再需要独立于上游改动时。插件启用前先 `diff` 两处，取本地版差异来源，勿直接覆盖。
