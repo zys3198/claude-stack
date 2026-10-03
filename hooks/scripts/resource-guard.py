@@ -13,10 +13,11 @@
 #   同一批名字写在容器内执行的命令里（docker compose exec <服务> mvn test）不在起首
 #   位置，不会被拦。
 #
-# 判据四：远程 Git 的硬禁止项直接阻断，且先于授权匹配——force push、推送主干（main/
-#   master/develop/trunk）、删除远程分支或标签，这四项按 CLAUDE.md 第 1.3 节「不因确认
-#   而放行」，已登记的精确授权也覆盖不了。其余 push/fetch/pull/clone/remote 在没有精确
-#   授权时提请确认；远程 Git 无法安全解析时直接阻断。
+# 判据四：远程 Git 的硬禁止项只对 dtsf 项目（C:/ZYS/Code/dtsf）生效，且先于授权匹配——
+#   force push、推送主干（main/master/develop/trunk）、删除远程分支或标签，这三项按
+#   dtsf 项目 CLAUDE.md 第 0 节「不因确认而放行」，已登记的精确授权也覆盖不了。
+#   其他仓库退回普通确认线：仍要用户确认，但不再硬阻断。其余 push/fetch/pull/clone/
+#   remote 同样在没有精确授权时提请确认；远程 Git 无法安全解析时直接阻断。
 # 判据五：生产环境或真实数据变更信号在没有精确授权时提请确认；授权状态、资源状态或活跃会话状态
 #   无法确认时不静默放行高风险动作。
 # 判据六：不可恢复删除。依据 ~/.claude/CLAUDE.md 第 1.3 节把「不可恢复删除」列为 R3 确认线。
@@ -167,9 +168,10 @@ GIT_GLOBAL_OPTS_WITH_VALUE = {
 }
 REMOTE_GIT_VERBS = {"push", "fetch", "pull", "clone", "remote"}
 FORCE_GIT_FLAGS = {"--force", "-f", "--force-with-lease"}
-# 判据四的硬禁止项。依据 ~/.claude/CLAUDE.md 第 1.3 节：禁止 force push、推送主干、
-# 删除远程分支或标签——这几项是硬禁止，不因确认而放行。因此它们在授权匹配之前判定，
-# 已登记的精确授权也覆盖不了。主干名按常见约定取值，自定义主干名不在其列。
+# 判据四的硬禁止项。依据 dtsf 项目（C:/ZYS/Code/dtsf）CLAUDE.md 第 0 节：禁止 force
+# push、推送主干、删除远程分支或标签——这几项只在该项目内硬禁止，不因确认而放行。
+# 因此它们在授权匹配之前判定，已登记的精确授权也覆盖不了。主干名按常见约定取值，
+# 自定义主干名不在其列。
 MAINLINE_REFS = {"main", "master", "develop", "trunk"}
 GIT_PUSH_DELETE_FLAGS = {"--delete", "-d"}
 REMOTE_URL = re.compile(r"(?:https?|ssh)://|@", re.I)
@@ -277,6 +279,23 @@ def starts_command(tokens, i):
 
 def norm(path):
     return os.path.normcase(os.path.realpath(os.path.abspath(path)))
+
+
+# 判据四的硬禁止项（force push、推送主干、删除远程分支或标签）只对 dtsf 项目生效。
+# 这条规则本来就是给该项目的，2026-10-03 前挂在全局，连 ~/.claude 推自己的 main 都被拦。
+# 其他仓库退回确认线。取不到作用仓库时按命令的 cwd 判。
+DTSF_ROOTS = (norm("C:/ZYS/Code/dtsf"), norm("/mnt/c/ZYS/Code/dtsf"))
+
+
+def is_dtsf(where):
+    if not where:
+        return False
+    target = norm(where).casefold()
+    for root in DTSF_ROOTS:
+        root = root.casefold()
+        if target == root or target.startswith(root + os.sep):
+            return True
+    return False
 
 
 def directory_name(target, cwd):
@@ -882,15 +901,17 @@ def scope_reason(scope):
     return json.dumps(scope, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
-def forbidden_push_reason(options, arguments):
+def forbidden_push_reason(options, arguments, repo):
     """判出 git push 里的硬禁止项，命中返回拒绝理由，没有返回 None。
 
-    依据 ~/.claude/CLAUDE.md 第 1.3 节，「推送主干」与「删除远程分支或标签」是硬禁止，
-    不因确认而放行，所以在授权匹配之前判定。只看 push 自己的开关与位置参数：
+    「推送主干」与「删除远程分支或标签」是 dtsf 项目的规则，只在该仓库内硬禁止，
+    所以在授权匹配之前判定。只看 push 自己的开关与位置参数：
     远端地址只用来定位仓库，不参与判定。
     """
+    if not is_dtsf(repo):
+        return None
     if GIT_PUSH_DELETE_FLAGS & {option.casefold() for option in options}:
-        return "Hook 拒绝 git push 删除远程分支或标签；这是 CLAUDE.md 第 1.3 节的硬禁止项，不因授权放行。"
+        return "Hook 拒绝 git push 删除远程分支或标签；dtsf 项目 CLAUDE.md 第 0 节把它列为硬禁止项，不因授权放行。"
     for item in arguments:
         if REMOTE_URL.search(item):
             continue
@@ -898,12 +919,12 @@ def forbidden_push_reason(options, arguments):
         if ":" in raw:
             local_side, _, remote_side = raw.partition(":")
             if not local_side:
-                return "Hook 拒绝 git push 删除远程分支或标签（refspec 左侧为空）；这是 CLAUDE.md 第 1.3 节的硬禁止项，不因授权放行。"
+                return "Hook 拒绝 git push 删除远程分支或标签（refspec 左侧为空）；dtsf 项目 CLAUDE.md 第 0 节把它列为硬禁止项，不因授权放行。"
         else:
             remote_side = raw
         name = remote_side.rsplit("/", 1)[-1].casefold()
         if name in MAINLINE_REFS:
-            return f"Hook 拒绝向主干 {name} 推送；这是 CLAUDE.md 第 1.3 节的硬禁止项，不因授权放行。"
+            return f"Hook 拒绝向主干 {name} 推送；dtsf 项目 CLAUDE.md 第 0 节把它列为硬禁止项，不因授权放行。"
     return None
 
 
@@ -917,12 +938,17 @@ def git_remote_actions(command, cwd):
                 i += 1
                 continue
             j = i + 1
+            repo = cwd
             while j < len(tokens) and not is_control(tokens[j]):
                 token = tokens[j]
-                key, sep, _ = token.partition("=")
+                key, sep, value = token.partition("=")
                 if token in GIT_GLOBAL_OPTS_WITH_VALUE and j + 1 < len(tokens):
+                    if token == "-C":
+                        repo = tokens[j + 1]
                     j += 2
                 elif key in GIT_GLOBAL_OPTS_WITH_VALUE and sep:
+                    if key == "-C":
+                        repo = value
                     j += 1
                 elif token == "-c" and j + 1 < len(tokens):
                     j += 2
@@ -949,15 +975,18 @@ def git_remote_actions(command, cwd):
                 "<redacted>" if REMOTE_URL.search(item) else item
                 for item in arguments
             ]
+            # -C 给相对路径时按命令所在目录解析，否则 norm() 会拿进程 cwd 兜底。
+            repo_path = repo if os.path.isabs(repo) else os.path.join(cwd, repo)
             actions.append({
                 "verb": verb,
+                "repo": repo_path,
                 "force": verb == "push" and any(
                     flag in FORCE_GIT_FLAGS or flag.startswith("--force-with-lease")
                     for flag in options
                 ),
                 # 硬禁止项按原始参数判定：safe_arguments 里的远端地址已脱敏，
                 # 脱敏后的占位符会干扰主干名与 refspec 的辨认。
-                "forbidden": forbidden_push_reason(options, arguments) if verb == "push" else None,
+                "forbidden": forbidden_push_reason(options, arguments, repo_path) if verb == "push" else None,
                 "scope": {
                     "targets": [f"git:{norm(cwd)}"],
                     "operation_family": f"remote-git.{verb}",
@@ -995,7 +1024,7 @@ def check_remote_git(command, cwd, self_id):
         if action["forbidden"]:
             deny(action["forbidden"])
             continue
-        if action["force"]:
+        if action["force"] and is_dtsf(action["repo"]):
             deny("Hook 拒绝 git push 强制推送；禁止 force push，改用普通推送并明确目标。")
             continue
         result = authorization_match(self_id, action["scope"])

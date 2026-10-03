@@ -599,19 +599,23 @@ def test_guard_global_options():
 
 
 def test_remote_git_guard():
-    # CLAUDE.md 第 1.3 节把 force push、推送主干、删除远程分支或标签列为硬禁止，
-    # 「不因确认而放行」。判据四必须在授权匹配之前判它们，否则已登记的精确授权
-    # 会把主干推送静默放行——这里同时验结论类型与「授权命中也不能翻转」。
+    # dtsf 项目 CLAUDE.md 第 1.3 节把 force push、推送主干、删除远程分支或标签列为
+    # 硬禁止，「不因确认而放行」；其他仓库退回普通确认线。判据四必须在授权匹配之前
+    # 判它们，否则已登记的精确授权会把主干推送静默放行。用沙箱路径替掉 DTSF_ROOTS，
+    # 两条分支都要验：dtsf 内 deny 且授权翻转不了，dtsf 外同样的命令只是 ask。
     rg = load("resource-guard", SANDBOX / "resource-guard.log")
+    dtsf = SANDBOX / "dtsf-repo"
+    (dtsf / "src").mkdir(parents=True, exist_ok=True)
+    rg.DTSF_ROOTS = (rg.norm(str(dtsf)),)
 
-    def verdict(command, authorized=False):
+    def verdict(command, authorized=False, repo=REPO):
         rg.DENY_REASONS.clear()
         rg.ASK_REASONS.clear()
         rg.authorization_match = (
             (lambda session_id, scope: {"matched": True}) if authorized
             else (lambda session_id, scope: {"matched": False})
         )
-        rg.check_remote_git(command, str(REPO), "selftest-session")
+        rg.check_remote_git(command, str(repo), "selftest-session")
         if rg.DENY_REASONS:
             return "deny"
         return "ask" if rg.ASK_REASONS else "pass"
@@ -628,14 +632,24 @@ def test_remote_git_guard():
         "git push origin :feature",
         "git push origin :refs/heads/feature",
     ):
-        check(f"硬禁止直接阻断：{command}", verdict(command) == "deny", command)
+        check(f"dtsf 内硬禁止直接阻断：{command}",
+              verdict(command, repo=dtsf) == "deny", command)
 
     for command in (
         "git push origin main",
         "git push origin --delete feature",
+        "git push --force origin feature",
     ):
-        check(f"精确授权不能翻转硬禁止：{command}",
-              verdict(command, authorized=True) == "deny", command)
+        check(f"dtsf 内精确授权不能翻转硬禁止：{command}",
+              verdict(command, authorized=True, repo=dtsf) == "deny", command)
+
+    for command in (
+        "git push origin main",
+        "git push origin --delete feature",
+        "git push --force origin feature",
+    ):
+        check(f"dtsf 外退回确认线而不是硬阻断：{command}",
+              verdict(command) == "ask", command)
 
     for command in (
         "git push origin feature",
@@ -649,6 +663,16 @@ def test_remote_git_guard():
 
     check("普通 push 落在确认线而不是硬阻断",
           verdict("git push origin feature") == "ask", "git push origin feature")
+
+    # -C 决定作用仓库，硬禁止跟着它走，不跟当前目录走。
+    check("-C 指向 dtsf 时硬阻断",
+          verdict(f"git -C {dtsf} push origin main") == "deny", "")
+    check("-C 指向别处时不硬阻断",
+          verdict(f"git -C {REPO} push origin main") == "ask", "")
+    check("-C 指向 dtsf 子目录时同样硬阻断",
+          verdict(f"git -C {dtsf / 'src'} push origin master") == "deny", "")
+    check("非 dtsf 仓库里的 -C 不误碰 dtsf",
+          verdict(f"git -C {SANDBOX} push origin main") == "ask", "")
 
 
 def test_memory_and_worktree_guard():
