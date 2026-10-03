@@ -1585,3 +1585,32 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：改动全在 `~/.claude` git 仓库内，逐文件 `git checkout -- <路径>`；被删的 `docs/protocols/dashboard/dashboard.md` 用 `git show HEAD:docs/protocols/dashboard/dashboard.md` 取回。
 - **验证**：`protocol_check.py` rc=0（255 个根入口全在 20 KB 内、1557 个段落无重复、25 个链接全存在、映射表 8 行全归类）；`hooks/tests/` 九套全过（上一轮因漏跑测试套件而残留的「映射表与判据漂移」回归已修）；`ledger_check.py` rc=1，唯一不符是既有项（`tool-install.md` 插件表缺 `cc-plugin-plugin-authoring`），改动前就在。
 - **未决**：`agents/*.md` 进 `ENTRY_GLOBS` 后受 20 KB 与段落重复判据约束，实测无命中；agent frontmatter 的 `hooks` 是否真被平台执行仍未实测（沿用上一条的未决）。
+
+### ClaudeCode 托管设置：开 tool search（2026-10-03，用户拍板）
+
+- **变更**：现状表「全局配置」新增一行 `C:\Program Files\ClaudeCode\managed-settings.json`（库外、需管理员写入），内容由 52 B 改为 99 B：`{"autoModeEnabled": true, "env": {"ENABLE_TOOL_SEARCH": "force"}, "parentSettingsBehavior": "merge"}`。`autoModeEnabled` 是本次之前就有的键，非本轮引入。
+- **依据**：桌面 app（网关 provider，magpie）上工具定义 111 个 / 261,799 B 全量随每次请求进上下文。三次实测对照——`%LOCALAPPDATA%\Claude-3p\configLibrary\<id>.json` 的 `workspace.toolSearchEnabled: true` **无效**；托管设置里 `env.ENABLE_TOOL_SEARCH: "true"` **无效**；`"force"` **有效**。判据取官方文档 `agent-sdk/tool-search` 的网关段落，不取运行时日志串——CC 日志那句 `Set ENABLE_TOOL_SEARCH=true … if your proxy forwards tool_reference blocks` 在本机不适用，按它改成 `"true"` 白跑一轮。用户拍板走托管设置路线（备选是 `configLibrary` 那条，实测无效）。
+- **回退**：改前原件 `C:\ZYS\Workspace\exp\2026-10-03-cc-context-audit\managed-settings.before11.json`（52 B），更早的原件 `managed-settings.before.json`（27 B，仅 `autoModeEnabled`）。写入与回滚都用同目录 `apply_managed11.ps1 -Source <文件名>`（需管理员提权），日志 `apply_managed11.log`。
+- **验证**：新会话工具定义 **111 个 / 261,799 B → 32 个 / 76,877 B**（−70.6%），一轮固定载荷 248,925 → 86,413 B（−65.3%）。数据取自 `~/.claude/projects/C--ZYS-Workspace/*.jsonl` 的 `prompt_snapshot` 附件，脚本 `exp/2026-10-03-cc-context-audit/probe_round11_toolset.py`（跨会话比条数与集合）与 `probe_snapshot_keys.py`（单会话明细）。改前已启动的老会话仍带全量定义、只多一个 `ToolSearch`，即**只对新开的 CC 进程生效**。magpie 接受 deferred 形状，无 HTTP 400。完整记录见 `exp/2026-10-03-cc-context-audit/REPORT.md` 第十一、十二轮。
+- **未做**：被 defer 的 71 个工具名是否在信道上另占一份索引未验（快照里没有）；「`ToolSearch` 加载 → 真调用一个 deferred 工具」没做端到端；magpie 完整转发 `tool_reference` 块是间接推断（只看「没 400」）。`mcp__Claude_Browser__*` 13 个不被 defer，仍直连占 16,385 B，关浏览器工具是留给用户的一项。另注：本文件 2026-09-21「Claude Code 减负」条写「本机已开 `ENABLE_TOOL_SEARCH`」，与本次实测（改前无效）冲突，该键当时落在哪未追查。
+- **顺带作废**：原列的「关 `context7` 插件省 7,414 B」已作废——它的 2 个工具现在被 defer，关插件几乎不省字节。
+
+### 两条已归档 hook 行删出（2026-10-03，用户拍板）
+
+- **变更**：`installing/custom-setup.md` 现状表「hook」小节整行删除两行。原文逐字保留：
+  - `| settings-degrade-guard.py | 已归档 | 原 \`hooks/settings-degrade-guard.py\` | 自建 | git | 2026-10-02 核实：文件已不存在，\`settings.json → SessionStart[0]\` 实为 session-guard.py；原行错记，删前未留恢复路径 |`
+  - `| settings-sync-auto.py | 已归档 | 原 \`hooks/settings-sync-auto.py\` | 自建 | git | 2026-10-02 核实：文件已不存在，\`PostToolUse[0]\` 实为 protocol-report.py；随 cc-switch 2026-10-01 卸载一并移除 |`
+- **依据**：台账协议 §七「现状表删行只有一种情形——对象不再是本机现状；已卸载和已删除的整行删掉，只在流水留痕」；§9「现状表接近 20 KB 时，先把同类行合并或移出，再添新行」。两行的对象（两个脚本文件）经 2026-10-02 核实均已不存在。触发点是同日新增「ClaudeCode 托管设置」行后实测 20,771 B 越过 20 KB 上限，先压缩该新行至 20,476 B（余 4 B），再按用户拍板删这两行。
+- **回退**：把上面两条原文贴回现状表「hook」小节即可，原文在本条「变更」里完整保留。
+- **验证**：`custom-setup.md` 20,476 → **20,013 B**（腾出 471 B，余量 467 B）；`protocol_check.py` rc=0（体积 260 个根入口全在限内）；`ledger_check.py` rc=1，唯一不符是既有项（`tool-install.md` 插件表缺 `cc-plugin-plugin-authoring`，改动前就在）。读回确认：文件内 `settings-degrade-guard`／`settings-sync-auto` 已无任何命中。
+- **未做**：本表其余 `已归档`／`停用` 行（`codex-home-2026-09-09`、`herdr-agent-state.ps1`、`test_install_ledger_reminder.py` 等）未一并勘察——它们指向的对象多数仍在磁盘上（快照目录、herdr 脚本、测试文件），是否该留属另一批判断，未逐条裁定。
+
+### 停用行对象清理：删 herdr 脚本与两条孤行（2026-10-03，用户指示）
+
+- **变更**：三项。①删除 `~/.claude/hooks/herdr-agent-state.ps1`（1,937 B）；②现状表「hook」小节整行删除 `herdr-agent-state.ps1` 一行；③同小节整行删除 `test_install_ledger_reminder.py` 一行（该行对象核查时已不存在，无文件可删）。两行原文逐字保留：
+  - `| herdr-agent-state.ps1 | 停用 | \`hooks/herdr-agent-state.ps1\` | herdr | 手工拷贝 | 2026-09-24 摘除 SessionStart 注册：\`HERDR_ENV\` 未设即 \`exit 0\`，实测 Herdr 已不在本机，每次会话白起进程。文件归 herdr 管，重装会覆盖 |`
+  - `| test_install_ledger_reminder.py | 停用 | \`hooks/tests/test_install_ledger_reminder.py\` | 自建 | git | **孤立**：无对应脚本、无注册 |`
+- **依据**：用户指示「把他们指向的对象删掉」；删行依台账协议 §七「对象不再是本机现状」。动手前按 `CLAUDE.md` §1.3 三项勘察：**herdr 脚本**——目录名语义为 herdr 的会话状态上报脚本、2026-09-24 已摘除 SessionStart 注册；副本比对 `git hash-object` 与 `git rev-parse HEAD:hooks/herdr-agent-state.ps1` 同为 `fc5968656119e27b05424330e7fefaf364e8f960`（均 1,937 B），`git status --short` 该文件无输出；接线核查 `settings.json` 全库 grep `herdr` 命中 0、`~/.herdr` 与 `AppData/Local/herdr` 均不存在，仓库内除台账行外无引用。**测试文件**——`hooks/tests/test_install_ledger_reminder.py` 实测已不存在，全库引用仅台账行一处。
+- **回退**：脚本 `git checkout HEAD -- hooks/herdr-agent-state.ps1`（blob 在库，已验证）；两条原文贴回现状表「hook」小节，原文在本条「变更」里完整保留。
+- **验证**：现状表 `herdr-agent-state`／`test_install_ledger_reminder` 命中 0（Grep）；`hooks/herdr-agent-state.ps1` 删除后 `ls` 报不存在，`git cat-file -s` 仍可取回 1,937 B；`protocol_check.py` rc=0；`ledger_check.py` 唯一不符仍是既有项（`tool-install.md` 插件表缺 `cc-plugin-plugin-authoring`）。
+- **未做**：其余三张表的 `已归档`／`停用` 行（`tool-install.md` 的 `cc-switch 归档`、`mattpocock-skills`，`skill-install.md` 的 Matt Pocock skills 插件 cache，`mcp-install.md` 的已卸载段）不在本轮指示的字面范围内，未动。

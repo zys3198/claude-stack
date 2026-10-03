@@ -62,11 +62,7 @@
 | ledger_check.py | 在用 | `hooks/scripts/ledger_check.py` | 自建 | git | 2026-09-27 由 `skills/install-ledger/scripts/` 移入；只读、非 hook，检查台账列数与顺序、状态枚举、表内名称唯一、单表体量与 `archive/` 完整性 |
 | protocol-report.py | 在用 | `hooks/scripts/protocol-report.py` → `hooks.PreToolUse[2]`、`hooks.PostToolUse[0]`、`hooks.Stop[1]` | 自建 | git | 资产判据的传输层：判据全在 protocol_check.py，本文件不含判据。PreToolUse 接阻断（检查器返 3 才拒，`deny` 形状照抄 product-guard.py，拒时留 `deny:` 日志）；PostToolUse 只报告；Stop 跑全量只读报告（本会话写过资产且命中与上次不同才出声） |
 | protocol-router.py | 在用 | `hooks/scripts/protocol-router.py` → `hooks.PreToolUse[3]`、`hooks.UserPromptSubmit[1]` | 自建 | `git`（脚本）＋ `installing/settings-wiring.md`（接线；`settings.json` 与 `backups/` 都不进 git） | 按动作与领域把协议推到模型眼前：两张路由表（`UserPromptSubmit` 匹配用户输入的领域词，`PreToolUse` 匹配 tool_name + tool_input）。输出**必须**写成事实陈述句——官方警告命令式会触发提示注入防御、反被表面化。按 session 节流，上限 10 个会话。`PreToolUse` 的注入点在工具结果旁，对一次性高风险动作太晚，本脚本刻意不管。接线：`PreToolUse[3]` matcher `Bash\|PowerShell\|Edit\|Write\|MultiEdit\|NotebookEdit\|Agent\|Task`、timeout 10（`UserPromptSubmit` 不支持 matcher，故那组无 matcher）。2026-09-29 复核订正：matcher 原缺 `MultiEdit\|NotebookEdit`，与代码里 `EDIT_TOOLS` 不一致、那两条分支永不触发，已补齐。测试 `hooks/tests/test_protocol_router.py`（31 项）；备份 `backups/protocol-router-2026-09-29/`、`backups/protocol-router-matcher-2026-09-29/` |
-| settings-degrade-guard.py | 已归档 | 原 `hooks/settings-degrade-guard.py` | 自建 | git | 2026-10-02 核实：文件已不存在，`settings.json → SessionStart[0]` 实为 session-guard.py；原行错记，删前未留恢复路径 |
-| settings-sync-auto.py | 已归档 | 原 `hooks/settings-sync-auto.py` | 自建 | git | 2026-10-02 核实：文件已不存在，`PostToolUse[0]` 实为 protocol-report.py；随 cc-switch 2026-10-01 卸载一并移除 |
-| herdr-agent-state.ps1 | 停用 | `hooks/herdr-agent-state.ps1` | herdr | 手工拷贝 | 2026-09-24 摘除 SessionStart 注册：`HERDR_ENV` 未设即 `exit 0`，实测 Herdr 已不在本机，每次会话白起进程。文件归 herdr 管，重装会覆盖 |
 | orca claude-hook.cmd | 在用 | `~/.orca/agent-hooks/claude-hook.cmd` → 12 个事件 | 待补 | 手工拷贝 | 不在 `~/.claude` 仓库内；2026-10-02 实测修正（原记 13） |
-| test_install_ledger_reminder.py | 停用 | `hooks/tests/test_install_ledger_reminder.py` | 自建 | git | **孤立**：无对应脚本、无注册 |
 | rtk hook claude | 在用 | `settings.json → PreToolUse[4]`（matcher `Bash`，无 timeout） | rtk | 待补 | 2026-10-02 补记：此前无台账行。全局 Bash 拦截器，命令输出压缩层；第三方 CLI 不在 `~/.claude` 仓库内 |
 | dashboard-scope-guard.py | 在用 | `hooks/scripts/dashboard-scope-guard.py` → `agents/dashboard-builder.md` 的 frontmatter `hooks.PreToolUse[0]` | 自建 | git | 不注册进 `settings.json`，只对 dashboard-builder 生效 |
 
@@ -102,8 +98,8 @@
 | docs/session-lifecycle.md | 在用 | `~/.claude/docs/session-lifecycle.md` | 自建 | git | 会话启动、并发、收尾与工作树生命周期；由 `CLAUDE.md` §2 索引 |
 | installing/ | 在用 | `~/.claude/installing/` | 自建 | git | 四张现状表 + `archive/` |
 | docs/archive/ | 在用 | `~/.claude/docs/archive/` | 自建 | git | 4 份已废弃的时点产物，文件名 `<日期>-<主题>.md`，日期取内容反映的最新时点 |
-| codex-home-2026-09-09 | 已归档 | `~/.claude/backups/codex-home-2026-09-09/` | 自建（快照） | **无 git 路径** | Codex home 快照，90 文件 / 3,400,308 B；`~/.codex/` 已不存在，**这是唯一副本**；`backups/` 在 `.gitignore` 内，只有一份 |
 | ~/.claude/statusline/ 目录名 | 在用 | `~/.claude/statusline/` | 自建 | git | 与空的 `hooks/statusline/` 不是一处 |
+| ClaudeCode 托管设置 | 在用 | `C:\Program Files\ClaudeCode\managed-settings.json` | 自建 | **手工拷贝**（库外、需管理员；回退见流水 2026-10-03） | 机器级；含开 tool search 的 `env.ENABLE_TOOL_SEARCH`，**只对新会话生效**；见流水 2026-10-03 |
 
 ## 已归档
 
