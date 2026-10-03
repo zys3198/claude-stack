@@ -61,6 +61,10 @@ PROTOCOLS = {
         "docs/protocols/execution-env/execution-env.md",
         "构建、测试、跑脚本与起服务的容器流程与宿主机边界",
     ),
+    "execution-discipline": (
+        "docs/protocols/execution-discipline/execution-discipline.md",
+        "验收标准、防作弊、基线不可退与连败换项的判据",
+    ),
     "evidence": (
         "docs/protocols/evidence/evidence.md",
         "证据分级、三层完成判定与交付前检查",
@@ -94,11 +98,12 @@ PROMPT_ROUTES = (
     (re.compile(r"记忆|memory|记住"), "memory"),
     (re.compile(r"子代理|派发|委派|并行|subagent|开几个\s*agent"), "delegation"),
     (re.compile(r"安装|卸载|插件|plugin|MCP|CLI"), "ledger"),
-    (re.compile(r"删除|删掉|清掉|不可恢复|移除"), "collaboration"),
+    (re.compile(r"删除|删掉|清掉|不可恢复|移除|该不该问|要不要问|方案怎么给|改动范围|该怎么问"), "collaboration"),
     (re.compile(r"跑测试|构建|编译|起服务|启动服务|容器|docker|pytest|gradle|mvn"), "execution-env"),
+    (re.compile(r"验收标准|达成标准|判可疑|跑偏|走偏|方向不对|该不该停|要不要停|换方向|作弊|蒙混"), "execution-discipline"),
     (re.compile(r"报告|结论|交付|验收|证据"), "evidence"),
     (re.compile(r"写文档|措辞|提交信息|回复|文案"), "expression"),
-    (re.compile(r"部署|发布|生产环境|推到远程|git\s+push|(?<![A-Za-z])(?:MR|PR)(?![A-Za-z])"), "gate"),
+    (re.compile(r"部署|发布|生产环境|推到远程|git\s+push|(?<![A-Za-z])(?:MR|PR)(?![A-Za-z])|hooks?|settings\.json|授权范围|确认线"), "gate"),
     (re.compile(r"接手|继续上次|跨会话|笔记|STATE\.md"), "task-notes"),
     (re.compile(r"收尾|清理|工作树|worktree|会话"), "session-lifecycle"),
     (re.compile(r"放哪|命名|归档|落点"), "protocols-index"),
@@ -170,6 +175,10 @@ def _route_edit(tool_input):
         keys.append("memory")
     if "/notes/" in norm:
         keys.append("task-notes")
+    # settings.json 与 hooks/ 下的脚本是门禁协议的管辖对象；只靠用户输入里的
+    # 「hook」「settings.json」字样命中不了模型自主发起的编辑。
+    if base in ("settings.json", "settings.local.json") or "/hooks/" in norm:
+        keys.append("gate")
     return keys
 
 

@@ -7,7 +7,7 @@
 | 领域 | 协议在哪 | 校验或执行者 | 状态 |
 |---|---|---|---|
 | 台账 | `~/.claude/docs/protocols/ledger/ledger.md` | `python ~/.claude/hooks/scripts/ledger_check.py` | **已落** |
-| 任务笔记 | `~/.claude/docs/protocols/task-notes/task-notes.md` | — | **已落** |
+| 任务笔记 | `~/.claude/docs/protocols/task-notes/task-notes.md` + `task-notes/` | — | **已落** |
 | 执行环境 | `~/.claude/docs/protocols/execution-env/execution-env.md` | `~/.claude/hooks/scripts/pretool-guard.py`（PreToolUse 合并入口，内跑 `product-guard.py` 与 `resource-guard.py`） | **已落** |
 | 会话生命周期 | `~/.claude/docs/session-lifecycle.md` | `~/.claude/hooks/scripts/session-guard.py`（SessionStart／SessionEnd） | **已落** |
 | 记忆 | `~/.claude/docs/protocols/memory/memory.md` | `protocol-report.py`（内含 `protocol_check.py`） | **已落** |

@@ -80,6 +80,7 @@ TABLE = """## 资产 → 形态 → L0
 | `~/.claude/skills/asset-guide/references/principles.md`（本文件） | 按需 | `asset-guide` 的 `description` 与 SKILL.md 指针 |
 | `~/.claude/CLAUDE.md` | 常驻 | 路由表 |
 | skill | 按需 | `description` 字段 |
+| `agent`（`~/.claude/agents/*.md`） | 按需 | `description` 字段 |
 | `docs/protocols/*.md` | 不进上下文 | `protocols-index.md` 对应行 |
 | memory | 召回 | `MEMORY.md` 索引行 |
 | `notes/` | 不进上下文 | 目录名 |
@@ -116,6 +117,7 @@ CLEAN = {
     "CLAUDE.md": "# 常驻指令\n",
     "skills/asset-guide/references/principles.md": f"# 资产原则\n\n{TABLE}",
     "skills/demo/SKILL.md": "---\nname: demo\ndescription: 演示\n---\n\n正文。\n",
+    "agents/agent-one.md": "---\nname: agent-one\ndescription: 演示子代理\n---\n\n正文。\n",
     "docs/protocols/gate/gate.md": GATE,
     "docs/protocols-index.md": "# 协议索引\n\n| 会话生命周期 | `docs/session-lifecycle.md` |\n| 门禁 | `docs/protocols/gate/gate.md` |\n",
     "docs/session-lifecycle.md": "# 会话生命周期\n",

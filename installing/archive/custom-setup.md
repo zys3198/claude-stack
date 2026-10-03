@@ -1557,3 +1557,31 @@ Windows 编码：hook 输出必须显式 `sys.stdout.reconfigure(encoding="utf-8
 - **回退**：两者均无 git 快照、不可恢复。skill-trimmer-workspace 的内容已由 2026-08-13 的盘点结论覆盖，且 `installing/archive/custom-setup.md` 的多条流水记载了那次精简的最终结果（4 份空壳 + 3 份归档物已清），中间产物无独立留存价值。augment 死链接删除无影响。
 - **验证**：`Test-Path` 与 `ls -la` 均确认目录与链接已消失；`~/.augment/skills/` 现为空目录。
 - **未做**：`~/.config/magpie/library/skills/` 的 43 份副本已由用户在本日删除（见上条）；`~/.augment/settings.json.bak`（25 B）未查内容。
+
+### last30days 现状表备注搬入流水（2026-10-03）
+
+- **变更**：`installing/custom-setup.md` 现状表 `last30days` 行备注列的长篇勘察记录（备注单元格本身 958 B，整行 1,051 B）逐字搬入本文件，现状表该行改为一行 + `见流水 2026-09-29`。搬运的原文：
+
+> v3.25.0；原第三方裸 skill 已本地化，`disable-model-invocation: true`，按 `/last30days` 手动调用；含 `references/` 与 `scripts/`，跳过上游 `assets/`。**2026-09-29 纳入 git 复核**：`.gitignore:131` 白名单虽已加，但从未 `git add`——135 文件 / 2.85 MB 一直是 untracked，本列写 `git` 的恢复路径**当时不成立**，提交 `b92a9d5` 后才成立。同日「轻量化」勘察：`references/` 分层**已完成**（8 份 127 KB，主文件各 Step 0.x 章只剩指针），剩余 143,486 B 是必须常驻的契约带（文内 `:87`/`:179` 记着规则移出前部后连续失败的实例），可移量仅约 4%；故只把 `## WHEN USER RESPONDS` 主体移入 `references/followup.md` 留指针，143,486 → 137,989 B，字节完全对账。保留 `CONTEXT MEMORY`、`## Output Summary Footer`、`Security & Permissions`（ht-ml.app 发布门禁）。备份 `backups/skill-last30days-slim-2026-09-29/`
+
+- **依据**：台账撞 `protocol_check.py` 的 20 KB 上限（改动前底本 19,843 B），新增登记必然超限；`docs/protocols/ledger/ledger.md` 规定备注写一句话、「需要背景写 `见流水 <日期>`」。搬前已搜本文件，`b92a9d5` 与 `143,486` 零命中，确认这段是孤本，故只搬不删。
+- **回退**：把上面的原文贴回现状表该行备注列即可，原文在本条「变更」里完整保留。
+- **验证**：搬家后该行由 1,051 B 降至 386 B；本文件不受体积判据约束。
+- **未做**：本文件其余备注列的长篇记录未一并整理——它们是否也属孤本未逐条勘察。
+
+### dashboard-builder 与长任务进度看板协议（2026-10-03）
+
+- **变更**：新建三份——`agents/dashboard-builder.md`（用户级子代理，`model: opus`／`effort: medium`／`background: true`／`memory: user`／`tools` 只给 Read·Write·Edit·Glob·Grep，frontmatter `hooks.PreToolUse` 挂写入范围守卫）、`docs/protocols/dashboard/dashboard.md`（规则正文）、`hooks/scripts/dashboard-scope-guard.py`（约 60 行，含 `--self-test`）。改七处——`CLAUDE.md` §2 加索引行并给「派发子代理」行补豁免注记；`docs/protocols-index.md` 加行并把它并进「校验留 `—`」的名单；`skills/asset-guide/references/principles.md` 映射表加 `agent` 行；`hooks/scripts/protocol_check.py` 的 `MAP_ROWS` 加 `"agent": "agents/*.md"`；`.gitignore` 加 `/agent-memory/`；现状表加「自建 agent」小节与协议、hook 两行。
+- **依据**：用户转来的模板要求「长任务开工前自动起 HTML 看板」。五处与实机不符，逐条核实后改写法：①不能预装 `impeccable`（带 `disable-model-invocation: true`，与 subagent 的 `skills:` 预装通道互斥，官方文档明写），设计口径改写进正文；②子代理无法向用户提自由问题，「第一次问风格」改为默认样式先渲染 + 页面留提示；③`file://` 下 `fetch()` 本地 JSON 被 CORS 拦，改单文件内嵌数据段；④`CLAUDE.md` 自己写着「本文件不复述」，规则正文落协议文件；⑤派发门禁需为它单独开常设授权。四项决策由用户逐条选定。
+- **回退**：三份新文件直接删；改动的七处逐处还原——`protocol_check.py` 的 `MAP_ROWS` 那行与 `principles.md` 映射表的 `agent` 行**必须同进同退**，否则 `check_map` 报「映射表与判据漂移」。`agents/` 未进 `.gitignore`，真源随仓库追踪。
+- **验证**：`protocol_check.py` rc=0（映射表 8 行 · 仓库顶层 16 项归表 2 豁免 14 全归类 · 254 个根入口体积全在限内）；`ledger_check.py` rc=1，唯一命中是既有问题（`tool-install.md` 插件表缺 `cc-plugin-plugin-authoring`，`git show HEAD` 同样缺，非本次引入）；守卫 `--self-test` 9/9；用真实 PreToolUse JSON 喂 stdin 七例 7/7（`.dashboard/` 与记忆目录放行，`hook-probe.txt`、`..\` 逃逸、无 `file_path` 拒绝，`Bash` 不介入）；agent frontmatter 经 PyYAML 解析，8 个字段全在官方字段表内，无会被静默忽略的字段。
+- **未做**：**子代理只在会话启动时被发现**，本会话拿不到 `dashboard-builder`，故「真跑一次建看板」未验，留待新会话——这是唯一未验项。`.dashboard/` 未加进任何项目的 `.gitignore`（属改他人仓库配置）。
+
+### 看板并入任务笔记协议（2026-10-03）
+
+- **出处**：用户 `/grill-me 整个体系需要做什么改动` 的拷问，题目是「刚加 `agent` 资产类型后全库还差什么」；六轮一问一答后用户答「确认」，授权 14 项改动。
+- **动机**：`docs/protocols/dashboard/dashboard.md` 当天新建，但它管的是一个只写不读的产物——看板渲染的正是 `STATE.md` 已在维护的进度、未决、下一步。用户判定「看板就是笔记协议的网页展示形式」，独立成协议属于重复建机制。
+- **改动**：`docs/protocols/dashboard/` 整目录删除（主题目录 12 → 11），`dashboard.md` 移入 `docs/protocols/task-notes/dashboard.md` 并重写为 task-notes 的视图层（新增「与源的关系」：先写源再投影／agent 读源不读板／不反向同步；规则 3 加「三块先写进 `STATE.md`」；规则 5 改为随父协议「任务收尾后的处置」；看板文件名定 `<YYYY-MM-DD>-<主题>.html`）。`task-notes.md` 首句「跨会话任务」改成判据是压缩损失（`adjacent-mechanisms.md` 早已写「同宿主同目录的长任务同样写」，入口写窄了）；`adjacent-mechanisms.md` 补「看板」一条边界。`delegation.md` 的 Configuration gate 收入 `dashboard-builder` 常设授权豁免原文；`CLAUDE.md` §2「派发子代理」与「开工前判断任务规模与进度可见性」两行合并为一行，豁免注解只留 `delegation.md` 一处。`protocols-index.md` 合并「任务笔记」与「长任务进度」两行。`instruction-assets.md` 两类 → 三类（补子代理定义），十查 #5「项目路线」改「项目路径」，新增对 agent 不适用的 #6／#15 说明。`asset-guide` 第 2 步类型清单加 `agent`、§转交加子代理一行；`asset-auditor` §0 加 `agent` 一行。`agents/dashboard-builder.md` 数据段加 `源` 字段、五块内容表加「源里先写」列。`hooks/scripts/protocol_check.py` 的 `ENTRY_GLOBS` 加 `agents/*.md`、`SECRET_TARGETS` 加 `agents`。
+- **回退**：改动全在 `~/.claude` git 仓库内，逐文件 `git checkout -- <路径>`；被删的 `docs/protocols/dashboard/dashboard.md` 用 `git show HEAD:docs/protocols/dashboard/dashboard.md` 取回。
+- **验证**：`protocol_check.py` rc=0（255 个根入口全在 20 KB 内、1557 个段落无重复、25 个链接全存在、映射表 8 行全归类）；`hooks/tests/` 九套全过（上一轮因漏跑测试套件而残留的「映射表与判据漂移」回归已修）；`ledger_check.py` rc=1，唯一不符是既有项（`tool-install.md` 插件表缺 `cc-plugin-plugin-authoring`），改动前就在。
+- **未决**：`agents/*.md` 进 `ENTRY_GLOBS` 后受 20 KB 与段落重复判据约束，实测无命中；agent frontmatter 的 `hooks` 是否真被平台执行仍未实测（沿用上一条的未决）。

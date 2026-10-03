@@ -47,28 +47,28 @@
 
 ## 2. 索引
 
-规则正文一律在右列文件里，本文件不复述。触发条件写在「何时必读」一列——该用时没读，等于规则不存在。
+规则正文一律在右列文件里，本文件不复述。触发条件写在「何时必读」一列——该用时没读，等于规则不存在。右列路径以 `~/.claude/` 为根：`protocols/<名>` 指 `docs/protocols/<名>/<名>.md`，`<名>.md` 在 `docs/` 下，裸名是 `skills/<名>/`，标「项目」的相对项目根。
 
 | 何时必读 | 规则在哪 | 判据一句话 |
 |---|---|---|
 | 编码、Bug 修复、重构、代码审查、回退 | `coding-workflow` | 全局只留两条底线：修根因、必须复核；回退改动一律用文件编辑改回 |
-| 编写或修改 `CLAUDE.md`、`AGENTS.md`、skill 文档 | `/writing-for-agents` + `docs/protocols/instruction-assets/instruction-assets.md` | 先读它再动笔；类型判定、唯一入口与维护判据在协议里 |
+| 编写或修改 `CLAUDE.md`、`AGENTS.md`、skill 文档 | `/writing-for-agents` + `protocols/instruction-assets` | 先读它再动笔；类型判定、唯一入口与维护判据在协议里 |
 | 设计取舍、术语、架构决策 | `grilling`／`domain-modeling`／`codebase-design` skill | 拷问既有想法用 `grilling`；定术语与 ADR 用 `domain-modeling`；设计模块接口与接缝用 `codebase-design` |
-| 安装、卸载、移动 skill／MCP／插件／CLI／桌面工具 | `docs/protocols/ledger/ledger.md` | 当轮登记；改动路径与恢复路径必须入表 |
-| 运行服务、构建、测试、脚本 | `docs/protocols/execution-env/execution-env.md` | 一律进容器；宿主机只做只读查看、Git 操作与 Docker 命令 |
+| 安装、卸载、移动 skill／MCP／插件／CLI／桌面工具 | `protocols/ledger` | 当轮登记；改动路径与恢复路径必须入表 |
+| 运行服务、构建、测试、脚本 | `protocols/execution-env` | 一律进容器；宿主机只做只读查看、Git 操作与 Docker 命令 |
 | 编写命令、脚本或派子代理之前 | `local-env-pitfalls` | git-bash 路径改写、编码与解析坑位 |
-| 跨会话任务 | `docs/protocols/task-notes/task-notes.md` + 项目 `notes/<任务名>/STATE.md` | 先读状态；段落边界保存已确认、已修改、未完成、下一步、验证结果 |
-| 派发子代理 | `docs/protocols/delegation/delegation.md` | 启动前展示模型、provider、route、effort、并发与隔离并取得确认 |
-| 执行有验收标准的任务、目标达成方式被判可疑、该不该停下换方向 | `docs/protocols/execution-discipline/execution-discipline.md` | 防作弊点名姿势；基线不可退；连败 3 次换项；未决不阻塞 |
-| 拿不准该不该问用户、方案怎么给、改动范围与纠正 | `docs/protocols/collaboration/collaboration.md` | 提问线、三次无进展即停、实验目录与产物去向 |
-| 给结论、写交付报告、判断任务算不算完成 | `docs/protocols/evidence/evidence.md` | 证据分级、三层完成判定、Git 交付前四条命令 |
-| 写回复、写提交信息、写落盘产物的措辞 | `docs/protocols/expression/expression.md` | 中文与用词、符号优先、用户原文保留 |
-| 放文件、起名字、归档 | `docs/protocols-index.md` | 落点按可重建性分；命名三段制 |
-| 写、改、删记忆 | `docs/protocols/memory/memory.md` | 进／不进四类；删前先写 `recovery/` 备份 |
-| 接 hook、被 hook 求授权、改 `settings.json` | `docs/protocols/gate/gate.md` | 分档与确认清单在 §1.3；被 auto mode 拦下时的处置 |
+| 跨会话任务 | `protocols/task-notes` + 项目 `notes/<任务名>/STATE.md` | 先读状态；段落边界保存已确认、已修改、未完成、下一步、验证结果 |
+| 派发子代理／开工前判断任务规模与进度可见性 | `protocols/delegation` + `protocols/task-notes/dashboard` | 启动前展示模型、provider、route、effort、并发与隔离并取得确认；超过 5 步或预计超 30 分钟：先派 `dashboard-builder` 搭看板，每步更新数据段，待决事写进问题列表并按默认做法继续 |
+| 执行有验收标准的任务、目标达成方式被判可疑、该不该停下换方向 | `protocols/execution-discipline` | 防作弊点名姿势；基线不可退；连败 3 次换项；未决不阻塞 |
+| 拿不准该不该问用户、方案怎么给、改动范围与纠正 | `protocols/collaboration` | 提问线、三次无进展即停、实验目录与产物去向 |
+| 给结论、写交付报告、判断任务算不算完成 | `protocols/evidence` | 证据分级、三层完成判定、Git 交付前四条命令 |
+| 写回复、写提交信息、写落盘产物的措辞 | `protocols/expression` | 中文与用词、符号优先、用户原文保留 |
+| 放文件、起名字、归档 | `protocols-index.md` | 落点按可重建性分；命名三段制 |
+| 写、改、删记忆 | `protocols/memory` | 进／不进四类；删前先写 `recovery/` 备份 |
+| 接 hook、被 hook 求授权、改 `settings.json` | `protocols/gate` | 分档与确认清单在 §1.3；被 auto mode 拦下时的处置 |
 | 工作树、并行会话、收尾、模块分支归并 | `coding-workflow` 的「工作树与本地资源」一节 | 有未提交改动的工作树不删；收尾删目录、保留分支 |
-| 对独占容器执行任何命令 | `session-hygiene.json` 清单 + `docs/session-lifecycle.md` | 先查 `docker ps` 与清单；有串扰风险先询问用户 |
-| 会话结束的资源回收与卫生检查 | `docs/session-lifecycle.md` | 护栏以实际挂载为准 |
+| 对独占容器执行任何命令 | `session-hygiene.json` 清单 + `session-lifecycle.md` | 先查 `docker ps` 与清单；有串扰风险先询问用户 |
+| 会话结束的资源回收与卫生检查 | `session-lifecycle.md` | 护栏以实际挂载为准 |
 | 新增、修改、迁移或删除任一资产 | `asset-guide` | 八步：查重 → 定类型 → 定位 L0 → 写元数据 → 最小正文 → 指针 → 更新索引 → 设生命周期 |
 | 判定一条资产该留、该收窄还是该归档 | `asset-auditor`（用户显式运行） | 留存判据在其 `references/retention-rubric.md` |
 

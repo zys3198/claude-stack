@@ -64,6 +64,7 @@ MEMORY_TYPES = {"user", "feedback", "project", "reference"}
 ENTRY_GLOBS = (
     "CLAUDE.md",
     "skills/*/SKILL.md",
+    "agents/*.md",
     "docs/session-lifecycle.md",
     "docs/protocols/*/*.md",
     "docs/protocols-index.md",
@@ -93,7 +94,7 @@ POINTER_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 SECRET_TARGETS = (
     "CLAUDE.md", "README.md", "long-complex-task-prompt.md", "keybindings.json",
     "settings.json", "settings.local.json", "settings.json.bak*",
-    "skills", "hooks", "docs", "installing", "authorization",
+    "skills", "agents", "hooks", "docs", "installing", "authorization",
     "external-configs", "tools", "statusline", "lib", "commands",
 )
 
@@ -165,6 +166,7 @@ MAP_ROWS = {
     PRINCIPLES: PRINCIPLES,
     "CLAUDE.md": "CLAUDE.md",
     "skill": "skills/*/SKILL.md",
+    "agent": "agents/*.md",
     "docs/protocols/*.md": "docs/protocols/*/*.md",
     "memory": "projects/*/memory/*.md",
     "notes": None,          # 落在各项目仓库里，~/.claude 下没有对应物

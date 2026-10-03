@@ -3,6 +3,8 @@
 /Python/
 /artifacts/
 /projects/
+# subagent 的记忆（memory: user），与 projects/*/memory/ 同类：运行时生成，git 不追踪
+/agent-memory/
 hooks/edited_state.json.*.json
 hooks/edited_state.json.*.json.lock
 

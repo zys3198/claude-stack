@@ -24,7 +24,7 @@
 | drawio-chart | 在用 | `~/.claude/skills/drawio-chart/` | 自建 | git | 含 examples/ |
 | improver-skill | 在用 | `~/.claude/skills/improver-skill/` | 自建 | git | 原名 wiki-skill；2026-09-26：按 writing-for-agents 明确 Trace、Pattern、候选 Skill 与 gate 四个入口；仍仅用户显式调用 |
 | leader | 在用 | `~/.claude/skills/leader/` | 自建 | git | 2026-09-24 补进 `.gitignore` 白名单，此前一直被忽略；2026-09-26：按 writing-for-agents 明确调研、独立执行与验收任务书入口；仍仅用户显式调用 |
-| last30days | 在用 | `~/.claude/skills/last30days/` | 本地化，上游已切断 | git | v3.25.0；原第三方裸 skill 已本地化，`disable-model-invocation: true`，按 `/last30days` 手动调用；含 `references/` 与 `scripts/`，跳过上游 `assets/`。**2026-09-29 纳入 git 复核**：`.gitignore:131` 白名单虽已加，但从未 `git add`——135 文件 / 2.85 MB 一直是 untracked，本列写 `git` 的恢复路径**当时不成立**，提交 `b92a9d5` 后才成立。同日「轻量化」勘察：`references/` 分层**已完成**（8 份 127 KB，主文件各 Step 0.x 章只剩指针），剩余 143,486 B 是必须常驻的契约带（文内 `:87`/`:179` 记着规则移出前部后连续失败的实例），可移量仅约 4%；故只把 `## WHEN USER RESPONDS` 主体移入 `references/followup.md` 留指针，143,486 → 137,989 B，字节完全对账。保留 `CONTEXT MEMORY`、`## Output Summary Footer`、`Security & Permissions`（ht-ml.app 发布门禁）。备份 `backups/skill-last30days-slim-2026-09-29/` |
+| last30days | 在用 | `~/.claude/skills/last30days/` | 本地化，上游已切断 | git | v3.25.0；原第三方裸 skill 已本地化，`disable-model-invocation: true`，按 `/last30days` 手动调用；含 `references/` 与 `scripts/`，跳过上游 `assets/`。2026-09-29 的 git 复核与轻量化勘察见流水 2026-09-29。备份 `backups/skill-last30days-slim-2026-09-29/` |
 | local-env-pitfalls | 在用 | `~/.claude/skills/local-env-pitfalls/` | 自建 | git | 含 references/；2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 前置脚本、命令与子代理执行前的坑位查询入口；恢复模型可调用 |
 | parallel-delegation | 在用 | `~/.claude/skills/parallel-delegation/`（触发面；正文在 `docs/protocols/delegation/delegation.md`） | 自建 | git | 2026-09-25 曾加 `disable-model-invocation: true`；2026-09-26：按 writing-for-agents 明确单个／并行委派及配置确认门禁；恢复模型可调用。2026-09-27：正文挪进 `docs/protocols/delegation/delegation.md`，三份 `references/` 移到 `docs/protocols/delegation/`；本 Skill 只剩触发面与必读指针，仍 model-invocable |
 | asset-auditor | 在用 | `~/.claude/skills/asset-auditor/` | 自建 | git | 含 references/；原名 skill-trimmer，2026-09-25 泛化改名——判定范围扩到原则文件映射表里的每一类资产，新增第 0 节资产类型映射表当唯一适配点；判据／扫描脚本／复审服务器未动；2026-09-26：按 writing-for-agents 收窄为库级留存、收窄、归档与新增审计，并保留只出建议边界；仍仅用户显式调用 |
@@ -34,6 +34,14 @@
 2026-09-25 逐条优化（token 线）：改动前逐份备份 `~/.claude/backups/skill-optimize-2026-09-25/<名>/SKILL.md`，21 份已逐字节校验。诊断与逐条结论见 `C:\ZYS\Workspace\notes\skill-hook-review\SKILL-REVIEW.md`。
 
 （2026-09-30 曾给 4 份空壳补 `user-invocable: false` 以挡 `/` 菜单；这 4 份已于 2026-10-02 删除，该行随行删除留痕于流水。）
+
+## 自建 agent（1 在用）
+
+`agents/` 无忽略规则，真源随仓库追踪，不需要像 `skills/` 那样加白名单；子代理记忆落 `agent-memory/<name>/MEMORY.md`，已在 `.gitignore` 排除。
+
+| 名称 | 状态 | 位置 | 出处 | 恢复 | 备注 |
+|---|---|---|---|---|---|
+| dashboard-builder | 在用 | `~/.claude/agents/dashboard-builder.md` | 自建 | git | 2026-10-03 新建；只写 `.dashboard/` 与自身记忆；见流水 2026-10-03 |
 
 ## hook
 
@@ -60,6 +68,7 @@
 | orca claude-hook.cmd | 在用 | `~/.orca/agent-hooks/claude-hook.cmd` → 12 个事件 | 待补 | 手工拷贝 | 不在 `~/.claude` 仓库内；2026-10-02 实测修正（原记 13） |
 | test_install_ledger_reminder.py | 停用 | `hooks/tests/test_install_ledger_reminder.py` | 自建 | git | **孤立**：无对应脚本、无注册 |
 | rtk hook claude | 在用 | `settings.json → PreToolUse[4]`（matcher `Bash`，无 timeout） | rtk | 待补 | 2026-10-02 补记：此前无台账行。全局 Bash 拦截器，命令输出压缩层；第三方 CLI 不在 `~/.claude` 仓库内 |
+| dashboard-scope-guard.py | 在用 | `hooks/scripts/dashboard-scope-guard.py` → `agents/dashboard-builder.md` 的 frontmatter `hooks.PreToolUse[0]` | 自建 | git | 不注册进 `settings.json`，只对 dashboard-builder 生效 |
 
 ## statusline
 
@@ -88,6 +97,7 @@
 | docs/protocols/task-notes/task-notes.md | 在用 | `~/.claude/docs/protocols/task-notes/task-notes.md` | 自建 | git | 任务笔记协议；2026-09-27 由 `skills/task-notes/SKILL.md` 正文挪入，skill 留触发面 |
 | docs/protocols/execution-env/execution-env.md | 在用 | `~/.claude/docs/protocols/execution-env/execution-env.md` | 自建 | git | 执行环境协议；2026-09-27 由 `skills/docker-only/SKILL.md` 正文挪入，`new-project-setup.md` 落同目录子目录 `execution-env/` |
 | docs/protocols/delegation/delegation.md | 在用 | `~/.claude/docs/protocols/delegation/delegation.md` | 自建 | git | 委派协议；2026-09-27 由 `skills/parallel-delegation/SKILL.md` 正文挪入，三份 `references/` 落同目录子目录 `delegation/` |
+| docs/protocols/task-notes/dashboard.md | 在用 | `~/.claude/docs/protocols/task-notes/dashboard.md` | 自建 | git | 长任务进度看板协议；2026-10-03 新建于 `docs/protocols/dashboard/`，同日并入任务笔记协议作其视图层、移入 `task-notes/`，源仍是 `notes/<任务名>/STATE.md` |
 | docs/protocols/instruction-assets/instruction-assets.md | 在用 | `~/.claude/docs/protocols/instruction-assets/instruction-assets.md` | 自建 | git | 指令资产协议；2026-09-27 合并 `skill-auditor` 与 `instruction-engineering` 两个 skill 的清单与模板，细则落同目录子目录 `instruction-assets/` |
 | docs/session-lifecycle.md | 在用 | `~/.claude/docs/session-lifecycle.md` | 自建 | git | 会话启动、并发、收尾与工作树生命周期；由 `CLAUDE.md` §2 索引 |
 | installing/ | 在用 | `~/.claude/installing/` | 自建 | git | 四张现状表 + `archive/` |

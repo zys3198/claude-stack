@@ -98,6 +98,7 @@ A1 原在表达层，2026-10-02 挪进治理层：它判的是规则能不能被
 | `~/.claude/skills/asset-guide/references/principles.md`（本文件） | 按需 | `asset-guide` 的 `description` 与 SKILL.md 指针 |
 | `~/.claude/CLAUDE.md` | 常驻 | 路由表 |
 | skill | 按需 | `description` 字段（model-invocable 时每轮常驻） |
+| `agent`（`~/.claude/agents/*.md`） | 按需 | `description` 字段（每轮常驻，供模型决定派不派；正文只在派发时进子代理上下文） |
 | `docs/protocols/*.md` | 不进上下文 | `protocols-index.md` 对应行 |
 | memory | 召回 | `MEMORY.md` 索引行 |
 | `notes/` | 不进上下文 | 目录名 |

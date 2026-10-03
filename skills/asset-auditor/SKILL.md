@@ -14,6 +14,7 @@ disable-model-invocation: true
 | 资产类 | 候选全集怎么拿 | 判定基准 |
 |---|---|---|
 | skill | `scripts/scan_skills.py` → 安装根目录旁 `skill-trimmer-workspace/inventory.json` | `retention-rubric.md` 全表（含触发面、描述预算、套件时机这些 skill 专项档） |
+| agent（`agents/*.md`） | 枚举 `agents/*.md` | 四问 + 触发面（`description` 每轮常驻，按「派不派它」判收益）；frontmatter 的模型档位、工具面与 `hooks` 写权边界另核一遍 |
 | 常驻指令 `CLAUDE.md`、`rules/*.md` | 直接读文件与其索引指向的文件 | 归属分层（rubric 三节）：该常驻、该条件加载，还是该挪进 skill |
 | `docs/protocols/*.md` | 枚举目录 + 与 `protocols-index.md` 对账 | 四问 + 生命周期（rubric 一、九节） |
 | memory | 枚举 `projects/*/memory/` + `MEMORY.md` | 四问 + 索引一致性 |
