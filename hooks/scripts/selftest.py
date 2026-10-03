@@ -598,6 +598,143 @@ def test_guard_global_options():
           denied(f"cat <<'EOF'\n说明文字\nEOF\ngit worktree add {outside}"), "")
 
 
+def test_remote_git_guard():
+    # CLAUDE.md 第 1.3 节把 force push、推送主干、删除远程分支或标签列为硬禁止，
+    # 「不因确认而放行」。判据四必须在授权匹配之前判它们，否则已登记的精确授权
+    # 会把主干推送静默放行——这里同时验结论类型与「授权命中也不能翻转」。
+    rg = load("resource-guard", SANDBOX / "resource-guard.log")
+
+    def verdict(command, authorized=False):
+        rg.DENY_REASONS.clear()
+        rg.ASK_REASONS.clear()
+        rg.authorization_match = (
+            (lambda session_id, scope: {"matched": True}) if authorized
+            else (lambda session_id, scope: {"matched": False})
+        )
+        rg.check_remote_git(command, str(REPO), "selftest-session")
+        if rg.DENY_REASONS:
+            return "deny"
+        return "ask" if rg.ASK_REASONS else "pass"
+
+    for command in (
+        "git push origin main",
+        "git push origin master",
+        "git push origin develop",
+        "git push origin HEAD:main",
+        "git push origin refs/heads/develop:refs/heads/develop",
+        "git push --force origin feature",
+        "git push origin --delete feature",
+        "git push origin -d feature",
+        "git push origin :feature",
+        "git push origin :refs/heads/feature",
+    ):
+        check(f"硬禁止直接阻断：{command}", verdict(command) == "deny", command)
+
+    for command in (
+        "git push origin main",
+        "git push origin --delete feature",
+    ):
+        check(f"精确授权不能翻转硬禁止：{command}",
+              verdict(command, authorized=True) == "deny", command)
+
+    for command in (
+        "git push origin feature",
+        "git push origin feature:feature",
+        "git push origin refs/heads/feature",
+        "git fetch origin",
+        "git pull origin main",
+        "git remote get-url origin",
+    ):
+        check(f"硬禁止不误伤：{command}", verdict(command) != "deny", command)
+
+    check("普通 push 落在确认线而不是硬阻断",
+          verdict("git push origin feature") == "ask", "git push origin feature")
+
+
+def test_memory_and_worktree_guard():
+    # 判据七把记忆文件的删除与整体覆盖拉到确认线；判据六的 worktree 分支管
+    # git worktree remove --force。这里造一份隔离的记忆目录，验命中与不误伤。
+    rg = load("resource-guard", SANDBOX / "resource-guard.log")
+    home = SANDBOX / "claude-home"
+    mem = home / "projects" / "proj" / "memory"
+    (mem / "recovery").mkdir(parents=True, exist_ok=True)
+    (mem / "seed.md").write_text("---\nname: seed\n---\n原内容\n", encoding="utf-8")
+    (mem / "recovery" / "2026-10-01-seed.md").write_text("备份\n", encoding="utf-8")
+    # 只认 ~/.claude 下这一处，所以把 CLAUDE 指到沙箱，别碰真实记忆。
+    rg.CLAUDE = home
+
+    def slash(path):
+        # 命令串里用正斜杠：反斜杠会被 shell 拆词当成转义吃掉。
+        return str(path).replace("\\", "/")
+
+    def verdict_of(call):
+        rg.DENY_REASONS.clear()
+        rg.ASK_REASONS.clear()
+        call()
+        if rg.DENY_REASONS:
+            return "deny"
+        return "ask" if rg.ASK_REASONS else "pass"
+
+    def rm_verdict(command, authorized=False):
+        rg.authorization_match = (
+            (lambda session_id, scope: {"matched": True}) if authorized
+            else (lambda session_id, scope: {"matched": False})
+        )
+        return verdict_of(
+            lambda: rg.check_destructive_rm(command, str(REPO), "selftest-session")
+        )
+
+    def write_verdict(tool, path):
+        return verdict_of(
+            lambda: rg.check_memory_write(tool, {"file_path": slash(path)}, str(REPO))
+        )
+
+    def wt_verdict(command):
+        return verdict_of(lambda: rg.check_worktree_remove(command, str(REPO)))
+
+    seed = slash(mem / "seed.md")
+    memory_dir = slash(mem)
+    backup = slash(mem / "recovery" / "2026-10-01-seed.md")
+
+    for command in (f"rm {seed}", f"rm -f {seed}", f"rm -rf {memory_dir}"):
+        check(f"记忆删除进确认线：{command}", rm_verdict(command) == "ask", command)
+
+    check("精确授权不能静默放行记忆文件删除",
+          rm_verdict(f"rm {seed}", authorized=True) == "ask", f"rm {seed}")
+
+    for command in (
+        f"rm {backup}",
+        f"rm {slash(REPO / 'README.md')}",
+        f"rm {slash(REPO)}/notes.md",
+    ):
+        check(f"记忆判据不误伤：{command}", rm_verdict(command) == "pass", command)
+
+    check("Write 覆盖已存在的记忆文件进确认线",
+          write_verdict("Write", mem / "seed.md") == "ask")
+    check("Write 新建记忆文件放行",
+          write_verdict("Write", mem / "brand-new.md") == "pass")
+    check("Edit 改记忆文件不拦",
+          write_verdict("Edit", mem / "seed.md") == "pass")
+    check("项目里的同名 memory 目录不拦",
+          write_verdict("Write", REPO / "docs" / "memory" / "notes.md") == "pass")
+
+    wt = slash(REPO) + "/wt"
+    for command in (
+        f"git worktree remove --force {wt}",
+        f"git worktree remove -f {wt}",
+        f"git -C {slash(REPO)} worktree remove --force {wt}",
+    ):
+        check(f"worktree --force 进确认线：{command}", wt_verdict(command) == "ask", command)
+
+    for command in (
+        f"git worktree remove {wt}",
+        f"git worktree list",
+        f"git worktree prune",
+        f"git worktree add {wt}",
+    ):
+        check(f"worktree 判据不误伤：{command}", wt_verdict(command) == "pass", command)
+
+
 def run_status(st, root, sessions):
     st.active_sessions = (lambda: sessions) if sessions is not None else (lambda: None)
     st.sys.argv = ["session-status.py", root]
@@ -639,6 +776,8 @@ def main():
         test_session_status()
         test_handoff_ts_guard()
         test_guard_global_options()
+        test_remote_git_guard()
+        test_memory_and_worktree_guard()
     finally:
         cleanup()
 

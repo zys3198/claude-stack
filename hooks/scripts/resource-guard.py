@@ -13,8 +13,10 @@
 #   同一批名字写在容器内执行的命令里（docker compose exec <服务> mvn test）不在起首
 #   位置，不会被拦。
 #
-# 判据四：远程 Git 普通 push/fetch/pull/clone/remote 在没有精确授权时提请确认；force push
-#   或远程 Git 无法安全解析时直接阻断。
+# 判据四：远程 Git 的硬禁止项直接阻断，且先于授权匹配——force push、推送主干（main/
+#   master/develop/trunk）、删除远程分支或标签，这四项按 CLAUDE.md 第 1.3 节「不因确认
+#   而放行」，已登记的精确授权也覆盖不了。其余 push/fetch/pull/clone/remote 在没有精确
+#   授权时提请确认；远程 Git 无法安全解析时直接阻断。
 # 判据五：生产环境或真实数据变更信号在没有精确授权时提请确认；授权状态、资源状态或活跃会话状态
 #   无法确认时不静默放行高风险动作。
 # 判据六：不可恢复删除。依据 ~/.claude/CLAUDE.md 第 1.3 节把「不可恢复删除」列为 R3 确认线。
@@ -26,6 +28,16 @@
 #     范围的开关（-x/-X/--exclude/-d）：直接阻断。这两者没有日常正当用途，放行等于
 #     放弃这条线——.git 删掉不可恢复，未跟踪文件里常有唯一的本地配置与实验产物。
 #   - git clean -f 只带路径：进授权线提请确认。
+#   - git worktree remove 带 --force/-f：提请确认。不带 force 时 git 自己会拒绝有改动
+#     或未跟踪文件的工作树，不用再拦；force 正是绕过这道保护，要在这里确认。
+# 判据七：记忆文件的删除与覆盖。依据 ~/.claude/docs/protocols/memory/memory.md
+#   「删或覆盖任何记忆文件前，先把完整内容写进 recovery/<日期>-<原文件名>.md，再删」。
+#   ~/.claude 仓库不追踪记忆，没有别的副本，所以判据六「不带 -f 的 rm 可恢复」这一档
+#   在这里不成立。只认两种情况，都提请确认、不接授权线——授权是按路径复述范围的，
+#   而覆盖记忆每次换的是内容，同路径批准一次不代表这次的内容该丢：
+#   - Write 整体覆盖已存在的记忆文件；新建记忆文件是常规操作，不进这条线。
+#   - rm 目标是记忆文件或记忆目录本身。
+#   Edit/MultiEdit 不拦：它们带原文锚点，改动在 diff 里可见，且更新记忆是高频操作。
 #
 # 只拦可以客观判定的动作，不做主观推测；低风险且明确放行时无输出。
 # 判定方式是把命令拆成词，要求目标命令出现在命令起首位置（行首，或管道与分号、
@@ -41,7 +53,14 @@
 # 粗判，因此 python -c "open(...)" 与变量拼出来的目标路径取不到；
 # 判据二只认命令里显式写出的服务名与容器名，不带服务名的 docker compose up -d
 # 要靠 -p 项目名、-f 所在目录名、--project-directory、命令里的 cd 目标或当前目录名
-# 对上项目才会命中，五者都对不上时放行；判据三不含 python，理由见 HOST_TOOLCHAIN。
+# 对上项目才会命中，五者都对不上时放行；判据三不含 python，理由见 HOST_TOOLCHAIN；
+# 判据四的硬禁止项只认命令里显式写出的 refspec——不带参数的 git push 推的是当前分支，
+# 静态取不到，会落到普通 push 的确认线；+<refspec> 形式的强制推送只在主干名上命中，
+# 写在功能分支上取不到；主干名限定 MAINLINE_REFS，名叫 main 的远端或分支会误命中；
+# 判据六的 worktree 分支只认写出来的 --force/-f，git worktree remove 不带 force 时
+# 靠 git 自己拒绝，若目标改了 git 的保护行为则这条失效；
+# 判据七只认 Write 工具与 rm。Bash 里改记忆内容的其余写法取不到：重定向（> 文件）、
+# Remove-Item、cp/mv 覆写、sed -i，以及命令替换给出的路径。
 # 本守卫定位是防止误建，不作为安全边界。
 # 异常写入 resource-guard.log，不阻塞工具调用。
 
@@ -148,6 +167,12 @@ GIT_GLOBAL_OPTS_WITH_VALUE = {
 }
 REMOTE_GIT_VERBS = {"push", "fetch", "pull", "clone", "remote"}
 FORCE_GIT_FLAGS = {"--force", "-f", "--force-with-lease"}
+# 判据四的硬禁止项。依据 ~/.claude/CLAUDE.md 第 1.3 节：禁止 force push、推送主干、
+# 删除远程分支或标签——这几项是硬禁止，不因确认而放行。因此它们在授权匹配之前判定，
+# 已登记的精确授权也覆盖不了。主干名按常见约定取值，自定义主干名不在其列。
+MAINLINE_REFS = {"main", "master", "develop", "trunk"}
+GIT_PUSH_DELETE_FLAGS = {"--delete", "-d"}
+REMOTE_URL = re.compile(r"(?:https?|ssh)://|@", re.I)
 # 判据六用。rm 的递归与强制开关；git clean 的强制开关与扩大范围的开关。
 RM_RECURSIVE_FLAGS = {"-r", "-R", "--recursive"}
 RM_FORCE_FLAGS = {"-f", "--force"}
@@ -155,6 +180,13 @@ GIT_CLEAN_FORCE_FLAGS = {"-f", "--force"}
 GIT_CLEAN_WIDEN_FLAGS = {"-x", "-X", "--exclude", "-d", "--remove-untracked"}
 # git clean 的子命令位置。Bash 路径上只认 git clean，不含 git submodule 之类。
 GIT_CLEAN_VERB = "clean"
+# git worktree 的两个子命令位置。只有 remove 带 --force/-f 才绕过 git 自己
+# 对「工作树有改动或未跟踪文件」的拒绝。
+GIT_WORKTREE_NOUN = "worktree"
+GIT_WORKTREE_REMOVE = "remove"
+# 判据七用。记忆文件落在 ~/.claude/projects/<项目>/memory/ 下。
+# memory/recovery/ 是删除前的备份目录，不算记忆本体，不在这条判据里。
+MEMORY_DIR_NAME = "memory"
 PRODUCTION_MARKER = re.compile(r"(?i)(?:^|[\s/_.:=-])(prod|production)(?:$|[\s/_.:=-])")
 PRODUCTION_MUTATION = re.compile(
     r"(?i)\b(deploy|apply|migrate|migration|delete|drop|truncate|update|insert|write|push|up)\b"
@@ -850,6 +882,31 @@ def scope_reason(scope):
     return json.dumps(scope, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def forbidden_push_reason(options, arguments):
+    """判出 git push 里的硬禁止项，命中返回拒绝理由，没有返回 None。
+
+    依据 ~/.claude/CLAUDE.md 第 1.3 节，「推送主干」与「删除远程分支或标签」是硬禁止，
+    不因确认而放行，所以在授权匹配之前判定。只看 push 自己的开关与位置参数：
+    远端地址只用来定位仓库，不参与判定。
+    """
+    if GIT_PUSH_DELETE_FLAGS & {option.casefold() for option in options}:
+        return "Hook 拒绝 git push 删除远程分支或标签；这是 CLAUDE.md 第 1.3 节的硬禁止项，不因授权放行。"
+    for item in arguments:
+        if REMOTE_URL.search(item):
+            continue
+        raw = item.lstrip("+")
+        if ":" in raw:
+            local_side, _, remote_side = raw.partition(":")
+            if not local_side:
+                return "Hook 拒绝 git push 删除远程分支或标签（refspec 左侧为空）；这是 CLAUDE.md 第 1.3 节的硬禁止项，不因授权放行。"
+        else:
+            remote_side = raw
+        name = remote_side.rsplit("/", 1)[-1].casefold()
+        if name in MAINLINE_REFS:
+            return f"Hook 拒绝向主干 {name} 推送；这是 CLAUDE.md 第 1.3 节的硬禁止项，不因授权放行。"
+    return None
+
+
 def git_remote_actions(command, cwd):
     parse_failed = lex(command) is None
     actions = []
@@ -889,7 +946,7 @@ def git_remote_actions(command, cwd):
                     arguments.append(token)
                 k += 1
             safe_arguments = [
-                "<redacted>" if re.search(r"(?:https?|ssh)://|@", item, re.I) else item
+                "<redacted>" if REMOTE_URL.search(item) else item
                 for item in arguments
             ]
             actions.append({
@@ -898,6 +955,9 @@ def git_remote_actions(command, cwd):
                     flag in FORCE_GIT_FLAGS or flag.startswith("--force-with-lease")
                     for flag in options
                 ),
+                # 硬禁止项按原始参数判定：safe_arguments 里的远端地址已脱敏，
+                # 脱敏后的占位符会干扰主干名与 refspec 的辨认。
+                "forbidden": forbidden_push_reason(options, arguments) if verb == "push" else None,
                 "scope": {
                     "targets": [f"git:{norm(cwd)}"],
                     "operation_family": f"remote-git.{verb}",
@@ -931,6 +991,9 @@ def check_remote_git(command, cwd, self_id):
         return
     for action in actions:
         if read_only_remote_action(action):
+            continue
+        if action["forbidden"]:
+            deny(action["forbidden"])
             continue
         if action["force"]:
             deny("Hook 拒绝 git push 强制推送；禁止 force push，改用普通推送并明确目标。")
@@ -1096,6 +1159,12 @@ def check_destructive_rm(command, cwd, self_id):
                     "工作区（git reset、git checkout），不要删 .git。"
                 )
                 continue
+            # 记忆文件没有别的副本，判据六那档「不带 -f 的 rm 可恢复」在这里不成立，
+            # 所以在低风险放行之前单独拦一道。
+            memory = [t for t in targets if is_memory_path(t, cwd)]
+            if memory:
+                ask(memory_backup_hint(memory))
+                continue
             # 非递归、单个文件、没带 -f 的 rm 是可恢复的低风险清理，不进授权线。
             if not recursive and not forced:
                 continue
@@ -1212,6 +1281,131 @@ def check_destructive_git_clean(command, cwd, self_id):
         )
 
 
+def worktree_remove_actions(command):
+    # 取出每一处 git worktree remove 的选项。结构照 git_clean_actions：
+    # 先跳过 git 的全局选项，再认 worktree 与 remove 两个子命令位置。
+    found = []
+    for tokens in expand_command(command):
+        i = 0
+        while i < len(tokens):
+            if command_name(tokens[i]) != "git" or not starts_command(tokens, i):
+                i += 1
+                continue
+            j = i + 1
+            while j < len(tokens) and not is_control(tokens[j]):
+                token = tokens[j]
+                key, sep, _ = token.partition("=")
+                if token in GIT_GLOBAL_OPTS_WITH_VALUE and j + 1 < len(tokens):
+                    j += 2
+                elif key in GIT_GLOBAL_OPTS_WITH_VALUE and sep:
+                    j += 1
+                elif token == "-c" and j + 1 < len(tokens):
+                    j += 2
+                else:
+                    break
+            if j + 1 >= len(tokens) or is_control(tokens[j]) or is_control(tokens[j + 1]):
+                i += 1
+                continue
+            if tokens[j].casefold() != GIT_WORKTREE_NOUN:
+                i = j + 1
+                continue
+            if tokens[j + 1].casefold() != GIT_WORKTREE_REMOVE:
+                i = j + 2
+                continue
+            options = []
+            paths = []
+            k = j + 2
+            while k < len(tokens) and not is_control(tokens[k]):
+                token = tokens[k]
+                if token.startswith("-") and token != "-":
+                    # 选项常黏连（-fn、-f），逐字符拆开再取长名。
+                    for ch in token.lstrip("-"):
+                        options.append(f"-{ch}")
+                    if token.startswith("--"):
+                        options.append(token.partition("=")[0])
+                    k += 1
+                    continue
+                paths.append(token)
+                k += 1
+            found.append({"options": options, "paths": paths})
+            i = k
+    return found
+
+
+def check_worktree_remove(command, cwd):
+    """判据六的一部分：git worktree remove 带 --force/-f 时提请确认。
+
+    不带 force 的 git worktree remove 在目标有未提交改动或未跟踪文件时会自己拒绝，
+    不用再拦；带 force 正是绕过那道保护，这时才需要先勘察再动手。
+    """
+    if not isinstance(command, str):
+        return
+    for action in worktree_remove_actions(command):
+        if not (set(action["options"]) & FORCE_GIT_FLAGS):
+            continue
+        paths = action["paths"]
+        names = "、".join(paths[:8]) + ("…" if len(paths) > 8 else "")
+        ask(
+            f"该命令要 git worktree remove --force，强制删除工作树 {names or '（未写路径）'}。"
+            f"依据 ~/.claude/CLAUDE.md 第 1.3 节与 coding-workflow 的「工作树与本地资源」一节，"
+            f"有未提交改动的工作树不删——force 会连同未提交改动与未跟踪文件一起丢掉。"
+            f"动之前先跑 git -C <工作树路径> status --short 逐项勘察；确认没有唯一副本，"
+            f"或先把改动提交或导出后再执行。"
+        )
+
+
+def is_memory_path(target, cwd):
+    """判目标是不是记忆目录本身，或它下面的一份记忆文件。
+
+    形态限定在 ~/.claude/projects/<项目>/memory 与 <…>/memory/<文件>.md；
+    memory/recovery/ 是删除前的备份目录，不是记忆本体，不在这条判据里。
+    其他项目里同名的 memory 目录也不命中——只认 ~/.claude 下这一处。
+    """
+    if not isinstance(target, str) or not target:
+        return False
+    full = norm(target if os.path.isabs(target) else os.path.join(cwd, target))
+    root = norm(str(CLAUDE / "projects")) + os.sep
+    if not full.startswith(root):
+        return False
+    rest = full[len(root):].split(os.sep)
+    if len(rest) == 2:
+        return rest[1].casefold() == MEMORY_DIR_NAME
+    return (
+        len(rest) == 3
+        and rest[1].casefold() == MEMORY_DIR_NAME
+        and rest[2].casefold().endswith(".md")
+    )
+
+
+def memory_backup_hint(targets):
+    names = "、".join(os.path.basename(t) for t in targets[:8])
+    names += "…" if len(targets) > 8 else ""
+    return (
+        f"该操作要删除或整体覆盖记忆文件 {names}。依据 ~/.claude/docs/protocols/memory/"
+        f"memory.md「删或覆盖任何记忆文件前，先把完整内容写进 "
+        f"recovery/<日期>-<原文件名>.md，再删」——~/.claude 仓库不追踪记忆，"
+        f"没有别的副本，删掉或盖掉就找不回来了。先把原内容备份到 "
+        f"<项目>/memory/recovery/<日期>-<原文件名>.md 再动手；只是追加或改个别字段"
+        f"的话，改用 Edit 带原文锚点改，那份改动在 diff 里可见。"
+    )
+
+
+def check_memory_write(tool, tool_input, cwd):
+    """判据七的非 Bash 分支：Write 整体覆盖已存在的记忆文件时提请确认。
+
+    新建记忆文件是常规操作，不进这条线。Edit/MultiEdit 带原文锚点，也不拦。
+    """
+    if tool != "Write":
+        return
+    target = tool_input.get("file_path")
+    if not is_memory_path(target, cwd):
+        return
+    full = norm(target if os.path.isabs(target) else os.path.join(cwd, target))
+    if not os.path.exists(full):
+        return
+    ask(memory_backup_hint([full]))
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     raw = sys.stdin.read()
@@ -1235,9 +1429,11 @@ def main():
             check_docker(command or "", cwd, payload.get("session_id"))
             check_destructive_rm(command, cwd, payload.get("session_id"))
             check_destructive_git_clean(command, cwd, payload.get("session_id"))
+            check_worktree_remove(command, cwd)
             check_host_toolchain(command, cwd)
         else:
             check_compose(tool, tool_input, cwd)
+            check_memory_write(tool, tool_input, cwd)
     except Exception as exc:
         import traceback
         log(f"check failed: {exc}\n{traceback.format_exc()}")
