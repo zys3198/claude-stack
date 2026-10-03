@@ -709,6 +709,14 @@ def test_memory_and_worktree_guard():
     ):
         check(f"记忆判据不误伤：{command}", rm_verdict(command) == "pass", command)
 
+    # memory/ 下只认 markdown。别的文件（缓存、临时状态）没有判据七的备份要求。
+    (mem / "MEMORY.md").write_text("# 索引\n", encoding="utf-8")
+    (mem / "cache.json").write_text("{}\n", encoding="utf-8")
+    check("记忆目录下的 .md 进确认线",
+          rm_verdict(f"rm {slash(mem / 'MEMORY.md')}") == "ask")
+    check("记忆目录下的非 .md 文件不拦",
+          rm_verdict(f"rm {slash(mem / 'cache.json')}") == "pass")
+
     check("Write 覆盖已存在的记忆文件进确认线",
           write_verdict("Write", mem / "seed.md") == "ask")
     check("Write 新建记忆文件放行",
@@ -733,6 +741,163 @@ def test_memory_and_worktree_guard():
         f"git worktree add {wt}",
     ):
         check(f"worktree 判据不误伤：{command}", wt_verdict(command) == "pass", command)
+
+
+def rg_verdict(rg, call, authorized=False):
+    # 判据函数把结论写在 DENY_REASONS / ASK_REASONS 上，不看返回值也不看退出码。
+    # authorized=True 模拟「已登记的精确授权命中」，用来验哪些判定能被授权翻转。
+    rg.DENY_REASONS.clear()
+    rg.ASK_REASONS.clear()
+    rg.authorization_match = (
+        (lambda session_id, scope: {"matched": True}) if authorized
+        else (lambda session_id, scope: {"matched": False})
+    )
+    with contextlib.redirect_stdout(io.StringIO()):
+        call()
+    if rg.DENY_REASONS:
+        return "deny"
+    return "ask" if rg.ASK_REASONS else "pass"
+
+
+def test_production_mutation_guard():
+    # 判据五：生产环境标记（prod/production）加变更动作、或真实数据的破坏性语句，
+    # 都进确认线。只有标记没有变更动作（kubectl get -n production）不算变更。
+    rg = load("resource-guard", SANDBOX / "resource-guard.log")
+    cwd = str(REPO)
+
+    def verdict(command, authorized=False):
+        return rg_verdict(
+            rg, lambda: rg.check_production_mutation(command, cwd, "selftest-session"),
+            authorized)
+
+    for command in (
+        'psql -h prod-db -c "delete from users"',
+        'psql -c "delete from users"',
+        'psql -c "truncate table orders"',
+        "kubectl apply -f prod/deploy.yaml",
+    ):
+        check(f"生产或真实数据变更进确认线：{command}", verdict(command) == "ask", command)
+
+    for command in (
+        "kubectl get pods -n production",
+        "npm run build",
+        "git commit -m 'update readme'",
+        "grep -rn production docs/",
+    ):
+        check(f"生产判据不误伤：{command}", verdict(command) == "pass", command)
+
+    check("精确授权可以放行生产变更（这条不是判据四那样的硬禁止）",
+          verdict('psql -h prod-db -c "delete from users"', authorized=True) == "pass")
+
+
+def test_compose_guard():
+    # 判据一：compose 里新增的服务必须同时声明 mem_limit 与 security_opt。
+    # Write/Edit 读得到改动前后的内容，只对新出现的服务判定；Bash 路径读不到，直接阻断。
+    rg = load("resource-guard", SANDBOX / "resource-guard.log")
+    cwd = str(REPO)
+    work = SANDBOX / "compose"
+    work.mkdir(parents=True, exist_ok=True)
+
+    bare = "services:\n  api:\n    image: sample:1\n"
+    full = ("services:\n  api:\n    image: sample:1\n    mem_limit: 512m\n"
+            "    security_opt:\n      - no-new-privileges:true\n")
+    (work / "docker-compose.yml").write_text(bare, encoding="utf-8")
+
+    def write_verdict(name, content):
+        return rg_verdict(rg, lambda: rg.check_compose(
+            "Write", {"file_path": str(work / name), "content": content}, cwd))
+
+    check("新增服务缺资源限制被阻断", write_verdict("new-compose.yml", bare) == "deny")
+    check("新增服务写全两项放行", write_verdict("new-compose.yml", full) == "pass")
+    check("非 compose 文件名不判", write_verdict("notes.md", bare) == "pass")
+    check("给已有 compose 追加缺项服务被阻断",
+          write_verdict("docker-compose.yml", bare + "  web:\n    image: sample:2\n") == "deny")
+    check("已有 compose 内容不变不判", write_verdict("docker-compose.yml", bare) == "pass")
+
+    def bash_verdict(command):
+        return rg_verdict(rg, lambda: rg.check_compose_write(command, cwd))
+
+    for command in (
+        "echo x > docker-compose.yml",
+        "tee docker-compose.yaml",
+        "sed -i 's/a/b/' compose.yaml",
+    ):
+        check(f"改写 compose 文件的命令被阻断：{command}", bash_verdict(command) == "deny", command)
+
+    for command in (
+        "cat docker-compose.yml",
+        "sed 's/a/b/' docker-compose.yml",
+        "cat notes.md",
+    ):
+        check(f"compose 判据不误伤：{command}", bash_verdict(command) == "pass", command)
+
+
+def test_destructive_dotgit_and_git_clean():
+    # 判据六里之前没有测试的两处：删 .git 是硬阻断，git clean 带 -f 进确认线、
+    # 再带 -x/-d 扩大范围就是硬阻断（-x 会连被 gitignore 的文件一起删）。
+    rg = load("resource-guard", SANDBOX / "resource-guard.log")
+    cwd = str(REPO)
+    slash = str(REPO).replace("\\", "/")
+
+    def rm_verdict(command):
+        return rg_verdict(rg, lambda: rg.check_destructive_rm(command, cwd, "selftest-session"))
+
+    for command in (
+        "rm -rf .git",
+        f"rm -rf {slash}/.git",
+        "rm -rf .git/objects",
+        f"rm -rf {slash}/.git/objects",
+    ):
+        check(f"删除 .git 硬阻断：{command}", rm_verdict(command) == "deny", command)
+
+    for command in ("rm -rf .gitignore", "rm -rf .gitattributes"):
+        check(f".git 判据不误伤同前缀文件名：{command}",
+              rm_verdict(command) != "deny", command)
+
+    def clean_verdict(command):
+        return rg_verdict(
+            rg, lambda: rg.check_destructive_git_clean(command, cwd, "selftest-session"))
+
+    for command in ("git clean -fdx", "git clean -fd", "git clean -fd ignored/"):
+        check(f"git clean 扩大范围硬阻断：{command}", clean_verdict(command) == "deny", command)
+
+    check("git clean -f 进确认线", clean_verdict("git clean -f") == "ask")
+    for command in ("git clean -n", "git clean -nd", "git status"):
+        check(f"git clean 判据不误伤：{command}", clean_verdict(command) == "pass", command)
+
+
+def test_host_toolchain_guard():
+    # 判据三：构建、测试与服务类工具链命令必须进容器。只认处在命令起首位置的工具名，
+    # 提交消息正文、容器内执行的载荷里出现的名字都不算。
+    # cwd 必须落在 ~/.claude 之外：沙箱在 ~/.claude/hooks/scripts 下，工具名后的实参
+    # 会被解析成 ~/.claude 里的路径而命中 trusted_local_script 豁免，判不出结论。
+    rg = load("resource-guard", SANDBOX / "resource-guard.log")
+    cwd = str(Path(tempfile.gettempdir()) / "selftest-toolchain")
+
+    def verdict(command):
+        return rg_verdict(rg, lambda: rg.check_host_toolchain(command, cwd))
+
+    for command in (
+        "pnpm build",
+        "npm test",
+        "mvn package",
+        # 宿主侧的 sh -c 包装仍然要在宿主机上执行，不能靠包一层绕过去。
+        'sh -c "pnpm build"',
+        'bash -c "mvn package"',
+    ):
+        check(f"宿主机工具链被阻断：{command}", verdict(command) == "deny", command)
+
+    for command in (
+        "python script.py",
+        "cat package.json",
+        # docker exec 与 compose run 后面的载荷是在容器里跑的，本来就该放过。
+        'docker exec app sh -c "pnpm build"',
+        "docker exec app pnpm build",
+        "docker compose run --rm web npm test",
+        'git commit -m "mvn test 的说明"',
+        'rg "pnpm build" docs/',
+    ):
+        check(f"工具链判据不误伤：{command}", verdict(command) == "pass", command)
 
 
 def run_status(st, root, sessions):
@@ -778,6 +943,10 @@ def main():
         test_guard_global_options()
         test_remote_git_guard()
         test_memory_and_worktree_guard()
+        test_production_mutation_guard()
+        test_compose_guard()
+        test_destructive_dotgit_and_git_clean()
+        test_host_toolchain_guard()
     finally:
         cleanup()
 
